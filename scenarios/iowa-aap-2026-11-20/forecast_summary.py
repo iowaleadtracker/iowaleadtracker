@@ -653,6 +653,8 @@ def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text) -> str:
     return f"""<section id="summary" aria-labelledby="summary-h">
   <h2 id="summary-h">What the forecast shows</h2>
   <p class="caveat"><b>{CAVEAT}</b></p>
+  <h3>Court hold</h3>
+  <p>{COURT_PAUSE} Source: <a href="{COURT_URL}" rel="noopener">{COURT_CITE}</a>.</p>
   <h3>Why the map is for Monday, Nov. 23</h3>
   <p>{WHY_MONDAY} Source: <a href="{ARMY_URL}" rel="noopener">{ARMY_CITE}</a>.</p>
   <p><b>No time set yet.</b> {no_time}</p>
@@ -702,8 +704,9 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text) -> list[tuple[str, str]]:
         ),
         (
             "When is the lead azide blast at the Iowa Army Ammunition Plant?",
-            f"Monday, Nov. 23, 2026. {WHY_MONDAY} (Source: {ARMY_CITE}, {ARMY_URL}.) "
-            + time_note(ctx["built_txt"]),
+            "The Army planned it for Monday, Nov. 23, 2026, but a court has put it on hold. "
+            f"{COURT_PAUSE} (Source: {COURT_CITE}, {COURT_URL}.) {WHY_MONDAY} (Source: "
+            f"{ARMY_CITE}, {ARMY_URL}.) " + time_note(ctx["built_txt"]),
         ),
         (
             "Where could the lead go?",
@@ -753,10 +756,12 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text) -> str:
             "## Key facts",
             "",
             (
-                f"- Blast: Monday, Nov. 23, 2026, Iowa Army Ammunition Plant, Middletown, Iowa "
+                "- Blast: planned for Monday, Nov. 23, 2026, and on hold by court order (see "
+                "Court hold), Iowa Army Ammunition Plant, Middletown, Iowa "
                 f"({ctx['lat']:.4f}, {ctx['lon']:.4f}). Blast times modeled: 11 a.m. to 12:30 p.m. "
                 "CST."
             ),
+            f"- Court hold: {COURT_PAUSE} Source: {COURT_CITE}, {COURT_URL}",
             f"- Time: {time_note(ctx['built_txt'])} Source: {HHS_URL}",
             f"- Why Monday: {WHY_MONDAY} Source: {ARMY_CITE}, {ARMY_URL}",
             f"- Water misting: {MISTING} Source: Army public advisory, {ADVISORY_URL}",

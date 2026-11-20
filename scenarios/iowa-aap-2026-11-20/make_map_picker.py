@@ -446,6 +446,23 @@ def write_hashed_maps(times: list[str]) -> dict[str, str]:
     return map_files
 
 
+_URL = re.compile(r"https?://[^\s<>\"]+?(?=[.,;:)]*(?:\s|$))")
+
+
+def linkify(text: str) -> str:
+    """Escape plain text for HTML and turn each web address in it into a link.
+
+    Trailing sentence punctuation (".", ",", ")") stays outside the link.
+    """
+    escaped = html.escape(text)
+    return _URL.sub(lambda m: f'<a href="{m.group(0)}" rel="noopener">{m.group(0)}</a>', escaped)
+
+
+def faq_html(faq: list[tuple[str, str]]) -> str:
+    """Return the visible FAQ: each question as a heading, its answer with live links."""
+    return "".join(f"<h3>{html.escape(q)}</h3><p>{linkify(a)}</p>" for q, a in faq)
+
+
 def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]:
     """Return the landing page HTML and llms.txt for the built maps.
 
@@ -544,7 +561,7 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "who": who,
         "cite_html": cite_html,
         "summary_html": summary_html,
-        "faq_html": "".join(f"<h3>{html.escape(q)}</h3><p>{html.escape(a)}</p>" for q, a in faq),
+        "faq_html": faq_html(faq),
         "map_files": json.dumps(write_hashed_maps(times), separators=(",", ":")),
     }
     template = Template(PAGE_TEMPLATE.read_text(encoding="utf-8").removesuffix("\n"))

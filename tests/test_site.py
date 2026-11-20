@@ -164,3 +164,28 @@ def test_court_pause_note_in_about_dialog() -> None:
     assert fs.COURT_URL.startswith("https://www.iowapublicradio.org/")
     assert "until it rules on a request" in fs.COURT_PAUSE
     assert "in case they do" in fs.COURT_PAUSE
+
+
+def test_faq_links_are_live() -> None:
+    """Web addresses in FAQ answers become links; punctuation stays outside."""
+    out = site.faq_html(
+        [("Q?", f"Code at {works_cited.SOURCE_URL}. Source: x (https://www.army.mil/a/1).")]
+    )
+    assert f'<a href="{works_cited.SOURCE_URL}" rel="noopener">{works_cited.SOURCE_URL}</a>.' in out
+    assert '<a href="https://www.army.mil/a/1" rel="noopener">https://www.army.mil/a/1</a>).' in out
+    assert site.linkify("<b> & no links") == "&lt;b&gt; &amp; no links"
+
+
+@pytest.mark.slow
+def test_court_hold_leads_the_summary_and_faq(rendered: tuple[str, list, str]) -> None:
+    """The court hold comes before any statement that the blast is Monday."""
+    summary, faq, llms = rendered
+    assert summary.index("Court hold") < summary.index("Why the map is for Monday")
+    assert fs.COURT_URL in summary
+    when = dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
+    assert when.startswith(
+        "The Army planned it for Monday, Nov. 23, 2026, but a court has put it on hold."
+    )
+    assert fs.COURT_PAUSE in when
+    assert "on hold by court order" in llms
+    assert fs.COURT_PAUSE in llms
