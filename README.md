@@ -49,7 +49,10 @@ python3 scenarios/iowa-aap-2026-11-20/make_map_picker.py --build
 ```
 
 Open the HTML file in a browser. The saved forecasts in `met_cache/` reproduce the live
-site; delete the cache file to download fresh forecasts from Open-Meteo. The `--publish`
+site on any date (the site build passes `--as-of`, the time they were pulled); delete the
+cache file to download fresh forecasts from Open-Meteo. A mirror of the site, built from
+this repository, is at https://iowaleadtracker.github.io/ for readers who can't reach
+iowaleadtracker.com. The `--publish`
 and `--deploy` options are for the maintainer; anyone else can serve `outputs/site/` from
 any static web host.
 

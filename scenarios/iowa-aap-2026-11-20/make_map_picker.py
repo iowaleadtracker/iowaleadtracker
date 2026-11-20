@@ -35,6 +35,7 @@ from string import Template
 from zoneinfo import ZoneInfo
 
 import forecast_summary
+import mirror
 import works_cited
 
 HERE = Path(__file__).resolve().parent
@@ -80,6 +81,9 @@ MODEL_ARGS = [
 # Lines of the model's output worth showing while building.
 BUILD_LOG_MARKERS = ("skipped", "shown:", "Error", "Traceback")
 CF_PROJECT = "iowaleadtracker"
+# The GitHub Pages mirror (see mirror.py) is built and published by this workflow.
+MIRROR_REPO = "iowaleadtracker/iowaleadtracker.github.io"
+MIRROR_WORKFLOW = "mirror.yml"
 WRANGLER = "wrangler@4.165.0"  # pinned; bump on purpose, not on every deploy
 # The Cloudflare account that holds the domain. It is kept out of the repo: put
 # {"cf_account_id": "..."} in deploy.local.json next to this script (git-ignored), or set
@@ -295,6 +299,10 @@ def build() -> None:
     """Run the model for every case and time, one after another (Open-Meteo rate limits)."""
     MAPS.mkdir(parents=True, exist_ok=True)
     py = find_python()
+    # Replay the saved forecasts as of when they were pulled, so a rebuild on any later
+    # date (or another machine) uses the same weather and makes the same maps.
+    pulled = retrieved_at() if MET_CACHE.exists() else None
+    as_of = ("--as-of", pulled.isoformat()) if pulled else ()
     for case, release_case, name in CASES:
         for t in TIMES:
             cmd = [
@@ -305,6 +313,7 @@ def build() -> None:
                 *("--time", f"{DATE}T{t}-06:00"),
                 *("--release-case", release_case),
                 *MODEL_ARGS,
+                *as_of,
                 *("--home-url", SITE_URL),
                 *("--legend-note", f"{name} case, blast {blast_label(t)}"),
                 *("-o", str(MAPS / map_name(case, t))),
@@ -392,6 +401,12 @@ def json_ld(faq: list[tuple[str, str]], now: dt.datetime) -> str:
         "citation": [forecast_summary.ARMY_URL, forecast_summary.PERMIT_URL],
         "abstract": forecast_summary.ABOUT_WHO,
         "creator": {"@type": "Person", "description": "A concerned Iowan (private citizen)"},
+        "isBasedOn": {
+            "@type": "SoftwareSourceCode",
+            "codeRepository": works_cited.SOURCE_URL,
+            "programmingLanguage": "Python",
+            "license": "https://opensource.org/licenses/MIT",
+        },
     }
     faq_page = {
         "@type": "FAQPage",
@@ -513,8 +528,12 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "pct_high": pct["high"],
         "pct_permit": pct["permit"],
         "about_who": forecast_summary.ABOUT_WHO,
+        "source_url": works_cited.SOURCE_URL,
         "misting": forecast_summary.MISTING,
         "advisory_url": forecast_summary.ADVISORY_URL,
+        "court_pause": forecast_summary.COURT_PAUSE,
+        "court_url": forecast_summary.COURT_URL,
+        "court_cite": forecast_summary.COURT_CITE,
         "why_monday": forecast_summary.WHY_MONDAY,
         "army_url": forecast_summary.ARMY_URL,
         "army_cite": forecast_summary.ARMY_CITE,
@@ -598,6 +617,29 @@ def deploy(project: str) -> None:
             )
 
 
+def trigger_mirror() -> None:
+    """Start the GitHub Pages mirror build, if the GitHub CLI is available.
+
+    The mirror builds from the pushed ``main`` branch, so push before deploying for
+    both copies to match. Without ``gh`` the workflow still runs within the hour.
+    """
+    gh = shutil.which("gh")
+    if not gh:
+        print(f"note: gh not found; the mirror ({MIRROR_REPO}) updates within the hour")
+        return
+    # Arguments are constants and the gh path comes from PATH; no shell is involved.
+    r = subprocess.run(  # noqa: S603
+        [gh, "workflow", "run", MIRROR_WORKFLOW, "-R", MIRROR_REPO],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if r.returncode:
+        print(f"note: could not start the mirror build: {r.stderr.strip()}")
+    else:
+        print(f"started the GitHub Pages mirror build ({MIRROR_REPO}); it builds from main")
+
+
 # ---------------------------------------------------------------------------
 
 
@@ -618,6 +660,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help=f"also upload the site to the Cloudflare Worker '{CF_PROJECT}'",
     )
     ap.add_argument("--project", default=CF_PROJECT, help="Cloudflare Worker name for --deploy")
+    ap.add_argument(
+        "--mirror",
+        metavar="DIR",
+        help="also write the GitHub Pages mirror of the site to DIR (see mirror.py)",
+    )
     return ap.parse_args(argv)
 
 
@@ -636,10 +683,14 @@ def main(argv: list[str] | None = None) -> None:
         + ", ".join(f"{n} {maps.pct[c]}" for c, _, n in CASES)
         + ")"
     )
+    if a.mirror:
+        n = mirror.write_mirror(SITE, Path(a.mirror), CSP)
+        print(f"wrote the mirror to {a.mirror} ({n} pages)")
     if a.publish:
         publish()
     if a.deploy:
         deploy(a.project)
+        trigger_mirror()
 
 
 if __name__ == "__main__":

@@ -142,3 +142,25 @@ def test_accessed_date_uses_site_time_zone() -> None:
     assert works_cited.SITE_TZ.utcoffset(
         dt.datetime(2026, 11, 23, tzinfo=dt.timezone.utc)
     ) == dt.timedelta(hours=-6)
+
+
+@pytest.mark.slow
+def test_source_code_is_linked(rendered: tuple[str, list, str]) -> None:
+    """The site points readers to the code so they can check it."""
+    _, faq, llms = rendered
+    assert works_cited.SOURCE_URL in dict(faq)["Who made the Iowa Lead Tracker, and why?"]
+    assert f"[Source code]({works_cited.SOURCE_URL})" in llms
+    assert 'href="$source_url"' in site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    assert works_cited.SOURCE_URL.startswith("https://github.com/iowaleadtracker/")
+
+
+def test_court_pause_note_in_about_dialog() -> None:
+    """The About dialog reports the Eighth Circuit pause, with a link to the report."""
+    page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    start = page.index('<dialog id="note"')  # the "About this map" dialog
+    about = page[start : page.index("</dialog>", start)]
+    assert "<b>Court pause.</b> $court_pause" in about
+    assert 'href="$court_url"' in about
+    assert fs.COURT_URL.startswith("https://www.kcci.com/")
+    assert "don\u2019t say how long" in fs.COURT_PAUSE
+    assert "in case it goes ahead" in fs.COURT_PAUSE

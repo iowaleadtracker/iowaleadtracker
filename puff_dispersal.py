@@ -299,6 +299,13 @@ def _add_run_args(p: argparse.ArgumentParser) -> None:
         "later runs (reproducible, and spares the API)",
     )
     p.add_argument(
+        "--as-of",
+        default=None,
+        metavar="TIME",
+        help="treat this ISO 8601 time as 'now' when choosing forecast or archive weather; "
+        "set it to when a --met-cache was filled to rebuild the same maps on a later date",
+    )
+    p.add_argument(
         "--wind",
         default=None,
         help="skip Open-Meteo and use a constant wind 'SPEED@DIR' "
@@ -525,6 +532,7 @@ def _resolve_run(a: argparse.Namespace, p: argparse.ArgumentParser) -> None:
     if a.met_cache:
         MET_CACHE["path"], MET_CACHE["data"] = a.met_cache, None
     a.start, a.display_tz = parse_time(a.time)
+    a.as_of = parse_time(a.as_of)[0] if a.as_of else None
     if 3600 % a.dt:
         p.error("--dt must divide 3600")
     if not (-90 < a.lat < 90 and -180 <= a.lon <= 360):
@@ -695,7 +703,15 @@ def _try_model(a: argparse.Namespace, m: str, log: TextIO, *, use_levels: bool) 
     """Return weather from one named model, or None (logged) if it doesn't cover the run."""
     try:
         nm, mt, el = build_met(
-            a.lat, a.lon, a.start, a.hours, a.wind_grid, None, use_levels, model=m.strip()
+            a.lat,
+            a.lon,
+            a.start,
+            a.hours,
+            a.wind_grid,
+            None,
+            use_levels,
+            model=m.strip(),
+            now=getattr(a, "as_of", None),
         )
     except (SystemExit, ValueError, KeyError) as e:
         print(f"weather model {m} skipped: {str(e).splitlines()[-1].strip()}", file=log)
@@ -711,9 +727,8 @@ def _load_weather(a: argparse.Namespace, log: TextIO) -> list[MetRun]:
     use_lev = not getattr(a, "no_pressure_levels", False)
     wm = getattr(a, "weather_model", "best-match") or "best-match"
     names = WEATHER_ENSEMBLE if wm == "ensemble" else [m for m in wm.split(",") if m.strip()]
-    historical = a.start + dt.timedelta(hours=a.hours) < dt.datetime.now(
-        dt.timezone.utc
-    ) - dt.timedelta(days=6)
+    now = getattr(a, "as_of", None) or dt.datetime.now(dt.timezone.utc)
+    historical = a.start + dt.timedelta(hours=a.hours) < now - dt.timedelta(days=6)
     mets: list[MetRun] = []
     if a.const_wind is None and not historical and names != ["best-match"]:
         for m in names:
@@ -721,7 +736,16 @@ def _load_weather(a: argparse.Namespace, log: TextIO) -> list[MetRun]:
             if got:
                 mets.append(got)
     if not mets:
-        nm, mt, el = build_met(a.lat, a.lon, a.start, a.hours, a.wind_grid, a.const_wind, use_lev)
+        nm, mt, el = build_met(
+            a.lat,
+            a.lon,
+            a.start,
+            a.hours,
+            a.wind_grid,
+            a.const_wind,
+            use_lev,
+            now=getattr(a, "as_of", None),
+        )
         mets = [(None, nm, mt, el)]
     if len(mets) > 1:
         print(

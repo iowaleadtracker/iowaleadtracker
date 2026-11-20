@@ -21,6 +21,7 @@ not official guidance.
 | File | What it is |
 |---|---|
 | `make_map_picker.py` | builds the iowaleadtracker.com site: every map, the picker page, publish and deploy |
+| `mirror.py` | turns the built site into the GitHub Pages mirror |
 | `index_template.html` | the landing page's HTML, CSS and script, filled in by `make_map_picker.py` |
 | `met_cache/map_met_all.json` | saved Open-Meteo forecasts for Monday at the new site (retrieved Nov 20, 10:00 a.m. CST) |
 | `make_icons.py` | builds the site icons and profile images |
@@ -78,7 +79,9 @@ python3 make_map_picker.py --build --publish --deploy
 ```
 
 - `--build` runs the model for all 28 maps, one after another (about 3 minutes once the
-  forecasts are cached).
+  forecasts are cached). With `met_cache/map_met_all.json` present, each run gets
+  `--as-of` set to when those forecasts were pulled, so a rebuild on any later date or
+  machine replays the same weather offline and makes the same maps.
 - `--publish` copies the site files to the folder named by `publish_dir` in
   `deploy.local.json` (or `IOWALEADTRACKER_PUBLISH_DIR`). Only the maintainer needs it.
 - `--deploy` uploads `outputs/site/` to the Cloudflare Worker on the account that owns the
@@ -86,7 +89,21 @@ python3 make_map_picker.py --build --publish --deploy
   `deploy.local.json` next to the script (git-ignored), holding
   `{"cf_account_id": "..."}`, or `IOWALEADTRACKER_CF_ACCOUNT_ID` set. Wrangler is pinned
   (`WRANGLER` in the script), every `CLOUDFLARE_*`/`CF_*` variable is dropped from the
-  environment so wrangler uses its own login, and dotfiles are never uploaded.
+  environment so wrangler uses its own login, and dotfiles are never uploaded. It then
+  starts the GitHub Pages mirror build (below) with `gh`, if installed.
+- `--mirror DIR` writes the GitHub Pages copy of the site to `DIR` (see `mirror.py`).
+
+**The mirror.** https://iowaleadtracker.github.io/ serves the same site for readers who
+can't reach iowaleadtracker.com, for example on networks that block Cloudflare's Encrypted
+Client Hello. The workflow in
+[iowaleadtracker/iowaleadtracker.github.io](https://github.com/iowaleadtracker/iowaleadtracker.github.io)
+checks out this repository's `main`, runs `make_map_picker.py --build --mirror`, and
+publishes the result: on demand, when `--deploy` starts it, and hourly whenever `main` has
+a new commit. It builds from the pushed `main`, so **push before deploying**, and remember
+that a push updates the public mirror within the hour. The mirror adds a notice naming the
+main site, keeps `rel=canonical` on iowaleadtracker.com, carries the security policy in a
+`<meta>` tag (GitHub Pages can't send `_headers`), and fails without publishing if the build
+would have to download weather the saved forecasts don't have.
 
 What `outputs/site/` holds:
 

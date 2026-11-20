@@ -169,8 +169,12 @@ def fetch_open_meteo(
     end: dt.datetime,
     levels: Sequence[int] = (),
     model: str | None = None,
+    now: dt.datetime | None = None,
 ) -> tuple[str, list[Json], int | None, list[int]]:
     """Hourly weather for the given points from Open-Meteo.
+
+    ``now`` is the time the choice of source is made against (default: the clock). Set
+    it to when saved forecasts were pulled to replay them on a later date.
 
     Picks the ERA5 archive for past dates and the forecast API otherwise. Also asks
     for one near-surface wind level aloft (100 m in ERA5, 120 m in the forecast API)
@@ -184,7 +188,7 @@ def fetch_open_meteo(
         Source name, the per-point responses, the height of the wind level aloft (or
         None) and the pressure levels requested.
     """
-    now = dt.datetime.now(dt.timezone.utc)
+    now = now or dt.datetime.now(dt.timezone.utc)
     base_params = {
         "latitude": ",".join(f"{v:.4f}" for v in lats),
         "longitude": ",".join(f"{v:.4f}" for v in lons),
@@ -391,7 +395,7 @@ class _MetSource:
     lon_nodes: FloatArray
 
 
-def _fetch_wind_grid(
+def _fetch_wind_grid(  # noqa: PLR0913 - the request's own settings
     lat0: float,
     lon0: float,
     t_first: dt.datetime,
@@ -401,13 +405,14 @@ def _fetch_wind_grid(
     *,
     use_levels: bool,
     model: str | None,
+    now: dt.datetime | None = None,
 ) -> tuple[_MetSource, float | None]:
     """Fetch the source point, size the wind grid from the wind there, then fetch the grid.
 
     Returns the grid data and the ground elevation at the source (m), if known.
     """
     # Stage 1: winds at the source, to size the wind grid and pick pressure levels.
-    src_name, src, z_up, _ = fetch_open_meteo([lat0], [lon0], t_first, t_last, model=model)
+    src_name, src, z_up, _ = fetch_open_meteo([lat0], [lon0], t_first, t_last, model=model, now=now)
     if model:  # a named model must really cover the run (some stop after 18-48 h)
         _check_model_covers(src, t_first, hours, model)
     levels = pressure_levels_for(src[0].get("elevation")) if use_levels else []
@@ -428,7 +433,7 @@ def _fetch_wind_grid(
         lon_nodes = np.linspace(lon0 - dlon, lon0 + dlon, grid_n)
         LA, LO = np.meshgrid(lat_nodes, lon_nodes, indexing="ij")
         name, data, z_up, levels = fetch_open_meteo(
-            LA.ravel(), ((LO.ravel() + 180) % 360) - 180, t_first, t_last, levels, model
+            LA.ravel(), ((LO.ravel() + 180) % 360) - 180, t_first, t_last, levels, model, now
         )
         if name != src_name:
             print(f"note: grid used {name}, source used {src_name}", file=sys.stderr)
@@ -437,7 +442,7 @@ def _fetch_wind_grid(
         data = src
         if levels:
             name, data, z_up, levels = fetch_open_meteo(
-                [lat0], [lon0], t_first, t_last, levels, model
+                [lat0], [lon0], t_first, t_last, levels, model, now
             )
     return _MetSource(name, data, z_up, levels, lat_nodes, lon_nodes), src[0].get("elevation")
 
@@ -489,7 +494,7 @@ def _pressure_level_fields(
     return fields, used
 
 
-def build_met(
+def build_met(  # noqa: PLR0913 - mirrors the command-line options
     lat0: float,
     lon0: float,
     start: dt.datetime,
@@ -498,6 +503,8 @@ def build_met(
     constant_wind: tuple[float, float] | None,
     use_levels: bool = True,  # noqa: FBT001, FBT002 - positional in callers
     model: str | None = None,
+    *,
+    now: dt.datetime | None = None,
 ) -> tuple[str, MetField, float | None]:
     """Hourly weather for the run as a :class:`MetField`.
 
@@ -518,7 +525,7 @@ def build_met(
         return "constant wind (user supplied)", met, None
 
     src, elev = _fetch_wind_grid(
-        lat0, lon0, t_first, t_last, hours, grid_n, use_levels=use_levels, model=model
+        lat0, lon0, t_first, t_last, hours, grid_n, use_levels=use_levels, model=model, now=now
     )
     data, name, z_up = src.data, src.name, src.z_up
     ny, nx = len(src.lat_nodes), len(src.lon_nodes)

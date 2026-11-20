@@ -11,6 +11,7 @@ and say why in the commit message.
 
 from __future__ import annotations
 
+import datetime as dt
 import json
 import sys
 from pathlib import Path
@@ -67,6 +68,25 @@ def test_permit_noon_matches_golden() -> None:
     for k, v in want["budget"].items():
         assert got["budget"][k] == pytest.approx(v, rel=1e-9), k
     assert got["centroid"] == pytest.approx(want["centroid"], abs=1e-5)
+
+
+@pytest.mark.slow
+def test_saved_forecasts_replay_on_a_later_date(monkeypatch: pytest.MonkeyPatch) -> None:
+    """With --as-of, a build months later uses the same saved forecasts.
+
+    Without it, the model would treat the run as historical and ask the weather
+    archive for data the saved file doesn't have. The site build (make_map_picker.py)
+    passes --as-of so the Cloudflare and GitHub Pages copies always match.
+    """
+    later = conftest.FORECAST_PULLED + dt.timedelta(days=60)
+    conftest.freeze_clock(monkeypatch, at=later)
+    _, out = run_puff([*site_argv(), "--as-of", conftest.FORECAST_PULLED.isoformat()])
+    want = json.loads(GOLDEN.read_text(encoding="utf-8"))
+    got = fingerprint(out)
+    assert got["weather"] == want["weather"]
+    assert got["models"] == want["models"]
+    for k, stats in want["fields"].items():
+        assert got["fields"][k]["sum"] == pytest.approx(stats["sum"], rel=1e-9), k
 
 
 def regenerate() -> None:

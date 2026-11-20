@@ -20,6 +20,7 @@ from typing import Any, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
+from works_cited import SOURCE_URL
 
 Facts: TypeAlias = dict[str, Any]
 FloatArray: TypeAlias = npt.NDArray[np.float64]
@@ -136,6 +137,18 @@ NOT_CHECKED = (
     "this map, and none of them have checked it."
 )
 ADVISORY_URL = "https://d34w7g4gy10iej.cloudfront.net/pubs/pdf_78366.pdf"
+# The Eighth Circuit stay, as reported by KCCI (updated Nov. 20, 2026, 10:59 a.m. CST).
+COURT_URL = (
+    "https://www.kcci.com/article/environmental-groups-sue-to-stop-planned-lead-azide-"
+    "detonation-at-iowa-ammunition-plant/74482081"
+)
+COURT_CITE = "KCCI, Nov. 20, 2026"
+COURT_PAUSE = (
+    "On Nov. 20, 2026, the U.S. Eighth Circuit Court of Appeals granted an emergency motion "
+    "by environmental groups to pause the planned detonation, KCCI reported. Court documents "
+    "don\u2019t say how long the pause will last. These maps still model Monday, Nov. 23, "
+    "in case it goes ahead."
+)
 # Army mitigation (public advisory, Nov. 18, 2026) and what runs of the model's spray option
 # showed with guessed setups (README, "Water misting and soil soaking"): 0.1% at 528 gal/min
 # up to 19% at 26,000 gal/min. The Army hasn't published its mister setup.
@@ -683,8 +696,8 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text) -> list[tuple[str, str]]:
         ),
         (
             "Who made the Iowa Lead Tracker, and why?",
-            ABOUT_WHO + " The model code, assumptions, and sources are listed on the page so "
-            "anyone can check them.",
+            ABOUT_WHO + " The model code, saved weather forecasts, assumptions, and sources are "
+            f"public at {SOURCE_URL} so anyone can check them.",
         ),
         (
             "When is the lead azide blast at the Iowa Army Ammunition Plant?",
@@ -772,6 +785,7 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text) -> str:
             "## Pages",
             "",
             f"- [Map]({ctx['site_url']}): interactive map by blast time and case",
+            f"- [Source code]({SOURCE_URL}): the model, saved forecasts, assumptions and tests",
             "",
         ]
     )

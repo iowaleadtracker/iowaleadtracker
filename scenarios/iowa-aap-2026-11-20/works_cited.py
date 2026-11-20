@@ -31,6 +31,8 @@ def doi(d: str) -> str:
     return _a(f"https://doi.org/{d}")
 
 
+#: Where the model, saved forecasts, assumptions and tests are published.
+SOURCE_URL = "https://github.com/iowaleadtracker/iowaleadtracker"
 ACCESSED = "accessed 20 November 2026"
 
 # Alphabetical by first author, then year. HTML.
@@ -387,5 +389,6 @@ def render(ctx: dict[str, Any], site_url: str, built_txt: str) -> str:
   <p>Iowa Lead Tracker, 2026: Unofficial estimate of lead dispersal from the planned
     23 November 2026 detonation at the Iowa Army Ammunition Plant. Interactive map, accessed
     {today.day} {today.strftime("%B %Y")}, {_a(site_url)}.</p>
-  <p class="meta">Model code: puff_dispersal.py, a Gaussian puff screening model. It is not a
-    regulatory or emergency-response model. Last updated {html.escape(built_txt)}.</p>"""
+  <p class="meta">Model code: puff_dispersal.py ({_a(SOURCE_URL)}), a Gaussian puff
+    screening model. It is not a regulatory or emergency-response model.
+    Last updated {html.escape(built_txt)}.</p>"""

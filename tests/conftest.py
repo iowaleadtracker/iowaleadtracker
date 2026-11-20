@@ -37,7 +37,7 @@ def block_network(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setitem(met.MET_CACHE, "data", None)
 
 
-def freeze_clock(monkeypatch: pytest.MonkeyPatch) -> dt.datetime:
+def freeze_clock(monkeypatch: pytest.MonkeyPatch, at: dt.datetime = FORECAST_PULLED) -> dt.datetime:
     """Make the model believe it is the time the saved forecasts were pulled.
 
     The model picks forecast or archive data by comparing the run with "now"; without
@@ -47,7 +47,7 @@ def freeze_clock(monkeypatch: pytest.MonkeyPatch) -> dt.datetime:
     class FrozenDatetime(dt.datetime):
         @classmethod
         def now(cls, tz: dt.tzinfo | None = None) -> FrozenDatetime:
-            t = FORECAST_PULLED if tz is None else FORECAST_PULLED.astimezone(tz)
+            t = at if tz is None else at.astimezone(tz)
             return cls.fromtimestamp(t.timestamp(), tz=t.tzinfo)
 
     fake = types.SimpleNamespace(
@@ -58,7 +58,7 @@ def freeze_clock(monkeypatch: pytest.MonkeyPatch) -> dt.datetime:
     )
     for module in CLOCK_READERS:
         monkeypatch.setattr(module, "dt", fake)
-    return FORECAST_PULLED
+    return at
 
 
 @pytest.fixture(autouse=True)
