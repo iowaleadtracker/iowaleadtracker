@@ -1,0 +1,67 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# virtual environments and local secrets
+.venv/
+venv/
+env/
+.env
+.env.*
+
+# test, type-check, lint, and profiling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+*.prof
+
+# Jupyter
+.ipynb_checkpoints/
+
+# NumPy scratch arrays and pickles (the model doesn't write these; keep them out of the repo)
+*.npy
+*.npz
+*.pkl
+
+# --- Editors and OS ---
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# --- Node / Cloudflare tooling ---
+node_modules/
+.wrangler/
+
+# --- Project ---
+# maintainer-only settings (Cloudflare account ID, publish folder)
+deploy.local.json
+
+# built by make_map_picker.py and the other scripts
+scenarios/*/outputs/*
+!scenarios/*/outputs/site/
+scenarios/*/outputs/site/*
+!scenarios/*/outputs/site/og.png
+!scenarios/*/outputs/site/favicon.svg
+!scenarios/*/outputs/site/favicon.ico
+!scenarios/*/outputs/site/apple-touch-icon.png
+!scenarios/*/outputs/site/brand/
+*.html
+!template.html
+!scenarios/*/index_template.html
+
+# older forecast pulls, kept locally when refreshing (README "Refreshing on the day")
+scenarios/*/met_cache_retrieved_*/

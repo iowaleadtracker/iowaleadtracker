@@ -1,0 +1,74 @@
+# Tool settings only: this repo is a set of scripts, not an installable package.
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+extend-exclude = [".venv", "scenarios/*/outputs"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "T20",      # the scripts are command-line tools: printing progress is their job
+    "COM812",   # trailing commas: left to the formatter
+    "ISC001",   # implicit string concatenation: conflicts with the formatter
+    "EM101",    # exception messages written inline are clearer here than in variables
+    "EM102",
+    "TRY003",
+    "PLR2004",  # physics thresholds that matter are named constants with sources
+    "CPY001",   # the license is in LICENSE, not in every file header
+    "FBT003",   # booleans passed positionally to numpy/stdlib calls
+    "D105",     # magic methods are self-explanatory
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Physics notation: T (temperature), C/K/E (Briggs coefficients), F (fields).
+"puff_dispersal.py" = ["N803", "N806"]
+"dispersal/**" = ["N803", "N806"]
+"validate_explosion.py" = ["N806"]
+"tests/**" = [
+    "S101",     # pytest uses assert
+    "PLR2004",  # published reference values are literal on purpose
+    "INP001",   # tests are not a package
+    "ANN",      # fixtures and test functions are typed where it helps
+    "D100",
+    "D103",
+    "SLF001",   # tests may reach module internals
+]
+"scenarios/**" = ["INP001"]  # stand-alone scripts, not a package
+"tools/**" = ["INP001"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.pylint]
+max-args = 8
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.mypy]
+python_version = "3.10"
+files = ["puff_dispersal.py", "dispersal", "validate_explosion.py", "scenarios", "tools", "tests"]
+exclude = ["scenarios/.*/outputs/"]
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_return_any = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+strict_equality = true
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = ["scipy.*"]  # optional: the model falls back to its own erf
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["--strict-markers", "-ra"]
+markers = ["slow: runs the dispersion model end to end (seconds to a minute each)"]

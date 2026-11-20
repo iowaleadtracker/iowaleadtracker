@@ -1,0 +1,134 @@
+1. SOURCE TERM (Church: H_top = 76 W^0.25, W = lb TNT by energy)
+         material  MJ/kg  energy GJ   TNT kg  cloud top m
+     5 t (tonnes)   1.40       7.00     1673          592
+     5 t (tonnes)   1.64       8.20     1960          616
+     5 short tons   1.40       6.35     1518          578
+     5 short tons   1.64       7.44     1778          601
+   check vs HotSpot example: 113 lb TNT -> 248 m (published 248 m)
+   check vs HotSpot example: 40 lb TNT -> 191 m (published 191 m)
+   -> energy range changes cloud height by only 4.0% (height ~ E^0.25)
+
+2. NUMERICS vs ANALYTIC (5-layer cloud, 5 m/s wind from W, class D, mixing height 800 m, non-settling tracer)
+   grid cell 583 m, run time 0.6 s
+     x km       model    analytic  ratio
+      4.9   9.667e-04   1.085e-03   0.89
+     10.1   6.353e-04   6.720e-04   0.95
+     20.1   4.114e-04   4.232e-04   0.97
+     39.9   2.592e-04   2.613e-04   0.99
+     80.1   1.545e-04   1.552e-04   1.00
+   -> worst deviation 11% (units kg·s/m³ = time-integrated concentration)
+
+8. MATERIAL, SHOTS, WINDS ALOFT, ENSEMBLE
+   lead-azide preset: 1778.6 kg lead (expect 1778.6), cloud top 255.0 m (expect 255.0), diameters [1.0, 3.0, 10.0, 30.0] um -> True
+   winds aloft at [10, 100, 250, 400, 700, 1000, 2500] m: v = [5.0, 8.0, 10.0, 12.0, 15.0, 18.0, 18.0] (expect [5, 8, 10, 12, 15, 18, 18]) -> True
+   wind turned from 180 to 188 deg: plume bearing 8.00 deg (expect 8) -> True
+   envelope >= central everywhere: True; envelope spans bearings -19 to 19 deg with no gaps at 60-70 km: True
+   Zhang deposition, grass, 5 m/s: [0.933, 0.388, 0.171, 0.109, 0.419, 4.464, 25.466] cm/s for [0.03, 0.09999999999999999, 0.3, 1.0, 3.0, 10.0, 29.999999999999996] um; minimum at 1 um, never below settling, rises with wind -> True
+   release cases: TNT-equivalent rule gives 55.1% respirable (expect 55.1%); 20-percent gives 20%; shares sum to 1 -> True
+   end-of-hour snapshot never exceeds the in-hour peak: True
+
+3/4. REAL WEATHER (ERA5), 5 t lofted as 1-32 µm particles (1pg:0.25,30pg:0.25,1ng:0.25,30ng:0.25, 1720 kg/m³), 24 h
+   day release 2024-06-01T08:00-06:00, 1.4 MJ/kg (cloud top 592 m)
+     weather ERA5 reanalysis (Open-Meteo archive); hour-1 stability B, mixing height 1350 m, wind10 1.63 m/s, wind100 2.25 m/s; run 17.6 s; cell 454 m
+     mass budget after 24 h: airborne  55.4%  dry  44.5%  wet   0.0%  sum 1.000000
+     deposition map integral / deposited mass = 0.999998
+     peak hourly-mean ground concentration 1,278.8 µg/m³ (hour 1); peak deposition 0.07 g/m²
+     peak 2-min ground concentration 16,661.2 µg/m³ (hour 1)
+     >=  35 µg/m³: hourly mean   227.6 km² to  59.3 km | 2-min peak   578.1 km² to  60.1 km
+     >= 150 µg/m³: hourly mean    11.4 km² to   6.6 km | 2-min peak    34.9 km² to  12.1 km
+     >=   1 mg/m³: hourly mean     0.4 km² to   0.7 km | 2-min peak     8.1 km² to   4.9 km
+     >=  10 mg/m³: hourly mean     0.0 km² to   0.0 km | 2-min peak     0.6 km² to   0.7 km
+     deposition  >=   1 mg/m²: area    585.5 km², reaches   57.7 km
+     deposition  >= 100 mg/m²: area      0.0 km², reaches    0.0 km
+     deposition  >=    1 g/m²: area      0.0 km², reaches    0.0 km
+     threat zones (max running 60-min mean):
+       >=  35 µg/m³:   304.0 km², reaches  59.3 km
+       >= 150 µg/m³:    11.6 km², reaches   6.6 km
+       >=   1 mg/m³:     0.4 km², reaches   0.7 km
+       >=  10 mg/m³:     0.0 km², reaches   0.0 km
+   day release 2024-06-01T08:00-06:00, 1.64 MJ/kg (cloud top 616 m)
+     weather ERA5 reanalysis (Open-Meteo archive); hour-1 stability B, mixing height 1350 m, wind10 1.63 m/s, wind100 2.25 m/s; run 3.3 s; cell 455 m
+     mass budget after 24 h: airborne  55.8%  dry  44.1%  wet   0.0%  sum 1.000000
+     deposition map integral / deposited mass = 0.999998
+     peak hourly-mean ground concentration 1,221.0 µg/m³ (hour 1); peak deposition 0.07 g/m²
+     peak 2-min ground concentration 15,591.8 µg/m³ (hour 1)
+     >=  35 µg/m³: hourly mean   219.6 km² to  59.0 km | 2-min peak   552.4 km² to  59.5 km
+     >= 150 µg/m³: hourly mean    11.2 km² to   6.6 km | 2-min peak    34.8 km² to  12.1 km
+     >=   1 mg/m³: hourly mean     0.4 km² to   0.7 km | 2-min peak     8.1 km² to   4.9 km
+     >=  10 mg/m³: hourly mean     0.0 km² to   0.0 km | 2-min peak     0.4 km² to   0.7 km
+     deposition  >=   1 mg/m²: area    580.2 km², reaches   57.7 km
+     deposition  >= 100 mg/m²: area      0.0 km², reaches    0.0 km
+     deposition  >=    1 g/m²: area      0.0 km², reaches    0.0 km
+     threat zones (max running 60-min mean):
+       >=  35 µg/m³:   286.3 km², reaches  59.0 km
+       >= 150 µg/m³:    11.2 km², reaches   6.6 km
+       >=   1 mg/m³:     0.4 km², reaches   0.7 km
+       >=  10 mg/m³:     0.0 km², reaches   0.0 km
+   night release 2024-06-02T01:00-06:00, 1.4 MJ/kg (cloud top 592 m)
+     weather ERA5 reanalysis (Open-Meteo archive); hour-1 stability F, mixing height 200 m, wind10 1.55 m/s, wind100 3.16 m/s; run 17.6 s; cell 1254 m
+     mass budget after 24 h: airborne  32.5%  dry  38.6%  wet  28.9%  sum 1.000000
+     deposition map integral / deposited mass = 1.000000
+     peak hourly-mean ground concentration 596.7 µg/m³ (hour 3); peak deposition 0.04 g/m²
+     peak 2-min ground concentration 5,353.3 µg/m³ (hour 1)
+     >=  35 µg/m³: hourly mean   187.2 km² to  62.8 km | 2-min peak   494.0 km² to 140.7 km
+     >= 150 µg/m³: hourly mean    75.5 km² to  42.9 km | 2-min peak   206.1 km² to  62.8 km
+     >=   1 mg/m³: hourly mean     0.0 km² to   0.0 km | 2-min peak    48.8 km² to  29.5 km
+     >=  10 mg/m³: hourly mean     0.0 km² to   0.0 km | 2-min peak     0.0 km² to   0.0 km
+     deposition  >=   1 mg/m²: area    643.4 km², reaches  288.3 km
+     deposition  >= 100 mg/m²: area      0.0 km², reaches    0.0 km
+     deposition  >=    1 g/m²: area      0.0 km², reaches    0.0 km
+     threat zones (max running 60-min mean):
+       >=  35 µg/m³:   206.1 km², reaches  62.8 km
+       >= 150 µg/m³:    86.5 km², reaches  42.9 km
+       >=   1 mg/m³:     0.0 km², reaches   0.0 km
+       >=  10 mg/m³:     0.0 km², reaches   0.0 km
+   night release 2024-06-02T01:00-06:00, 1.64 MJ/kg (cloud top 616 m)
+     weather ERA5 reanalysis (Open-Meteo archive); hour-1 stability F, mixing height 200 m, wind10 1.55 m/s, wind100 3.16 m/s; run 17.7 s; cell 1250 m
+     mass budget after 24 h: airborne  32.4%  dry  38.4%  wet  29.2%  sum 1.000000
+     deposition map integral / deposited mass = 1.000000
+     peak hourly-mean ground concentration 536.9 µg/m³ (hour 2); peak deposition 0.03 g/m²
+     peak 2-min ground concentration 5,254.7 µg/m³ (hour 1)
+     >=  35 µg/m³: hourly mean   189.0 km² to  63.9 km | 2-min peak   501.4 km² to 144.3 km
+     >= 150 µg/m³: hourly mean    75.0 km² to  44.0 km | 2-min peak   195.3 km² to  65.7 km
+     >=   1 mg/m³: hourly mean     0.0 km² to   0.0 km | 2-min peak    45.3 km² to  29.0 km
+     >=  10 mg/m³: hourly mean     0.0 km² to   0.0 km | 2-min peak     0.0 km² to   0.0 km
+     deposition  >=   1 mg/m²: area    643.6 km², reaches  288.6 km
+     deposition  >= 100 mg/m²: area      0.0 km², reaches    0.0 km
+     deposition  >=    1 g/m²: area      0.0 km², reaches    0.0 km
+     threat zones (max running 60-min mean):
+       >=  35 µg/m³:   204.6 km², reaches  63.9 km
+       >= 150 µg/m³:    85.9 km², reaches  44.0 km
+       >=   1 mg/m³:     0.0 km², reaches   0.0 km
+       >=  10 mg/m³:     0.0 km², reaches   0.0 km
+
+   SENSITIVITY 1.64 vs 1.4 MJ/kg (ratio high/low)
+       day: max hourly mean 0.955, max 2-min peak 0.936, max deposition 0.955, area >=150 µg/m³ 0.985, area >=1 mg/m² 0.991
+     night: max hourly mean 0.900, max 2-min peak 0.982, max deposition 0.920, area >=150 µg/m³ 0.993, area >=1 mg/m² 1.000
+
+5. VISUALISATION RANGE
+     day  1.4 conc: encoded 1.3e-15..1.3e-06 kg/m³; levels encoded 3/4, on default 5-decade scale 3/4 (levels above the maximum never occur)
+     day  1.4 peak: encoded 1.7e-14..1.7e-05 kg/m³; levels encoded 4/4, on default 5-decade scale 4/4 (levels above the maximum never occur)
+     day  1.4  dep: encoded 7.4e-14..7.4e-05 kg/m²; levels encoded 1/3, on default 5-decade scale 1/3 (levels above the maximum never occur)
+     day 1.64 conc: encoded 1.2e-15..1.2e-06 kg/m³; levels encoded 3/4, on default 5-decade scale 3/4 (levels above the maximum never occur)
+     day 1.64 peak: encoded 1.6e-14..1.6e-05 kg/m³; levels encoded 4/4, on default 5-decade scale 4/4 (levels above the maximum never occur)
+     day 1.64  dep: encoded 7.1e-14..7.1e-05 kg/m²; levels encoded 1/3, on default 5-decade scale 1/3 (levels above the maximum never occur)
+   night  1.4 conc: encoded 6.0e-16..6.0e-07 kg/m³; levels encoded 2/4, on default 5-decade scale 2/4 (levels above the maximum never occur)
+   night  1.4 peak: encoded 5.4e-15..5.4e-06 kg/m³; levels encoded 3/4, on default 5-decade scale 3/4 (levels above the maximum never occur)
+   night  1.4  dep: encoded 3.6e-14..3.6e-05 kg/m²; levels encoded 1/3, on default 5-decade scale 1/3 (levels above the maximum never occur)
+   night 1.64 conc: encoded 5.4e-16..5.4e-07 kg/m³; levels encoded 2/4, on default 5-decade scale 2/4 (levels above the maximum never occur)
+   night 1.64 peak: encoded 5.3e-15..5.3e-06 kg/m³; levels encoded 3/4, on default 5-decade scale 3/4 (levels above the maximum never occur)
+   night 1.64  dep: encoded 3.4e-14..3.4e-05 kg/m²; levels encoded 1/3, on default 5-decade scale 1/3 (levels above the maximum never occur)
+
+7. THREAT-ZONE METRIC AND HYSPLIT EXPORT
+     day  1.4: hourly mean <= 60-min max True; 60-min max <= peak True
+     day 1.64: hourly mean <= 60-min max True; 60-min max <= peak True
+   night  1.4: hourly mean <= 60-min max True; 60-min max <= peak True
+   night 1.64: hourly mean <= 60-min max True; 60-min max <= peak True
+   CONTROL: 59 lines, 2 source heights [10.0, 616.2], 4 pollutants, emitted 5000 kg, met gdas1.jun24.w1 -> consistent True
+
+6. NEAR-FIELD RESOLUTION (day case, 1.64 MJ/kg, first 2 h)
+    whole plume, 24 h: cell   455 m  hour-1 max hourly mean   1270.5 µg/m³, max 1-min peak  21612.8 µg/m³
+     5 km window, 2 h: cell    38 m  hour-1 max hourly mean   1713.5 µg/m³, max 1-min peak  42218.7 µg/m³
+   -> coarse map understates the near-source hourly mean by 1.3x and the short-term peak by 2.0x; use --extent-km for near-field numbers
+
+RESULT: PASS

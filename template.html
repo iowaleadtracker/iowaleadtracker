@@ -1,0 +1,1195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Puff Dispersal Map</title>
+<style>
+:root {
+  --bg: #f6f5f2; --surface: #ffffff; --ink: #1d1d1b; --ink-2: #55544f; --ink-3: #6b6a64;
+  --line: #e3e1db; --accent: #2a78d6; --map-bg: #e9e7e1; --chip: #f0efec;
+  --c-air: #eb6834; --c-dry: #2a78d6; --c-wet: #1baf7a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161615; --surface: #1f1f1d; --ink: #f0efea; --ink-2: #b9b8b1; --ink-3: #9a9993;
+    --line: #34332f; --accent: #3987e5; --map-bg: #262624; --chip: #2a2a27;
+    --c-air: #d95926; --c-dry: #3987e5; --c-wet: #199e70;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161615; --surface: #1f1f1d; --ink: #f0efea; --ink-2: #b9b8b1; --ink-3: #9a9993;
+  --line: #34332f; --accent: #3987e5; --map-bg: #262624; --chip: #2a2a27;
+  --c-air: #d95926; --c-dry: #3987e5; --c-wet: #199e70;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg); color: var(--ink);
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  display: flex; flex-direction: column;
+}
+header { padding: 12px 16px 10px; border-bottom: 1px solid var(--line); background: var(--surface); }
+header h1 { font-size: 17px; margin: 0; font-weight: 650; letter-spacing: -0.01em; }
+header p { margin: 2px 0 0; color: var(--ink-2); font-size: 13px; }
+main { flex: 1; display: flex; min-height: 0; }
+#mapwrap { position: relative; flex: 1; min-width: 0; background: var(--map-bg); overflow: hidden; touch-action: none; }
+#map { position: absolute; inset: 0; width: 100%; height: 100%; cursor: grab; display: block; }
+#map.dragging { cursor: grabbing; }
+aside {
+  width: 330px; flex: none; overflow-y: auto; background: var(--surface);
+  border-left: 1px solid var(--line); padding: 14px 16px 24px;
+}
+aside h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); margin: 18px 0 6px; font-weight: 600; }
+aside h2:first-child { margin-top: 0; }
+dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 0; }
+dt { color: var(--ink-2); }
+dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.zoom { position: absolute; top: 12px; left: 12px; display: flex; flex-direction: column; gap: 4px; }
+.mapbtn {
+  width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); font-size: 18px; line-height: 1; cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,.12);
+}
+.legend {
+  position: absolute; right: 12px; bottom: 26px; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 10px; padding: 8px 10px 6px; min-width: 210px; box-shadow: 0 1px 4px rgba(0,0,0,.12);
+}
+.legend .lt { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+.legend canvas { display: block; width: 100%; height: 12px; border-radius: 3px; }
+.legend .ticks { position: relative; height: 16px; font-size: 11px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.legend .ticks span { position: absolute; transform: translateX(-50%); top: 2px; white-space: nowrap; }
+.attrib { position: absolute; right: 0; bottom: 0; font-size: 10.5px; background: color-mix(in srgb, var(--surface) 80%, transparent); color: var(--ink-2); padding: 1px 6px; border-top-left-radius: 6px; }
+.attrib a { color: inherit; }
+#nodata {
+  position: absolute; top: 12px; left: 56px; right: 12px; max-width: 520px; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-left: 4px solid #fab219; border-radius: 8px; padding: 8px 12px; font-size: 13px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.12);
+}
+#tip {
+  position: absolute; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+  border-radius: 8px; padding: 6px 8px; font-size: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.18); display: none; white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+#tip b { font-weight: 600; }
+.controls { background: var(--surface); border-top: 1px solid var(--line); padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.timebox { display: flex; align-items: center; gap: 10px; flex: 1 1 420px; min-width: 260px; }
+#play { width: 36px; height: 36px; border-radius: 50%; border: none; background: var(--accent); color: #fff; cursor: pointer; flex: none; font-size: 14px; }
+#hour { flex: 1; accent-color: var(--accent); min-width: 120px; }
+#timelabel { min-width: 150px; font-variant-numeric: tabular-nums; }
+#timelabel .sub { display: block; color: var(--ink-2); font-size: 12px; }
+.seg { display: inline-flex; background: var(--chip); border-radius: 8px; padding: 2px; }
+.seg button { border: 0; background: transparent; color: var(--ink-2); padding: 5px 10px; border-radius: 6px; cursor: pointer; font: inherit; font-size: 13px; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+.opt { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); font-size: 13px; }
+.opt select, .opt input[type=range] { font: inherit; accent-color: var(--accent); }
+.opt select { background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 3px 6px; }
+.budget { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--chip); margin: 6px 0 8px; gap: 2px; }
+.budget div { height: 100%; }
+.sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.note { color: var(--ink-3); font-size: 12px; margin-top: 18px; }
+.zonectl { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; align-items: center; margin-bottom: 8px; font-size: 13px; }
+.zonectl input, .zonectl select { width: 100%; font: inherit; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 3px 6px; }
+.zonectl label { color: var(--ink-2); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+table.zones { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+table.zones th { text-align: left; color: var(--ink-3); font-weight: 500; font-size: 12px; padding: 2px 0; }
+table.zones td { padding: 3px 0; border-top: 1px solid var(--line); }
+table.zones td.n, table.zones th.n { text-align: right; white-space: nowrap; padding-left: 8px; vertical-align: top; }
+aside section > h2:first-child { margin-top: 18px; }
+.zsw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 6px; }
+.legnote { width: 0; min-width: 100%; font-size: 11.5px; color: var(--ink-3); margin-top: 5px; padding-top: 4px; border-top: 1px solid var(--line); white-space: normal; }
+.lz { display: flex; align-items: center; font-size: 12px; color: var(--ink-2); margin: 2px 0; gap: 6px; }
+.lz b { color: var(--ink); font-weight: 600; min-width: 46px; }
+.btnrow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.btnrow button { font: inherit; font-size: 12px; border: 1px solid var(--line); background: var(--chip); color: var(--ink); border-radius: 6px; padding: 4px 9px; cursor: pointer; }
+.muted { color: var(--ink-3); }
+#loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink-2); }
+body.embedded > header { display: none; }
+#standalone { padding: 8px 16px; background: #fde8c8; color: #1d1d1b; font-size: 13px; border-bottom: 1px solid var(--line); }
+#standalone a { color: #0b5cad; }
+@media (max-width: 820px) {
+  html, body { height: auto; }
+  main { display: contents; }
+  #mapwrap { flex: none; height: 62vh; order: 1; }
+  .controls { order: 2; }
+  aside { order: 3; }
+  .attrib { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-top-left-radius: 0; }
+  aside { width: auto; border-left: 0; border-top: 1px solid var(--line); }
+  .legend { min-width: 170px; bottom: 22px; }
+}
+#techdetails > summary { cursor: pointer; font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--ink-3); font-weight: 600; margin: 18px 0 6px; padding: 6px 0; }
+#gesturehint {
+  position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none;
+  background: rgba(0, 0, 0, .45); color: #fff; font-size: 16px; font-weight: 600; text-align: center;
+  padding: 0 24px; opacity: 0; transition: opacity .2s;
+}
+#gesturehint.show { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { #gesturehint { transition: none; } }
+/* touch screens, narrow: one finger scrolls the page, two fingers move the map */
+#mapwrap.coop { touch-action: pan-x pan-y; }
+/* narrow screens: the legend sits in a strip under the map instead of on top of it */
+.legend.below {
+  position: static; order: 1; min-width: 0; margin: 0; border-radius: 0; box-shadow: none;
+  border-width: 0 0 1px; padding: 8px 16px 6px;
+}
+.legend.below .lz { font-size: 12.5px; }
+</style>
+</head>
+<body>
+<div id="standalone" role="note" hidden></div>
+<header>
+  <h1 id="title">Puff dispersal</h1>
+  <p id="subtitle"></p>
+</header>
+<main>
+  <div id="mapwrap">
+    <canvas id="map" role="img" aria-label="Map of the dispersal cloud. The same numbers are in the side panel."></canvas>
+    <div id="loading">Decoding model output…</div>
+    <div class="zoom">
+      <button class="mapbtn" id="zin" title="Zoom in" aria-label="Zoom in">+</button>
+      <button class="mapbtn" id="zout" title="Zoom out" aria-label="Zoom out">−</button>
+      <button class="mapbtn" id="zfit" title="Fit plume" aria-label="Fit plume" style="font-size:14px">⤢</button>
+    </div>
+    <div class="legend">
+      <div class="lt" id="legtitle"></div>
+      <canvas id="legbar" width="256" height="12"></canvas>
+      <div class="ticks" id="legticks"></div>
+      <div id="legzones" hidden></div>
+      <div class="lz" id="legenv" hidden></div>
+      <div class="lz lpath" style="margin-top:4px"><svg width="26" height="8" aria-hidden="true"><line x1="1" y1="4" x2="25" y2="4" stroke="currentColor" stroke-width="2" stroke-dasharray="5 4"/></svg>Path of the cloud's center, labeled with the local time it passes</div>
+      <div class="legnote" id="legnote" hidden></div>
+    </div>
+    <div id="tip"></div>
+    <div id="gesturehint" aria-hidden="true">Use two fingers to move the map</div>
+    <div id="nodata" hidden></div>
+    <div class="attrib" id="attrib"></div>
+  </div>
+  <aside>
+    <h2>At the source this hour</h2>
+    <dl id="met"></dl>
+    <h2>Mass budget</h2>
+    <div class="budget" id="budgetbar"></div>
+    <dl id="budget"></dl>
+    <h2>Peak on map</h2>
+    <dl id="peak"></dl>
+    <section id="zonesec" hidden>
+      <h2>Levels of concern, release to end of this hour</h2>
+      <div class="zonectl">
+        <label for="zmetric" class="muted">Metric</label>
+        <select id="zmetric">
+          <option value="m60">max 60-min average (AEGL/PAC style)</option>
+          <option value="peak">max short-term peak</option>
+          <option value="dep">cumulative deposition</option>
+        </select>
+        <label for="loc2"><span class="zsw" style="background:#d03b3b"></span>Red ≥</label><input id="loc2" type="number" min="0" step="any" aria-label="Red level of concern">
+        <label for="loc1"><span class="zsw" style="background:#ec835a"></span>Orange ≥</label><input id="loc1" type="number" min="0" step="any" aria-label="Orange level of concern">
+        <label for="loc0"><span class="zsw" style="background:#fab219"></span>Yellow ≥</label><input id="loc0" type="number" min="0" step="any" aria-label="Yellow level of concern">
+      </div>
+      <table class="zones" id="zonetab"></table>
+      <div class="note" style="margin-top:6px" id="zonenote"></div>
+    </section>
+    <details id="techdetails" open>
+    <summary>Model details</summary>
+    <h2 id="explhead" hidden>Explosion source</h2>
+    <dl id="expl"></dl>
+    <h2>Release</h2>
+    <dl id="release"></dl>
+    <h2>Particle sizes</h2>
+    <dl id="bins"></dl>
+    <div class="note" id="sizenote" style="margin-top:4px"></div>
+    <h2>Cross-check with HYSPLIT</h2>
+    <div class="note" style="margin-top:0">Same release as NOAA HYSPLIT inputs (vertical line source, one pollutant per particle size). Download, add the listed ARL meteorology files, run <code>hycs_std</code>.</div>
+    <div class="btnrow" id="hysplit"></div>
+    <div class="note" id="note"></div>
+    </details>
+  </aside>
+</main>
+<div class="controls">
+  <div class="timebox">
+    <button id="play" aria-label="Play">▶</button>
+    <input id="hour" type="range" min="1" max="24" value="1" aria-label="Hour">
+    <div id="timelabel"></div>
+  </div>
+  <div class="seg" id="fieldseg" role="group" aria-label="What to show">
+    <button data-v="conc" aria-pressed="true">Hourly mean</button>
+    <button data-v="peak" aria-pressed="false">Peak</button>
+    <button data-v="snap" aria-pressed="false">Snapshot</button>
+    <button data-v="dep" aria-pressed="false">Deposition</button>
+    <button data-v="zones" aria-pressed="false">Levels of concern</button>
+  </div>
+  <div class="seg" id="sysseg" role="group" aria-label="Unit system">
+    <button data-v="us" aria-pressed="false">U.S.</button>
+    <button data-v="metric" aria-pressed="true">Metric</button>
+  </div>
+  <label class="opt">Units
+    <select id="units"><option value="mass">mass /m³</option><option value="ugm3">µg/m³</option><option value="ugft2">µg/m³ · µg/ft²</option><option value="cm3">µg/cm³</option><option value="count">particles</option></select>
+  </label>
+  <label class="opt" id="fixtopwrap" hidden><input type="checkbox" id="fixtop" checked> <span id="fixtoplabel"></span></label>
+  <label class="opt" id="rangewrap">Color scale <input id="decades" type="range" min="2" max="8" value="5" aria-label="Color scale range"> <span id="decout"></span></label>
+  <label class="opt" id="envwrap" hidden><input type="checkbox" id="showEnv"> <span id="envlabel"></span></label>
+  <label class="opt"><input type="checkbox" id="showPuffs" checked> puffs</label>
+  <label class="opt"><input type="checkbox" id="showWind" checked> wind</label>
+  <label class="opt"><input type="checkbox" id="showTrack" checked> path times</label>
+  <label class="opt">Map
+    <select id="basemap">
+      <option value="auto">auto (gray)</option><option value="light">light gray</option>
+      <option value="dark">dark gray</option><option value="topo">topographic</option>
+      <option value="imagery">satellite</option>
+      <option value="none">none</option>
+    </select>
+  </label>
+</div>
+<script>
+const DATA = /*__DATA__*/null;
+(async function () {
+"use strict";
+const M = DATA.meta, GR = DATA.grid, HRS = DATA.hours;
+const $ = (id) => document.getElementById(id);
+// text from the data that goes into innerHTML
+const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+// Embedded in the site: the page around it has the title. Opened on its own: say what it is.
+if (window.top !== window) document.body.classList.add("embedded");
+else if (M.homeUrl) {
+  const sa = $("standalone");
+  sa.innerHTML = `<b>Unofficial estimate, not from the Army or any government agency. Don\u2019t use it to decide if you\u2019re safe.</b> ` +
+    `Full map, summary and sources: <a href="${esc(M.homeUrl)}">${esc(M.homeUrl.replace(/^https?:\/\//, "").replace(/\/$/, ""))}</a>`;
+  sa.hidden = false;
+}
+// Legend footer: what the map shows and that it's unofficial, so a cropped screenshot still says so.
+if (M.homeUrl || M.legendNote) {
+  const ln = $("legnote");
+  const af = M.explosionOpts && M.explosionOpts.airborneFraction;
+  ln.textContent = [M.homeUrl ? "Unofficial estimate" : "", M.legendNote || "",
+    af ? `${fmt(af * 100, 3)}% of the ${M.trackedName || "material"} airborne` : "",
+    M.homeUrl ? M.homeUrl.replace(/^https?:\/\//, "").replace(/\/$/, "") : ""].filter(Boolean).join(" \u00b7 ");
+  ln.hidden = false;
+}
+// On narrow screens move the legend out of the map into a strip right below it.
+{
+  const legend = document.querySelector(".legend"), mq = matchMedia("(max-width: 820px)");
+  const placeLegend = () => {
+    if (mq.matches) $("mapwrap").after(legend); else $("mapwrap").appendChild(legend);
+    legend.classList.toggle("below", mq.matches);
+  };
+  placeLegend();
+  (mq.addEventListener ? mq.addEventListener("change", placeLegend) : mq.addListener(placeLegend));
+}
+// Phones and small tablets: fold the technical panel sections, and on touch screens let one
+// finger scroll the page while two fingers move the map (like embedded Google Maps).
+const narrowMQ = matchMedia("(max-width: 820px)"), coarseMQ = matchMedia("(pointer: coarse)");
+const coop = () => narrowMQ.matches && coarseMQ.matches;
+$("techdetails").open = !narrowMQ.matches;
+$("mapwrap").classList.toggle("coop", coop());
+// Inside the site on a narrow screen, the page around the map sets its height (#h=) and
+// sizes the frame to fit everything, so the whole page scrolls as one.
+const embeddedNarrow = () => window.top !== window && narrowMQ.matches;
+const setMapH = (h) => { if (embeddedNarrow() && h > 0) $("mapwrap").style.height = Math.round(h) + "px"; };
+{ const hm = /(?:^#|&)h=(\d+)/.exec(location.hash); if (hm) setMapH(+hm[1]); }
+if (window.top !== window && window.ResizeObserver) {
+  const tell = () => window.parent.postMessage({ puffHeight: Math.ceil(document.body.getBoundingClientRect().height) }, location.origin);
+  new ResizeObserver(tell).observe(document.body);
+}
+// Unit choice from the page around it: in the URL (#u=us) and by message. The listener is
+// set up before the data is decoded so an early message isn't lost.
+let pendingSys = null, sysReady = false;
+const hu = /(?:^#|&)u=(us|metric)\b/.exec(location.hash);
+const fromParentOk = (e) => e.source === window.parent && e.origin === location.origin;
+window.addEventListener("message", (e) => {
+  if (!fromParentOk(e) || !e.data) return;
+  if (typeof e.data.puffMapH === "number") { setMapH(e.data.puffMapH); return; }
+  if (e.data.puffUnits !== "us" && e.data.puffUnits !== "metric") return;
+  if (sysReady) { if (e.data.puffUnits !== SYS) setSystem(e.data.puffUnits, true); }
+  else pendingSys = e.data.puffUnits;
+});
+const dpr = Math.max(1, window.devicePixelRatio || 1);
+
+// ---------- web-mercator helpers ----------
+const TS = 256;
+const wx = (lon, z) => (lon + 180) / 360 * TS * 2 ** z;
+const wy = (lat, z) => { const s = Math.sin(Math.max(-85.05, Math.min(85.05, lat)) * Math.PI / 180); return (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * TS * 2 ** z; };
+const xlon = (x, z) => x / (TS * 2 ** z) * 360 - 180;
+const ylat = (y, z) => { const n = Math.PI - 2 * Math.PI * y / (TS * 2 ** z); return 180 / Math.PI * Math.atan(Math.sinh(n)); };
+
+// ---------- formatting ----------
+const SUP = { "-": "⁻", "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹" };
+function fmt(v, digits = 2) {
+  if (!isFinite(v)) return "–";
+  if (v === 0) return "0";
+  const a = Math.abs(v);
+  if (a >= 0.01 && a < 1e4) return +v.toPrecision(digits) + "";
+  const e = Math.floor(Math.log10(a)), m = v / 10 ** e;
+  const mm = +m.toPrecision(digits);
+  return (mm === 1 ? "" : mm + "×") + "10" + String(e).split("").map((c) => SUP[c]).join("");
+}
+// Unit system for everything but air/deposition levels (those follow the Units menu):
+// "metric" or "us" (U.S. customary). Shared with the picker page through localStorage.
+// Default: U.S. when the map was built with µg/ft² deposition (--units ugft2), else metric.
+let SYS = M.units === "ugft2" ? "us" : "metric";
+try { const p = Object(JSON.parse(localStorage.getItem("puffmap.prefs") || "{}")); if (p.sys === "us" || p.sys === "metric") SYS = p.sys; } catch (e) {}
+if (hu) SYS = hu[1];
+const US = () => SYS === "us";
+function fmtMass(kg) {
+  if (!kg) return "0";
+  if (US()) {                              // short tons, pounds, ounces; tiny amounts stay metric
+    const lb = kg / 0.45359237;
+    if (Math.abs(lb) >= 2000) return fmt(lb / 2000, 3) + " tons";
+    if (Math.abs(lb) >= 1) return fmt(lb, 3) + " lb";
+    if (Math.abs(lb) * 16 >= 1) return fmt(lb * 16, 3) + " oz";
+  }
+  const u = [["t", 1e-3], ["kg", 1], ["g", 1e3], ["mg", 1e6], ["µg", 1e9], ["ng", 1e12], ["pg", 1e15], ["fg", 1e18]];
+  for (const [n, f] of u) if (Math.abs(kg) * f >= 1) return fmt(kg * f, 3) + " " + n;
+  return fmt(kg * 1e18, 3) + " fg";
+}
+const fmtLen = (m) => (US() ? `${Math.round(m / 0.3048).toLocaleString("en-US")} ft` : `${Math.round(m).toLocaleString("en-US")} m`);
+const fmtDist = (km) => (US() ? `${fmt(km / 1.609344, 3)} mi` : `${fmt(km, 3)} km`);
+const fmtArea = (km2) => (US() ? `${fmt(km2 / 2.58998811, 3)} mi²` : `${fmt(km2, 3)} km²`);
+const fmtSpeed = (ms) => (US() ? `${(ms * 2.23693629).toFixed(1)} mph` : `${ms.toFixed(1)} m/s`);
+const fmtRate = (mmh) => (US() ? `${fmt(mmh / 25.4, 2)} in/h` : `${fmt(mmh, 3)} mm/h`);
+const fmtDens = (kgm3) => (US() ? `${fmt(kgm3 * 0.0624279606, 3)} lb/ft³` : `${fmt(kgm3, 4)} kg/m³`);
+const fmtSmallLen = (mm) => (US() ? `${fmt(mm / 25.4, 2)} in` : `${fmt(mm, 3)} mm`);
+// unit text written by the Python side ("9500 kg/m3", "5 m/s")
+const usText = (t) => (!US() || !t ? t : t
+  .replace(/([\d.]+) kg\/m3/g, (_, v) => fmtDens(+v))
+  .replace(/([\d.]+) m\/s/g, (_, v) => fmtSpeed(+v)));
+function pad(n) { return String(n).padStart(2, "0"); }
+function fmtTime(iso, offMin) {
+  const d = new Date(new Date(iso).getTime() + offMin * 60000);
+  const s = `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+  if (!offMin) return s + " UTC";
+  const sg = offMin < 0 ? "−" : "+", a = Math.abs(offMin);
+  return s + ` (UTC${sg}${pad(Math.floor(a / 60))}:${pad(a % 60)})`;
+}
+const compass = (d) => ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"][Math.round(d / 22.5) % 16];
+
+// ---------- decode grids ----------
+// Small zlib inflate (RFC 1950/1951) for browsers without DecompressionStream.
+// After Mark Adler's puff.c. Input: Uint8Array of zlib data. Output: Uint8Array.
+function inflateZlib(src) {
+  let pos = 2, bitbuf = 0, bitcnt = 0, out = new Uint8Array(Math.max(1024, src.length * 4)), n = 0;
+  const grow = (k) => { if (n + k > out.length) { const o = new Uint8Array(Math.max(out.length * 2, n + k)); o.set(out); out = o; } };
+  const bits = (k) => {
+    while (bitcnt < k) { if (pos >= src.length) throw new Error("inflate: truncated"); bitbuf |= src[pos++] << bitcnt; bitcnt += 8; }
+    const v = bitbuf & ((1 << k) - 1); bitbuf >>>= k; bitcnt -= k; return v;
+  };
+  const table = (lens, count) => {
+    const counts = new Uint16Array(16), offs = new Uint16Array(16), syms = new Uint16Array(count);
+    for (let i = 0; i < count; i++) counts[lens[i]]++;
+    counts[0] = 0;
+    for (let i = 1; i < 16; i++) offs[i] = offs[i - 1] + counts[i - 1];
+    for (let i = 0; i < count; i++) if (lens[i]) syms[offs[lens[i]]++] = i;
+    return { counts, syms };
+  };
+  const decode = (h) => {
+    let code = 0, first = 0, index = 0;
+    for (let len = 1; len < 16; len++) {
+      code |= bits(1);
+      const c = h.counts[len];
+      if (code - c < first) return h.syms[index + (code - first)];
+      index += c; first = (first + c) << 1; code <<= 1;
+    }
+    throw new Error("inflate: bad code");
+  };
+  const LB = [3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258];
+  const LE = [0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0];
+  const DB = [1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577];
+  const DE = [0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13];
+  let fixed = null;
+  const codes = (lit, dist) => {
+    for (;;) {
+      let s = decode(lit);
+      if (s < 256) { grow(1); out[n++] = s; continue; }
+      if (s === 256) return;
+      s -= 257;
+      const len = LB[s] + bits(LE[s]);
+      const ds = decode(dist), d = DB[ds] + bits(DE[ds]);
+      if (d > n) throw new Error("inflate: distance too far");
+      grow(len);
+      for (let i = 0; i < len; i++, n++) out[n] = out[n - d];
+    }
+  };
+  let last;
+  do {
+    last = bits(1);
+    const type = bits(2);
+    if (type === 0) {
+      bitbuf = 0; bitcnt = 0;
+      const len = src[pos] | (src[pos + 1] << 8); pos += 4;
+      grow(len); out.set(src.subarray(pos, pos + len), n); n += len; pos += len;
+    } else if (type === 1) {
+      if (!fixed) {
+        const l = new Uint8Array(288);
+        l.fill(8, 0, 144); l.fill(9, 144, 256); l.fill(7, 256, 280); l.fill(8, 280, 288);
+        fixed = [table(l, 288), table(new Uint8Array(30).fill(5), 30)];
+      }
+      codes(fixed[0], fixed[1]);
+    } else if (type === 2) {
+      const nlen = bits(5) + 257, ndist = bits(5) + 1, ncode = bits(4) + 4;
+      const ORD = [16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15];
+      const cl = new Uint8Array(19);
+      for (let i = 0; i < ncode; i++) cl[ORD[i]] = bits(3);
+      const ch = table(cl, 19), lens = new Uint8Array(nlen + ndist);
+      for (let i = 0; i < nlen + ndist;) {
+        const s = decode(ch);
+        if (s < 16) { lens[i++] = s; continue; }
+        let v = 0, r;
+        if (s === 16) { if (!i) throw new Error("inflate: bad repeat"); v = lens[i - 1]; r = 3 + bits(2); }
+        else if (s === 17) r = 3 + bits(3);
+        else r = 11 + bits(7);
+        while (r--) lens[i++] = v;
+      }
+      codes(table(lens, nlen), table(lens.subarray(nlen), ndist));
+    } else throw new Error("inflate: bad block type");
+  } while (!last);
+  return out.subarray(0, n);
+}
+async function inflate(b64) {
+  const bin = atob(b64), bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  if (typeof DecompressionStream !== "function") return inflateZlib(bytes);   // older browsers
+  const ds = new DecompressionStream("deflate");
+  const buf = await new Response(new Blob([bytes]).stream().pipeThrough(ds)).arrayBuffer();
+  return new Uint8Array(buf);
+}
+const FIELDS = {};
+for (const k of Object.keys(GR)) if (GR[k] && GR[k].data) FIELDS[k] = { ...GR[k], q: await inflate(GR[k].data) };
+$("loading").remove();
+const NX = GR.nx, NY = GR.ny, NCELL = NX * NY;
+const qToLog = (F, q) => F.lo + (q - 1) / 254 * (F.hi - F.lo);
+
+// ---------- static text ----------
+$("title").textContent = M.title;
+document.title = "Puff Dispersal Map";
+const BINS = M.bins, EX = M.explosion;
+const ENS = M.ensemble;
+const ENS_TEXT = !ENS ? "" : ENS.models
+  ? `${ENS.models.length} weather models (${esc(ENS.models.join(", "))}; shown: ${esc(ENS.shown)})` +
+    (ENS.rotations ? `, each turned up to ±${ENS.spread}°` : `, each allowed ±${ENS.spread}° of direction error`)
+  : `${ENS.n} runs with the wind turned up to ±${ENS.spread}°`;
+const TN = M.trackedName, Cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+const AIR = TN ? `${Cap(TN)} in air` : "Air concentration", DEPN = TN ? `${Cap(TN)} deposition` : "Deposition";
+const totalCount = BINS.reduce((t, b) => t + M.releaseMass * b.frac / b.mass, 0);
+const sizeText = () => (BINS.length === 1 ? `${fmtMass(BINS[0].mass)} particles (${fmt(BINS[0].d * 1e6, 3)} µm)`
+  : `${BINS.length} particle sizes (${fmt(BINS[0].d * 1e6, 2)}–${fmt(BINS[BINS.length - 1].d * 1e6, 2)} µm)`);
+const energyTxt = (mjkg) => (US() ? `${fmt(mjkg * 429.922614, 3)} BTU/lb` : `${mjkg} MJ/kg`);
+function renderStatic() {
+$("subtitle").textContent = (EX
+  ? `Explosion ${fmtTime(M.start, M.tzOffsetMin)} · ${fmtMass(EX.mass)} at ${energyTxt(EX.specificEnergy)} (${fmtMass(EX.tntKg)} TNT eq) · ${fmtMass(M.releaseMass)}${TN ? " of " + TN : ""} lofted as ${sizeText()}`
+  : `Release ${fmtTime(M.start, M.tzOffsetMin)} · ${fmtMass(M.releaseMass)} of ${sizeText()}`) +
+  ` · ${M.hours} h · ${M.weather}`;
+const rows = (r) => r.map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join("");
+if (EX) {
+  $("explhead").hidden = false;
+  const o = M.explosionOpts;
+  $("expl").innerHTML = rows([
+    ["Material", fmtMass(EX.mass)],
+    ["Specific energy", energyTxt(EX.specificEnergy)],
+    ["Energy released", US() ? `${fmt(EX.energyJ / 1.05505585e9, 3)} MMBtu` : `${fmt(EX.energyJ / 1e9, 3)} GJ`],
+    ["TNT equivalent", fmtMass(EX.tntKg)],
+    ["Charges", (EX.shots || 1) > 1 ? `${EX.shots} × ${fmtMass(EX.mass / EX.shots)}` : "1"],
+    ["Confinement", esc(EX.confinement || "open")],
+    ["Cloud top (Church)", fmtLen(EX.cloudTop) + (EX.churchFactor && EX.churchFactor !== 1 ? ` (× ${EX.churchFactor})` : "")],
+    ["Initial cloud", `${o.layers} layers, σ<sub>y</sub> ${fmtLen(o.radiusFrac * EX.cloudTop)}`],
+  ].concat(TN ? [[`${esc(Cap(TN))} in the material`, `${fmt(M.trackedFraction * 100, 3)}%`]] : [],
+    [[`Share of ${esc(TN || "material")} lofted`, `${fmt(o.airborneFraction * 100, 3)}%`]]));
+}
+$("release").innerHTML = rows([
+  ["Location", `${M.lat.toFixed(4)}, ${M.lon.toFixed(4)}`],
+  ["Ground elevation", M.elevation != null ? fmtLen(M.elevation) : "–"],
+  ["Height", EX ? `0–${fmtLen(EX.cloudTop)}` : fmtLen(M.releaseHeight)],
+  [TN ? `${esc(Cap(TN))} lofted` : "Particulate mass", fmtMass(M.releaseMass)],
+  ["Duration", M.releaseDuration > 0 ? `${M.releaseDuration} h` : "instantaneous"],
+  ["Particle count", fmt(totalCount, 3)],
+  ["Density", fmtDens(M.density)],
+]);
+if (M.spray) {
+  const sp = M.spray;
+  $("release").innerHTML += rows([
+    ["Water spray", US() ? `${fmt(sp.flowLpm / 3.78541178, 3)} gal/min (${fmtRate(sp.fluxMmH)})` : `${fmt(sp.flowLpm, 3)} L/min (${fmtRate(sp.fluxMmH)})`],
+    ["Spray zone", `r ${fmtLen(sp.radius)}, to ${fmtLen(sp.height)}, ${fmtSmallLen(sp.dropMm)} drops`],
+    ["Spray timing", `+${sp.startMin} to +${sp.startMin + sp.durationMin} min`],
+  ]);
+}
+$("bins").innerHTML = `<dt class="muted">diameter · density</dt><dd class="muted">share · deposition speed</dd>` + rows(BINS.map((b) => [
+  `${fmt(b.d * 1e6, 3)} µm · ${US() ? fmtDens(b.rho || M.density) : fmt((b.rho || M.density) / 1000, 2) + " g/cm³"}`,
+  `${fmt(b.frac * 100, 3)}% · ${US() ? fmt(b.vd * 39.3700787, 2) + " in/s" : fmt(b.vd * 100, 2) + " cm/s"}`]));
+$("sizenote").textContent = (M.sizeNote ? `Sizes: ${usText(M.sizeNote)}. ` : "") + (M.releaseNote ? `Release: ${usText(M.releaseNote)}. ` : "") +
+  (M.deposition ? `Deposition speed shown for a wind of ${fmtSpeed(5)}: ${usText(M.deposition)}.` : "");
+$("note").innerHTML =
+  `Gaussian puff model: Pasquill–Gifford stability, Briggs rural σ curves, ` +
+  (M.nLev ? `winds from ${fmtLen(10)}, ${fmtLen(M.zUp)}, and ${M.nLev} pressure levels (${esc(M.levelNames.join(", "))}), ` : `winds blended from ${fmtLen(10)} to ${fmtLen(M.zUp)} then power law, `) +
+  `tilted-puff settling, ` +
+  (EX ? `explosion cloud height from the Church formula (H = 76·W<sup>¼</sup>, W in lb TNT of one charge), ` : "") +
+  (EX && EX.confinement && EX.confinement !== "open" ? `${esc(EX.confinementNote)}, ` : "") +
+  (M.ensemble ? `uncertainty view from ${ENS_TEXT}, ` : "") +
+  `dry deposition by ${esc(usText(M.deposition) || "settling plus a fixed speed")}, wet deposition, both with source depletion, ` +
+  (M.residualLayer ? `a residual layer that holds the cloud above a falling mixing height off the ground, ` : "") +
+  `${GR.nx}×${GR.ny} grid of ${fmtDist(GR.dx / 1000)} cells. ` +
+  `Air concentration is at ground level, as the hourly mean, the highest ${M.dt / 60}-minute value within the hour, or the cloud as it stands at the end of the hour; deposition is cumulative since release. ` +
+  `Screening estimate only. Weather: ${esc(M.weather)} via Open-Meteo. Generated ${esc(M.generated.replace("T", " ").replace("+00:00", " UTC"))}.`;
+}
+$("hour").max = HRS.length;
+renderStatic();
+
+// ---------- state ----------
+const S = {
+  hour: 1, field: "conc", units: "mass", decades: 5, puffs: true, wind: true, base: "auto", playing: false,
+  lat: M.lat, lon: M.lon, z: 8,
+  zoneMetric: M.zoneMetric || "m60", locs: M.loc.map((l) => l.value), track: true, env: false,
+  dlocs: M.depLoc ? M.depLoc.map((l) => l.value) : [1e-6, 1e-5, 1e-4],
+  fixTop: !!M.scaleMax, fixMin: !!M.scaleMin, decades: M.decades || 5,
+};
+S.units = M.units || "mass";
+try { const s = Object(JSON.parse(localStorage.getItem("puffmap.prefs") || "{}")); if (["auto", "light", "dark", "topo", "imagery", "none"].includes(s.base)) S.base = s.base; } catch (e) {}
+
+// ---------- color ramps (one hue, sequential) ----------
+const RAMPS = {
+  conc: { light: ["#fde3d4", "#f9b896", "#f28c5c", "#eb6834", "#c94e1f", "#9c3913", "#6e270b"],
+          dark:  ["#5a200a", "#8a3412", "#bd4a1d", "#d95926", "#f0814f", "#f7ad85", "#fdd9c4"] },
+  dep:  { light: ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"],
+          dark:  ["#0d366b", "#184f95", "#256abf", "#3987e5", "#6da7ec", "#9ec5f4", "#cde2fb"] },
+};
+RAMPS.peak = RAMPS.conc; RAMPS.snap = RAMPS.conc;
+const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+const isDark = () => {
+  const t = document.documentElement.getAttribute("data-theme");
+  if (t) return t === "dark";
+  return matchMedia("(prefers-color-scheme: dark)").matches;
+};
+function rampLUT(field) {
+  const stops = RAMPS[field][isDark() ? "dark" : "light"].map(hex), lut = new Uint8ClampedArray(256 * 4);
+  for (let i = 0; i < 256; i++) {
+    const f = i / 255, p = f * (stops.length - 1), k = Math.min(stops.length - 2, Math.floor(p)), t = p - k;
+    for (let c = 0; c < 3; c++) lut[i * 4 + c] = stops[k][c] + (stops[k + 1][c] - stops[k][c]) * t;
+    lut[i * 4 + 3] = 255 * (0.35 + 0.6 * f);
+  }
+  return lut;
+}
+
+// ---------- units ----------
+function unitInfo() {
+  const F = FIELDS[S.field], area = S.field === "dep" ? "m²" : "m³";
+  if (S.units === "count") return { factor: 1, label: `particles/${area}` };
+  if (S.units === "cm3") return S.field === "dep" ? { factor: 1e5, label: "µg/cm²" } : { factor: 1e3, label: "µg/cm³" };
+  if (S.units === "ugm3") return S.field === "dep" ? { factor: 1e9, label: "µg/m²" } : { factor: 1e9, label: "µg/m³" };
+  if (S.units === "ugft2") return S.field === "dep" ? { factor: UGFT2, label: "µg/ft²" } : { factor: 1e9, label: "µg/m³" };
+  const maxv = S.field !== "dep" && S.fixTop && M.scaleMax ? Math.max(F.max, M.scaleMax) : F.max;
+  const u = [["g", 1e3], ["mg", 1e6], ["µg", 1e9], ["ng", 1e12], ["pg", 1e15], ["fg", 1e18]];
+  let pick = u[u.length - 1];
+  for (const x of u) if (maxv * x[1] >= 1) { pick = x; break; }
+  return { factor: pick[1], label: `${pick[0]}/${area}` };
+}
+
+const UGFT2 = 1e9 * 0.09290304;          // kg/m2 -> µg/ft2
+// With the uncertainty view on, use the field holding the highest value of any ensemble member.
+const eKey = (f) => (S.env && FIELDS["env_" + f] ? "env_" + f : f);
+const fkey = (f) => (S.units === "count" && FIELDS[f + "_n"] ? f + "_n" : eKey(f));
+// value in kg/m3 (air) or kg/m2 (deposition) -> text in the selected units
+function fmtVal(v, field, vCount) {
+  const area = field === "dep" ? "m²" : "m³";
+  if (S.units === "count") return `${fmt(vCount, 3)} particles/${area}`;
+  if (S.units === "cm3") return field === "dep" ? `${fmt(v * 1e5, 3)} µg/cm²` : `${fmt(v * 1e3, 3)} µg/cm³`;
+  if (S.units === "ugm3") return field === "dep" ? `${fmt(v * 1e9, 3)} µg/m²` : `${fmt(v * 1e9, 3)} µg/m³`;
+  if (S.units === "ugft2") return field === "dep" ? `${fmt(v * UGFT2, 3)} µg/ft²` : `${fmt(v * 1e9, 3)} µg/m³`;
+  return `${fmtMass(v)}/${area}`;
+}
+const locText = (v) => (S.units === "cm3" ? `${fmt(v * 1e3, 3)} µg/cm³` : S.units === "ugm3" || S.units === "ugft2" ? `${fmt(v * 1e9, 3)} µg/m³` : `${fmt(v * 1e6, 3)} mg/m³`);
+const depText = (v) => (S.units === "ugft2" ? `${fmt(v * UGFT2, 3)} µg/ft²` : S.units === "cm3" ? `${fmt(v * 1e5, 3)} µg/cm²` : S.units === "ugm3" ? `${fmt(v * 1e9, 3)} µg/m²` : `${fmt(v * 1e6, 3)} mg/m²`);
+
+// ---------- overlay image ----------
+// The model grid is evenly spaced in latitude; re-sample its rows onto an evenly
+// spaced Web-Mercator axis once per frame so the map can draw it in one image.
+const NW = Math.min(2048, NY * 3);
+const warp = document.createElement("canvas"); warp.width = NX; warp.height = NW;
+const offCtx = warp.getContext("2d");
+const warpRow = new Int32Array(NW);
+{
+  const yN = wy(GR.north, 0), yS = wy(GR.south, 0);
+  for (let r = 0; r < NW; r++) {
+    const lat = ylat(yN + (r + 0.5) / NW * (yS - yN), 0);
+    warpRow[r] = Math.max(0, Math.min(NY - 1, Math.floor((GR.north - lat) / (GR.north - GR.south) * NY)));
+  }
+}
+let overlayKey = "";
+const ZONE_COLORS = [[250, 178, 25], [236, 131, 90], [208, 59, 59]];   // status: warning, serious, critical
+const ZONE_NAMES = ["Yellow", "Orange", "Red"];
+const cumCache = {};
+function cumulativeQ(metric, hour) {      // max over hours 1..hour, per cell
+  const key = metric + "|" + hour;
+  if (cumCache[key]) return cumCache[key];
+  const F = FIELDS[metric], out = hour > 1 ? cumulativeQ(metric, hour - 1).slice() : new Uint8Array(NCELL);
+  const base = (hour - 1) * NCELL;
+  for (let i = 0; i < NCELL; i++) { const q = F.q[base + i]; if (q > out[i]) out[i] = q; }
+  return (cumCache[key] = out);
+}
+function buildZones() {
+  const isDep = S.zoneMetric === "dep", name = eKey(S.zoneMetric);
+  const F = FIELDS[name], cq = cumulativeQ(name, S.hour);
+  const levels = isDep ? S.dlocs : S.locs, meta = (isDep ? M.depLoc : M.loc) || [], txt = isDep ? depText : locText;
+  const px = new Uint8ClampedArray(NCELL * 4);
+  const thr = levels.map((v) => (v > 0 ? Math.log10(v) : Infinity));
+  const cnt = [0, 0, 0], far = [0, 0, 0];
+  const si = (M.lon - GR.west) / (GR.east - GR.west) * NX, sj = (GR.north - M.lat) / (GR.north - GR.south) * NY;
+  for (let i = 0; i < NCELL; i++) {
+    const q = cq[i]; if (!q) continue;
+    const lv = qToLog(F, q);
+    let lev = -1;
+    for (let k = 0; k < 3; k++) if (lv >= thr[k]) lev = Math.max(lev, k);
+    if (lev < 0) continue;
+    const d = Math.hypot((i % NX) + 0.5 - si, Math.floor(i / NX) + 0.5 - sj) * GR.dx;
+    for (let k = 0; k < 3; k++) if (lv >= thr[k]) { cnt[k]++; if (d > far[k]) far[k] = d; }
+    const c = ZONE_COLORS[lev];
+    px[i * 4] = c[0]; px[i * 4 + 1] = c[1]; px[i * 4 + 2] = c[2]; px[i * 4 + 3] = 150;
+  }
+  const area = (n) => n * GR.dx * GR.dx / 1e6;
+  const rowsZ = [2, 1, 0].map((k) =>
+    `<tr><td><span class="zsw" style="background:rgb(${ZONE_COLORS[k]})"></span>${ZONE_NAMES[k]} ≥ ${txt(levels[k])}<div class="muted" style="font-size:11.5px">${esc((meta[k] || {}).label || "")}</div></td>` +
+    `<td class="n">${cnt[k] ? fmtArea(area(cnt[k])) : "–"}</td><td class="n">${cnt[k] ? fmtDist(far[k] / 1000) : "–"}</td></tr>`).join("");
+  $("zonetab").innerHTML = `<tr><th>Level of concern</th><th class="n">Area</th><th class="n">Reaches</th></tr>` + rowsZ;
+  $("legtitle").textContent = `Levels of concern, ${{ m60: "max 60-min average", peak: "max short-term peak", dep: "cumulative deposition" }[S.zoneMetric]}`;
+  $("legzones").innerHTML = [2, 1, 0].map((k) =>
+    `<div class="lz"><span class="zsw" style="background:rgb(${ZONE_COLORS[k]})"></span><b>${ZONE_NAMES[k]}</b>≥ ${txt(levels[k])}</div>`).join("");
+  return px;
+}
+function buildOverlay() {
+  const key = [S.hour, S.field, S.units, S.decades, isDark(), S.zoneMetric, S.locs.join(","), S.dlocs.join(","), S.fixTop, S.fixMin, S.env].join("|");
+  if (key === overlayKey) return;
+  overlayKey = key;
+  const zones = S.field === "zones";
+  const envOn = S.env && !!FIELDS["env_" + (zones ? S.zoneMetric : S.field)] && (zones || S.units !== "count");
+  $("legenv").hidden = !envOn;
+  if (envOn) $("legenv").textContent = ENS.models ? `Highest value across ${ENS.models.length} weather models; other paths dashed` : `Highest value of ${ENS.n} runs with the wind turned up to ±${ENS.spread}°`;
+  $("legbar").style.display = zones ? "none" : ""; $("legticks").style.display = zones ? "none" : "";
+  if (zones) $("nodata").hidden = true;
+  $("rangewrap").hidden = zones;                 // threat zones use fixed levels
+  $("legzones").hidden = !zones;
+  if (zones) { putWarped(buildZones()); return; }
+  const F = FIELDS[fkey(S.field)], lut = rampLUT(S.field);
+  const px = new Uint8ClampedArray(NCELL * 4);
+  const air = S.field !== "dep" && S.units !== "count";
+  const useMin = air && S.fixMin && M.scaleMin, fixed = air && !useMin && S.fixTop && M.scaleMax;
+  const base = (S.hour - 1) * NCELL;
+  let top = fixed ? Math.max(F.hi, Math.log10(M.scaleMax)) : F.hi, floor = top - S.decades;
+  if (useMin) { floor = Math.log10(M.scaleMin); top = floor + S.decades; }
+  let shown = 0, frameMax = -Infinity;
+  for (let i = 0; i < NCELL; i++) {
+    const q = F.q[base + i];
+    if (!q) continue;
+    const lv = qToLog(F, q);
+    if (lv > frameMax) frameMax = lv;
+    if (lv < floor) continue;
+    shown++;
+    const f = Math.min(255, Math.max(0, Math.round((lv - floor) / (top - floor) * 255)));
+    px[i * 4] = lut[f * 4]; px[i * 4 + 1] = lut[f * 4 + 1]; px[i * 4 + 2] = lut[f * 4 + 2]; px[i * 4 + 3] = lut[f * 4 + 3];
+  }
+  putWarped(px);
+  drawLegend(lut, floor, top);
+  const nd = $("nodata");
+  nd.hidden = !(useMin && shown === 0);
+  if (!nd.hidden) {
+    const h = HRS[S.hour - 1];
+    const [what, vmax] = { peak: ["short-term peak", h.pmax], snap: ["end-of-hour value", h.smax] }[S.field] || ["hourly mean", h.cmax];   // exact, not color-quantized
+    nd.innerHTML = `<b>Nothing reaches the ${fmtVal(M.scaleMin, "conc")} minimum this hour.</b> ` +
+      (vmax > 0 ? `Highest ${what}: ${fmtVal(vmax, "conc")} (${fmt(vmax / M.scaleMin * 100, 2)}% of the minimum).` : "No airborne material on the map.");
+  }
+}
+function putWarped(px) {
+  const img = offCtx.createImageData(NX, NW), row = NX * 4;
+  for (let r = 0; r < NW; r++) img.data.set(px.subarray(warpRow[r] * row, (warpRow[r] + 1) * row), r * row);
+  offCtx.putImageData(img, 0, 0);
+}
+function drawLegend(lut, floor, top) {
+  const c = $("legbar"), x = c.getContext("2d"), im = x.createImageData(256, 12);
+  for (let i = 0; i < 256; i++) for (let r = 0; r < 12; r++) {
+    const o = (r * 256 + i) * 4; im.data[o] = lut[i * 4]; im.data[o + 1] = lut[i * 4 + 1]; im.data[o + 2] = lut[i * 4 + 2]; im.data[o + 3] = 255;
+  }
+  x.putImageData(im, 0, 0);
+  const U = unitInfo(), shift = Math.log10(U.factor);
+  $("legtitle").textContent = { conc: `${AIR}, hourly mean`, peak: `${AIR}, peak in hour`, snap: `${AIR}, at the end of the hour`, dep: `${DEPN}, cumulative` }[S.field] + ` (${U.label})`;
+  const lo = floor + shift, hi = top + shift, ticks = [];
+  const step = S.decades > 5 ? 2 : 1;
+  for (let e = Math.ceil(lo); e <= Math.floor(hi); e += step) ticks.push(e);
+  let html = ticks.filter((e) => hi - e > 0.45 || e === Math.floor(hi) && hi - e < 0.05).map((e) =>
+    `<span style="left:${((e - lo) / (hi - lo) * 100).toFixed(1)}%">${fmt(10 ** e, 1)}</span>`).join("");
+  if (S.fixMin && M.scaleMin && S.field !== "dep" && S.units !== "count" && Math.ceil(lo) - lo >= 0.05)   // label the minimum
+    html = `<span style="left:0;transform:none;font-weight:600;color:var(--ink)">${fmt(10 ** lo, 2)}</span>` + html;
+  if (!ticks.length || hi - ticks[ticks.length - 1] >= 0.05)   // label the top of the scale
+    html += `<span style="left:100%;transform:translateX(-100%);font-weight:600;color:var(--ink)">${fmt(10 ** hi, 2)}</span>`;
+  $("legticks").innerHTML = html;
+  // the slider's label shows the range it sets, in the units on screen
+  const rangeTxt = `${plainNum(10 ** lo)} – ${plainNum(10 ** hi)} ${U.label}`;
+  $("decout").textContent = rangeTxt;
+  $("decades").setAttribute("aria-valuetext", rangeTxt);
+}
+// 0.15, 1.5, 1,500, 15,000: plain numbers for labels people read
+function plainNum(v) {
+  if (!isFinite(v) || v <= 0) return "0";
+  if (v < 1) return String(+v.toPrecision(2));
+  return (+v.toPrecision(v < 1e3 ? 3 : 2)).toLocaleString("en-US");
+}
+
+// ---------- web-mercator map ----------
+const cv = $("map"), ctx = cv.getContext("2d");
+let W = 0, H = 0;
+const toScreen = (lat, lon) => [wx(lon, S.z) - wx(S.lon, S.z) + W / 2, wy(lat, S.z) - wy(S.lat, S.z) + H / 2];
+const toLatLon = (x, y) => [ylat(wy(S.lat, S.z) + y - H / 2, S.z), xlon(wx(S.lon, S.z) + x - W / 2, S.z)];
+const mPerPx = (lat) => 156543.034 * Math.cos(lat * Math.PI / 180) / 2 ** S.z;
+
+function resize() {
+  const r = cv.getBoundingClientRect();
+  W = r.width; H = r.height;
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+  draw();
+}
+function fit(bounds) {
+  const [n, s, w, e] = bounds;
+  for (let z = 18; z >= 1; z -= 0.25) {
+    if ((wx(e, z) - wx(w, z)) < W * 0.86 && (wy(s, z) - wy(n, z)) < H * 0.86) {
+      S.z = z; S.lat = ylat((wy(n, z) + wy(s, z)) / 2, z); S.lon = (w + e) / 2; return;
+    }
+  }
+  S.z = 1;
+}
+function plumeBounds() {
+  let n = M.lat, s = M.lat, w = M.lon, e = M.lon;
+  for (const h of HRS) for (const p of h.puffs) {
+    if (p[3] < 0.01) continue;
+    n = Math.max(n, p[0]); s = Math.min(s, p[0]); w = Math.min(w, p[1]); e = Math.max(e, p[1]);
+  }
+  const padLat = Math.max((n - s) * 0.15, 0.02), padLon = Math.max((e - w) * 0.15, 0.02);
+  return [Math.min(GR.north, n + padLat), Math.max(GR.south, s - padLat), Math.max(GR.west, w - padLon), Math.min(GR.east, e + padLon)];
+}
+
+const tiles = new Map();
+const ESRI = (svc) => (z, x, y) => `https://server.arcgisonline.com/ArcGIS/rest/services/${svc}/MapServer/tile/${z}/${y}/${x}`;
+const ESRI_ATTR = 'Tiles © <a href="https://www.esri.com" target="_blank" rel="noopener">Esri</a> and its data providers, © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
+const BASEMAPS = {
+  light: { layers: [ESRI("Canvas/World_Light_Gray_Base"), ESRI("Canvas/World_Light_Gray_Reference")], max: 16, attr: ESRI_ATTR },
+  dark: { layers: [ESRI("Canvas/World_Dark_Gray_Base"), ESRI("Canvas/World_Dark_Gray_Reference")], max: 16, attr: ESRI_ATTR },
+  topo: { layers: [ESRI("World_Topo_Map")], max: 19, attr: ESRI_ATTR },
+  imagery: { layers: [ESRI("World_Imagery"), ESRI("Reference/World_Boundaries_and_Places")], max: 19, attr: ESRI_ATTR },
+};
+function baseStyle() { return S.base === "auto" ? (isDark() ? "dark" : "light") : S.base; }
+function tileImg(url) {
+  let t = tiles.get(url);
+  if (!t) {
+    t = new Image();
+    t.onload = () => schedule(); t.onerror = () => { t.failed = true; };
+    t.src = url;
+    tiles.set(url, t);
+    if (tiles.size > 800) tiles.delete(tiles.keys().next().value);
+  }
+  return t;
+}
+function drawTiles() {
+  const bm = BASEMAPS[baseStyle()];
+  $("attrib").innerHTML = (bm ? bm.attr + " · " : "") + "Weather: Open-Meteo";
+  if (!bm) return;
+  const tz = Math.max(0, Math.min(bm.max, Math.round(S.z))), sc = 2 ** (S.z - tz), n = 2 ** tz;
+  const cx = wx(S.lon, tz), cy = wy(S.lat, tz), size = TS * sc;
+  const x0 = Math.floor((cx - W / 2 / sc) / TS), x1 = Math.floor((cx + W / 2 / sc) / TS);
+  const y0 = Math.max(0, Math.floor((cy - H / 2 / sc) / TS)), y1 = Math.min(n - 1, Math.floor((cy + H / 2 / sc) / TS));
+  bm.layers.forEach((layer, li) => {
+    for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) {
+      const wxT = ((tx % n) + n) % n;
+      const t = tileImg(layer(tz, wxT, ty));
+      const sx = (tx * TS - cx) * sc + W / 2, sy = (ty * TS - cy) * sc + H / 2;
+      if (t.complete && t.naturalWidth) ctx.drawImage(t, sx, sy, size + 0.5, size + 0.5);
+      else if (tz > 0 && li === 0) { // show a cached parent tile while this one loads
+        const p = tiles.get(layer(tz - 1, wxT >> 1, ty >> 1));
+        if (p && p.complete && p.naturalWidth) {
+          const hs = p.naturalWidth / 2;
+          ctx.drawImage(p, (wxT & 1) * hs, (ty & 1) * hs, hs, hs, sx, sy, size + 0.5, size + 0.5);
+        }
+      }
+    }
+  });
+}
+function drawOverlay() {
+  buildOverlay();
+  const [xw, yn] = toScreen(GR.north, GR.west), [xe, ys] = toScreen(GR.south, GR.east);
+  ctx.save();
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(warp, xw, yn, xe - xw, ys - yn);
+  ctx.restore();
+}
+function arrow(x, y, dx, dy, color, width) {
+  const L = Math.hypot(dx, dy); if (L < 2) return;
+  const ux = dx / L, uy = dy / L, hl = Math.min(7, L * 0.4);
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width; ctx.lineCap = "round";
+  ctx.beginPath(); ctx.moveTo(x - dx / 2, y - dy / 2); ctx.lineTo(x + dx / 2 - ux * hl * 0.6, y + dy / 2 - uy * hl * 0.6); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x + dx / 2, y + dy / 2);
+  ctx.lineTo(x + dx / 2 - ux * hl - uy * hl * 0.5, y + dy / 2 - uy * hl + ux * hl * 0.5);
+  ctx.lineTo(x + dx / 2 - ux * hl + uy * hl * 0.5, y + dy / 2 - uy * hl - ux * hl * 0.5);
+  ctx.closePath(); ctx.fill();
+}
+function draw() {
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.fillStyle = getComputedStyle(document.body).getPropertyValue("--map-bg"); ctx.fillRect(0, 0, W, H);
+  drawTiles();
+  drawOverlay();
+  const ink = isDark() ? "rgba(240,239,234," : "rgba(29,29,27,";
+  const h = HRS[S.hour - 1];
+  if (S.wind) for (const [la, lo, u, v] of h.wind) {
+    const [x, y] = toScreen(la, lo);
+    if (x < -20 || y < -20 || x > W + 20 || y > H + 20) continue;
+    arrow(x, y, u * 5, -v * 5, ink + "0.55)", 2);
+  }
+  // path of the cloud's center: traveled part dark, the rest faint
+  const track = [{ p: toScreen(M.lat, M.lon), i: -1 }];
+  HRS.forEach((hh, i) => { if (hh.centroid) track.push({ p: toScreen(...hh.centroid), i }); });
+  const stroke = (seg, alpha) => {
+    if (seg.length < 2) return;
+    ctx.lineWidth = 2; ctx.strokeStyle = ink + alpha + ")"; ctx.setLineDash([5, 4]); ctx.beginPath();
+    seg.forEach(({ p: [x, y] }, k) => (k ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.stroke(); ctx.setLineDash([]);
+  };
+  const done = track.filter((t) => t.i < S.hour);
+  stroke(done, "0.75");
+  if (S.track) stroke(track.slice(done.length - 1), "0.28");
+  if (S.env && M.ensemble) for (const tr of M.ensemble.tracks)   // other wind directions
+    stroke([{ p: toScreen(M.lat, M.lon) }].concat(tr.filter(Boolean).map((c) => ({ p: toScreen(...c) }))), "0.2");
+  let pts = done.map((t) => t.p);
+  if (S.puffs) {
+    for (const [la, lo, sy, f] of h.puffs) {
+      const [x, y] = toScreen(la, lo), r = sy / mPerPx(la);
+      if (x < -r || y < -r || x > W + r || y > H + r) continue;
+      const a = 0.25 + 0.6 * Math.min(1, Math.sqrt(f));
+      if (r > 5) { ctx.strokeStyle = ink + (0.18 * a).toFixed(3) + ")"; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.stroke(); }
+      ctx.fillStyle = ink + a.toFixed(3) + ")"; ctx.beginPath(); ctx.arc(x, y, 2.2, 0, 7); ctx.fill();
+    }
+  }
+  const last = pts[pts.length - 1];
+  if (pts.length > 1) { ctx.fillStyle = isDark() ? "#f0efea" : "#1d1d1b"; ctx.strokeStyle = isDark() ? "#1f1f1d" : "#fff"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(last[0], last[1], 5, 0, 7); ctx.fill(); ctx.stroke(); }
+  const [sx, sy] = toScreen(M.lat, M.lon);
+  ctx.lineWidth = 2; ctx.strokeStyle = isDark() ? "#1f1f1d" : "#fff"; ctx.fillStyle = "#e34948";
+  ctx.beginPath(); ctx.arc(sx, sy, 7, 0, 7); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(sx, sy, 2.4, 0, 7); ctx.fill();
+  if (S.track) drawTrackLabels(track, ink);
+}
+// Hour labels along the center path: local clock time when the cloud's center is there.
+const clock = (iso) => fmtTime(iso, M.tzOffsetMin).slice(11, 16);
+function drawTrackLabels(track, ink) {
+  const surface = getComputedStyle(document.body).getPropertyValue("--surface").trim() || "#fff";
+  // keep labels off the legend and the zoom buttons
+  const cr = cv.getBoundingClientRect();
+  const placed = [document.querySelector(".legend"), document.querySelector(".zoom")].map((el) => {
+    const r = el.getBoundingClientRect();
+    return { x0: r.left - cr.left, y0: r.top - cr.top, x1: r.right - cr.left, y1: r.bottom - cr.top };
+  });
+  const fits = (b) => b.x0 >= 2 && b.y0 >= 2 && b.x1 <= W - 2 && b.y1 <= H - 2 &&
+    !placed.some((o) => b.x0 < o.x1 + 4 && b.x1 > o.x0 - 4 && b.y0 < o.y1 + 2 && b.y1 > o.y0 - 2);
+  // current hour first so it is never the one dropped, then the rest in order
+  const order = track.slice().sort((a, b) => (b.i === S.hour - 1) - (a.i === S.hour - 1));
+  ctx.textBaseline = "middle";
+  for (const t of order) {
+    const k = track.indexOf(t);
+    const [x, y] = t.p;
+    if (x < -50 || y < -50 || x > W + 50 || y > H + 50) continue;
+    const prev = track[Math.max(0, k - 1)].p, next = track[Math.min(track.length - 1, k + 1)].p;
+    let dx = next[0] - prev[0], dy = next[1] - prev[1];
+    const L = Math.hypot(dx, dy) || 1; dx /= L; dy /= L;
+    const past = t.i < S.hour, current = t.i === S.hour - 1;
+    const text = t.i < 0 ? `${clock(M.start)} release` : clock(HRS[t.i].t);
+    ctx.font = `${current ? 700 : 600} 12px system-ui, -apple-system, "Segoe UI", sans-serif`;
+    const w = ctx.measureText(text).width, hgt = 14;
+    // try the right-hand side of travel first, then the left
+    let box = null;
+    for (const side of [1, -1]) {
+      const ox = x + -dy * side * 12, oy = y + dx * side * 12;
+      const lx = (-dy * side) >= 0 ? ox : ox - w;
+      const b = { x0: lx, y0: oy - hgt / 2, x1: lx + w, y1: oy + hgt / 2 };
+      if (fits(b)) { box = b; break; }
+    }
+    if (t.i >= 0) {               // hourly tick on the path
+      ctx.fillStyle = ink + (past ? "0.85)" : "0.35)");
+      ctx.beginPath(); ctx.arc(x, y, current ? 0 : 3, 0, 7); ctx.fill();
+    }
+    if (!box) continue;
+    placed.push(box);
+    ctx.lineJoin = "round"; ctx.lineWidth = 4; ctx.strokeStyle = surface;
+    ctx.strokeText(text, box.x0, (box.y0 + box.y1) / 2);
+    ctx.fillStyle = ink + (past ? "0.95)" : "0.5)");
+    ctx.fillText(text, box.x0, (box.y0 + box.y1) / 2);
+  }
+}
+let raf = 0;
+function schedule() { if (!raf) raf = requestAnimationFrame(() => { raf = 0; draw(); }); }
+
+// ---------- panel ----------
+function updatePanel() {
+  const h = HRS[S.hour - 1];
+  const prev = new Date(new Date(h.t).getTime() - 3600e3).toISOString();
+  $("timelabel").innerHTML = `Hour ${S.hour} of ${HRS.length}<span class="sub">${fmtTime(prev, M.tzOffsetMin).replace(/ \(.*| UTC/, "")}–${fmtTime(h.t, M.tzOffsetMin).slice(11)}</span>`;
+  $("hour").setAttribute("aria-valuetext", `Hour ${S.hour} of ${HRS.length}, ${fmtTime(prev, M.tzOffsetMin).slice(11, 16)} to ${fmtTime(h.t, M.tzOffsetMin).slice(11, 16)}`);
+  const stabName = { A: "very unstable", B: "unstable", C: "slightly unstable", D: "neutral", E: "slightly stable", F: "stable" }[h.stab];
+  $("met").innerHTML = [
+    [`Wind (${fmtLen(10)})`, `${fmtSpeed(h.ws)} from ${compass(h.wd)} (${h.wd}°)`],
+    [`Wind (${fmtLen(M.zUp)})`, `${fmtSpeed(h.wsUp)} from ${compass(h.wdUp)} (${h.wdUp}°)`],
+    ...(h.prof || []).filter((q) => q[0] <= 2000).map((q) => [`Wind (${fmtLen(q[0])})`, `${fmtSpeed(q[1])} from ${compass(q[2])} (${q[2]}°)`]),
+    ["Stability", `${h.stab} · ${stabName}`],
+    ["Mixing height", fmtLen(h.blh)],
+    ["Cloud / sun", `${h.cloud}% · ${h.sw} W/m²`],
+    ["Precipitation", fmtRate(h.precip)],
+  ].map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join("");
+  const tot = M.releaseMass, parts = [["Airborne", h.airborne, "--c-air"], ["Dry deposited", h.dry, "--c-dry"], ["Wet deposited", h.wet, "--c-wet"]];
+  $("budgetbar").innerHTML = parts.filter((p) => p[1] / tot > 0.002).map(([, v, c]) => `<div style="width:${(v / tot * 100).toFixed(2)}%;background:var(${c})"></div>`).join("");
+  $("budget").innerHTML = parts.map(([n, v, c]) => `<dt><span class="sw" style="background:var(${c})"></span>${n}</dt><dd>${(v / tot * 100).toFixed(1)}% · ${fmtMass(v)}</dd>`).join("") +
+    (h.spray > 0 ? `<dt class="muted" style="padding-left:16px">of which captured by spray</dt><dd class="muted">${(h.spray / tot * 100).toFixed(1)}% · ${fmtMass(h.spray)}</dd>` : "") +
+    (h.released < tot * 0.999 ? `<dt class="muted">Not yet released</dt><dd class="muted">${((tot - h.released) / tot * 100).toFixed(1)}%</dd>` : "");
+  const show = (v, vn, field) => (v > 1e-20 ? fmtVal(v, field, vn) : "none on the map");
+  let dist = "–";
+  if (h.centroid) {
+    const dy = (h.centroid[0] - M.lat) * 111195, dx = (h.centroid[1] - M.lon) * 111195 * Math.cos(M.lat * Math.PI / 180);
+    const d = Math.hypot(dx, dy) / 1000, b = (Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360;
+    dist = `${fmtDist(d)} ${compass(b)}`;
+  }
+  $("peak").innerHTML = [
+    ["Air, hourly mean", show(h.cmax, h.cmaxN, "conc")],
+    ["Air, peak in hour", show(h.pmax, h.pmaxN, "peak")],
+    ...(h.smax !== undefined ? [["Air, end of hour", show(h.smax, h.smaxN, "snap")]] : []),
+    ["Deposition", show(h.dmax, h.dmaxN, "dep")],
+    ["Airborne center", dist],
+    ["Active puffs", h.puffs.length],
+  ].map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join("");
+}
+
+function render() { updatePanel(); draw(); }
+
+// ---------- interaction ----------
+const pointers = new Map();
+let pinch = null, dragMoved = false;
+cv.addEventListener("pointerdown", (e) => {
+  if (e.pointerType === "touch" && coop()) return;   // touch handled below: 1 finger scrolls, 2 move the map
+  cv.setPointerCapture(e.pointerId); pointers.set(e.pointerId, [e.offsetX, e.offsetY]); dragMoved = false;
+  if (pointers.size === 2) { const [a, b] = [...pointers.values()]; pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), z: S.z, mx: (a[0] + b[0]) / 2, my: (a[1] + b[1]) / 2 }; }
+  cv.classList.add("dragging");
+});
+cv.addEventListener("pointermove", (e) => {
+  if (!pointers.has(e.pointerId)) { hover(e.offsetX, e.offsetY); return; }
+  const [px, py] = pointers.get(e.pointerId);
+  pointers.set(e.pointerId, [e.offsetX, e.offsetY]);
+  if (pointers.size === 2 && pinch) {
+    const [a, b] = [...pointers.values()];
+    const d = Math.hypot(a[0] - b[0], a[1] - b[1]), mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+    // two fingers: move with their midpoint, and zoom with their spread
+    S.lon = xlon(wx(S.lon, S.z) - (mx - pinch.mx), S.z); S.lat = ylat(wy(S.lat, S.z) - (my - pinch.my), S.z);
+    pinch.mx = mx; pinch.my = my;
+    zoomAt(mx, my, pinch.z + Math.log2(d / pinch.d) - S.z);
+    schedule();
+    return;
+  }
+
+  const dx = e.offsetX - px, dy = e.offsetY - py;
+  if (Math.abs(dx) + Math.abs(dy) > 0) dragMoved = true;
+  S.lon = xlon(wx(S.lon, S.z) - dx, S.z); S.lat = ylat(wy(S.lat, S.z) - dy, S.z);
+  $("tip").style.display = "none";
+  schedule();
+});
+const up = (e) => { pointers.delete(e.pointerId); if (pointers.size < 2) pinch = null; if (!pointers.size) cv.classList.remove("dragging"); };
+cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
+cv.addEventListener("pointerleave", () => { $("tip").style.display = "none"; });
+// Touch screens, narrow: one finger scrolls the page (with a hint); two fingers pan and zoom.
+// Touch events keep firing even after the browser cancels pointer events for a scroll.
+let tpinch = null;
+const touchXY = (t) => { const r = cv.getBoundingClientRect(); return [t.clientX - r.left, t.clientY - r.top]; };
+const twoFinger = (e) => {
+  const [a, b] = [touchXY(e.touches[0]), touchXY(e.touches[1])];
+  return { d: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, mx: (a[0] + b[0]) / 2, my: (a[1] + b[1]) / 2 };
+};
+cv.addEventListener("touchstart", (e) => {
+  if (!coop()) return;
+  if (e.touches.length >= 2) { const g = twoFinger(e); tpinch = { ...g, z: S.z }; if (e.cancelable) e.preventDefault(); }
+}, { passive: false });
+cv.addEventListener("touchmove", (e) => {
+  if (!coop()) return;
+  if (e.touches.length < 2) { tpinch = null; showGestureHint(); return; }      // one finger: page scrolls
+  if (e.cancelable) e.preventDefault();                                     // two fingers: the map moves
+  const g = twoFinger(e);
+  if (!tpinch) { tpinch = { ...g, z: S.z }; return; }
+  S.lon = xlon(wx(S.lon, S.z) - (g.mx - tpinch.mx), S.z); S.lat = ylat(wy(S.lat, S.z) - (g.my - tpinch.my), S.z);
+  tpinch.mx = g.mx; tpinch.my = g.my;
+  zoomAt(g.mx, g.my, tpinch.z + Math.log2(g.d / tpinch.d) - S.z);
+  $("tip").style.display = "none";
+  schedule();
+}, { passive: false });
+cv.addEventListener("touchend", (e) => { if (e.touches.length < 2) tpinch = null; });
+cv.addEventListener("touchcancel", () => { tpinch = null; });
+let hintTimer = 0;
+function showGestureHint() {
+  const g = $("gesturehint");
+  g.classList.add("show"); clearTimeout(hintTimer);
+  hintTimer = setTimeout(() => g.classList.remove("show"), 1400);
+}
+const onMQ = () => { $("mapwrap").classList.toggle("coop", coop()); };
+for (const q of [narrowMQ, coarseMQ]) (q.addEventListener ? q.addEventListener("change", onMQ) : q.addListener(onMQ));
+function zoomAt(x, y, dz) {
+  const nz = Math.max(2, Math.min(18, S.z + dz)); if (nz === S.z) return;
+  const [la, lo] = toLatLon(x, y);
+  S.z = nz;
+  // keep (la, lo) under the cursor
+  S.lon = xlon(wx(lo, S.z) - (x - W / 2), S.z); S.lat = ylat(wy(la, S.z) - (y - H / 2), S.z);
+  schedule();
+}
+cv.addEventListener("wheel", (e) => { e.preventDefault(); zoomAt(e.offsetX, e.offsetY, -e.deltaY * (e.deltaMode ? 0.05 : 0.0025)); }, { passive: false });
+cv.addEventListener("dblclick", (e) => zoomAt(e.offsetX, e.offsetY, 1));
+$("zin").onclick = () => zoomAt(W / 2, H / 2, 1);
+$("zout").onclick = () => zoomAt(W / 2, H / 2, -1);
+$("zfit").onclick = () => { fit(plumeBounds()); schedule(); };
+
+function hover(x, y) {
+  const tip = $("tip");
+  const [la, lo] = toLatLon(x, y);
+  const i = Math.floor((lo - GR.west) / (GR.east - GR.west) * NX), j = Math.floor((GR.north - la) / (GR.north - GR.south) * NY);
+  if (i < 0 || j < 0 || i >= NX || j >= NY) { tip.style.display = "none"; return; }
+  const lines = [], BELOW = "below map range (not zero)";
+  if (S.field === "zones") {
+    const zn = eKey(S.zoneMetric), F = FIELDS[zn], q = cumulativeQ(zn, S.hour)[j * NX + i];
+    const zu = S.units === "count" ? "mass" : S.units, keep = S.units;
+    S.units = zu;
+    lines.push(`${{ m60: "Max 60-min avg", peak: "Max peak", dep: "Deposited" }[S.zoneMetric]} so far: <b>${q ? fmtVal(10 ** qToLog(F, q), S.zoneMetric === "dep" ? "dep" : "conc") : BELOW}</b>`);
+    S.units = keep;
+  }
+  for (const f of (S.field === "snap" ? ["snap", "conc", "peak", "dep"] : ["conc", "peak", "dep"])) {
+    const F = FIELDS[fkey(f)], q = F.q[(S.hour - 1) * NCELL + j * NX + i];
+    const v = q ? 10 ** qToLog(F, q) : 0;
+    const val = !q ? BELOW : fmtVal(v, f, v);
+    lines.push(`${{ conc: "Air, hourly mean", peak: "Air, peak", snap: "Air, end of hour", dep: "Deposited" }[f]}: <b>${val}</b>`);
+  }
+  // Ranges, not error bars: the model has no error statistics. One range is the spread
+  // across weather forecasts, the other the spread across release cases (exact, because
+  // the model is linear in the mass released).
+  if (S.units !== "count") {
+    const pf = S.field === "zones" ? S.zoneMetric : S.field, kind = pf === "dep" ? "dep" : "conc";
+    const cell = (name) => {
+      const F = FIELDS[name];
+      if (!F) return null;
+      const q = S.field === "zones" ? cumulativeQ(name, S.hour)[j * NX + i] : F.q[(S.hour - 1) * NCELL + j * NX + i];
+      return q ? 10 ** qToLog(F, q) : 0;
+    };
+    const main = cell(pf), top = cell("env_" + pf);
+    const nf = ENS && (ENS.models ? ENS.models.length : ENS.n);
+    if (top) lines.push(`Up to <b>${fmtVal(top, kind, top)}</b> in any of ${nf} weather forecasts`);
+    const cr = M.caseRange, af = M.explosionOpts && M.explosionOpts.airborneFraction;
+    if (main && cr && af) {
+      let lo = fmtVal(main * cr[0] / af, kind, 0);
+      const hi = fmtVal(main * cr[1] / af, kind, 0), unit = hi.slice(hi.lastIndexOf(" "));
+      if (lo.endsWith(unit)) lo = lo.slice(0, -unit.length);          // "0.7 – 10 µg/ft²"
+      lines.push(`Across release cases (${fmt(cr[0] * 100, 3)}\u2013${fmt(cr[1] * 100, 3)}% airborne): <b>${lo} \u2013 ${hi}</b>`);
+    }
+  }
+  // The model works on grid cells, so say so and don't show street-level coordinates.
+  lines.push(`<span class="muted">Model estimate for a ${fmtDist(GR.dx / 1000)} grid cell near ${la.toFixed(2)}, ${lo.toFixed(2)}</span>`);
+  tip.innerHTML = lines.join("<br>");
+  tip.style.display = "block";
+  const tw = tip.offsetWidth, th = tip.offsetHeight;
+  tip.style.left = Math.min(W - tw - 6, x + 14) + "px";
+  tip.style.top = Math.max(6, y - th - 10) + "px";
+}
+
+$("hour").addEventListener("input", (e) => { S.hour = +e.target.value; render(); });
+$("fieldseg").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  S.field = b.dataset.v;
+  for (const x of $("fieldseg").children) x.setAttribute("aria-pressed", x === b);
+  $("zonesec").hidden = S.field !== "zones";
+  render();
+});
+$("units").onchange = (e) => { S.units = e.target.value; overlayKey = ""; syncLocInputs(); render(); };
+$("decades").oninput = (e) => { S.decades = +e.target.value; render(); };
+$("showPuffs").onchange = (e) => { S.puffs = e.target.checked; schedule(); };
+$("showWind").onchange = (e) => { S.wind = e.target.checked; schedule(); };
+$("showTrack").onchange = (e) => { S.track = e.target.checked; schedule(); };
+$("basemap").value = S.base;
+const savePrefs = () => { try { localStorage.setItem("puffmap.prefs", JSON.stringify({ base: S.base, sys: SYS })); } catch (err) {} };
+$("basemap").onchange = (e) => { S.base = e.target.value; savePrefs(); schedule(); };
+// U.S. / metric: lengths, speeds, masses and areas everywhere; the air and deposition
+// levels move with it (µg/ft² for deposition in U.S. units) unless set by hand.
+function setSystem(sys, fromParent) {
+  SYS = sys === "us" ? "us" : "metric";
+  for (const x of $("sysseg").children) x.setAttribute("aria-pressed", x.dataset.v === SYS);
+  if (SYS === "us" && S.units === "ugm3") S.units = "ugft2";
+  if (SYS === "metric" && S.units === "ugft2") S.units = "ugm3";
+  $("units").value = S.units; overlayKey = "";
+  savePrefs(); renderStatic(); syncLocInputs(); render();
+  if (!fromParent && window.parent !== window) window.parent.postMessage({ puffUnits: SYS }, location.origin);
+}
+$("sysseg").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) setSystem(b.dataset.v); });
+let timer = 0;
+function setPlaying(p) {
+  S.playing = p; $("play").textContent = p ? "❚❚" : "▶"; $("play").setAttribute("aria-label", p ? "Pause" : "Play");
+  clearInterval(timer);
+  if (p) timer = setInterval(() => { S.hour = S.hour % HRS.length + 1; $("hour").value = S.hour; render(); }, 700);
+}
+$("play").onclick = () => setPlaying(!S.playing);
+document.addEventListener("keydown", (e) => {
+  if (e.target.tagName === "SELECT" || (e.target.tagName === "INPUT" && e.target.type !== "range")) return;
+  if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+    if (e.target.id === "hour") return;
+    S.hour = Math.max(1, Math.min(HRS.length, S.hour + (e.key === "ArrowRight" ? 1 : -1))); $("hour").value = S.hour; render();
+  } else if (e.key === " " && e.target.tagName !== "BUTTON") { e.preventDefault(); setPlaying(!S.playing); }
+});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { overlayKey = ""; schedule(); });
+// threat-level inputs follow the display units (kg/m3 internally)
+const locUnit = () => (S.zoneMetric === "dep"
+  ? (S.units === "ugft2" ? [UGFT2, "µg/ft²"] : S.units === "ugm3" ? [1e9, "µg/m²"] : S.units === "cm3" ? [1e5, "µg/cm²"] : [1e6, "mg/m²"])
+  : (S.units === "ugm3" || S.units === "ugft2" ? [1e9, "µg/m³"] : S.units === "cm3" ? [1e3, "µg/cm³"] : [1e6, "mg/m³"]));
+const curLocs = () => (S.zoneMetric === "dep" ? S.dlocs : S.locs);
+function syncLocInputs() {
+  const [f, name] = locUnit();
+  for (let k = 0; k < 3; k++) $("loc" + k).value = +(curLocs()[k] * f).toPrecision(4);
+  $("zonenote").textContent = `Levels in ${name}. ` + (S.zoneMetric === "dep" && M.material === "lead-azide"
+    ? "EPA's dust-lead action levels (40 CFR 745.227) are for indoor surfaces, measured by wipe tests. Lead falling outdoors is only a rough comparison."
+    : M.material
+    ? "These benchmarks were set for different averaging times and settings; read each label before comparing."
+    : "Defaults are generic references with different averaging times; replace them with the material's own values.");
+}
+for (let k = 0; k < 3; k++) {
+  const el = $("loc" + k);
+  el.addEventListener("input", () => { const v = parseFloat(el.value); if (v > 0) { curLocs()[k] = v / locUnit()[0]; render(); } });
+}
+$("zmetric").onchange = (e) => { S.zoneMetric = e.target.value; syncLocInputs(); render(); };
+if (!FIELDS.snap) document.querySelector('#fieldseg button[data-v="snap"]').hidden = true;   // older data
+if (M.ensemble) {
+  $("envwrap").hidden = false;
+  $("envlabel").textContent = ENS.models ? `weather-model spread (${ENS.models.length} models)` : `wind uncertainty ±${ENS.spread}°`;
+  $("showEnv").onchange = (e) => { S.env = e.target.checked; render(); };
+}
+if (SYS === "us" && S.units === "ugm3") S.units = "ugft2";
+if (SYS === "metric" && S.units === "ugft2") S.units = "ugm3";
+for (const x of $("sysseg").children) x.setAttribute("aria-pressed", x.dataset.v === SYS);
+$("units").value = S.units;
+$("zmetric").value = S.zoneMetric;
+syncLocInputs();
+$("decades").value = S.decades;
+if (M.scaleMin) {
+  $("fixtopwrap").hidden = false;
+  $("fixtop").checked = true;
+  $("fixtoplabel").textContent = `show only ≥ ${M.scaleMin >= 1e-6 ? fmt(M.scaleMin * 1e3, 3) + " µg/cm³" : fmt(M.scaleMin * 1e9, 3) + " µg/m³"}`;
+  $("fixtop").onchange = (e) => { S.fixMin = e.target.checked; render(); };
+} else if (M.scaleMax) {
+  $("fixtopwrap").hidden = false;
+  $("fixtoplabel").textContent = `scale top ${fmt(M.scaleMax * 1e3, 3)} µg/cm³`;
+  $("fixtop").onchange = (e) => { S.fixTop = e.target.checked; render(); };
+}
+for (const [name, text] of Object.entries(M.hysplit || {})) {
+  const b = document.createElement("button");
+  b.textContent = "⭳ " + name;
+  b.onclick = () => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+    a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+  $("hysplit").appendChild(b);
+}
+new ResizeObserver(resize).observe($("mapwrap"));
+resize();
+fit(plumeBounds());
+render();
+sysReady = true;
+if (pendingSys && pendingSys !== SYS) setSystem(pendingSys, true);   // arrived while decoding
+})().catch((e) => { const l = document.getElementById("loading"); if (l) l.textContent = "Could not load: " + e.message; console.error(e); });
+</script>
+</body>
+</html>

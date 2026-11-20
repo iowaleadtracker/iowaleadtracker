@@ -1,0 +1,7 @@
+# Development tools: linting, type checking, tests and the git hooks.
+#   pip install -r requirements.txt -r requirements-dev.txt
+#   pre-commit install
+mypy==2.4.1
+pre-commit==4.7.0
+pytest==9.2.0
+ruff==0.17.6

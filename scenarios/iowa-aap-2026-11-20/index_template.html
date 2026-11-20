@@ -1,0 +1,289 @@
+<!doctype html><html lang="en-US"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>$site_name</title>
+<meta name="description" content="$description">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="$site_url">
+<meta name="theme-color" content="#1f2933">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="$site_name">
+<meta property="og:title" content="$site_name">
+<meta property="og:description" content="$description">
+<meta property="og:url" content="$site_url">
+<meta property="og:locale" content="en_US">$og_image
+<meta name="twitter:card" content="$twitter_card">
+<meta name="twitter:title" content="$site_name">
+<meta name="twitter:description" content="$description">
+<script type="application/ld+json">$json_ld</script>
+<style>
+  html, body { margin: 0; font: 14px system-ui, -apple-system, sans-serif; background: #f5f7fa; color: #1f2933; }
+  header { position: sticky; top: 0; z-index: 2; }
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px;
+           padding: 8px 16px; background: #1f2933; color: #f5f7fa; }
+  header .title { display: flex; flex-direction: column; }
+  header h1 { margin: 0; font-size: 16px; }
+  header .title p { margin: 0; font-size: 13px; color: #cbd2d9; }
+  .mapbox { display: flex; height: calc(100vh - var(--hh, 120px)); height: calc(100dvh - var(--hh, 120px)); min-height: 360px; }
+  .doc { max-width: 46rem; margin: 0 auto; padding: 24px 16px 48px; line-height: 1.55; }
+  .doc h2 { font-size: 20px; margin: 0 0 8px; }
+  .doc h3 { font-size: 16px; margin: 20px 0 6px; }
+  .doc p { margin: 0 0 10px; }
+  .doc .caveat { background: #fde8c8; padding: 8px 12px; border-radius: 6px; }
+  .doc a { color: #0b5cad; }
+  .tablewrap { overflow-x: auto; }
+  .doc table { border-collapse: collapse; margin: 6px 0 10px; font-size: 13.5px; }
+  .doc th, .doc td { border-bottom: 1px solid #cbd2d9; padding: 5px 10px 5px 0; text-align: left; vertical-align: top; }
+  #faq { margin-top: 28px; }
+  #summary, #faq, .doc h3 { scroll-margin-top: calc(var(--hh, 120px) + 8px); }
+  .mapnote { margin: 0; padding: 4px 16px; font-size: 12px; color: #52606d; background: #eef1f4; }
+  .bottomnav { display: none; }
+  @media (max-width: 820px) {
+    /* one page scroll: the header scrolls away, the map frame grows to its content, and a
+       bar at the bottom jumps between sections */
+    header { position: static; }
+    .mapbox { height: auto; min-height: 0; }
+    iframe { height: var(--frameh, 1200px); flex: none; }
+    #summary, #faq, .doc h3 { scroll-margin-top: 12px; }
+    body { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); }
+    .bottomnav {
+      display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 3;
+      background: #1f2933; border-top: 1px solid #52606d;
+      padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+    }
+    .bottomnav button {
+      flex: 1; min-height: 44px; margin: 0 4px; border: 0; border-radius: 8px; background: transparent;
+      color: #cbd2d9; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+    }
+    .bottomnav button[aria-current="true"] { background: #f5f7fa; color: #1f2933; }
+  }
+  @media (max-width: 600px) {
+    header { gap: 6px 10px; padding: 6px 12px; }
+    header .title p, header .warn .long { display: none; }
+    header button, header select { min-height: 32px; }
+    header .warn button { min-height: 32px; padding: 4px 2px; }
+    header #prev, header #next { padding: 4px 10px; }
+  }
+  label { display: flex; align-items: center; gap: 8px; }
+  select { font: inherit; padding: 4px 8px; border-radius: 6px; }
+  header .warn { margin: 0; flex-basis: 100%; color: #fde8c8; font-size: 12.5px; line-height: 1.4; }
+  header .warn b { color: #fff; }
+  header .warn button { font: inherit; color: #9fd3ff; background: none; border: 0; padding: 0;
+                         text-decoration: underline; cursor: pointer; }
+  .sys { display: inline-flex; border: 1px solid #52606d; border-radius: 6px; overflow: hidden; }
+  .sys button { font: inherit; border: 0; padding: 3px 10px; background: transparent; color: #cbd2d9; cursor: pointer; }
+  .sys button[aria-pressed="true"] { background: #f5f7fa; color: #1f2933; }
+  iframe { flex: 1; width: 100%; border: 0; }
+  dialog { max-width: 40rem; width: calc(100% - 32px); box-sizing: border-box; padding: 20px 24px;
+           border: 0; border-radius: 10px; background: #fff; color: #1f2933; line-height: 1.5;
+           max-height: calc(100% - 32px); overflow-y: auto; }
+  dialog.wide { max-width: 54rem; }
+  dialog h3 { margin: 18px 0 6px; font-size: 15px; }
+  dialog ul.refs { list-style: none; margin: 0 0 10px; padding: 0; }
+  dialog ul.refs li { margin: 0 0 7px; padding-left: 2em; text-indent: -2em; }
+  dialog a { color: #0b5cad; overflow-wrap: anywhere; }
+  dialog table { border-collapse: collapse; font-size: 13px; }
+  dialog th, dialog td { border-bottom: 1px solid #cbd2d9; padding: 5px 10px 5px 0; text-align: left; vertical-align: top; }
+  dialog tbody th { white-space: nowrap; }
+  dialog::backdrop { background: rgba(0, 0, 0, .55); }
+  dialog h2 { margin: 0 0 8px; font-size: 18px; }
+  dialog h2:focus { outline: none; }
+  dialog p { margin: 0 0 10px; }
+  dialog .meta { color: #52606d; font-size: 12.5px; }
+  dialog form { margin: 14px 0 0; text-align: right; }
+  dialog form button { font: inherit; padding: 6px 16px; border-radius: 6px; border: 0;
+                        background: #1f2933; color: #fff; cursor: pointer; }
+</style></head><body>
+<header>
+  <div class="title"><h1>$site_name</h1>
+    <p>Lead from the planned blast at the Iowa Army Ammunition Plant, Monday, Nov. 23</p></div>
+  <label for="t">Blast time (CST)
+    <select id="t">$time_options</select></label>
+  <button id="prev" type="button">&lsaquo; Earlier</button>
+  <button id="next" type="button">Later &rsaquo;</button>
+  <label for="c">Lead in the air
+    <select id="c">$case_options</select></label>
+  <span class="sys" id="sys" role="group" aria-label="Units">
+    <button type="button" data-v="us" aria-pressed="true">U.S. units</button>
+    <button type="button" data-v="metric" aria-pressed="false">Metric</button></span>
+  <p class="warn" role="note"><b>This is an unofficial estimate, not from the Army or any government
+    agency. Don't use it to decide if you're safe.</b>
+    <span class="long">Follow official instructions. Weather forecast from $got_txt.</span>
+    <button id="about" type="button">About this map</button> &middot;
+    <button id="tosummary" type="button">What the forecast shows</button> &middot;
+    <button id="cites" type="button" aria-haspopup="dialog">References</button></p>
+</header>
+<dialog id="note" aria-labelledby="note-h">
+  <h2 id="note-h" tabindex="-1" autofocus>About this map</h2>
+  <p>$about_who</p>
+  <p><b>The numbers are guesses.</b> The public doesn&rsquo;t know exactly how much lead will get
+    into the air or how the Army will set up the charges. This map assumes <span class="u-us">about
+    9,700 pounds</span><span class="u-metric" hidden>about 4,400 kg (9,700 pounds)</span> of lead
+    azide in 68 drums (the amount an Army spokesperson gave), which the Army plans to set off in two blasts
+    around noon inside earth-covered bunkers. The Iowa Lead Tracker lets you simulate four
+    possibilities for how much of the lead gets into the air: Low ($pct_low), Middle
+    ($pct_mid), High ($pct_high), or EPA permit ($pct_permit). In each case, the lead in
+    the air comes in pieces small enough to breathe in, and the rest stays at the plant.</p>
+  <p>The low case comes from EPA and Army tests of military blasting caps, which use lead azide.
+    In those tests, at least $pct_low of the lead got into the air, and almost all of the dust
+    was small enough to breathe in. The high case uses a rule for explosions from a Department of
+    Energy handbook. The middle case falls in between. The EPA permit case uses the 100% that EPA
+    requires the Army to assume in its official plume maps; EPA calls that conservative. Different
+    numbers would give a very different map.</p>
+  <p><b>Water misting.</b> $misting Source:
+    <a href="$advisory_url" rel="noopener">Army public advisory, Nov. 18, 2026</a>.</p>
+  <p><b>Why Monday.</b> $why_monday Source:
+    <a href="$army_url" rel="noopener">$army_cite</a>.</p>
+  <p><b>No time set yet.</b> $time_note</p>
+  <p><b>The weather is a forecast.</b> The winds come from $n_models weather forecasts, current as
+    of $got_txt. If the wind changes, the cloud will go somewhere else. The shaded areas show where
+    the cloud <i>could</i> go, not where it <i>will</i> go.</p>
+  <p><b>Don&rsquo;t use this map to decide if you&rsquo;re safe.</b> $not_checked
+    A place that looks clear may not be. A place that looks affected may get no lead you could measure. For instructions, orders to
+    stay inside or leave, and health questions, follow $who.</p>
+  <p><b>Privacy.</b> The site counts visits with Cloudflare Web Analytics, which uses no cookies.
+    Map tiles load from Esri&rsquo;s servers, which see your IP address and the part of the map you
+    view. Only your browser keeps your choice of units and map style.</p>
+  <p class="meta">No warranty. Last updated $built_txt.</p>
+  <form method="dialog"><button type="submit">OK</button></form>
+</dialog>
+<dialog id="cite" class="wide" aria-labelledby="cite-h">
+  <h2 id="cite-h" tabindex="-1" autofocus>References</h2>
+  $cite_html
+  <form method="dialog"><button type="submit">Close</button></form>
+</dialog>
+<main>
+  <div class="mapbox">
+    <iframe id="map" title="Map of where lead from the blast could travel and settle"></iframe>
+    <noscript>This map needs JavaScript. A summary of what it shows is below.</noscript>
+  </div>
+  <p class="mapnote">If the map doesn&rsquo;t load, the summary below has the same numbers.</p>
+  <div class="doc">
+  $summary_html
+  <section id="faq" aria-labelledby="faq-h">
+    <h2 id="faq-h">Questions</h2>
+    $faq_html
+  </section>
+  </div>
+</main>
+<nav class="bottomnav" aria-label="Page sections">
+  <button type="button" data-go="top" aria-current="true">Map</button>
+  <button type="button" data-go="summary">What it shows</button>
+  <button type="button" data-go="faq">Questions</button>
+</nav>
+<script>
+const sel = document.getElementById('t'), cas = document.getElementById('c'), frame = document.getElementById('map');
+// Map files carry a content hash so browsers can cache them for good. The live site serves
+// them without ".html"; a local server or a file:// copy needs the extension.
+const MAP_FILES = $map_files;
+const EXT = location.protocol === 'file:' || /^(localhost|127\.|\[::1\])/.test(location.hostname) ? '.html' : '';
+let sys = 'us';
+// Phones: size the map from the small viewport height (the one with the address bar
+// showing), so it never runs under the browser's toolbars.
+const narrow = matchMedia('(max-width: 820px)');
+const probe = document.createElement('div');
+probe.style.cssText = 'position:fixed;top:0;height:100svh;visibility:hidden;pointer-events:none';
+document.body.appendChild(probe);
+function mapH() {
+  const vh = probe.offsetHeight || window.innerHeight;
+  const hh = document.querySelector('header').offsetHeight, nav = 60;
+  return Math.max(280, Math.round(vh - hh - nav - 70));    // leaves room for the legend strip
+}
+function show() {
+  const t = sel.value.replace(':', '');
+  frame.src = MAP_FILES[cas.value + '-' + t] + EXT + '#u=' + sys + (narrow.matches ? '&h=' + mapH() : '');
+  history.replaceState(null, '', '#' + t + '-' + cas.value);
+}
+function step(d) { const i = sel.selectedIndex + d; if (i >= 0 && i < sel.options.length) { sel.selectedIndex = i; show(); } }
+sel.addEventListener('change', show);
+cas.addEventListener('change', show);
+document.getElementById('prev').onclick = () => step(-1);
+document.getElementById('next').onclick = () => step(1);
+const note = document.getElementById('note');
+// the map fills the screen under the header; the summary scrolls below it
+const hdr = document.querySelector('header');
+const setHH = () => document.documentElement.style.setProperty('--hh', hdr.offsetHeight + 'px');
+new ResizeObserver(setHH).observe(hdr); setHH();
+const toSummary = () => document.getElementById('summary').scrollIntoView({
+  behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+document.getElementById('tosummary').onclick = toSummary;
+// <dialog> is missing on some older browsers; fall back to the summary instead of failing
+const canModal = typeof note.showModal === 'function';
+// open a dialog at the top of its text, with focus on its heading (not the button at the end)
+const openDialog = (d) => {
+  if (!canModal) return toSummary();
+  d.showModal(); d.scrollTop = 0;
+  const h = d.querySelector('h2'); if (h) h.focus({ preventScroll: true });
+};
+document.getElementById('about').onclick = () => openDialog(note);
+const cite = document.getElementById('cite');
+document.getElementById('cites').onclick = () => openDialog(cite);
+cite.addEventListener('click', (e) => {       // a click on the backdrop closes it
+  const r = cite.getBoundingClientRect();
+  if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) cite.close();
+});
+// U.S. / metric, shared with the maps (same storage key) and passed to the open map.
+const prefs = () => Object(JSON.parse(localStorage.getItem('puffmap.prefs') || '{}'));
+try { if (prefs().sys === 'metric') sys = 'metric'; } catch (e) {}
+function setSys(v, tell) {
+  sys = v;
+  for (const b of document.querySelectorAll('#sys button')) b.setAttribute('aria-pressed', b.dataset.v === v);
+  for (const el of document.querySelectorAll('.u-us')) el.hidden = v !== 'us';
+  for (const el of document.querySelectorAll('.u-metric')) el.hidden = v !== 'metric';
+  try { const p = prefs(); p.sys = v; localStorage.setItem('puffmap.prefs', JSON.stringify(p)); } catch (e) {}
+  if (tell && frame.contentWindow) frame.contentWindow.postMessage({ puffUnits: v }, location.origin);
+}
+document.getElementById('sys').onclick = (e) => { const b = e.target.closest('button'); if (b) setSys(b.dataset.v, true); };
+window.addEventListener('message', (e) => {
+  if (e.source !== frame.contentWindow || e.origin !== location.origin || !e.data) return;
+  if (typeof e.data.puffHeight === 'number') {             // phones: frame as tall as the map page
+    if (narrow.matches) document.documentElement.style.setProperty('--frameh', Math.max(300, e.data.puffHeight) + 'px');
+    return;
+  }
+  if (e.data.puffUnits === 'us' || e.data.puffUnits === 'metric') setSys(e.data.puffUnits, false);
+});
+// keep the map height right when the phone turns or the header wraps differently
+let lastH = 0;
+const resizeMap = () => { if (!narrow.matches || !frame.contentWindow) return; const h = mapH();
+  if (h !== lastH) { lastH = h; frame.contentWindow.postMessage({ puffMapH: h }, location.origin); } };
+window.addEventListener('resize', resizeMap);
+// bottom bar: jump between sections and show which one is on screen
+const nav = document.querySelector('.bottomnav');
+const goTo = (where) => {
+  const smooth = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+  if (where === 'top') window.scrollTo({ top: 0, behavior: smooth });
+  else document.getElementById(where).scrollIntoView({ behavior: smooth });
+};
+nav.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) goTo(b.dataset.go); });
+if ('IntersectionObserver' in window) {
+  const parts = { top: document.querySelector('.mapbox'), summary: document.getElementById('summary'), faq: document.getElementById('faq') };
+  const vis = {};
+  const io = new IntersectionObserver((entries) => {
+    for (const en of entries) vis[en.target.dataset.part] = en.intersectionRect.height;   // pixels on screen
+    const best = Object.keys(parts).reduce((a, k) => ((vis[k] || 0) > (vis[a] || 0) ? k : a), 'top');
+    for (const b of nav.children) b.setAttribute('aria-current', b.dataset.go === best);
+  }, { threshold: Array.from({ length: 21 }, (_, i) => i / 20) });
+  for (const [k, el] of Object.entries(parts)) { el.dataset.part = k; io.observe(el); }
+}
+// the map also reads the unit from its URL (#u=); this covers a switch made while it loads
+frame.addEventListener('load', () => { if (frame.contentWindow) frame.contentWindow.postMessage({ puffUnits: sys }, location.origin); });
+setSys(sys, false);
+// #HHMM-case picks the time and case, on load and when the hash changes
+function applyHash() {
+  const [ht, hc] = location.hash.slice(1).split('-');
+  let changed = false;
+  for (const o of sel.options) if (o.value.replace(':', '') === ht && !o.selected) { o.selected = true; changed = true; }
+  for (const o of cas.options) if (o.value === hc && !o.selected) { o.selected = true; changed = true; }
+  return changed;
+}
+window.addEventListener('hashchange', () => { if (applyHash()) show(); });
+applyHash();
+show();                                   // load the map before anything that could fail
+const BUILT = $built_json;
+let seen = false;
+try { seen = localStorage.getItem('noteSeen') === BUILT; } catch (e) {}
+note.addEventListener('close', () => { try { localStorage.setItem('noteSeen', BUILT); } catch (e) {} });
+if (!seen && canModal) openDialog(note);
+</script></body></html>

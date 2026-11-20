@@ -1,0 +1,646 @@
+#!/usr/bin/env python3
+"""Build the iowaleadtracker.com site: one page with a blast-time and lead-in-the-air picker.
+
+The site lives in outputs/site/: index.html plus one map per (case, time) in
+outputs/site/maps/{case}-{HHMM}.html. The page loads only the map being looked at. The
+page itself is index_template.html, filled in here.
+
+    python3 make_map_picker.py --build    # run the model for every case and time
+    python3 make_map_picker.py            # rewrite outputs/site/index.html from the maps
+    python3 make_map_picker.py --publish  # also copy the site files to the publish folder
+    python3 make_map_picker.py --deploy   # also upload the site to Cloudflare
+
+--build needs the .venv. --deploy uploads to the Cloudflare Worker iowaleadtracker: it
+runs `npx wrangler deploy` on a temporary folder whose public/ holds only the site, so
+nothing else in the repo (or the wrangler config) is published. Log in once first with
+`env -u CLOUDFLARE_API_TOKEN npx wrangler login`.
+"""
+
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import hashlib
+import html
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from dataclasses import dataclass
+from pathlib import Path
+from string import Template
+from zoneinfo import ZoneInfo
+
+import forecast_summary
+import works_cited
+
+HERE = Path(__file__).resolve().parent
+TOOL = HERE.parents[1]  # the repo root, where puff_dispersal.py lives
+SITE = HERE / "outputs" / "site"
+MAPS = SITE / "maps"
+HASHED = SITE / "m"  # content-hashed copies of the maps, cached for a year
+PAGE_TEMPLATE = HERE / "index_template.html"
+MET_CACHE = HERE / "met_cache" / "map_met_all.json"
+DATE = "2026-11-23"  # blast day (CST, UTC-6)
+LAT, LON = 40.825518, -91.266502
+TIMES = ["11:00", "11:15", "11:30", "11:45", "12:00", "12:15", "12:30"]
+DEFAULT = "12:00"  # the Nov. 20 detonation had been set for about noon (Iowa HHS)
+NOON_HOUR = 12
+# (id used in file names and the URL, --release-case, label). See README "Release cases".
+CASES = [
+    ("low", "ap42-floor", "Low"),
+    ("mid", "fine-20", "Middle"),
+    ("high", "tnt-fine", "High"),
+    ("permit", "permit-100", "EPA permit"),
+]
+DEFAULT_CASE = "permit"  # most conservative by default: better than a false sense of security
+# HRRR shown when it covers the run, then RRFS, then GFS; models with no data are skipped.
+WEATHER = (
+    "ncep_hrrr_conus,ncep_rrfs_conus,gfs_seamless,ecmwf_ifs025,icon_seamless,"
+    "gem_seamless,ukmo_seamless,meteofrance_seamless"
+)
+WEATHER_ORDER = WEATHER.split(",")
+MODEL_ARGS = [
+    *("--material", "lead-azide"),
+    *("--explosive-mass", "9700lb"),
+    *("--specific-energy", "1.64"),
+    *("--shots", "2"),
+    *("--confinement", "earth-covered"),
+    *("--hours", "8"),
+    *("--dt", "60"),
+    *("--grid", "360"),
+    *("--scale-min", "0.15ug"),
+    *("--decades", "4"),
+    *("--weather-model", WEATHER),
+    *("--met-cache", str(MET_CACHE)),
+]
+# Lines of the model's output worth showing while building.
+BUILD_LOG_MARKERS = ("skipped", "shown:", "Error", "Traceback")
+CF_PROJECT = "iowaleadtracker"
+WRANGLER = "wrangler@4.165.0"  # pinned; bump on purpose, not on every deploy
+# The Cloudflare account that holds the domain. It is kept out of the repo: put
+# {"cf_account_id": "..."} in deploy.local.json next to this script (git-ignored), or set
+# IOWALEADTRACKER_CF_ACCOUNT_ID. Deploys always go to that account, even if the shell has
+# other Cloudflare credentials; wrangler uses its own login.
+LOCAL_CONFIG = HERE / "deploy.local.json"
+# Files besides maps/, m/ and brand/ that --publish copies.
+PUBLISHED_FILES = (
+    "index.html",
+    "robots.txt",
+    "sitemap.xml",
+    "og.png",
+    "llms.txt",
+    "_headers",
+    "favicon.svg",
+    "favicon.ico",
+    "apple-touch-icon.png",
+)
+
+TZ = ZoneInfo("America/Chicago")
+SITE_URL = "https://iowaleadtracker.com/"
+SITE_NAME = "Iowa Lead Tracker"
+DESCRIPTION = (
+    "Unofficial, open-model map of where lead from the planned Nov. 23, 2026 blast at the "
+    "Iowa Army Ammunition Plant could travel and settle, with its data, assumptions, and "
+    "sources published."
+)
+# Response headers for Workers static assets (written to the site as _headers).
+CSP = (
+    "default-src 'none'; "
+    "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; "
+    "style-src 'unsafe-inline'; img-src 'self' data: blob: https://server.arcgisonline.com; "
+    "connect-src 'self' https://cloudflareinsights.com; frame-src 'self'; "
+    "frame-ancestors 'self'; "
+    "base-uri 'none'; form-action 'none'; object-src 'none'; upgrade-insecure-requests"
+)
+PERMISSIONS = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()"
+HEADERS = f"""/*
+  Content-Security-Policy: {CSP}
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: {PERMISSIONS}
+  Cross-Origin-Opener-Policy: same-origin
+  Strict-Transport-Security: max-age=31536000
+/maps/*
+  X-Robots-Tag: noindex
+/m/*
+  X-Robots-Tag: noindex
+  Cache-Control: public, max-age=31536000, immutable
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+"""
+OG_IMAGE_META = (
+    f'\n<meta property="og:image" content="{SITE_URL}og.png">'
+    '\n<meta property="og:image:width" content="1200">'
+    '\n<meta property="og:image:height" content="630">'
+    '\n<meta property="og:image:alt" '
+    'content="Map of the lead cloud\'s path from the Iowa Army Ammunition Plant">'
+    f'\n<meta name="twitter:image" content="{SITE_URL}og.png">'
+)
+DEFAULT_WHO = "the Army, your county emergency management office, and state health officials"
+# Official contacts for the disclaimer, as (name, url). Confirm each before adding it.
+OFFICIAL_LINKS: list[tuple[str, str]] = []
+NUMBER_WORDS = [
+    "zero",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+]
+AP_MONTHS = {  # AP style abbreviates these months before a day
+    "January": "Jan.",
+    "February": "Feb.",
+    "August": "Aug.",
+    "September": "Sept.",
+    "October": "Oct.",
+    "November": "Nov.",
+    "December": "Dec.",
+}
+
+
+# ---------------------------------------------------------------------------
+# Local settings (kept out of the repo)
+
+
+def local_setting(key: str, env: str, missing: str) -> str:
+    """Return a maintainer setting from the environment or deploy.local.json.
+
+    Parameters
+    ----------
+    key
+        Key in deploy.local.json.
+    env
+        Environment variable that overrides the file.
+    missing
+        Message to exit with when neither has the setting.
+    """
+    if os.environ.get(env):
+        return os.environ[env]
+    try:
+        with LOCAL_CONFIG.open(encoding="utf-8") as f:
+            return str(json.load(f)[key])
+    except (OSError, KeyError, ValueError) as err:
+        raise SystemExit(missing) from err
+
+
+def publish_dir() -> Path:
+    """Return the folder --publish copies the site into (the maintainer's own)."""
+    env = "IOWALEADTRACKER_PUBLISH_DIR"
+    return Path(
+        local_setting(
+            "publish_dir",
+            env,
+            f'no publish folder: add "publish_dir" to {LOCAL_CONFIG} or set {env}',
+        )
+    )
+
+
+def cf_account_id() -> str:
+    """Return the Cloudflare account ID that --deploy uploads to."""
+    return local_setting(
+        "cf_account_id",
+        "IOWALEADTRACKER_CF_ACCOUNT_ID",
+        f"no Cloudflare account ID: create {LOCAL_CONFIG} with "
+        '{"cf_account_id": "..."} or set IOWALEADTRACKER_CF_ACCOUNT_ID',
+    )
+
+
+# ---------------------------------------------------------------------------
+# Names and times
+
+
+def map_name(case: str, t: str) -> str:
+    """Return the map file name for a case and blast time: 'permit-1200.html'."""
+    return f"{case}-{t.replace(':', '')}.html"
+
+
+def label(t: str) -> str:
+    """Return a 24-hour 'HH:MM' as '12:00 p.m.'."""
+    h, m = map(int, t.split(":"))
+    return f"{(h - 1) % 12 + 1}:{m:02d} {'a.m.' if h < NOON_HOUR else 'p.m.'}"
+
+
+def fmt_time(t: dt.datetime) -> str:
+    """Return a time as 'November 19, 2026, at 2:09 p.m. CST'."""
+    return (
+        t.strftime("%B %-d, %Y, at %-I:%M ")
+        + ("a.m." if t.hour < NOON_HOUR else "p.m.")
+        + " "
+        + t.strftime("%Z")
+    )
+
+
+def blast_label(t: str) -> str:
+    """Return a blast time on the blast day as 'Monday, Nov. 23, 2026, 12:00 p.m. CST'."""
+    d = dt.datetime.fromisoformat(f"{DATE}T{t}").replace(tzinfo=TZ)
+    month = AP_MONTHS.get(d.strftime("%B"), d.strftime("%B"))
+    return f"{d.strftime('%A')}, {month} {d.day}, {d.year}, {label(t)} {d.strftime('%Z')}"
+
+
+def retrieved_at() -> dt.datetime | None:
+    """Return when the forecasts behind the maps were downloaded.
+
+    That is the oldest fetch stamp in the cache, or the cache file's write time for caches
+    made before stamps were kept.
+    """
+    try:
+        with MET_CACHE.open(encoding="utf-8") as f:
+            stamps = json.load(f).get("__fetched__") or {}
+        if stamps:
+            oldest = min(dt.datetime.fromisoformat(v) for v in stamps.values())
+            return oldest.astimezone(TZ)
+    except (OSError, ValueError):
+        pass
+    files = [MET_CACHE] if MET_CACHE.exists() else sorted(MET_CACHE.parent.glob("*.json"))
+    if not files:
+        return None
+    return dt.datetime.fromtimestamp(min(f.stat().st_mtime for f in files), TZ)
+
+
+def model_count(pages: list[str]) -> str:
+    """Return the fewest weather models used by any of the maps, as a word ("seven")."""
+    counts = []
+    for page in pages:
+        m = re.search(r'"models":\[([^\]]*)\]', page)
+        if m:
+            counts.append(len([x for x in m.group(1).split(",") if x.strip()]))
+    n = min(counts) if counts else 0
+    return NUMBER_WORDS[n] if n < len(NUMBER_WORDS) else str(n)
+
+
+# ---------------------------------------------------------------------------
+# Running the model
+
+
+def find_python() -> str:
+    """Return the Python of a .venv next to the model or above it, else this Python."""
+    for d in (TOOL, *TOOL.parents):
+        cand = d / ".venv" / "bin" / "python"
+        if cand.exists():
+            return str(cand)
+    return sys.executable
+
+
+def build() -> None:
+    """Run the model for every case and time, one after another (Open-Meteo rate limits)."""
+    MAPS.mkdir(parents=True, exist_ok=True)
+    py = find_python()
+    for case, release_case, name in CASES:
+        for t in TIMES:
+            cmd = [
+                py,
+                str(TOOL / "puff_dispersal.py"),
+                *("--lat", str(LAT)),
+                *("--lon", str(LON)),
+                *("--time", f"{DATE}T{t}-06:00"),
+                *("--release-case", release_case),
+                *MODEL_ARGS,
+                *("--home-url", SITE_URL),
+                *("--legend-note", f"{name} case, blast {blast_label(t)}"),
+                *("-o", str(MAPS / map_name(case, t))),
+            ]
+            print(f"building {case} {t}", flush=True)
+            # Arguments are built here from constants; no shell is involved.
+            r = subprocess.run(cmd, cwd=TOOL, capture_output=True, text=True, check=False)  # noqa: S603
+            for line in r.stdout.splitlines() + r.stderr.splitlines():
+                if any(marker in line for marker in BUILD_LOG_MARKERS):
+                    print("  " + line)
+            if r.returncode:
+                raise SystemExit(f"model run failed for {case} {t}:\n{r.stderr[-2000:]}")
+
+
+# ---------------------------------------------------------------------------
+# The page
+
+
+@dataclass
+class Maps:
+    """The built maps: page text, share of lead airborne per case, blast times present."""
+
+    pages: list[str]
+    pct: dict[str, str]
+    times: list[str]
+    default: str
+
+
+def read_maps() -> Maps:
+    """Read every complete blast time's maps and the share of lead airborne per case."""
+    times = [t for t in TIMES if all((MAPS / map_name(c, t)).exists() for c, _, _ in CASES)]
+    if not times:
+        raise SystemExit(f"no complete set of maps in {MAPS}; run with --build first")
+    for t in TIMES:
+        if t not in times:
+            print(f"missing a map for {t}, leaving it out")
+    pages: list[str] = []
+    share: dict[str, float] = {}
+    for case, _, _ in CASES:
+        for t in times:
+            page = (MAPS / map_name(case, t)).read_text(encoding="utf-8")
+            pages.append(page)
+            m = re.search(r'"airborneFraction":\s*([0-9.eE+-]+)', page)
+            if m and case not in share:
+                share[case] = float(m.group(1))
+    pct = {c: f"{share.get(c, 0) * 100:.0f}%" for c, _, _ in CASES}
+    default = DEFAULT if DEFAULT in times else times[0]
+    return Maps(pages=pages, pct=pct, times=times, default=default)
+
+
+def models_used(pages: list[str]) -> list[str]:
+    """Return the weather models any map used, in the preference order of WEATHER."""
+    found: set[str] = set()
+    for page in pages:
+        m = re.search(r'"models":(\[[^\]]*\])', page)
+        found.update(json.loads(m.group(1)) if m else [])
+    return sorted(found, key=lambda m: WEATHER_ORDER.index(m) if m in WEATHER_ORDER else 99)
+
+
+def json_ld(faq: list[tuple[str, str]], now: dt.datetime) -> str:
+    """Return the page's schema.org structured data (WebPage and FAQPage)."""
+    page = {
+        "@type": "WebPage",
+        "name": SITE_NAME,
+        "url": SITE_URL,
+        "description": DESCRIPTION,
+        "inLanguage": "en-US",
+        "isAccessibleForFree": True,
+        "dateModified": now.isoformat(timespec="minutes"),
+        "about": {
+            "@type": "Place",
+            "name": "Iowa Army Ammunition Plant",
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Middletown",
+                "addressRegion": "IA",
+                "addressCountry": "US",
+            },
+            "geo": {"@type": "GeoCoordinates", "latitude": LAT, "longitude": LON},
+        },
+        "keywords": (
+            "lead, lead azide, Iowa Army Ammunition Plant, Middletown, Burlington, "
+            "Des Moines County, air quality, plume map, dust-lead"
+        ),
+        "citation": [forecast_summary.ARMY_URL, forecast_summary.PERMIT_URL],
+        "abstract": forecast_summary.ABOUT_WHO,
+        "creator": {"@type": "Person", "description": "A concerned Iowan (private citizen)"},
+    }
+    faq_page = {
+        "@type": "FAQPage",
+        "url": SITE_URL + "#faq",
+        "mainEntity": [
+            {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}}
+            for q, a in faq
+        ],
+    }
+    data = {"@context": "https://schema.org", "@graph": [page, faq_page]}
+    return json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+
+
+def write_hashed_maps(times: list[str]) -> dict[str, str]:
+    """Copy each map to m/ under a content-hashed name and return {case-HHMM: path}.
+
+    The plain maps/ files stay for old links. A map opened on its own points search
+    engines at the home page.
+    """
+    shutil.rmtree(HASHED, ignore_errors=True)
+    HASHED.mkdir(parents=True)
+    map_files = {}
+    for case, _, _ in CASES:
+        for t in times:
+            mp = MAPS / map_name(case, t)
+            txt = mp.read_text(encoding="utf-8")
+            add = ("" if 'name="robots"' in txt else '\n<meta name="robots" content="noindex">') + (
+                "" if 'rel="canonical"' in txt else f'\n<link rel="canonical" href="{SITE_URL}">'
+            )
+            if add:
+                txt = txt.replace("<head>", "<head>" + add, 1)
+                mp.write_text(txt, encoding="utf-8")
+            key = f"{case}-{t.replace(':', '')}"
+            h = hashlib.sha256(txt.encode("utf-8")).hexdigest()[:10]
+            shutil.copyfile(mp, HASHED / f"{key}-{h}.html")
+            map_files[key] = f"m/{key}-{h}"
+    return map_files
+
+
+def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]:
+    """Return the landing page HTML and llms.txt for the built maps.
+
+    Parameters
+    ----------
+    maps
+        The built maps, from :func:`read_maps`.
+    now
+        Build time, for the structured data's dateModified.
+    built_txt
+        Build time as shown on the page ("Last updated ...").
+    """
+    pct, times = maps.pct, maps.times
+    got = retrieved_at()
+    got_txt = fmt_time(got) if got else "unknown"
+    n_models = model_count(maps.pages)
+    f_facts = forecast_summary.facts(
+        {(c, t): MAPS / map_name(c, t) for c, _, _ in CASES for t in times},
+        CASES,
+        times,
+        maps.default,
+    )
+    summary_html, faq, llms_txt = forecast_summary.render(
+        f_facts,
+        {
+            "pct": pct,
+            "got_txt": got_txt,
+            "n_models": n_models,
+            "built_txt": built_txt,
+            "site_name": SITE_NAME,
+            "site_url": SITE_URL,
+            "description": DESCRIPTION,
+            "lat": LAT,
+            "lon": LON,
+        },
+    )
+    shown = f_facts["shown_model"]
+    model_name = forecast_summary.MODEL_SHORT.get(shown, shown or "the first model")
+    cite_html = works_cited.render(
+        {
+            "pct": pct,
+            "n_models": n_models,
+            "got_txt": got_txt,
+            "shown_model": model_name,
+            "models": models_used(maps.pages),
+        },
+        SITE_URL,
+        built_txt,
+    )
+    og_image = OG_IMAGE_META if (SITE / "og.png").exists() else ""
+    who = (
+        ", ".join(
+            f'<a href="{html.escape(u)}" target="_blank" rel="noopener">{html.escape(n)}</a>'
+            for n, u in OFFICIAL_LINKS
+        )
+        or DEFAULT_WHO
+    )
+    values = {
+        "site_name": SITE_NAME,
+        "site_url": SITE_URL,
+        "description": html.escape(DESCRIPTION),
+        "og_image": og_image,
+        "twitter_card": "summary_large_image" if og_image else "summary",
+        "json_ld": json_ld(faq, now),
+        "time_options": "".join(
+            f'<option value="{t}"{" selected" if t == maps.default else ""}>{label(t)}</option>'
+            for t in times
+        ),
+        "case_options": "".join(
+            f'<option value="{c}"{" selected" if c == DEFAULT_CASE else ""}>'
+            f"{name}: {pct[c]} of the lead</option>"
+            for c, _, name in CASES
+        ),
+        "got_txt": got_txt,
+        "n_models": n_models,
+        "built_txt": built_txt,
+        "built_json": json.dumps(built_txt),
+        "pct_low": pct["low"],
+        "pct_mid": pct["mid"],
+        "pct_high": pct["high"],
+        "pct_permit": pct["permit"],
+        "about_who": forecast_summary.ABOUT_WHO,
+        "misting": forecast_summary.MISTING,
+        "advisory_url": forecast_summary.ADVISORY_URL,
+        "why_monday": forecast_summary.WHY_MONDAY,
+        "army_url": forecast_summary.ARMY_URL,
+        "army_cite": forecast_summary.ARMY_CITE,
+        "time_note": forecast_summary.time_note(built_txt).replace(
+            "(Iowa HHS fact sheet)", f"({forecast_summary.HHS_LINK})"
+        ),
+        "not_checked": forecast_summary.NOT_CHECKED,
+        "who": who,
+        "cite_html": cite_html,
+        "summary_html": summary_html,
+        "faq_html": "".join(f"<h3>{html.escape(q)}</h3><p>{html.escape(a)}</p>" for q, a in faq),
+        "map_files": json.dumps(write_hashed_maps(times), separators=(",", ":")),
+    }
+    template = Template(PAGE_TEMPLATE.read_text(encoding="utf-8").removesuffix("\n"))
+    return template.substitute(values), llms_txt
+
+
+def write_site(page: str, llms_txt: str, now: dt.datetime) -> Path:
+    """Write index.html and the small site files; return the index path."""
+    (SITE / "_headers").write_text(HEADERS, encoding="utf-8")
+    (SITE / "llms.txt").write_text(llms_txt, encoding="utf-8")
+    (SITE / "robots.txt").write_text(
+        f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}sitemap.xml\n", encoding="utf-8"
+    )
+    (SITE / "sitemap.xml").write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        f"  <url><loc>{SITE_URL}</loc><lastmod>{now.date().isoformat()}</lastmod></url>\n"
+        "</urlset>\n",
+        encoding="utf-8",
+    )
+    dest = SITE / "index.html"
+    dest.write_text(page, encoding="utf-8")
+    return dest
+
+
+# ---------------------------------------------------------------------------
+# Publishing
+
+
+def publish() -> None:
+    """Copy the site into the maintainer's publish folder."""
+    dest = publish_dir()
+    for name in PUBLISHED_FILES:
+        if (SITE / name).exists():
+            shutil.copyfile(SITE / name, dest / name)
+    for sub in ("maps", "m", "brand"):
+        if (SITE / sub).is_dir():
+            shutil.rmtree(dest / sub, ignore_errors=True)
+            shutil.copytree(SITE / sub, dest / sub)
+    print(f"copied index.html and maps/ to {dest}")
+
+
+def deploy(project: str) -> None:
+    """Upload the site to the Cloudflare Worker `project` with wrangler."""
+    with tempfile.TemporaryDirectory() as d:
+        # only site files: no dotfiles (.DS_Store), no caches
+        shutil.copytree(
+            SITE, Path(d) / "public", ignore=shutil.ignore_patterns(".*", "__pycache__", "*.pyc")
+        )
+        config = {
+            "name": project,
+            "compatibility_date": "2026-11-18",
+            "assets": {"directory": "./public"},
+            # Serve only on the custom domain: the workers.dev and preview
+            # addresses contain the account's username.
+            "workers_dev": False,
+            "preview_urls": False,
+        }
+        (Path(d) / "wrangler.jsonc").write_text(json.dumps(config, indent=2), encoding="utf-8")
+        cmd = ["npx", "--yes", WRANGLER, "deploy"]
+        print("running:", " ".join(cmd), "in", d)
+        # drop every Cloudflare credential from the shell so wrangler uses its own login
+        env = {k: v for k, v in os.environ.items() if not k.startswith(("CLOUDFLARE_", "CF_"))}
+        env["CLOUDFLARE_ACCOUNT_ID"] = cf_account_id()
+        env["WRANGLER_SEND_METRICS"] = "false"
+        # npx comes from PATH on purpose (the maintainer's Node install); fixed arguments.
+        if subprocess.run(cmd, env=env, cwd=d, check=False).returncode:  # noqa: S603
+            raise SystemExit(
+                "deploy failed (log in first: env -u CLOUDFLARE_API_TOKEN npx wrangler login)"
+            )
+
+
+# ---------------------------------------------------------------------------
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse the command line."""
+    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    ap.add_argument(
+        "--build", action="store_true", help="run the model for every case and time first"
+    )
+    ap.add_argument(
+        "--publish",
+        action="store_true",
+        help="also copy the site files to publish_dir from deploy.local.json",
+    )
+    ap.add_argument(
+        "--deploy",
+        action="store_true",
+        help=f"also upload the site to the Cloudflare Worker '{CF_PROJECT}'",
+    )
+    ap.add_argument("--project", default=CF_PROJECT, help="Cloudflare Worker name for --deploy")
+    return ap.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> None:
+    """Build (optionally), write, publish and deploy the site."""
+    a = parse_args(argv)
+    if a.build:
+        build()
+    maps = read_maps()
+    built_txt = fmt_time(dt.datetime.now(TZ))
+    now = dt.datetime.now(TZ)
+    page, llms_txt = render_page(maps, now, built_txt)
+    dest = write_site(page, llms_txt, now)
+    print(
+        f"wrote {dest} ({len(maps.times)} times x {len(CASES)} cases; lead in the air: "
+        + ", ".join(f"{n} {maps.pct[c]}" for c, _, n in CASES)
+        + ")"
+    )
+    if a.publish:
+        publish()
+    if a.deploy:
+        deploy(a.project)
+
+
+if __name__ == "__main__":
+    main()
