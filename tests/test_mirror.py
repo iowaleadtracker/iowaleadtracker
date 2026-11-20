@@ -25,7 +25,7 @@ def test_notice_names_the_main_site_and_why() -> None:
     assert out.count(mirror.NOTICE_ID) == 1
     assert out.index("<body") < out.index(mirror.NOTICE_ID) < out.index("<h1>")
     assert f'href="{mirror.CANONICAL_URL}"' in mirror.NOTICE
-    assert "Encrypted Client Hello" in mirror.NOTICE
+    assert "networks that block Cloudflare" in mirror.NOTICE
     assert "GitHub Pages hosts it" in mirror.NOTICE
 
 

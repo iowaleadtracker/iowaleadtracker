@@ -1,6 +1,6 @@
 """The GitHub Pages mirror of the site, for readers who can't reach iowaleadtracker.com.
 
-Some networks block sites behind Cloudflare's Encrypted Client Hello (ECH), so the same
+Some networks block Cloudflare or the domain itself, so the same
 build is also published at https://iowaleadtracker.github.io/. This module turns the built
 site (``outputs/site``) into that copy:
 
@@ -37,14 +37,14 @@ NOTICE = (
     f'<b>This is a mirror.</b> The main site is <a href="{CANONICAL_URL}">iowaleadtracker.com</a>. '
     "This copy, built from the same "
     f'<a href="{SOURCE_URL}" rel="noopener">source code</a>, is for people who can&rsquo;t '
-    "reach that address, for example on networks that block Cloudflare&rsquo;s Encrypted "
-    "Client Hello (ECH). GitHub Pages hosts it and sees visitors&rsquo; IP addresses; it "
+    "reach that address, for example on networks that block Cloudflare. GitHub Pages "
+    "hosts it and sees visitors&rsquo; IP addresses; it "
     "doesn&rsquo;t count visits.</div>"
 )
 LLMS_NOTE = (
     f"> Mirror: the canonical site is {CANONICAL_URL}. This copy at {MIRROR_URL} is built "
-    "from the same source for readers who can't reach that domain (for example where "
-    "Cloudflare's Encrypted Client Hello is blocked).\n"
+    "from the same source for readers who can't reach that domain (for example on "
+    "networks that block Cloudflare).\n"
 )
 
 

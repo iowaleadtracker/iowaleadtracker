@@ -161,6 +161,6 @@ def test_court_pause_note_in_about_dialog() -> None:
     about = page[start : page.index("</dialog>", start)]
     assert "<b>Court pause.</b> $court_pause" in about
     assert 'href="$court_url"' in about
-    assert fs.COURT_URL.startswith("https://www.kcci.com/")
-    assert "don\u2019t say how long" in fs.COURT_PAUSE
-    assert "in case it goes ahead" in fs.COURT_PAUSE
+    assert fs.COURT_URL.startswith("https://www.iowapublicradio.org/")
+    assert "until it rules on a request" in fs.COURT_PAUSE
+    assert "in case they do" in fs.COURT_PAUSE

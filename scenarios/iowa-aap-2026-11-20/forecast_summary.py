@@ -137,17 +137,18 @@ NOT_CHECKED = (
     "this map, and none of them have checked it."
 )
 ADVISORY_URL = "https://d34w7g4gy10iej.cloudfront.net/pubs/pdf_78366.pdf"
-# The Eighth Circuit stay, as reported by KCCI (updated Nov. 20, 2026, 10:59 a.m. CST).
+# The Eighth Circuit's order, as reported by Iowa Public Radio (Nov. 20, 2026, 11:45 a.m. CST).
 COURT_URL = (
-    "https://www.kcci.com/article/environmental-groups-sue-to-stop-planned-lead-azide-"
-    "detonation-at-iowa-ammunition-plant/74482081"
+    "https://www.iowapublicradio.org/ipr-news/2026-11-20/"
+    "court-injunction-army-planned-lead-azide-detonation"
 )
-COURT_CITE = "KCCI, Nov. 20, 2026"
+COURT_CITE = "Iowa Public Radio, Nov. 20, 2026"
 COURT_PAUSE = (
-    "On Nov. 20, 2026, the U.S. Eighth Circuit Court of Appeals granted an emergency motion "
-    "by environmental groups to pause the planned detonation, KCCI reported. Court documents "
-    "don\u2019t say how long the pause will last. These maps still model Monday, Nov. 23, "
-    "in case it goes ahead."
+    "Late on Nov. 19, 2026, the 8th U.S. Circuit Court of Appeals put the EPA\u2019s emergency "
+    "permit for the blasts on hold until it rules on a request by the Iowa Environmental "
+    "Council and the Sierra Club\u2019s Iowa chapter to block them, Iowa Public Radio "
+    "reported. The court could rule before Monday, so it\u2019s unclear whether the blasts "
+    "will go ahead then. These maps still model Monday, Nov. 23, in case they do."
 )
 # Army mitigation (public advisory, Nov. 18, 2026) and what runs of the model's spray option
 # showed with guessed setups (README, "Water misting and soil soaking"): 0.1% at 528 gal/min

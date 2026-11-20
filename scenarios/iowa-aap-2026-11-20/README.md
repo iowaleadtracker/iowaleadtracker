@@ -94,8 +94,8 @@ python3 make_map_picker.py --build --publish --deploy
 - `--mirror DIR` writes the GitHub Pages copy of the site to `DIR` (see `mirror.py`).
 
 **The mirror.** https://iowaleadtracker.github.io/ serves the same site for readers who
-can't reach iowaleadtracker.com, for example on networks that block Cloudflare's Encrypted
-Client Hello. The workflow in
+can't reach iowaleadtracker.com, for example on networks that block Cloudflare. The
+workflow in
 [iowaleadtracker/iowaleadtracker.github.io](https://github.com/iowaleadtracker/iowaleadtracker.github.io)
 checks out this repository's `main`, runs `make_map_picker.py --build --mirror`, and
 publishes the result: on demand, when `--deploy` starts it, and hourly whenever `main` has
