@@ -210,3 +210,55 @@ def test_wrangler_uses_only_this_projects_credentials() -> None:
     assert env["PATH"] == "/bin"
     env = site.wrangler_env({**shell, site.CF_TOKEN_ENV: "ours"}, "acct")
     assert env["CLOUDFLARE_API_TOKEN"] == "ours"  # noqa: S105 - a test value
+
+
+def _fake_gh(monkeypatch: pytest.MonkeyPatch, returncode: int, stderr: str = "") -> list[list[str]]:
+    """Stand in for `gh workflow run` (no network); return the commands it was given."""
+    calls: list[list[str]] = []
+
+    def run(cmd: list[str], **_: Any) -> Any:
+        calls.append(cmd)
+        return type("Done", (), {"returncode": returncode, "stderr": stderr, "stdout": ""})()
+
+    monkeypatch.setattr(site.shutil, "which", lambda _name: "/usr/bin/gh")
+    monkeypatch.setattr(site.subprocess, "run", run)
+    return calls
+
+
+def test_mirror_not_started_warns_in_actions(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """A deploy that can't start the mirror says so on the run, not just in the log."""
+    summary = tmp_path / "summary.md"
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary))
+    _fake_gh(monkeypatch, 4, "gh: To use GitHub CLI in a GitHub Actions workflow,\n set GH_TOKEN")
+    site.trigger_mirror()
+    out = capsys.readouterr().out
+    assert out.startswith("::warning title=Mirror not started::")
+    assert "set GH_TOKEN" in out
+    assert "\n" not in out.strip()  # one annotation line
+    assert "MIRROR_DISPATCH_TOKEN" in summary.read_text(encoding="utf-8")
+
+
+def test_mirror_without_gh(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
+    monkeypatch.setattr(site.shutil, "which", lambda _name: None)
+    site.trigger_mirror()
+    out = capsys.readouterr().out
+    assert out.startswith("note: could not start the mirror build (gh not found)")
+    assert "::warning" not in out
+
+
+def test_mirror_started(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    calls = _fake_gh(monkeypatch, 0)
+    site.trigger_mirror()
+    assert calls[0][1:] == ["workflow", "run", site.MIRROR_WORKFLOW, "-R", site.MIRROR_REPO]
+    out = capsys.readouterr().out
+    assert out.startswith("started the GitHub Pages mirror build")
+    assert "::warning" not in out
