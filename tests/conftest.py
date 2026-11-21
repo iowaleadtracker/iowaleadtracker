@@ -1,29 +1,35 @@
-"""Shared fixtures: make the scripts importable, keep tests offline, freeze the clock."""
+"""Shared fixtures: keep tests offline, freeze the clock, run the model."""
 
 from __future__ import annotations
 
 import datetime as dt
-import sys
+import json
 import types
-from pathlib import Path
 from typing import Any
 
 import pytest
 
-ROOT = Path(__file__).resolve().parents[1]
-SCENARIO = ROOT / "scenarios" / "iowa-aap-2026-11-20"
-for path in (ROOT, SCENARIO):
-    if str(path) not in sys.path:
-        sys.path.insert(0, str(path))
+import puff_dispersal as puff
+from dispersal import met, units
 
-import puff_dispersal as puff  # noqa: E402 - after the path setup above
-from dispersal import met, units  # noqa: E402
+from . import SCENARIO
 
 #: Modules that read the current time (to pick forecast or archive data, and to stamp
 #: downloads and pages).
 CLOCK_READERS = (puff, met, units)
-#: When the saved forecasts were downloaded (see met_cache/map_met_all.json).
-FORECAST_PULLED = dt.datetime(2026, 11, 21, 4, 16, tzinfo=dt.timezone.utc)
+SAVED_FORECASTS = SCENARIO / "met_cache" / "map_met_all.json"
+
+
+def _forecast_pulled() -> dt.datetime:
+    """Return the latest download stamp in the saved forecasts."""
+    with SAVED_FORECASTS.open(encoding="utf-8") as f:
+        stamps = json.load(f)["__fetched__"]
+    return max(dt.datetime.fromisoformat(v) for v in stamps.values())
+
+
+#: When the saved forecasts were downloaded, read from met_cache/map_met_all.json so a
+#: forecast refresh needs no edit here.
+FORECAST_PULLED = _forecast_pulled()
 
 
 def block_network(monkeypatch: pytest.MonkeyPatch) -> None:

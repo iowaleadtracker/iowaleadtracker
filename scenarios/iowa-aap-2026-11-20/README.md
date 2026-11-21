@@ -23,7 +23,7 @@ not official guidance.
 | `make_map_picker.py` | builds the iowaleadtracker.com site: every map, the picker page, publish and deploy |
 | `mirror.py` | turns the built site into the GitHub Pages mirror |
 | `index_template.html` | the landing page's HTML, CSS and script, filled in by `make_map_picker.py` |
-| `met_cache/map_met_all.json` | saved Open-Meteo forecasts for Monday at the new site (retrieved Nov 20, 10:14 p.m. CST) |
+| `met_cache/map_met_all.json` | saved Open-Meteo forecasts for Monday at the new site (download times in `__fetched__`; the page shows when) |
 | `make_icons.py` | builds the site icons and profile images |
 | `outputs/site/` | the site. The repo holds only the hand-made files (`og.png`, icons, `brand/`); `make_map_picker.py --build` writes the page and the maps |
 
@@ -316,12 +316,21 @@ time costs a few hundred.
 
 ## Refreshing on the day
 
-Forecasts improve as the event approaches, and the saved ones are from Nov 20, 10:14 p.m. CST.
+Forecasts improve as the event approaches. The page and `met_cache/map_met_all.json`
+(`__fetched__`) say when the saved ones were downloaded.
 
-1. Move `met_cache/map_met_all.json` into a dated `met_cache_retrieved_*` folder.
-2. Run `python3 make_map_picker.py --build --publish --deploy`.
+1. Run `python3 tools/refresh_forecast.py` from the repository root. It moves the saved
+   file into a dated `met_cache_retrieved_*` folder, downloads new forecasts, rebuilds the
+   site and regenerates the golden test numbers. It exits with status 3, keeping the
+   saved file, if the forecasts haven't changed.
+2. Check the news for the dated statements, open a pull request, and once it's merged run
+   `python3 make_map_picker.py --deploy`.
 3. HRRR and RRFS are already first in the list and take over as soon as they cover the
    whole run (HRRR reaches 18 to 48 hours ahead depending on the cycle).
+
+`.github/workflows/refresh-forecast.yml` does step 1 every three hours until the blast
+date and pushes the result to the `forecast-refresh` branch with a pull request. It
+never deploys.
 
 ## Limits
 

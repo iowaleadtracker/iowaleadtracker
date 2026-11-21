@@ -35,6 +35,7 @@ python3 tools/compare_site.py /tmp/site-before scenarios/iowa-aap-2026-11-20/out
 
 - **Don't change the maps by accident.** Any change to the numbers must be intended,
   explained in the commit, and reflected in `tests/data/` (`python -m tests.test_regression`).
+  A forecast refresh (`tools/refresh_forecast.py`) regenerates it for you.
 - **Don't weaken the warnings.** "Unofficial estimate, not from the Army or any government
   agency", "Don't use it to decide if you're safe", and the caveat after every list of
   towns must stay wherever they appear (page, map banner and legend, summary, FAQ,
@@ -54,5 +55,5 @@ python3 tools/compare_site.py /tmp/site-before scenarios/iowa-aap-2026-11-20/out
   news before a build that will be deployed or a push to `main`.
 - **Keep tests offline.** No test may use the network (see `tests/README.md`).
 - **Keep the saved forecasts as they are.** `met_cache/map_met_all.json` reproduces the
-  live site byte for byte. Refreshing it is a deliberate step (scenario README,
-  "Refreshing on the day"); older pulls go in an ignored `met_cache_retrieved_*` folder.
+  live site byte for byte. Refreshing it is a deliberate step (`tools/refresh_forecast.py`, or the
+  scheduled `refresh-forecast` workflow's pull request; scenario README, "Refreshing on the day"); older pulls go in an ignored `met_cache_retrieved_*` folder.
