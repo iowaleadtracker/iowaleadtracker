@@ -213,7 +213,7 @@ velocity, and the wet-scavenging coefficient.
 
 ## Worked scenario
 
-`scenarios/iowa-aap-2026-11-20/` holds a complete worked case: the map,
+`scenarios/iowa-aap-lead-azide/` holds a complete worked case: the map,
 saved weather forecasts, and a README on how to rerun all of it.
 
 ## Choosing a model for an explosive dispersal event

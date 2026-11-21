@@ -43,8 +43,8 @@ python3 puff_dispersal.py --lat 40.825518 --lon -91.266502 \
     --material lead-azide --explosive-mass 9700lb --specific-energy 1.64 \
     --shots 2 --confinement earth-covered --release-case fine-20 \
     --hours 8 --dt 60 --grid 360 --scale-min 0.15ug --decades 4 \
-    --met-cache scenarios/iowa-aap-2026-11-20/met_cache/map_met_all.json \
-    -o scenarios/iowa-aap-2026-11-20/outputs/map_noon.html
+    --met-cache scenarios/iowa-aap-lead-azide/met_cache/map_met_all.json \
+    -o scenarios/iowa-aap-lead-azide/outputs/map_noon.html
 ```
 
 Useful changes:

@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-SCENARIO = ROOT / "scenarios" / "iowa-aap-2026-11-20"
+SCENARIO = ROOT / "scenarios" / "iowa-aap-lead-azide"
 CACHE = SCENARIO / "met_cache" / "map_met_all.json"
 UNCHANGED = 3
 
