@@ -1,4 +1,4 @@
-# Downloads fresh weather forecasts for the Iowa scenario every three hours until the
+# Downloads fresh weather forecasts for the Iowa scenario every hour until the
 # planned blast, and proposes them as a pull request (main takes changes only through a
 # reviewed pull request). It never deploys; merging the pull request does
 # (.github/workflows/deploy.yml), so check the news before merging.
@@ -7,7 +7,7 @@ name: Refresh forecast
 on:
   workflow_dispatch:
   schedule:
-    - cron: "40 */3 * * *" # every three hours
+    - cron: "40 * * * *" # every hour
 
 permissions:
   contents: write # push the forecast-refresh branch

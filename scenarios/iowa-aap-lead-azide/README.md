@@ -337,7 +337,7 @@ Forecasts improve as the event approaches. The page and `met_cache/map_met_all.j
 3. HRRR and RRFS are already first in the list and take over as soon as they cover the
    whole run (HRRR reaches 18 to 48 hours ahead depending on the cycle).
 
-`.github/workflows/refresh-forecast.yml` does step 1 every three hours until the blast
+`.github/workflows/refresh-forecast.yml` does step 1 every hour until the blast
 date and pushes the result to the `forecast-refresh` branch with a pull request. It
 never deploys; merging the pull request does.
 
