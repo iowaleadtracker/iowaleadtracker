@@ -1,0 +1,86 @@
+# Deploys https://iowaleadtracker.com/ (Cloudflare Worker) from `main`: on every merge
+# that touches the model or the site, and by hand. It runs the full tests, builds the
+# site from the saved forecasts (no downloads), deploys, checks the live page, and starts
+# the GitHub Pages mirror build.
+#
+# Merging is deploying: check the news for the dated statements (court hold, Army time)
+# before merging. The deploy restamps "As of this update".
+#
+# Setup (the `cloudflare` environment, deployable from main only):
+#   secrets  CLOUDFLARE_API_TOKEN   Cloudflare API token, "Edit Cloudflare Workers" template
+#            CLOUDFLARE_ACCOUNT_ID  the account that holds the domain
+#            MIRROR_DISPATCH_TOKEN  optional: fine-grained GitHub token with Actions
+#                                   read/write on iowaleadtracker.github.io, to start the
+#                                   mirror at once (otherwise it notices within 15 minutes)
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "puff_dispersal.py"
+      - "dispersal/**"
+      - "template.html"
+      - "requirements.txt"
+      - "scenarios/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: cloudflare
+      url: https://iowaleadtracker.com/
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version-file: .python-version
+          cache: pip
+          cache-dependency-path: requirements*.txt
+
+      - name: Install
+        run: python -m pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Test (full suite)
+        run: python -m pytest -q
+
+      - name: Build the site from the saved forecasts
+        working-directory: scenarios/iowa-aap-lead-azide
+        run: python make_map_picker.py --build
+
+      - name: The build must not download weather
+        run: git diff --exit-code -- 'scenarios/*/met_cache/'
+
+      - name: Deploy to Cloudflare and start the mirror
+        working-directory: scenarios/iowa-aap-lead-azide
+        env:
+          IOWALEADTRACKER_CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          IOWALEADTRACKER_CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          IOWALEADTRACKER_MIRROR_TOKEN: ${{ secrets.MIRROR_DISPATCH_TOKEN }}
+        run: python make_map_picker.py --deploy
+
+      - name: Check the live page
+        working-directory: scenarios/iowa-aap-lead-azide
+        run: |
+          want=$(grep -o 'Forecast pulled [^;]*' outputs/site/index.html | head -1)
+          stamp=$(grep -o 'Last updated [^<]*' outputs/site/index.html | head -1)
+          for i in 1 2 3 4 5 6; do
+            page=$(curl -fsS "https://iowaleadtracker.com/?deploy=$GITHUB_RUN_ID-$i" || true)
+            if grep -qF "$want" <<<"$page" && grep -qF "$stamp" <<<"$page"; then
+              echo "live: $want; $stamp" | tee -a "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::iowaleadtracker.com doesn't show this build ($want; $stamp)"
+          exit 1

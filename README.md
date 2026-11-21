@@ -54,7 +54,8 @@ site on any date (the site build passes `--as-of`, the time they were pulled); d
 cache file to download fresh forecasts from Open-Meteo. A mirror of the site, built from
 this repository, is at https://iowaleadtracker.github.io/ for readers who can't reach
 iowaleadtracker.com. The `--publish`
-and `--deploy` options are for the maintainer; anyone else can serve `outputs/site/` from
+and `--deploy` options are for the maintainer (merges to `main` deploy through
+`.github/workflows/deploy.yml`); anyone else can serve `outputs/site/` from
 any static web host.
 
 ## Development

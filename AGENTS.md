@@ -44,15 +44,15 @@ python3 tools/compare_site.py /tmp/site-before scenarios/iowa-aap-lead-azide/out
   tells people to stay or leave; it points them to official instructions.
 - **Cite only what you can verify.** New sources go in `works_cited.py` and the docstrings
   that use them. If a source can't be checked, say so rather than cite it.
-- **Don't deploy or publish without the maintainer.** `make_map_picker.py --deploy` and
-  `--publish` change the live site. Pushing to `main` changes the public mirror at
-  iowaleadtracker.github.io within the hour (its workflow builds from `main`), so treat a
-  push like a deploy, and push before deploying so both copies match. Never commit `deploy.local.json` (it holds the
-  Cloudflare account ID; it is git-ignored).
+- **Don't deploy or publish without the maintainer.** Merging to `main` is deploying:
+  `.github/workflows/deploy.yml` deploys iowaleadtracker.com and the mirror at
+  iowaleadtracker.github.io rebuilds from `main` too. `make_map_picker.py --deploy` and
+  `--publish` (by hand) also change the live site. Never commit `deploy.local.json` (it
+  holds the Cloudflare account ID; it is git-ignored) or any token.
 - **Dated statements need rechecking.** Every build restamps "As of this update, the
   Army hasn't announced a Monday time itself"; the summary and About dialog also report the
   court pause and the Iowa HHS time. Check the
-  news before a build that will be deployed or a push to `main`.
+  news before merging to `main` (which deploys) or deploying by hand.
 - **Keep tests offline.** No test may use the network (see `tests/README.md`).
 - **Keep the saved forecasts as they are.** `met_cache/map_met_all.json` reproduces the
   live site byte for byte. Refreshing it is a deliberate step (`tools/refresh_forecast.py`, or the

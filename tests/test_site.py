@@ -191,3 +191,15 @@ def test_court_hold_leads_the_summary_and_faq(rendered: tuple[str, list, str]) -
     assert fs.COURT_PAUSE in when
     assert "on hold by court order" in llms
     assert fs.COURT_PAUSE in llms
+
+
+def test_wrangler_uses_only_this_projects_credentials() -> None:
+    """Shell Cloudflare credentials are dropped; the project's own token is passed on."""
+    shell = {"PATH": "/bin", "CLOUDFLARE_API_TOKEN": "other", "CF_API_KEY": "other"}
+    env = site.wrangler_env(shell, "acct")
+    assert env["CLOUDFLARE_ACCOUNT_ID"] == "acct"
+    assert "CLOUDFLARE_API_TOKEN" not in env  # wrangler's own login
+    assert "CF_API_KEY" not in env
+    assert env["PATH"] == "/bin"
+    env = site.wrangler_env({**shell, site.CF_TOKEN_ENV: "ours"}, "acct")
+    assert env["CLOUDFLARE_API_TOKEN"] == "ours"  # noqa: S105 - a test value
