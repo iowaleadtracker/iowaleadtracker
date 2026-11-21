@@ -24,7 +24,7 @@ officials.
 | `template.html` | the interactive map page the model fills in |
 | `MODEL.md` | how the model works, every option, and its limits |
 | `validate_explosion.py`, `validation_output.txt` | checks of the explosion source against published results |
-| `scenarios/iowa-aap-2026-11-20/` | the Iowa scenario: site build scripts, saved forecasts, and a README with every assumption and source |
+| `scenarios/iowa-aap-lead-azide/` | the Iowa scenario: site build scripts, saved forecasts, and a README with every assumption and source |
 | `tests/` | the test suite: physics checked against published values, model properties, a golden run, and the site's safety wording |
 | `tools/compare_site.py` | proves two site builds are identical apart from build times |
 | `tools/refresh_forecast.py` | downloads fresh forecasts, rebuilds the site and regenerates the golden test numbers |
@@ -42,11 +42,11 @@ python3 puff_dispersal.py --lat 40.825518 --lon -91.266502 \
     --material lead-azide --explosive-mass 9700lb --specific-energy 1.64 \
     --shots 2 --confinement earth-covered --hours 8 --dt 60 --grid 360 \
     --weather-model gfs_seamless \
-    --met-cache scenarios/iowa-aap-2026-11-20/met_cache/map_met_all.json \
+    --met-cache scenarios/iowa-aap-lead-azide/met_cache/map_met_all.json \
     -o permit-noon.html
 
 # the whole site: 4 cases x 7 blast times, written to scenarios/.../outputs/site/
-python3 scenarios/iowa-aap-2026-11-20/make_map_picker.py --build
+python3 scenarios/iowa-aap-lead-azide/make_map_picker.py --build
 ```
 
 Open the HTML file in a browser. The saved forecasts in `met_cache/` reproduce the live
@@ -82,7 +82,7 @@ and say why in the commit. For a change that should *not* alter any map, rebuild
 and compare it with a build from before the change:
 
 ```bash
-python3 tools/compare_site.py OLD/outputs/site scenarios/iowa-aap-2026-11-20/outputs/site
+python3 tools/compare_site.py OLD/outputs/site scenarios/iowa-aap-lead-azide/outputs/site
 ```
 
 ## Questions and corrections

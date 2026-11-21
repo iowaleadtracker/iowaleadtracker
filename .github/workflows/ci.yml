@@ -56,7 +56,7 @@ jobs:
           cache-dependency-path: requirements*.txt
       - run: python -m pip install -r requirements.txt
       - name: Build the site and the mirror from the saved forecasts
-        working-directory: scenarios/iowa-aap-2026-11-20
+        working-directory: scenarios/iowa-aap-lead-azide
         run: python make_map_picker.py --build --mirror "$RUNNER_TEMP/mirror"
       - name: The build must not download weather
         # A download would rewrite the saved forecasts, and the maps would no longer

@@ -1,7 +1,7 @@
 # Downloads fresh weather forecasts for the Iowa scenario every three hours until the
 # planned blast, and proposes them as a pull request (main takes changes only through a
 # reviewed pull request). It never deploys: after merging, check the news and run
-# `make_map_picker.py --deploy` (see scenarios/iowa-aap-2026-11-20/README.md).
+# `make_map_picker.py --deploy` (see scenarios/iowa-aap-lead-azide/README.md).
 name: Refresh forecast
 
 on:
@@ -82,7 +82,7 @@ jobs:
           python - > "$RUNNER_TEMP/body.md" <<'PY'
           import datetime as dt, html, json, re
           from pathlib import Path
-          scen = Path("scenarios/iowa-aap-2026-11-20")
+          scen = Path("scenarios/iowa-aap-lead-azide")
           stamps = json.loads((scen / "met_cache/map_met_all.json").read_text())["__fetched__"]
           pulled = min(dt.datetime.fromisoformat(v) for v in stamps.values())
           cst = pulled.astimezone(dt.timezone(dt.timedelta(hours=-6)))

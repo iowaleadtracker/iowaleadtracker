@@ -3,13 +3,13 @@
 Iowa Lead Tracker is an unofficial public model of where lead from a planned detonation
 could travel. People may read it during an emergency, so accuracy and clear warnings
 matter more than features. Start with `README.md`; the model is in `MODEL.md`, the
-Iowa scenario and every assumption in `scenarios/iowa-aap-2026-11-20/README.md`.
+Iowa scenario and every assumption in `scenarios/iowa-aap-lead-azide/README.md`.
 
 ## Layout
 
 - `puff_dispersal.py`: the command line and run driver.
 - `dispersal/`: the model, one module per topic (see its README).
-- `scenarios/iowa-aap-2026-11-20/`: the site build (`make_map_picker.py`), page text
+- `scenarios/iowa-aap-lead-azide/`: the site build (`make_map_picker.py`), page text
   (`forecast_summary.py`, `works_cited.py`, `index_template.html`) and saved forecasts.
 - `tests/`: the test suite (see its README). `tools/compare_site.py`: build comparison.
 
@@ -26,9 +26,9 @@ and pull request; `main` only takes changes through a reviewed pull request.
 If the change should not alter the published maps, prove it:
 
 ```bash
-cp -R scenarios/iowa-aap-2026-11-20/outputs/site /tmp/site-before   # build first if empty
-python3 scenarios/iowa-aap-2026-11-20/make_map_picker.py --build
-python3 tools/compare_site.py /tmp/site-before scenarios/iowa-aap-2026-11-20/outputs/site
+cp -R scenarios/iowa-aap-lead-azide/outputs/site /tmp/site-before   # build first if empty
+python3 scenarios/iowa-aap-lead-azide/make_map_picker.py --build
+python3 tools/compare_site.py /tmp/site-before scenarios/iowa-aap-lead-azide/outputs/site
 ```
 
 ## Rules

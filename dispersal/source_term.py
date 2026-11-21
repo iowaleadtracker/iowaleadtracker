@@ -64,7 +64,7 @@ RELEASE_CASES = {
     # All-fine cases: only this share of the tracked substance gets airborne, all of it in
     # respirable 'fume' sizes, and the rest stays at the site. Based on EPA AP-42 Ch. 15
     # blasting-cap tests (EO 07, 2008), where 96-98% of the airborne dust was PM-10 and
-    # lead was 27-51% of it. See scenarios/iowa-aap-2026-11-20/README.md.
+    # lead was 27-51% of it. See scenarios/iowa-aap-lead-azide/README.md.
     "ap42-floor": (
         "7% of the lead airborne, all respirable: the lowest share consistent with "
         "EPA AP-42 Ch. 15 blasting-cap tests (low case)"
