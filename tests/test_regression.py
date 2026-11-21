@@ -25,6 +25,10 @@ from .conftest import run_puff
 
 GOLDEN = Path(__file__).with_name("data") / "golden_permit_1200.json"
 FIELDS = ("conc", "peak", "dep", "m60", "env_conc", "env_dep")
+# Field totals and maxima agree to about 1e-6 between machines, not to the last bit: numpy
+# picks different vectorized math (exp, erf) for different CPUs, and a last-digit difference
+# can move a puff across a cutoff. Any real change to the model moves them far more.
+FIELD_REL = 1e-5
 
 
 def site_argv() -> list[str]:
@@ -63,8 +67,8 @@ def test_permit_noon_matches_golden() -> None:
     assert got["grid"][:2] == want["grid"][:2]
     assert got["grid"][2] == pytest.approx(want["grid"][2], rel=1e-12)
     for k, stats in want["fields"].items():
-        assert got["fields"][k]["sum"] == pytest.approx(stats["sum"], rel=1e-9), k
-        assert got["fields"][k]["max"] == pytest.approx(stats["max"], rel=1e-9), k
+        assert got["fields"][k]["sum"] == pytest.approx(stats["sum"], rel=FIELD_REL), k
+        assert got["fields"][k]["max"] == pytest.approx(stats["max"], rel=FIELD_REL), k
     for k, v in want["budget"].items():
         assert got["budget"][k] == pytest.approx(v, rel=1e-9), k
     assert got["centroid"] == pytest.approx(want["centroid"], abs=1e-5)
@@ -86,7 +90,7 @@ def test_saved_forecasts_replay_on_a_later_date(monkeypatch: pytest.MonkeyPatch)
     assert got["weather"] == want["weather"]
     assert got["models"] == want["models"]
     for k, stats in want["fields"].items():
-        assert got["fields"][k]["sum"] == pytest.approx(stats["sum"], rel=1e-9), k
+        assert got["fields"][k]["sum"] == pytest.approx(stats["sum"], rel=FIELD_REL), k
 
 
 def regenerate() -> None:

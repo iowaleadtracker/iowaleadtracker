@@ -38,6 +38,10 @@ jobs:
           cache: pip
           cache-dependency-path: requirements*.txt
       - run: python -m pip install -r requirements.txt -r requirements-dev.txt
+      - name: Machine (CPU and numpy SIMD features, for numeric differences)
+        run: |
+          grep -m1 "model name" /proc/cpuinfo
+          python -c "import numpy; numpy.show_runtime()"
       - name: pytest (full suite, offline)
         run: python -m pytest -q
 
