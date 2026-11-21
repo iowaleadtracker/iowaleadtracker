@@ -1,7 +1,7 @@
 # Downloads fresh weather forecasts for the Iowa scenario every three hours until the
 # planned blast, and proposes them as a pull request (main takes changes only through a
-# reviewed pull request). It never deploys: after merging, check the news and run
-# `make_map_picker.py --deploy` (see scenarios/iowa-aap-lead-azide/README.md).
+# reviewed pull request). It never deploys; merging the pull request does
+# (.github/workflows/deploy.yml), so check the news before merging.
 name: Refresh forecast
 
 on:
@@ -96,9 +96,8 @@ jobs:
                 "(golden numbers regenerated for it). The full test suite passed.\n")
           print("**Before merging**, check the news: the court hold, the Iowa HHS time and "
                 "\"the Army hasn't announced a Monday time\" (`forecast_summary.py`). "
-                "Merging updates the GitHub Pages mirror within the hour; "
-                "iowaleadtracker.com updates only with `make_map_picker.py --deploy`, "
-                "so deploy right after merging.")
+                "Merging deploys iowaleadtracker.com (the Deploy workflow) and updates "
+                "the GitHub Pages mirror.")
           print(f"\nTITLE=Refresh forecast (pulled {cst:%b %-d, %-I:%M %p} CST)")
           PY
           title=$(sed -n 's/^TITLE=//p' "$RUNNER_TEMP/body.md")

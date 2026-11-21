@@ -88,8 +88,13 @@ WRANGLER = "wrangler@4.165.0"  # pinned; bump on purpose, not on every deploy
 # The Cloudflare account that holds the domain. It is kept out of the repo: put
 # {"cf_account_id": "..."} in deploy.local.json next to this script (git-ignored), or set
 # IOWALEADTRACKER_CF_ACCOUNT_ID. Deploys always go to that account, even if the shell has
-# other Cloudflare credentials; wrangler uses its own login.
+# other Cloudflare credentials; wrangler uses its own login, or the API token in
+# IOWALEADTRACKER_CF_API_TOKEN (the GitHub Actions deploy, .github/workflows/deploy.yml).
 LOCAL_CONFIG = HERE / "deploy.local.json"
+CF_TOKEN_ENV = "IOWALEADTRACKER_CF_API_TOKEN"  # noqa: S105 - a variable name, not a secret
+# A GitHub token allowed to start the mirror workflow; the Actions deploy sets it, since
+# its own token can't start workflows in another repository. Locally, gh's login is used.
+MIRROR_TOKEN_ENV = "IOWALEADTRACKER_MIRROR_TOKEN"  # noqa: S105 - a variable name
 # Files besides maps/, m/ and brand/ that --publish copies.
 PUBLISHED_FILES = (
     "index.html",
@@ -625,10 +630,7 @@ def deploy(project: str) -> None:
         (Path(d) / "wrangler.jsonc").write_text(json.dumps(config, indent=2), encoding="utf-8")
         cmd = ["npx", "--yes", WRANGLER, "deploy"]
         print("running:", " ".join(cmd), "in", d)
-        # drop every Cloudflare credential from the shell so wrangler uses its own login
-        env = {k: v for k, v in os.environ.items() if not k.startswith(("CLOUDFLARE_", "CF_"))}
-        env["CLOUDFLARE_ACCOUNT_ID"] = cf_account_id()
-        env["WRANGLER_SEND_METRICS"] = "false"
+        env = wrangler_env(dict(os.environ), cf_account_id())
         # npx comes from PATH on purpose (the maintainer's Node install); fixed arguments.
         if subprocess.run(cmd, env=env, cwd=d, check=False).returncode:  # noqa: S603
             raise SystemExit(
@@ -636,25 +638,47 @@ def deploy(project: str) -> None:
             )
 
 
+def wrangler_env(environ: dict[str, str], account_id: str) -> dict[str, str]:
+    """Return the environment for wrangler: this project's account and credentials only.
+
+    Every Cloudflare variable from the shell is dropped, so a token for some other
+    account can't be used by accident. Wrangler then uses its own login, unless
+    ``IOWALEADTRACKER_CF_API_TOKEN`` holds a token (as in the GitHub Actions deploy).
+    """
+    env = {k: v for k, v in environ.items() if not k.startswith(("CLOUDFLARE_", "CF_"))}
+    env["CLOUDFLARE_ACCOUNT_ID"] = account_id
+    env["WRANGLER_SEND_METRICS"] = "false"
+    if environ.get(CF_TOKEN_ENV):
+        env["CLOUDFLARE_API_TOKEN"] = environ[CF_TOKEN_ENV]
+    return env
+
+
 def trigger_mirror() -> None:
     """Start the GitHub Pages mirror build, if the GitHub CLI is available.
 
     The mirror builds from the pushed ``main`` branch, so push before deploying for
-    both copies to match. Without ``gh`` the workflow still runs within the hour.
+    both copies to match. Without ``gh`` the workflow still notices within 15 minutes.
     """
     gh = shutil.which("gh")
     if not gh:
-        print(f"note: gh not found; the mirror ({MIRROR_REPO}) updates within the hour")
+        print(f"note: gh not found; the mirror ({MIRROR_REPO}) updates within 15 minutes")
         return
+    env = dict(os.environ)
+    if env.get(MIRROR_TOKEN_ENV):
+        env["GH_TOKEN"] = env[MIRROR_TOKEN_ENV]
     # Arguments are constants and the gh path comes from PATH; no shell is involved.
     r = subprocess.run(  # noqa: S603
         [gh, "workflow", "run", MIRROR_WORKFLOW, "-R", MIRROR_REPO],
         capture_output=True,
         text=True,
         check=False,
+        env=env,
     )
     if r.returncode:
-        print(f"note: could not start the mirror build: {r.stderr.strip()}")
+        print(
+            f"note: could not start the mirror build ({r.stderr.strip()}); "
+            "it checks for new commits every 15 minutes"
+        )
     else:
         print(f"started the GitHub Pages mirror build ({MIRROR_REPO}); it builds from main")
 

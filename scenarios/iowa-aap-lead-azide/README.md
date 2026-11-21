@@ -89,8 +89,17 @@ python3 make_map_picker.py --build --publish --deploy
   `deploy.local.json` next to the script (git-ignored), holding
   `{"cf_account_id": "..."}`, or `IOWALEADTRACKER_CF_ACCOUNT_ID` set. Wrangler is pinned
   (`WRANGLER` in the script), every `CLOUDFLARE_*`/`CF_*` variable is dropped from the
-  environment so wrangler uses its own login, and dotfiles are never uploaded. It then
-  starts the GitHub Pages mirror build (below) with `gh`, if installed.
+  environment so wrangler uses its own login (or the token in
+  `IOWALEADTRACKER_CF_API_TOKEN`), and dotfiles are never uploaded. It then starts the
+  GitHub Pages mirror build (below) with `gh`, if installed.
+
+**Deploying from GitHub.** `.github/workflows/deploy.yml` does the same on every merge to
+`main` that touches the model or the site, and on demand: full tests, an offline build
+from the saved forecasts, `--deploy`, then a check that the live page shows that build.
+Its secrets live in the `cloudflare` environment, which only `main` can use:
+`CLOUDFLARE_API_TOKEN` (the "Edit Cloudflare Workers" token template),
+`CLOUDFLARE_ACCOUNT_ID`, and optionally `MIRROR_DISPATCH_TOKEN` (a fine-grained GitHub token
+with Actions read and write on the mirror repository) to start the mirror at once.
 - `--mirror DIR` writes the GitHub Pages copy of the site to `DIR` (see `mirror.py`).
 
 **The mirror.** https://iowaleadtracker.github.io/ serves the same site for readers who
@@ -98,9 +107,9 @@ can't reach iowaleadtracker.com, for example on networks that block Cloudflare. 
 workflow in
 [iowaleadtracker/iowaleadtracker.github.io](https://github.com/iowaleadtracker/iowaleadtracker.github.io)
 checks out this repository's `main`, runs `make_map_picker.py --build --mirror`, and
-publishes the result: on demand, when `--deploy` starts it, and hourly whenever `main` has
-a new commit. It builds from the pushed `main`, so **push before deploying**, and remember
-that a push updates the public mirror within the hour. The mirror adds a notice naming the
+publishes the result: on demand, when `--deploy` starts it, and within 15 minutes whenever
+`main` has a new commit. It builds from `main`, so a merge updates the public mirror
+even without a deploy. The mirror adds a notice naming the
 main site, keeps `rel=canonical` on iowaleadtracker.com, carries the security policy in a
 `<meta>` tag (GitHub Pages can't send `_headers`), and fails without publishing if the build
 would have to download weather the saved forecasts don't have.
@@ -323,14 +332,14 @@ Forecasts improve as the event approaches. The page and `met_cache/map_met_all.j
    file into a dated `met_cache_retrieved_*` folder, downloads new forecasts, rebuilds the
    site and regenerates the golden test numbers. It exits with status 3, keeping the
    saved file, if the forecasts haven't changed.
-2. Check the news for the dated statements, open a pull request, and once it's merged run
-   `python3 make_map_picker.py --deploy`.
+2. Check the news for the dated statements and open a pull request. Merging it deploys
+   both sites (`.github/workflows/deploy.yml`).
 3. HRRR and RRFS are already first in the list and take over as soon as they cover the
    whole run (HRRR reaches 18 to 48 hours ahead depending on the cycle).
 
 `.github/workflows/refresh-forecast.yml` does step 1 every three hours until the blast
 date and pushes the result to the `forecast-refresh` branch with a pull request. It
-never deploys.
+never deploys; merging the pull request does.
 
 ## Limits
 
