@@ -147,8 +147,17 @@ COURT_PAUSE = (
     "Late on Nov. 19, 2026, the 8th U.S. Circuit Court of Appeals put the EPA\u2019s emergency "
     "permit for the blasts on hold until it rules on a request by the Iowa Environmental "
     "Council and the Sierra Club\u2019s Iowa chapter to block them, Iowa Public Radio "
-    "reported. The court could rule before Monday, so it\u2019s unclear whether the blasts "
-    "will go ahead then. These maps still model Monday, Nov. 23, in case they do."
+    "reported. In a court filing on Nov. 20, EPA suggested the Army may be able to go ahead "
+    "without the permit under EPA\u2019s emergency rules, KCRG reported. The court could rule "
+    "before Monday, so it\u2019s unclear whether the blasts will go ahead then. These maps "
+    "still model Monday, Nov. 23, in case they do."
+)
+EPA_FILING_URL = "https://www.kcrg.com/2026/11/20/appeals-court-pauses-lead-azide-detonation/"
+EPA_FILING_CITE = "KCRG, Nov. 20, 2026"
+COURT_SOURCES_TEXT = f"{COURT_CITE}, {COURT_URL}; {EPA_FILING_CITE}, {EPA_FILING_URL}"
+COURT_SOURCES_HTML = (
+    f'<a href="{COURT_URL}" rel="noopener">{COURT_CITE}</a>; '
+    f'<a href="{EPA_FILING_URL}" rel="noopener">{EPA_FILING_CITE}</a>'
 )
 # Army mitigation (public advisory, Nov. 18, 2026) and what runs of the model's spray option
 # showed with guessed setups (README, "Water misting and soil soaking"): 0.1% at 528 gal/min
@@ -203,7 +212,7 @@ SOURCES = [
         "- Amount, 9,700 lb in 68 barrels (Army spokesperson): "
         "https://abcnews.com/US/iowa-army-plant-lead-azide-detonation/story?id=138261613"
     ),
-    f"- Two detonations around noon: Iowa HHS fact sheet, {HHS_URL}",
+    f"- Two detonations Monday at approximately noon: Iowa HHS fact sheet for Nov. 23, {HHS_URL}",
     (
         "- EPA dust-lead action levels, 40 CFR 745.227: "
         "https://www.ecfr.gov/current/title-40/part-745/section-745.227"
@@ -416,13 +425,16 @@ def facts(
 # Wording
 
 
+TIME_HEAD = "Planned for about noon."
+
+
 def time_note(built_txt: str) -> str:
-    """Say no time is announced for Monday; the map assumes noon, from the Nov. 20 plan."""
+    """Say the state gives about noon for Monday, the Army hasn't itself, and what's modeled."""
     return (
-        f"As of this update ({built_txt}), the Army hasn\u2019t announced a time for "  # noqa: S608 - prose, not SQL
-        "Monday\u2019s detonation. This map assumes around noon, modeling blasts from 11 a.m. "
-        "to 12:30 p.m., because the Army had set the original Friday, Nov. 20 detonation for "
-        "about noon (Iowa HHS fact sheet)."
+        "Iowa HHS\u2019s fact sheet for Nov. 23 says the Army plans two detonations on Monday "
+        "at approximately noon (Iowa HHS fact sheet). As of this update "
+        f"({built_txt}), the Army hasn\u2019t announced a Monday time itself. This map models "
+        "blasts from 11 a.m. to 12:30 p.m."
     )
 
 
@@ -654,10 +666,10 @@ def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text) -> str:
   <h2 id="summary-h">What the forecast shows</h2>
   <p class="caveat"><b>{CAVEAT}</b></p>
   <h3>Court hold</h3>
-  <p>{COURT_PAUSE} Source: <a href="{COURT_URL}" rel="noopener">{COURT_CITE}</a>.</p>
+  <p>{COURT_PAUSE} Sources: {COURT_SOURCES_HTML}.</p>
   <h3>Why the map is for Monday, Nov. 23</h3>
   <p>{WHY_MONDAY} Source: <a href="{ARMY_URL}" rel="noopener">{ARMY_CITE}</a>.</p>
-  <p><b>No time set yet.</b> {no_time}</p>
+  <p><b>{TIME_HEAD}</b> {no_time}</p>
   <h3>Where the cloud goes</h3>
   <p>{wind_sentence(f)} {path_sentence(f)} Other blast times in the window follow almost the same
     path. {t.forecast_line}</p>
@@ -705,7 +717,7 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text) -> list[tuple[str, str]]:
         (
             "When is the lead azide blast at the Iowa Army Ammunition Plant?",
             "The Army planned it for Monday, Nov. 23, 2026, but a court has put it on hold. "
-            f"{COURT_PAUSE} (Source: {COURT_CITE}, {COURT_URL}.) {WHY_MONDAY} (Source: "
+            f"{COURT_PAUSE} (Sources: {COURT_SOURCES_TEXT}.) {WHY_MONDAY} (Source: "
             f"{ARMY_CITE}, {ARMY_URL}.) " + time_note(ctx["built_txt"]),
         ),
         (
@@ -761,7 +773,7 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text) -> str:
                 f"({ctx['lat']:.4f}, {ctx['lon']:.4f}). Blast times modeled: 11 a.m. to 12:30 p.m. "
                 "CST."
             ),
-            f"- Court hold: {COURT_PAUSE} Source: {COURT_CITE}, {COURT_URL}",
+            f"- Court hold: {COURT_PAUSE} Sources: {COURT_SOURCES_TEXT}",
             f"- Time: {time_note(ctx['built_txt'])} Source: {HHS_URL}",
             f"- Why Monday: {WHY_MONDAY} Source: {ARMY_CITE}, {ARMY_URL}",
             f"- Water misting: {MISTING} Source: Army public advisory, {ADVISORY_URL}",

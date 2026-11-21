@@ -23,7 +23,7 @@ from dispersal import met, units  # noqa: E402
 #: downloads and pages).
 CLOCK_READERS = (puff, met, units)
 #: When the saved forecasts were downloaded (see met_cache/map_met_all.json).
-FORECAST_PULLED = dt.datetime(2026, 11, 20, 16, 1, tzinfo=dt.timezone.utc)
+FORECAST_PULLED = dt.datetime(2026, 11, 21, 4, 16, tzinfo=dt.timezone.utc)
 
 
 def block_network(monkeypatch: pytest.MonkeyPatch) -> None:

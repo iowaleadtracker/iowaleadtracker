@@ -23,7 +23,7 @@ not official guidance.
 | `make_map_picker.py` | builds the iowaleadtracker.com site: every map, the picker page, publish and deploy |
 | `mirror.py` | turns the built site into the GitHub Pages mirror |
 | `index_template.html` | the landing page's HTML, CSS and script, filled in by `make_map_picker.py` |
-| `met_cache/map_met_all.json` | saved Open-Meteo forecasts for Monday at the new site (retrieved Nov 20, 10:00 a.m. CST) |
+| `met_cache/map_met_all.json` | saved Open-Meteo forecasts for Monday at the new site (retrieved Nov 20, 10:14 p.m. CST) |
 | `make_icons.py` | builds the site icons and profile images |
 | `outputs/site/` | the site. The repo holds only the hand-made files (`og.png`, icons, `brand/`); `make_map_picker.py --build` writes the page and the maps |
 
@@ -316,7 +316,7 @@ time costs a few hundred.
 
 ## Refreshing on the day
 
-Forecasts improve as the event approaches, and the saved ones are from Nov 20, 10:00 a.m. CST.
+Forecasts improve as the event approaches, and the saved ones are from Nov 20, 10:14 p.m. CST.
 
 1. Move `met_cache/map_met_all.json` into a dated `met_cache_retrieved_*` folder.
 2. Run `python3 make_map_picker.py --build --publish --deploy`.
@@ -359,7 +359,7 @@ Lead azide, Pb(N3)2, is 71.1% lead by weight, so 9,700 lb holds about 6,900 lb o
   factor of 1.00, an air edge of 0.18 µg/m³, and ground lines at 5 and 100 µg/ft² (stay indoors;
   also wet-clean); weather limits bar surface wind under 1 or over 15 mph, winds over 30 mph at
   1,000-3,000 ft, rain, storms, fog, overcast under 2,000 ft, night, and inversions.
-- **Two detonations around noon:** Iowa HHS fact sheet,
+- **Two detonations Monday at approximately noon:** Iowa HHS fact sheet for Nov. 23 (revised Nov. 20, 10:36 a.m.),
   https://hhs.iowa.gov/media/19822/download?inline=.
 - The Army's FAQ, open house slides and environmental handout (linked from
   https://response.epa.gov/site/site_profile.aspx?site_id=17211) give no weight.

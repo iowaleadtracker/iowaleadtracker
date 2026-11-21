@@ -46,7 +46,8 @@ python3 tools/compare_site.py /tmp/site-before scenarios/iowa-aap-2026-11-20/out
   push like a deploy, and push before deploying so both copies match. Never commit `deploy.local.json` (it holds the
   Cloudflare account ID; it is git-ignored).
 - **Dated statements need rechecking.** Every build restamps "As of this update, the
-  Army hasn't announced a time"; the About dialog also reports the court pause. Check the
+  Army hasn't announced a Monday time itself"; the summary and About dialog also report the
+  court pause and the Iowa HHS time. Check the
   news before a build that will be deployed or a push to `main`.
 - **Keep tests offline.** No test may use the network (see `tests/README.md`).
 - **Keep the saved forecasts as they are.** `met_cache/map_met_all.json` reproduces the
