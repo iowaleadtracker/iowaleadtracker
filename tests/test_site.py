@@ -160,7 +160,9 @@ def test_court_pause_note_in_about_dialog() -> None:
     start = page.index('<dialog id="note"')  # the "About this map" dialog
     about = page[start : page.index("</dialog>", start)]
     assert "<b>Court pause.</b> $court_pause" in about
-    assert 'href="$court_url"' in about
+    assert "$court_sources" in about
+    assert f'href="{fs.COURT_URL}"' in fs.COURT_SOURCES_HTML
+    assert f'href="{fs.EPA_FILING_URL}"' in fs.COURT_SOURCES_HTML
     assert fs.COURT_URL.startswith("https://www.iowapublicradio.org/")
     assert "until it rules on a request" in fs.COURT_PAUSE
     assert "in case they do" in fs.COURT_PAUSE

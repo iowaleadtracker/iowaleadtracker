@@ -117,7 +117,7 @@ REFERENCES = [
     "guide. LLNL-SM-636474, Lawrence Livermore National Laboratory, "
     + _a("https://narac.llnl.gov/hotspot")
     + ".",
-    "Iowa HHS, 2026: Planned lead azide detonation fact sheet&mdash;November 20, 2026. Iowa "
+    "Iowa HHS, 2026: Planned lead azide detonation fact sheet&mdash;November 23, 2026. Iowa "
     f"Department of Health and Human Services, {ACCESSED}, "
     + _a("https://hhs.iowa.gov/media/19822/download?inline=")
     + ".",
