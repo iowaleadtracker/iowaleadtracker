@@ -148,10 +148,13 @@ COURT_PAUSE = (
     "permit for the blasts on hold until it rules on a request by the Iowa Environmental "
     "Council and the Sierra Club\u2019s Iowa chapter to block them, Iowa Public Radio "
     "reported. In a court filing on Nov. 20, EPA suggested the Army may be able to go ahead "
-    "without the permit under EPA\u2019s emergency rules, KCRG reported. The court could rule "
+    "without the permit under EPA\u2019s emergency rules, and the Justice Department said it "
+    "would file its full response by Sunday, Nov. 22, KCRG reported. The court could rule "
     "before Monday, so it\u2019s unclear whether the blasts will go ahead then. These maps "
     "still model Monday, Nov. 23, in case they do."
 )
+# EPA's and the Justice Department's Nov. 20 filing (the response-by-Sunday date is also in
+# Iowa Capital Dispatch, Nov. 20, 2026; both checked Nov. 21, 2026).
 EPA_FILING_URL = "https://www.kcrg.com/2026/11/20/appeals-court-pauses-lead-azide-detonation/"
 EPA_FILING_CITE = "KCRG, Nov. 20, 2026"
 COURT_SOURCES_TEXT = f"{COURT_CITE}, {COURT_URL}; {EPA_FILING_CITE}, {EPA_FILING_URL}"
