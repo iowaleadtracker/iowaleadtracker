@@ -256,6 +256,12 @@ def blast_label(t: str) -> str:
     return f"{d.strftime('%A')}, {month} {d.day}, {d.year}, {label(t)} {d.strftime('%Z')}"
 
 
+def pulled_label(d: dt.datetime) -> str:
+    """Return a forecast download time as 'Nov. 21, 12:49 p.m. CST' for the map legend."""
+    month = AP_MONTHS.get(d.strftime("%B"), d.strftime("%B"))
+    return f"{month} {d.day}, {label(d.strftime('%H:%M'))} {d.strftime('%Z')}"
+
+
 def retrieved_at() -> dt.datetime | None:
     """Return when the forecasts behind the maps were downloaded.
 
@@ -308,6 +314,7 @@ def build() -> None:
     # date (or another machine) uses the same weather and makes the same maps.
     pulled = retrieved_at() if MET_CACHE.exists() else None
     as_of = ("--as-of", pulled.isoformat()) if pulled else ()
+    forecast = f", forecast from {pulled_label(pulled)}" if pulled else ""
     for case, release_case, name in CASES:
         for t in TIMES:
             cmd = [
@@ -320,7 +327,7 @@ def build() -> None:
                 *MODEL_ARGS,
                 *as_of,
                 *("--home-url", SITE_URL),
-                *("--legend-note", f"{name} case, blast {blast_label(t)}"),
+                *("--legend-note", f"{name} case, blast {blast_label(t)}{forecast}"),
                 *("-o", str(MAPS / map_name(case, t))),
             ]
             print(f"building {case} {t}", flush=True)

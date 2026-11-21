@@ -126,6 +126,13 @@ def test_blast_label_names_the_date() -> None:
     assert site.blast_label("11:15") == "Monday, Nov. 23, 2026, 11:15 a.m. CST"
 
 
+def test_pulled_label_for_the_legend() -> None:
+    pulled = dt.datetime(2026, 11, 21, 12, 49, tzinfo=site.TZ)
+    assert site.pulled_label(pulled) == "Nov. 21, 12:49 p.m. CST"
+    morning = dt.datetime(2026, 11, 21, 8, 8, tzinfo=site.TZ)
+    assert site.pulled_label(morning) == "Nov. 21, 8:08 a.m. CST"
+
+
 def test_default_case_is_the_conservative_one() -> None:
     """Showing the EPA permit case first avoids a false sense of security."""
     assert site.DEFAULT_CASE == "permit"
