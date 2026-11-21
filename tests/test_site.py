@@ -127,9 +127,9 @@ def test_blast_label_names_the_date() -> None:
 
 
 def test_pulled_label_for_the_legend() -> None:
-    pulled = dt.datetime(2026, 11, 21, 18, 49, tzinfo=dt.UTC).astimezone(site.TZ)
+    pulled = dt.datetime(2026, 11, 21, 12, 49, tzinfo=site.TZ)
     assert site.pulled_label(pulled) == "Nov. 21, 12:49 p.m. CST"
-    morning = dt.datetime(2026, 11, 21, 14, 8, tzinfo=dt.UTC).astimezone(site.TZ)
+    morning = dt.datetime(2026, 11, 21, 8, 8, tzinfo=site.TZ)
     assert site.pulled_label(morning) == "Nov. 21, 8:08 a.m. CST"
 
 
