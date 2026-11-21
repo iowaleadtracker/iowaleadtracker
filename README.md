@@ -27,6 +27,7 @@ officials.
 | `scenarios/iowa-aap-2026-11-20/` | the Iowa scenario: site build scripts, saved forecasts, and a README with every assumption and source |
 | `tests/` | the test suite: physics checked against published values, model properties, a golden run, and the site's safety wording |
 | `tools/compare_site.py` | proves two site builds are identical apart from build times |
+| `tools/refresh_forecast.py` | downloads fresh forecasts, rebuilds the site and regenerates the golden test numbers |
 
 ## Run it
 

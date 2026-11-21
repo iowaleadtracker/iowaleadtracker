@@ -1,0 +1,130 @@
+# Downloads fresh weather forecasts for the Iowa scenario every three hours until the
+# planned blast, and proposes them as a pull request (main takes changes only through a
+# reviewed pull request). It never deploys: after merging, check the news and run
+# `make_map_picker.py --deploy` (see scenarios/iowa-aap-2026-11-20/README.md).
+name: Refresh forecast
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "40 */3 * * *" # every three hours
+
+permissions:
+  contents: write # push the forecast-refresh branch
+  pull-requests: write # open or update its pull request
+  actions: write # start CI on that branch (pushes made by this workflow don't)
+
+concurrency:
+  group: refresh-forecast
+  cancel-in-progress: false
+
+env:
+  BRANCH: forecast-refresh
+  LAST_DAY: "2026-11-23" # the planned blast (Central time); no refreshes after it
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Still before the blast?
+        id: when
+        run: |
+          today=$(TZ=America/Chicago date +%F)
+          if [[ "$today" > "$LAST_DAY" ]]; then
+            echo "It's $today, after $LAST_DAY; nothing to refresh." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "go=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "go=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v7
+        if: steps.when.outputs.go == 'true'
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v7
+        if: steps.when.outputs.go == 'true'
+        with:
+          python-version-file: .python-version
+          cache: pip
+          cache-dependency-path: requirements*.txt
+
+      - name: Install
+        if: steps.when.outputs.go == 'true'
+        run: python -m pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Download forecasts and rebuild
+        id: refresh
+        if: steps.when.outputs.go == 'true'
+        run: |
+          set +e
+          python tools/refresh_forecast.py
+          code=$?
+          set -e
+          if [ "$code" -eq 3 ]; then
+            echo "The forecasts haven't changed since the saved pull." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          elif [ "$code" -ne 0 ]; then
+            exit "$code"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Test
+        if: steps.refresh.outputs.changed == 'true'
+        run: python -m pytest -q
+
+      - name: Push the branch and open or update the pull request
+        if: steps.refresh.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - > "$RUNNER_TEMP/body.md" <<'PY'
+          import datetime as dt, html, json, re
+          from pathlib import Path
+          scen = Path("scenarios/iowa-aap-2026-11-20")
+          stamps = json.loads((scen / "met_cache/map_met_all.json").read_text())["__fetched__"]
+          pulled = min(dt.datetime.fromisoformat(v) for v in stamps.values())
+          cst = pulled.astimezone(dt.timezone(dt.timedelta(hours=-6)))
+          page = (scen / "outputs/site/index.html").read_text(encoding="utf-8")
+          i = page.find("<h3>Where the cloud goes</h3>")
+          j = page.find("<h3>", i + 4)
+          text = html.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", page[i:j]))).strip()
+          print(f"Forecasts pulled {cst:%b %-d, %Y, %-I:%M %p} CST by the scheduled refresh.\n")
+          print(f"> {text}\n")
+          print("Changes: `met_cache/map_met_all.json` (the new pull) and `tests/data/` "
+                "(golden numbers regenerated for it). The full test suite passed.\n")
+          print("**Before merging**, check the news: the court hold, the Iowa HHS time and "
+                "\"the Army hasn't announced a Monday time\" (`forecast_summary.py`). "
+                "Merging updates the GitHub Pages mirror within the hour; "
+                "iowaleadtracker.com updates only with `make_map_picker.py --deploy`, "
+                "so deploy right after merging.")
+          print(f"\nTITLE=Refresh forecast (pulled {cst:%b %-d, %-I:%M %p} CST)")
+          PY
+          title=$(sed -n 's/^TITLE=//p' "$RUNNER_TEMP/body.md")
+          sed -i '/^TITLE=/d' "$RUNNER_TEMP/body.md"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c "$BRANCH"
+          git add scenarios/*/met_cache/map_met_all.json tests/data/
+          git commit -q -F - <<MSG
+          $title
+
+          Downloaded by .github/workflows/refresh-forecast.yml; golden regression
+          data regenerated for the new saved forecasts (intended map change).
+          MSG
+          git push --force origin "$BRANCH"
+          gh workflow run ci.yml --ref "$BRANCH"
+
+          if gh pr view "$BRANCH" --json state --jq .state 2>/dev/null | grep -q OPEN; then
+            gh pr edit "$BRANCH" --title "$title" --body-file "$RUNNER_TEMP/body.md"
+            echo "Updated $(gh pr view "$BRANCH" --json url --jq .url)" >> "$GITHUB_STEP_SUMMARY"
+          elif gh pr create --base main --head "$BRANCH" --title "$title" \
+              --body-file "$RUNNER_TEMP/body.md"; then
+            echo "Opened $(gh pr view "$BRANCH" --json url --jq .url)" >> "$GITHUB_STEP_SUMMARY"
+          else
+            url="https://github.com/${GITHUB_REPOSITORY}/compare/main...${BRANCH}?expand=1"
+            echo "::warning::Couldn't open the pull request (allow GitHub Actions to create pull requests in the repository settings). Open it by hand: $url"
+            echo "Pushed \`$BRANCH\`. Open the pull request by hand: $url" >> "$GITHUB_STEP_SUMMARY"
+          fi
