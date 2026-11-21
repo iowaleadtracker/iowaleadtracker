@@ -20,6 +20,9 @@ pre-commit run --all-files   # ruff, ruff format, mypy, fast tests, file checks
 pytest                       # the full suite
 ```
 
+CI (`.github/workflows/ci.yml`) runs both, plus an offline site build, on every push
+and pull request; `main` only takes changes through a reviewed pull request.
+
 If the change should not alter the published maps, prove it:
 
 ```bash

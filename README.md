@@ -67,6 +67,9 @@ pytest                      # everything, including full model runs (about 10 s)
 pre-commit run --all-files  # every check on every file
 ```
 
+GitHub Actions (`.github/workflows/ci.yml`) runs the same hooks, the full test suite and
+an offline build of the site on every branch push and pull request.
+
 Linting is ruff with nearly every rule on, plus mypy type checking; the settings and the
 reasons for each exception are in `pyproject.toml`. Tests never use the network: model
 runs use a steady wind or the saved forecasts. Physics tests name the published source
