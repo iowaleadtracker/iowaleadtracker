@@ -660,15 +660,38 @@ def wrangler_env(environ: dict[str, str], account_id: str) -> dict[str, str]:
     return env
 
 
+def _mirror_not_started(reason: str) -> None:
+    """Say that the mirror build wasn't started, loudly when running in GitHub Actions.
+
+    In Actions this is a warning annotation on the run and a line in its summary, so a
+    green deploy doesn't hide a mirror that will lag until its own schedule notices.
+    """
+    msg = (
+        f"could not start the mirror build ({reason}); it waits for its own "
+        "15-minute check, which GitHub may delay or skip. Set MIRROR_DISPATCH_TOKEN "
+        f"or run {MIRROR_WORKFLOW} in {MIRROR_REPO} by hand."
+    )
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        print(f"::warning title=Mirror not started::{msg}")
+        summary = os.environ.get("GITHUB_STEP_SUMMARY")
+        if summary:
+            with Path(summary).open("a", encoding="utf-8") as f:
+                f.write(f"**Mirror not started:** {msg}\n")
+    else:
+        print(f"note: {msg}")
+
+
 def trigger_mirror() -> None:
     """Start the GitHub Pages mirror build, if the GitHub CLI is available.
 
     The mirror builds from the pushed ``main`` branch, so push before deploying for
-    both copies to match. Without ``gh`` the workflow still notices within 15 minutes.
+    both copies to match. Otherwise the mirror's own 15-minute check should notice, but
+    GitHub runs scheduled workflows on a best-effort basis, so a failure to start it is
+    reported (a warning in GitHub Actions).
     """
     gh = shutil.which("gh")
     if not gh:
-        print(f"note: gh not found; the mirror ({MIRROR_REPO}) updates within 15 minutes")
+        _mirror_not_started("gh not found")
         return
     env = dict(os.environ)
     if env.get(MIRROR_TOKEN_ENV):
@@ -682,10 +705,7 @@ def trigger_mirror() -> None:
         env=env,
     )
     if r.returncode:
-        print(
-            f"note: could not start the mirror build ({r.stderr.strip()}); "
-            "it checks for new commits every 15 minutes"
-        )
+        _mirror_not_started(" ".join(r.stderr.split()) or f"gh exited {r.returncode}")
     else:
         print(f"started the GitHub Pages mirror build ({MIRROR_REPO}); it builds from main")
 

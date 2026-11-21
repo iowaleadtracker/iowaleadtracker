@@ -11,7 +11,9 @@
 #            CLOUDFLARE_ACCOUNT_ID  the account that holds the domain
 #            MIRROR_DISPATCH_TOKEN  optional: fine-grained GitHub token with Actions
 #                                   read/write on iowaleadtracker.github.io, to start the
-#                                   mirror at once (otherwise it notices within 15 minutes)
+#                                   mirror at once. Without it the run shows a "Mirror not
+#                                   started" warning and the mirror waits for its own
+#                                   15-minute check, which GitHub may delay or skip.
 name: Deploy
 
 on:
