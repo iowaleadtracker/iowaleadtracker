@@ -12,6 +12,12 @@ Steps:
 
 It doesn't commit, deploy or publish. Run it by hand (``python tools/refresh_forecast.py``)
 or let ``.github/workflows/refresh-forecast.yml`` run it and open a pull request.
+
+With ``--unlisted`` it does the same for the unlisted Tuesday/Wednesday maps
+(``scenarios/iowa-aap-lead-azide/unlisted.py``): their own saved file
+(``met_cache/unlisted_forecasts.json``), only those maps rebuilt (``unlisted.py --build``),
+no golden data. The first run, before that file exists, downloads it. The
+``refresh-unlisted.yml`` workflow runs it by hand only.
 """
 
 from __future__ import annotations
@@ -28,6 +34,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 SCENARIO = ROOT / "scenarios" / "iowa-aap-lead-azide"
 CACHE = SCENARIO / "met_cache" / "map_met_all.json"
+UNLISTED_CACHE = SCENARIO / "met_cache" / "unlisted_forecasts.json"
 UNCHANGED = 3
 
 
@@ -54,32 +61,47 @@ def run(args: list[str], cwd: Path, env: dict[str, str] | None = None) -> None:
     subprocess.run(args, cwd=cwd, env=env, check=True)  # noqa: S603 - our own scripts
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     """Refresh the forecasts; return 0 when they changed, 3 when they didn't."""
-    if not CACHE.exists():
-        raise SystemExit(f"no saved forecasts at {CACHE}")
-    old_text = CACHE.read_text(encoding="utf-8")
+    args = sys.argv[1:] if argv is None else argv
+    if any(a != "--unlisted" for a in args):
+        raise SystemExit("usage: refresh_forecast.py [--unlisted]")
+    if "--unlisted" in args:
+        return refresh(UNLISTED_CACHE, ["unlisted.py", "--build"], golden=False)
+    return refresh(CACHE, ["make_map_picker.py", "--build"], golden=True)
+
+
+def refresh(cache: Path, build: list[str], *, golden: bool) -> int:
+    """Download new forecasts into ``cache`` and rebuild; 0 when changed, 3 when not."""
+    if not cache.exists():
+        if golden:
+            raise SystemExit(f"no saved forecasts at {cache}")
+        run([sys.executable, *build], cwd=SCENARIO)  # first download
+        print(f"downloaded {cache.relative_to(ROOT)}", file=sys.stderr)
+        return 0
+    old_text = cache.read_text(encoding="utf-8")
     old = json.loads(old_text)
     archive = SCENARIO / archive_name(old)
     archive.mkdir(exist_ok=True)
-    kept = archive / CACHE.name
-    shutil.move(CACHE, kept)
+    kept = archive / cache.name
+    shutil.move(cache, kept)
     print(f"moved the saved forecasts to {kept.relative_to(ROOT)}", file=sys.stderr)
 
     try:
-        run([sys.executable, "make_map_picker.py", "--build"], cwd=SCENARIO)
+        run([sys.executable, *build], cwd=SCENARIO)
     except subprocess.CalledProcessError:
-        shutil.copy2(kept, CACHE)  # leave the repo as it was
+        shutil.copy2(kept, cache)  # leave the repo as it was
         raise
 
-    new = json.loads(CACHE.read_text(encoding="utf-8"))
+    new = json.loads(cache.read_text(encoding="utf-8"))
     if forecasts(new) == forecasts(old):
-        CACHE.write_text(old_text, encoding="utf-8")
+        cache.write_text(old_text, encoding="utf-8")
         print("the forecasts haven't changed; kept the saved file", file=sys.stderr)
         return UNCHANGED
 
-    env = {**os.environ, "PYTHONPATH": str(SCENARIO)}
-    run([sys.executable, "-m", "tests.test_regression"], cwd=ROOT, env=env)
+    if golden:
+        env = {**os.environ, "PYTHONPATH": str(SCENARIO)}
+        run([sys.executable, "-m", "tests.test_regression"], cwd=ROOT, env=env)
     pulled = min(fetched(new)).astimezone(dt.timezone(dt.timedelta(hours=-6)))
     print(f"new forecasts pulled {pulled:%Y-%m-%d %H:%M} CST", file=sys.stderr)
     return 0

@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Any
 import forecast_summary as fs
 import make_map_picker as site
 import pytest
+import unlisted
 import works_cited
 
 from dispersal.output import load_template, write_html
@@ -301,3 +302,11 @@ def test_mirror_started(
     out = capsys.readouterr().out
     assert out.startswith("started the GitHub Pages mirror build")
     assert "::warning" not in out
+
+
+@pytest.mark.slow
+def test_public_text_does_not_mention_unlisted_maps(rendered: tuple[str, list, str]) -> None:
+    """The summary, FAQ and llms.txt never point to the unlisted Tuesday/Wednesday maps."""
+    summary, faq, llms = rendered
+    for text in (summary, llms, *(a for _, a in faq)):
+        assert not unlisted.links_to_unlisted(text)
