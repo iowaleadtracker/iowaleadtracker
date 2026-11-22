@@ -1,7 +1,7 @@
 # Downloads GFS and ECMWF forecasts for the staged Tuesday/Wednesday maps
 # (scenarios/iowa-aap-lead-azide/staged.py) and proposes them as a pull request. Runs
-# every hour through Wednesday, Nov. 25, at :10 (the main refresh runs at :40), and by
-# hand: Actions → "Refresh staged forecast" → Run workflow. It never deploys;
+# every 6 hours through Wednesday, Nov. 25, at :10 (the main refresh runs every 3 hours
+# at :40), and by hand: Actions → "Refresh staged forecast" → Run workflow. It never deploys;
 # merging the pull request does (.github/workflows/deploy.yml), so check the news first.
 #
 # It touches only met_cache/staged_forecasts.json, so the public maps and the hourly
@@ -11,7 +11,7 @@ name: Refresh staged forecast
 on:
   workflow_dispatch:
   schedule:
-    - cron: "10 * * * *" # every hour; GitHub may delay or skip scheduled runs
+    - cron: "10 */6 * * *" # GFS and ECMWF update every 6 hours; GitHub may delay or skip runs
 
 permissions:
   contents: write # push the forecast-refresh-staged branch

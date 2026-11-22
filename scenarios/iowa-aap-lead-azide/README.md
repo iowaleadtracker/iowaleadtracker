@@ -345,7 +345,7 @@ Forecasts improve as the event approaches. The page and `met_cache/map_met_all.j
 3. RRFS is first in the list and takes over from GFS as soon as it covers the whole run.
    HRRR (18 to 48 hours ahead depending on the cycle) is in the spread but not shown.
 
-`.github/workflows/refresh-forecast.yml` does step 1 every hour through
+`.github/workflows/refresh-forecast.yml` does step 1 every 3 hours through
 Wednesday, Nov. 25, and pushes the result to the `forecast-refresh` branch with a pull request. It
 never deploys; merging the pull request does.
 
@@ -377,7 +377,7 @@ and the sitemap, robots.txt, `llms.txt` and the GitHub Pages mirror leave them o
 **Not private:** this repository is public, so the address is in it.
 
 Their forecasts are saved in `met_cache/staged_forecasts.json`, which the hourly refresh
-doesn't touch. Their own workflow refreshes them every hour through Wednesday, Nov. 25,
+doesn't touch. Their own workflow refreshes them every 6 hours through Wednesday, Nov. 25,
 or by hand: Actions → "Refresh staged forecast" → Run workflow
 (`.github/workflows/refresh-staged.yml`, which runs `tools/refresh_forecast.py
 --staged`). It opens a pull request on the `forecast-refresh-staged` branch; merging it

@@ -11,7 +11,8 @@ from __future__ import annotations
 import datetime as dt
 import json
 import re
-from typing import TYPE_CHECKING, Any
+from pathlib import Path
+from typing import Any
 
 import forecast_summary as fs
 import make_map_picker as site
@@ -22,9 +23,6 @@ import works_cited
 from dispersal.output import load_template, write_html
 
 from .conftest import run_puff
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 NOT_SAFE = "Don't use"
 UNOFFICIAL = "unofficial estimate, not from the Army or any government agency"
@@ -528,3 +526,16 @@ def test_long_links_wrap_on_phones() -> None:
     css = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
     assert re.search(r"\.doc a \{[^}]*overflow-wrap: anywhere", css)
     assert re.search(r"dialog a \{[^}]*overflow-wrap: anywhere", css)
+
+
+def test_refresh_pr_text_finds_the_path_section(
+    rendered: tuple[str, list, str], rendered_two_days: tuple[str, list, str]
+) -> None:
+    """The refresh quotes "Where the cloud goes" in its PR; the heading gains a day."""
+    root = Path(__file__).resolve().parent.parent
+    workflow = (root / ".github/workflows/refresh-forecast.yml").read_text(encoding="utf-8")
+    m = re.search(r'page\.find\("([^"]+)"\)', workflow)
+    assert m
+    for summary, _, _ in (rendered, rendered_two_days):
+        assert m.group(1) in summary
+    assert "<h3>Where the cloud goes on Monday, Nov. 23</h3>" in rendered_two_days[0]
