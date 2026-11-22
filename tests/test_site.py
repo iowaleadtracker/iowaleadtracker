@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import re
 from typing import TYPE_CHECKING, Any
 
 import forecast_summary as fs
@@ -520,3 +521,10 @@ def test_link_to_a_day_not_in_this_update_says_so() -> None:
     assert '<p class="daynote" id="daynote" role="status" hidden></p>' in page
     assert "const ALL_DAYS = $all_days;" in page
     assert "maps aren\\u2019t in this update; showing " in page
+
+
+def test_long_links_wrap_on_phones() -> None:
+    """Source URLs shown as link text (the court filing) mustn't push the page sideways."""
+    css = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    assert re.search(r"\.doc a \{[^}]*overflow-wrap: anywhere", css)
+    assert re.search(r"dialog a \{[^}]*overflow-wrap: anywhere", css)
