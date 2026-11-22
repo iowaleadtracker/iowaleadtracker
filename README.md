@@ -70,7 +70,7 @@ pre-commit run --all-files  # every check on every file
 ```
 
 GitHub Actions (`.github/workflows/ci.yml`) runs the same hooks, the full test suite and
-an offline build of the site on every branch push and pull request.
+an offline build of the site on every branch push (a pull request shows its branch's checks).
 
 Linting is ruff with nearly every rule on, plus mypy type checking; the settings and the
 reasons for each exception are in `pyproject.toml`. Tests never use the network: model
