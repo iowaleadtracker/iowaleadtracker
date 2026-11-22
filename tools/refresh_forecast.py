@@ -17,7 +17,7 @@ With ``--staged`` it does the same for the staged Tuesday/Wednesday maps
 (``scenarios/iowa-aap-lead-azide/staged.py``): their own saved file
 (``met_cache/staged_forecasts.json``), only those maps rebuilt (``staged.py --build``),
 no golden data. The first run, before that file exists, downloads it. The
-``refresh-staged.yml`` workflow runs it by hand only.
+``refresh-staged.yml`` workflow runs it every hour through Wednesday, Nov. 25, and by hand.
 """
 
 from __future__ import annotations

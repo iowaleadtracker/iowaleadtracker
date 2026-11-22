@@ -1,5 +1,5 @@
-# Downloads fresh weather forecasts for the Iowa scenario every hour until the
-# planned blast, and proposes them as a pull request (main takes changes only through a
+# Downloads fresh weather forecasts for the Iowa scenario every hour through
+# Wednesday, Nov. 25 (the court filing leaves the blast day open), and proposes them as a pull request (main takes changes only through a
 # reviewed pull request). It never deploys; merging the pull request does
 # (.github/workflows/deploy.yml), so check the news before merging.
 name: Refresh forecast
@@ -20,7 +20,7 @@ concurrency:
 
 env:
   BRANCH: forecast-refresh
-  LAST_DAY: "2026-11-23" # the planned blast (Central time); no refreshes after it
+  LAST_DAY: "2026-11-25" # Wednesday, the last day any map models (Central time); none after it
 
 jobs:
   refresh:

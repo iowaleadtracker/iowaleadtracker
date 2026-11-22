@@ -5,16 +5,13 @@ from __future__ import annotations
 import json
 import re
 import sys
-from typing import TYPE_CHECKING
+from pathlib import Path
 
 import forecast_summary
 import make_map_picker as site
 import mirror
 import pytest
 import staged
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 MAP = "<!doctype html>\n<html><head>\n<title>map</title></head><body>map</body></html>"
 
@@ -154,3 +151,14 @@ def test_refresh_tool_arguments() -> None:
 def test_missing_staged_file_has_no_time(tmp_path: Path) -> None:
     """A missing staged file never borrows the public forecasts' time."""
     assert site.retrieved_at(tmp_path / "staged_forecasts.json") is None
+
+
+def test_refreshes_run_through_wednesday() -> None:
+    """Both refreshes run on a schedule through the last day the maps model."""
+    root = Path(__file__).resolve().parent.parent / ".github" / "workflows"
+    last = staged.DAYS[-1]
+    for name in ("refresh-forecast.yml", "refresh-staged.yml"):
+        text = (root / name).read_text(encoding="utf-8")
+        assert f'LAST_DAY: "{last}"' in text, name
+        assert "schedule:" in text, name
+        assert "workflow_dispatch:" in text, name
