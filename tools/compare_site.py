@@ -27,7 +27,7 @@ VOLATILE = [
     re.compile(r'const BUILT = "[^"]*";'),
     re.compile(r"<lastmod>[^<]*</lastmod>"),
     re.compile(r'"dateModified":\s*"[^"]*"'),
-    re.compile(r"m/([a-z]+-\d{4})-[0-9a-f]{10}"),
+    re.compile(r"m/((?:\d{4}-\d\d-\d\d-)?[a-z]+-\d{4})-[0-9a-f]{10}"),
 ]
 
 

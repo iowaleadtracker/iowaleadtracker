@@ -356,11 +356,20 @@ def days_to_build() -> list[str]:
     return days
 
 
+def remove_days_not_built(days: list[str]) -> None:
+    """Delete maps of extra days not being built: left over, they'd mix two forecasts."""
+    for day, _ in DAYS:
+        if day not in days and day != DATE:
+            for old in MAPS.glob(f"{day}-*.html"):
+                old.unlink()
+
+
 def build() -> None:
     """Run the model for every day, case and time, one after another (Open-Meteo limits)."""
     MAPS.mkdir(parents=True, exist_ok=True)
     py = find_python()
     days = days_to_build()
+    remove_days_not_built(days)
     # Replay the saved forecasts as of when they were pulled, so a rebuild on any later
     # date (or another machine) uses the same weather and makes the same maps.
     pulled = retrieved_at() if MET_CACHE.exists() else None
@@ -410,11 +419,29 @@ class Maps:
     times: list[str]  # the planned day's (DATE)
     default: str
     days: dict[str, list[str]] = field(default_factory=dict)  # every built day's times
+    pages_by_day: dict[str, list[str]] = field(default_factory=dict)
 
 
 def complete_times(day: str) -> list[str]:
     """Return the blast times on ``day`` with a map for every case."""
     return [t for t in TIMES if all((MAPS / map_name(c, t, day)).exists() for c, _, _ in CASES)]
+
+
+def days_shown(times: list[str]) -> dict[str, list[str]]:
+    """Return {day: blast times} for the planned day and every other day built in full.
+
+    Another day is shown only with every one of the planned day's blast times, so the
+    page's one time menu always has a map for the day chosen.
+    """
+    days = {DATE: times}
+    for day, _ in DAYS:
+        if day == DATE or not complete_times(day):
+            continue
+        if complete_times(day) == times:
+            days[day] = times
+        else:
+            print(f"maps for {day} don't cover every blast time; leaving that day out")
+    return days
 
 
 def read_maps() -> Maps:
@@ -425,23 +452,24 @@ def read_maps() -> Maps:
     for t in TIMES:
         if t not in times:
             print(f"missing a map for {t}, leaving it out")
-    days = {DATE: times}
-    for day, _ in DAYS:
-        if day != DATE and complete_times(day):
-            days[day] = complete_times(day)
+    days = days_shown(times)
     pages: list[str] = []
+    pages_by_day: dict[str, list[str]] = {}
     share: dict[str, float] = {}
     for day, day_times in days.items():
         for case, _, _ in CASES:
             for t in day_times:
                 page = (MAPS / map_name(case, t, day)).read_text(encoding="utf-8")
                 pages.append(page)
+                pages_by_day.setdefault(day, []).append(page)
                 m = re.search(r'"airborneFraction":\s*([0-9.eE+-]+)', page)
                 if m and case not in share:
                     share[case] = float(m.group(1))
     pct = {c: f"{share.get(c, 0) * 100:.0f}%" for c, _, _ in CASES}
     default = DEFAULT if DEFAULT in times else times[0]
-    return Maps(pages=pages, pct=pct, times=times, default=default, days=days)
+    return Maps(
+        pages=pages, pct=pct, times=times, default=default, days=days, pages_by_day=pages_by_day
+    )
 
 
 def models_used(pages: list[str]) -> list[str]:
@@ -570,7 +598,7 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
     pct, times = maps.pct, maps.times
     got = retrieved_at()
     got_txt = fmt_time(got) if got else "unknown"
-    n_models = model_count(maps.pages)
+    n_models = model_count(maps.pages_by_day.get(DATE, maps.pages))  # the planned day's
     f_facts = forecast_summary.facts(
         {(c, t): MAPS / map_name(c, t) for c, _, _ in CASES for t in times},
         CASES,
@@ -590,13 +618,7 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
             default,
         )
         f_day["day"] = day_label(day)
-        f_day["n_models"] = model_count(
-            [
-                (MAPS / map_name(c, t, day)).read_text(encoding="utf-8")
-                for c, _, _ in CASES
-                for t in day_times
-            ]
-        )
+        f_day["n_models"] = model_count(maps.pages_by_day[day])
         more.append(f_day)
     summary_html, faq, llms_txt = forecast_summary.render(
         f_facts,
@@ -615,12 +637,29 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
     )
     shown = f_facts["shown_model"]
     model_name = forecast_summary.MODEL_SHORT.get(shown, shown or "the first model")
+    cite_models, cite_count = model_name, n_models
+    if more:  # name each day's shown model and count in the References
+        per_day = [(day_label(DATE).split(",")[0], model_name, n_models)] + [
+            (
+                m["day"].split(",")[0],
+                forecast_summary.MODEL_SHORT.get(
+                    m["shown_model"], m["shown_model"] or "the first model"
+                ),
+                m["n_models"],
+            )
+            for m in more
+        ]
+        cite_models = ", ".join(f"{model} ({wd})" for wd, model, _ in per_day)
+        counts = {n for _, _, n in per_day}
+        cite_count = (
+            n_models if len(counts) == 1 else " and ".join(f"{n} ({wd})" for wd, _, n in per_day)
+        )
     cite_html = works_cited.render(
         {
             "pct": pct,
-            "n_models": n_models,
+            "n_models": cite_count,
             "got_txt": got_txt,
-            "shown_model": model_name,
+            "shown_model": cite_models,
             "models": models_used(maps.pages),
         },
         SITE_URL,
@@ -647,10 +686,11 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         ),
         "day_hidden": "" if len(maps.days) > 1 else " hidden",
         "day_codes": json.dumps({d: c for d, c in DAYS if d in maps.days}),
+        "all_days": json.dumps({c: day_label(d) for d, c in DAYS}),
         "header_days": (
-            "Monday, Nov. 23"
+            day_label(DATE)
             if len(maps.days) == 1
-            else "Monday, Nov. 23 (also modeled: "
+            else f"{day_label(DATE)} (also modeled: "
             + ", ".join(day_label(d) for d in maps.days if d != DATE)
             + ")"
         ),

@@ -309,7 +309,8 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
         (
             "Weather",
             (
-                f"{ctx['n_models'].capitalize()} forecast models pulled {ctx['got_txt']}; "
+                f"{ctx['n_models'][:1].upper() + ctx['n_models'][1:]} forecast models pulled "
+                f"{ctx['got_txt']}; "
                 f"{html.escape(ctx['shown_model'])} shown; &plusmn;5&deg; direction error around "
                 "each"
             ),

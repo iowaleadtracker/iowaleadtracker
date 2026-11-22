@@ -391,7 +391,7 @@ def test_second_day_in_summary_faq_and_llms(rendered_two_days: tuple[str, list, 
     tue = answers["What if the blasts are on Tuesday, Nov. 24?"]
     assert fs.TOWN_CAVEAT in tue
     assert fs.CAVEAT in tue
-    assert "- Tuesday, Nov. 24 (also modeled, 11 a.m. to 12:30 p.m.):" in llms
+    assert f"- Tuesday, Nov. 24 (also modeled): {fs.SAME_WINDOW}" in llms
 
 
 @pytest.mark.slow
@@ -404,7 +404,10 @@ def test_one_day_has_no_second_day_text(rendered: tuple[str, list, str]) -> None
 
 def test_court_paragraph_names_the_days_modeled() -> None:
     """The court paragraph cites the Tuesday filing and names only the days built."""
-    assert "emergency exclusion despite the hold, KCCI reported" in fs.COURT_HOLD
+    assert "still plans a controlled blast after the court paused the permit, KCCI reported" in (
+        fs.COURT_HOLD
+    )
+    assert "emergency exclusion" not in fs.COURT_HOLD  # not in the part of the article checked
     assert fs.WHY_TUESDAY == (
         "Federal court records filed late Saturday, Nov. 21, say the Department of the Army plans "
         "to detonate the lead azide on or by Tuesday, Nov. 24, KCCI reported."
@@ -446,3 +449,72 @@ def test_summary_why_section_cites_both(rendered: tuple[str, list, str]) -> None
         in dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
     )
     assert f"- Why Tuesday: {fs.WHY_TUESDAY} Source: {fs.EPA_FILING_CITE}" in llms
+
+
+@pytest.mark.slow
+def test_two_days_label_monday_and_keep_notes(rendered_two_days: tuple[str, list, str]) -> None:
+    """With a second day, Monday's parts say Monday and each day keeps its notes."""
+    summary, faq, llms = rendered_two_days
+    for h in ("Where the cloud goes", "How far lead on the ground could reach", "Lead in the air"):
+        assert f"<h3>{h} on Monday, Nov. 23</h3>" in summary
+    # Monday's permit weather stays with the Army comparison, before the Tuesday section
+    assert (
+        summary.index("For noon Monday the forecast")
+        < summary.index("If the blasts are on Tuesday")
+        < summary.index("For noon Tuesday the forecast")
+    )
+    tue = summary[summary.index("If the blasts are on Tuesday") :]
+    assert fs.REACH_NOTE in tue
+    assert fs.SAME_WINDOW in tue
+    assert "change before the blasts" in summary
+    assert "before Monday" not in summary
+    answers = dict(faq)
+    assert answers["Where could the lead go?"].startswith("For Monday, Nov. 23: ")
+    assert fs.REACH_NOTE in answers["What if the blasts are on Tuesday, Nov. 24?"]
+    assert "- Monday, Nov. 23: Forecast pulled" in llms
+
+
+def _fake_map(models: list[str]) -> str:
+    return '{"airborneFraction": 0.07, "models":' + json.dumps(models) + "}"
+
+
+def test_read_maps_days_and_model_counts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A day missing any blast time is left out; each day counts its own models."""
+    monkeypatch.setattr(site, "MAPS", tmp_path)
+    seven = site.WEATHER.split(",")[:7]
+    for c, _, _ in site.CASES:
+        for t in site.TIMES:
+            (tmp_path / site.map_name(c, t)).write_text(_fake_map(seven), encoding="utf-8")
+            if t != "12:30":  # Tuesday is missing one time
+                (tmp_path / site.map_name(c, t, "2026-11-24")).write_text(
+                    _fake_map(seven[1:]), encoding="utf-8"
+                )
+    maps = site.read_maps()
+    assert list(maps.days) == ["2026-11-23"]  # partly built Tuesday left out
+    for c, _, _ in site.CASES:
+        (tmp_path / site.map_name(c, "12:30", "2026-11-24")).write_text(
+            _fake_map(seven[1:]), encoding="utf-8"
+        )
+    maps = site.read_maps()
+    assert list(maps.days) == ["2026-11-23", "2026-11-24"]
+    assert maps.days["2026-11-24"] == site.TIMES
+    assert site.model_count(maps.pages_by_day["2026-11-23"]) == "seven"
+    assert site.model_count(maps.pages_by_day["2026-11-24"]) == "six"
+
+
+def test_remove_days_not_built(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(site, "MAPS", tmp_path)
+    (tmp_path / "permit-1200.html").write_text("mon", encoding="utf-8")
+    (tmp_path / "2026-11-24-permit-1200.html").write_text("old tue", encoding="utf-8")
+    site.remove_days_not_built(["2026-11-24", "2026-11-23"])
+    assert (tmp_path / "2026-11-24-permit-1200.html").exists()
+    site.remove_days_not_built(["2026-11-23"])
+    assert not (tmp_path / "2026-11-24-permit-1200.html").exists()
+    assert (tmp_path / "permit-1200.html").exists()  # the planned day is never removed
+
+
+def test_link_to_a_day_not_in_this_update_says_so() -> None:
+    page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    assert '<p class="daynote" id="daynote" role="status" hidden></p>' in page
+    assert "const ALL_DAYS = $all_days;" in page
+    assert "maps aren\\u2019t in this update; showing " in page
