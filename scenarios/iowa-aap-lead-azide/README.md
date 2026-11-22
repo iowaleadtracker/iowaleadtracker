@@ -341,6 +341,22 @@ Forecasts improve as the event approaches. The page and `met_cache/map_met_all.j
 date and pushes the result to the `forecast-refresh` branch with a pull request. It
 never deploys; merging the pull request does.
 
+### Staged Tuesday/Wednesday maps
+
+`staged.py` builds a separate set of maps for blasts on Tuesday, Nov. 24 and Wednesday,
+Nov. 25, 11 a.m. to 1 p.m. every 30 minutes, all four cases, with only GFS and ECMWF
+(GFS shown, ECMWF as the weather-model spread). They sit in their own folder on the main
+site (`staged.DIR_NAME`), which nothing links to; the pages and the folder are noindex,
+and the sitemap, robots.txt, `llms.txt` and the GitHub Pages mirror leave them out.
+**Not private:** this repository is public, so the address is in it.
+
+Their forecasts are saved in `met_cache/staged_forecasts.json`, which the hourly refresh
+doesn't touch. Refresh them by hand: Actions → "Refresh staged forecast" → Run workflow
+(`.github/workflows/refresh-staged.yml`, which runs `tools/refresh_forecast.py
+--staged`). It opens a pull request on the `forecast-refresh-staged` branch; merging it
+deploys. Until that file exists, the build makes no staged maps. Locally,
+`python3 staged.py --build` builds only these maps.
+
 ## Limits
 
 - The share of lead that gets airborne is the largest unknown; the three release cases

@@ -36,6 +36,7 @@ from zoneinfo import ZoneInfo
 
 import forecast_summary
 import mirror
+import staged
 import works_cited
 
 HERE = Path(__file__).resolve().parent
@@ -141,6 +142,9 @@ HEADERS = f"""/*
   Cache-Control: public, max-age=31536000, immutable
 /llms.txt
   Content-Type: text/plain; charset=utf-8
+/{staged.DIR_NAME}/*
+  X-Robots-Tag: noindex, nofollow
+  Referrer-Policy: no-referrer
 """
 OG_IMAGE_META = (
     f'\n<meta property="og:image" content="{SITE_URL}og.png">'
@@ -262,21 +266,26 @@ def pulled_label(d: dt.datetime) -> str:
     return f"{month} {d.day}, {label(d.strftime('%H:%M'))} {d.strftime('%Z')}"
 
 
-def retrieved_at() -> dt.datetime | None:
-    """Return when the forecasts behind the maps were downloaded.
+def retrieved_at(cache: Path = MET_CACHE) -> dt.datetime | None:
+    """Return when the forecasts behind the maps (or another saved file) were downloaded.
 
     That is the oldest fetch stamp in the cache, or the cache file's write time for caches
     made before stamps were kept.
     """
     try:
-        with MET_CACHE.open(encoding="utf-8") as f:
+        with cache.open(encoding="utf-8") as f:
             stamps = json.load(f).get("__fetched__") or {}
         if stamps:
             oldest = min(dt.datetime.fromisoformat(v) for v in stamps.values())
             return oldest.astimezone(TZ)
     except (OSError, ValueError):
         pass
-    files = [MET_CACHE] if MET_CACHE.exists() else sorted(MET_CACHE.parent.glob("*.json"))
+    if cache.exists():
+        files = [cache]
+    elif cache != MET_CACHE:  # another file (the staged maps'): no stand-in
+        return None
+    else:  # older per-model caches, never the staged maps' own file
+        files = [f for f in sorted(cache.parent.glob("*.json")) if f != staged.CACHE]
     if not files:
         return None
     return dt.datetime.fromtimestamp(min(f.stat().st_mtime for f in files), TZ)
@@ -338,6 +347,8 @@ def build() -> None:
                     print("  " + line)
             if r.returncode:
                 raise SystemExit(f"model run failed for {case} {t}:\n{r.stderr[-2000:]}")
+    if staged.CACHE.exists():  # the staged Tuesday/Wednesday maps, from their own file
+        staged.build()
 
 
 # ---------------------------------------------------------------------------
@@ -619,7 +630,7 @@ def publish() -> None:
     for name in PUBLISHED_FILES:
         if (SITE / name).exists():
             shutil.copyfile(SITE / name, dest / name)
-    for sub in ("maps", "m", "brand"):
+    for sub in ("maps", "m", "brand", staged.DIR_NAME):
         if (SITE / sub).is_dir():
             shutil.rmtree(dest / sub, ignore_errors=True)
             shutil.copytree(SITE / sub, dest / sub)
@@ -756,6 +767,9 @@ def main(argv: list[str] | None = None) -> None:
     now = dt.datetime.now(TZ)
     page, llms_txt = render_page(maps, now, built_txt)
     dest = write_site(page, llms_txt, now)
+    n_staged = staged.write_pages()
+    if n_staged:
+        print(f"wrote {n_staged} staged maps to {staged.OUT}")
     print(
         f"wrote {dest} ({len(maps.times)} times x {len(CASES)} cases; lead in the air: "
         + ", ".join(f"{n} {maps.pct[c]}" for c, _, n in CASES)

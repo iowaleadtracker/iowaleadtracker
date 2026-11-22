@@ -21,6 +21,7 @@ import re
 import shutil
 from typing import TYPE_CHECKING
 
+from staged import DIR_NAME as STAGED_DIR
 from works_cited import SOURCE_URL
 
 if TYPE_CHECKING:
@@ -108,7 +109,8 @@ def write_mirror(site: Path, out: Path, csp: str) -> int:
         raise SystemExit(f"no built site in {site}; run make_map_picker.py first")
     if out.exists():
         shutil.rmtree(out)
-    shutil.copytree(site, out, ignore=shutil.ignore_patterns("_headers", ".*"))
+    # The staged maps stay on the main site only (see staged.py).
+    shutil.copytree(site, out, ignore=shutil.ignore_patterns("_headers", ".*", STAGED_DIR))
     index = out / "index.html"
     index.write_text(mirror_index(index.read_text(encoding="utf-8"), csp), encoding="utf-8")
     pages = 1
