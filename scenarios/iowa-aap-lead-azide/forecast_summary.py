@@ -20,7 +20,7 @@ from typing import Any, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
-from works_cited import SOURCE_URL
+from works_cited import CONTACT_TEXT, SOURCE_URL
 
 Facts: TypeAlias = dict[str, Any]
 FloatArray: TypeAlias = npt.NDArray[np.float64]
@@ -767,6 +767,8 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text) -> str:
             "## About",
             "",
             ABOUT_WHO,
+            "",
+            CONTACT_TEXT,
             "",
             "## Key facts",
             "",

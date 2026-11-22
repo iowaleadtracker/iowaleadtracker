@@ -175,6 +175,34 @@ def test_court_pause_note_in_about_dialog() -> None:
     assert "in case they do" in fs.COURT_PAUSE
 
 
+def test_contact_in_about_citation_and_llms(rendered: tuple[str, list, str]) -> None:
+    """The role inbox is in the About box, the citation, and llms.txt.
+
+    Each time it comes with the line that it can't tell anyone whether they're safe.
+    """
+    email = works_cited.CONTACT_EMAIL
+    assert email == "contact@iowaleadtracker.com"
+    assert "follow official instructions" in works_cited.CONTACT_LIMIT
+    page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    start = page.index('<dialog id="note"')
+    assert "<b>Contact.</b> $contact_html" in page[start : page.index("</dialog>", start)]
+    for text in (works_cited.CONTACT_HTML, works_cited.CONTACT_TEXT):
+        assert email in text
+        assert works_cited.CONTACT_LIMIT in text
+    assert f'href="mailto:{email}"' in works_cited.CONTACT_HTML
+    ctx = {
+        "pct": {"low": "7%", "mid": "20%", "high": "55%", "permit": "100%"},
+        "n_models": "seven",
+        "got_txt": "November 21, 2026, at 5:54 p.m. CST",
+        "shown_model": "RRFS",
+        "models": [],
+    }
+    cite = works_cited.render(ctx, works_cited.SOURCE_URL, "now")
+    assert works_cited.CONTACT_HTML in cite[cite.index("Citing this map") :]
+    llms = rendered[2]
+    assert works_cited.CONTACT_TEXT in llms[llms.index("## About") : llms.index("## Key facts")]
+
+
 def test_faq_links_are_live() -> None:
     """Web addresses in FAQ answers become links; punctuation stays outside."""
     out = site.faq_html(

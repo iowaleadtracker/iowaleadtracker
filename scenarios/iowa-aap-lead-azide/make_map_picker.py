@@ -558,6 +558,7 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "pct_permit": pct["permit"],
         "about_who": forecast_summary.ABOUT_WHO,
         "source_url": works_cited.SOURCE_URL,
+        "contact_html": works_cited.CONTACT_HTML,
         "misting": forecast_summary.MISTING,
         "advisory_url": forecast_summary.ADVISORY_URL,
         "court_pause": forecast_summary.COURT_PAUSE,
