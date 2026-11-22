@@ -75,6 +75,15 @@ def mirror_page(html: str, csp: str) -> str:
     return _after_head(html, meta_csp(csp))
 
 
+def mirror_staged_page(html: str, csp: str) -> str:
+    """Return a staged page with the meta security policy, noindex and no-referrer."""
+    if 'name="referrer"' not in html:
+        html = _after_head(html, '<meta name="referrer" content="no-referrer">')
+    if 'name="robots"' not in html:
+        html = _after_head(html, '<meta name="robots" content="noindex, nofollow">')
+    return mirror_page(html, csp)
+
+
 def mirror_index(html: str, csp: str) -> str:
     """Return the landing page with the mirror notice and the meta security policy.
 
@@ -109,8 +118,7 @@ def write_mirror(site: Path, out: Path, csp: str) -> int:
         raise SystemExit(f"no built site in {site}; run make_map_picker.py first")
     if out.exists():
         shutil.rmtree(out)
-    # The staged maps stay on the main site only (see staged.py).
-    shutil.copytree(site, out, ignore=shutil.ignore_patterns("_headers", ".*", STAGED_DIR))
+    shutil.copytree(site, out, ignore=shutil.ignore_patterns("_headers", ".*"))
     index = out / "index.html"
     index.write_text(mirror_index(index.read_text(encoding="utf-8"), csp), encoding="utf-8")
     pages = 1
@@ -121,6 +129,12 @@ def write_mirror(site: Path, out: Path, csp: str) -> int:
         )
     for page in sorted([*(out / "maps").glob("*.html"), *(out / "m").glob("*.html")]):
         page.write_text(mirror_page(page.read_text(encoding="utf-8"), csp), encoding="utf-8")
+        pages += 1
+    # The staged maps (see staged.py): GitHub Pages can't send their noindex and
+    # no-referrer headers, so the pages carry them as meta tags.
+    staged = out / STAGED_DIR
+    for page in sorted([*staged.glob("*.html"), *(staged / "maps").glob("*.html")]):
+        page.write_text(mirror_staged_page(page.read_text(encoding="utf-8"), csp), encoding="utf-8")
         pages += 1
     llms = out / "llms.txt"
     if llms.exists():

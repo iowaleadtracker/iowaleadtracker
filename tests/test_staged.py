@@ -103,8 +103,8 @@ def test_no_maps_no_folder(built: Path) -> None:
     assert not built.exists()
 
 
-def test_kept_off_public_files_and_mirror(tmp_path: Path) -> None:
-    """Nothing public points to the folder; the mirror leaves it out; it's noindex."""
+def test_kept_off_public_files_and_on_mirror(tmp_path: Path) -> None:
+    """Nothing public points to the folder; the mirror carries it, noindex; it's noindex."""
     assert f"/{staged.DIR_NAME}/*\n  X-Robots-Tag: noindex, nofollow" in site.HEADERS
     for text in (
         site.PAGE_TEMPLATE.read_text(encoding="utf-8"),
@@ -114,6 +114,7 @@ def test_kept_off_public_files_and_mirror(tmp_path: Path) -> None:
     src = tmp_path / "site"
     (src / staged.DIR_NAME / "maps").mkdir(parents=True)
     (src / staged.DIR_NAME / "index.html").write_text(MAP, encoding="utf-8")
+    (src / staged.DIR_NAME / "maps" / "a.html").write_text(MAP, encoding="utf-8")
     (src / "maps").mkdir()
     (src / "m").mkdir()
     (src / "index.html").write_text(
@@ -122,7 +123,12 @@ def test_kept_off_public_files_and_mirror(tmp_path: Path) -> None:
     )
     out = tmp_path / "mirror"
     mirror.write_mirror(src, out, site.CSP)
-    assert not (out / staged.DIR_NAME).exists()
+    for page in (out / staged.DIR_NAME / "index.html", out / staged.DIR_NAME / "maps" / "a.html"):
+        txt = page.read_text(encoding="utf-8")
+        assert '<meta http-equiv="Content-Security-Policy"' in txt
+        assert '<meta name="robots" content="noindex' in txt
+        assert '<meta name="referrer" content="no-referrer">' in txt
+        assert mirror.NOTICE_ID not in txt
     assert (src / staged.DIR_NAME / "index.html").exists()  # the main site keeps it
 
 
