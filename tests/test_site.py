@@ -243,7 +243,7 @@ def test_faq_links_are_live() -> None:
 def test_court_hold_leads_the_summary_and_faq(rendered: tuple[str, list, str]) -> None:
     """The court hold comes before any statement that the blast is Monday."""
     summary, faq, llms = rendered
-    assert summary.index("Court hold") < summary.index("Why Monday or Tuesday")
+    assert summary.index("Court hold") < summary.index("When will the detonation happen?")
     assert fs.COURT_URL in summary
     when = dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
     assert when.startswith(
@@ -427,18 +427,18 @@ def test_two_days_court_paragraph(rendered_two_days: tuple[str, list, str]) -> N
 
 
 def test_about_box_cites_the_tuesday_filing() -> None:
-    """The About box's "Why" paragraph gives Monday (Army) and Tuesday (KCCI), each sourced."""
+    """The About box's "When." paragraph gives Monday (Army) and Tuesday (KCCI), each sourced."""
     page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
     start = page.index('<dialog id="note"')
     about = " ".join(page[start : page.index("</dialog>", start)].split())
-    assert "<b>Why Monday or Tuesday.</b> $why_monday Source:" in about
+    assert "<b>When.</b> $why_monday Source:" in about
     assert '$why_tuesday Source: <a href="$filing_url" rel="noopener">$filing_cite</a>.' in about
 
 
 @pytest.mark.slow
 def test_summary_why_section_cites_both(rendered: tuple[str, list, str]) -> None:
     summary, faq, llms = rendered
-    assert "<h3>Why Monday or Tuesday</h3>" in summary
+    assert "<h3>When will the detonation happen?</h3>" in summary
     assert fs.WHY_TUESDAY in summary
     assert f'<a href="{fs.EPA_FILING_URL}" rel="noopener">{fs.EPA_FILING_CITE}</a>' in summary
     assert (

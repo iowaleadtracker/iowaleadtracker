@@ -720,7 +720,7 @@ def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) ->
   <p class="caveat"><b>{CAVEAT}</b></p>
   <h3>Court hold</h3>
   <p>{court_pause([m["day"] for m in more])} Sources: {COURT_SOURCES_HTML}.</p>
-  <h3>Why Monday or Tuesday</h3>
+  <h3>When will the detonation happen?</h3>
   <p>{WHY_MONDAY} Source: <a href="{ARMY_URL}" rel="noopener">{ARMY_CITE}</a>.
     {WHY_TUESDAY} Source: <a href="{EPA_FILING_URL}" rel="noopener">{EPA_FILING_CITE}</a>.</p>
   <p><b>{TIME_HEAD}</b> {no_time}</p>
