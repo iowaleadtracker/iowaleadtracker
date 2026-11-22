@@ -1,4 +1,4 @@
-# Downloads fresh weather forecasts for the Iowa scenario every hour through
+# Downloads fresh weather forecasts for the Iowa scenario every 3 hours through
 # Wednesday, Nov. 25 (the court filing leaves the blast day open), and proposes them as a pull request (main takes changes only through a
 # reviewed pull request). It never deploys; merging the pull request does
 # (.github/workflows/deploy.yml), so check the news before merging.
@@ -7,7 +7,9 @@ name: Refresh forecast
 on:
   workflow_dispatch:
   schedule:
-    - cron: "40 * * * *" # every hour
+    # Every 3 hours: one run downloads 8 models for a 25-point grid and 2 days, and hourly
+    # runs hit Open-Meteo's free daily limit on Nov. 22. Models update every 6 hours.
+    - cron: "40 */3 * * *"
 
 permissions:
   contents: write # push the forecast-refresh branch
@@ -87,7 +89,7 @@ jobs:
           pulled = min(dt.datetime.fromisoformat(v) for v in stamps.values())
           cst = pulled.astimezone(dt.timezone(dt.timedelta(hours=-6)))
           page = (scen / "outputs/site/index.html").read_text(encoding="utf-8")
-          i = page.find("<h3>Where the cloud goes</h3>")
+          i = page.find("<h3>Where the cloud goes")  # "... on Monday, Nov. 23" with two days
           j = page.find("<h3>", i + 4)
           text = html.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", page[i:j]))).strip()
           print(f"Forecasts pulled {cst:%b %-d, %Y, %-I:%M %p} CST by the scheduled refresh.\n")
