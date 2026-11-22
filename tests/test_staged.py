@@ -1,4 +1,4 @@
-"""The unlisted Tuesday/Wednesday maps: settings, page, privacy and the mirror."""
+"""The staged Tuesday/Wednesday maps: settings, page, privacy and the mirror."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 import make_map_picker as site
 import mirror
 import pytest
-import unlisted
+import staged
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -20,49 +20,55 @@ MAP = "<!doctype html>\n<html><head>\n<title>map</title></head><body>map</body><
 
 @pytest.fixture
 def built(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """A fake set of unlisted maps and saved forecasts in tmp_path."""
-    out = tmp_path / unlisted.DIR_NAME
-    monkeypatch.setattr(unlisted, "OUT", out)
-    monkeypatch.setattr(unlisted, "MAPS", out / "maps")
-    cache = tmp_path / "unlisted_forecasts.json"
+    """Write a fake set of staged maps and saved forecasts in tmp_path."""
+    out = tmp_path / staged.DIR_NAME
+    monkeypatch.setattr(staged, "OUT", out)
+    monkeypatch.setattr(staged, "MAPS", out / "maps")
+    cache = tmp_path / "staged_forecasts.json"
     cache.write_text(
         json.dumps({"__fetched__": {"a": "2026-11-22T03:08:00+00:00"}}), encoding="utf-8"
     )
-    monkeypatch.setattr(unlisted, "CACHE", cache)
+    monkeypatch.setattr(staged, "CACHE", cache)
     (out / "maps").mkdir(parents=True)
-    for day in unlisted.DAYS:
+    for day in staged.DAYS:
         for case, _, _ in site.CASES:
-            for t in unlisted.TIMES:
-                (out / "maps" / unlisted.map_name(day, case, t)).write_text(MAP, encoding="utf-8")
+            for t in staged.TIMES:
+                (out / "maps" / staged.map_name(day, case, t)).write_text(MAP, encoding="utf-8")
     return out
 
 
 def test_settings() -> None:
     """Tuesday and Wednesday, 11 a.m. to 1 p.m. every 30 minutes, GFS and ECMWF only."""
-    assert unlisted.DAYS == ["2026-11-24", "2026-11-25"]
-    assert unlisted.TIMES == ["11:00", "11:30", "12:00", "12:30", "13:00"]
-    assert unlisted.WEATHER == "gfs_seamless,ecmwf_ifs025"
-    assert unlisted.day_label("2026-11-24") == "Tuesday, Nov. 24, 2026"
-    assert unlisted.day_label("2026-11-25") == "Wednesday, Nov. 25, 2026"
-    assert re.fullmatch(r"u-[0-9a-f]{10}", unlisted.DIR_NAME)
+    assert staged.DAYS == ["2026-11-24", "2026-11-25"]
+    assert staged.TIMES == ["11:00", "11:30", "12:00", "12:30", "13:00"]
+    assert staged.WEATHER == "gfs_seamless,ecmwf_ifs025"
+    assert staged.day_label("2026-11-24") == "Tuesday, Nov. 24, 2026"
+    assert staged.day_label("2026-11-25") == "Wednesday, Nov. 25, 2026"
+    assert re.fullmatch(r"s-[0-9a-f]{10}", staged.DIR_NAME)
 
 
 def test_model_args_change_only_weather_and_file() -> None:
-    args = unlisted.model_args()
-    assert args[args.index("--weather-model") + 1] == unlisted.WEATHER
-    assert args[args.index("--met-cache") + 1] == str(unlisted.CACHE)
+    args = staged.model_args()
+    assert args[args.index("--weather-model") + 1] == staged.WEATHER
+    assert args[args.index("--met-cache") + 1] == str(staged.CACHE)
     public = site.MODEL_ARGS
     assert public[public.index("--weather-model") + 1] == site.WEATHER  # not changed
     assert public[public.index("--met-cache") + 1] == str(site.MET_CACHE)
-    others = [a for i, a in enumerate(args) if i not in {args.index("--weather-model") + 1,
-                                                         args.index("--met-cache") + 1}]
-    pub = [a for i, a in enumerate(public) if i not in {public.index("--weather-model") + 1,
-                                                        public.index("--met-cache") + 1}]
+    others = [
+        a
+        for i, a in enumerate(args)
+        if i not in {args.index("--weather-model") + 1, args.index("--met-cache") + 1}
+    ]
+    pub = [
+        a
+        for i, a in enumerate(public)
+        if i not in {public.index("--weather-model") + 1, public.index("--met-cache") + 1}
+    ]
     assert others == pub  # same model settings as the public maps
 
 
 def test_picker_page(built: Path) -> None:
-    n = unlisted.write_pages()
+    n = staged.write_pages()
     assert n == 2 * 5 * len(site.CASES) == 40
     page = (built / "index.html").read_text(encoding="utf-8")
     assert '<meta name="robots" content="noindex, nofollow">' in page
@@ -86,21 +92,21 @@ def test_picker_page(built: Path) -> None:
 def test_no_maps_no_folder(built: Path) -> None:
     for mp in (built / "maps").glob("*.html"):
         mp.unlink()
-    assert unlisted.write_pages() == 0
+    assert staged.write_pages() == 0
     assert not built.exists()
 
 
 def test_kept_off_public_files_and_mirror(tmp_path: Path) -> None:
     """Nothing public points to the folder; the mirror leaves it out; it's noindex."""
-    assert f"/{unlisted.DIR_NAME}/*\n  X-Robots-Tag: noindex, nofollow" in site.HEADERS
+    assert f"/{staged.DIR_NAME}/*\n  X-Robots-Tag: noindex, nofollow" in site.HEADERS
     for text in (
         site.PAGE_TEMPLATE.read_text(encoding="utf-8"),
         (site.TOOL / "template.html").read_text(encoding="utf-8"),
     ):
-        assert not unlisted.links_to_unlisted(text)
+        assert not staged.links_to_staged(text)
     src = tmp_path / "site"
-    (src / unlisted.DIR_NAME / "maps").mkdir(parents=True)
-    (src / unlisted.DIR_NAME / "index.html").write_text(MAP, encoding="utf-8")
+    (src / staged.DIR_NAME / "maps").mkdir(parents=True)
+    (src / staged.DIR_NAME / "index.html").write_text(MAP, encoding="utf-8")
     (src / "maps").mkdir()
     (src / "m").mkdir()
     (src / "index.html").write_text(
@@ -109,15 +115,15 @@ def test_kept_off_public_files_and_mirror(tmp_path: Path) -> None:
     )
     out = tmp_path / "mirror"
     mirror.write_mirror(src, out, site.CSP)
-    assert not (out / unlisted.DIR_NAME).exists()
-    assert (src / unlisted.DIR_NAME / "index.html").exists()  # the main site keeps it
+    assert not (out / staged.DIR_NAME).exists()
+    assert (src / staged.DIR_NAME / "index.html").exists()  # the main site keeps it
 
 
-def test_retrieved_at_ignores_unlisted_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """With the public file missing, the unlisted file's time is never used for it."""
-    other = tmp_path / "unlisted_forecasts.json"
+def test_retrieved_at_ignores_staged_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """With the public file missing, the staged file's time is never used for it."""
+    other = tmp_path / "staged_forecasts.json"
     other.write_text("{}", encoding="utf-8")
-    monkeypatch.setattr(unlisted, "CACHE", other)
+    monkeypatch.setattr(staged, "CACHE", other)
     assert site.retrieved_at(tmp_path / "map_met_all.json") is None
 
 
@@ -129,9 +135,9 @@ def test_refresh_tool_arguments() -> None:
         sys.path.pop(0)
     with pytest.raises(SystemExit, match="usage"):
         refresh_forecast.main(["--bogus"])
-    assert refresh_forecast.UNLISTED_CACHE.name == unlisted.CACHE.name
+    assert refresh_forecast.STAGED_CACHE.name == staged.CACHE.name
 
 
-def test_missing_unlisted_file_has_no_time(tmp_path: Path) -> None:
-    """A missing unlisted file never borrows the public forecasts' time."""
-    assert site.retrieved_at(tmp_path / "unlisted_forecasts.json") is None
+def test_missing_staged_file_has_no_time(tmp_path: Path) -> None:
+    """A missing staged file never borrows the public forecasts' time."""
+    assert site.retrieved_at(tmp_path / "staged_forecasts.json") is None

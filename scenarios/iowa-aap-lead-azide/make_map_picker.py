@@ -36,7 +36,7 @@ from zoneinfo import ZoneInfo
 
 import forecast_summary
 import mirror
-import unlisted
+import staged
 import works_cited
 
 HERE = Path(__file__).resolve().parent
@@ -142,7 +142,7 @@ HEADERS = f"""/*
   Cache-Control: public, max-age=31536000, immutable
 /llms.txt
   Content-Type: text/plain; charset=utf-8
-/{unlisted.DIR_NAME}/*
+/{staged.DIR_NAME}/*
   X-Robots-Tag: noindex, nofollow
   Referrer-Policy: no-referrer
 """
@@ -282,10 +282,10 @@ def retrieved_at(cache: Path = MET_CACHE) -> dt.datetime | None:
         pass
     if cache.exists():
         files = [cache]
-    elif cache != MET_CACHE:  # another file (the unlisted maps'): no stand-in
+    elif cache != MET_CACHE:  # another file (the staged maps'): no stand-in
         return None
-    else:  # older per-model caches, never the unlisted maps' own file
-        files = [f for f in sorted(cache.parent.glob("*.json")) if f != unlisted.CACHE]
+    else:  # older per-model caches, never the staged maps' own file
+        files = [f for f in sorted(cache.parent.glob("*.json")) if f != staged.CACHE]
     if not files:
         return None
     return dt.datetime.fromtimestamp(min(f.stat().st_mtime for f in files), TZ)
@@ -347,8 +347,8 @@ def build() -> None:
                     print("  " + line)
             if r.returncode:
                 raise SystemExit(f"model run failed for {case} {t}:\n{r.stderr[-2000:]}")
-    if unlisted.CACHE.exists():  # the unlisted Tuesday/Wednesday maps, from their own file
-        unlisted.build()
+    if staged.CACHE.exists():  # the staged Tuesday/Wednesday maps, from their own file
+        staged.build()
 
 
 # ---------------------------------------------------------------------------
@@ -630,7 +630,7 @@ def publish() -> None:
     for name in PUBLISHED_FILES:
         if (SITE / name).exists():
             shutil.copyfile(SITE / name, dest / name)
-    for sub in ("maps", "m", "brand", unlisted.DIR_NAME):
+    for sub in ("maps", "m", "brand", staged.DIR_NAME):
         if (SITE / sub).is_dir():
             shutil.rmtree(dest / sub, ignore_errors=True)
             shutil.copytree(SITE / sub, dest / sub)
@@ -767,9 +767,9 @@ def main(argv: list[str] | None = None) -> None:
     now = dt.datetime.now(TZ)
     page, llms_txt = render_page(maps, now, built_txt)
     dest = write_site(page, llms_txt, now)
-    n_unlisted = unlisted.write_pages()
-    if n_unlisted:
-        print(f"wrote {n_unlisted} unlisted maps to {unlisted.OUT}")
+    n_staged = staged.write_pages()
+    if n_staged:
+        print(f"wrote {n_staged} staged maps to {staged.OUT}")
     print(
         f"wrote {dest} ({len(maps.times)} times x {len(CASES)} cases; lead in the air: "
         + ", ".join(f"{n} {maps.pct[c]}" for c, _, n in CASES)

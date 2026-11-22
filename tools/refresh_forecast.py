@@ -13,11 +13,11 @@ Steps:
 It doesn't commit, deploy or publish. Run it by hand (``python tools/refresh_forecast.py``)
 or let ``.github/workflows/refresh-forecast.yml`` run it and open a pull request.
 
-With ``--unlisted`` it does the same for the unlisted Tuesday/Wednesday maps
-(``scenarios/iowa-aap-lead-azide/unlisted.py``): their own saved file
-(``met_cache/unlisted_forecasts.json``), only those maps rebuilt (``unlisted.py --build``),
+With ``--staged`` it does the same for the staged Tuesday/Wednesday maps
+(``scenarios/iowa-aap-lead-azide/staged.py``): their own saved file
+(``met_cache/staged_forecasts.json``), only those maps rebuilt (``staged.py --build``),
 no golden data. The first run, before that file exists, downloads it. The
-``refresh-unlisted.yml`` workflow runs it by hand only.
+``refresh-staged.yml`` workflow runs it by hand only.
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 SCENARIO = ROOT / "scenarios" / "iowa-aap-lead-azide"
 CACHE = SCENARIO / "met_cache" / "map_met_all.json"
-UNLISTED_CACHE = SCENARIO / "met_cache" / "unlisted_forecasts.json"
+STAGED_CACHE = SCENARIO / "met_cache" / "staged_forecasts.json"
 UNCHANGED = 3
 
 
@@ -64,10 +64,10 @@ def run(args: list[str], cwd: Path, env: dict[str, str] | None = None) -> None:
 def main(argv: list[str] | None = None) -> int:
     """Refresh the forecasts; return 0 when they changed, 3 when they didn't."""
     args = sys.argv[1:] if argv is None else argv
-    if any(a != "--unlisted" for a in args):
-        raise SystemExit("usage: refresh_forecast.py [--unlisted]")
-    if "--unlisted" in args:
-        return refresh(UNLISTED_CACHE, ["unlisted.py", "--build"], golden=False)
+    if any(a != "--staged" for a in args):
+        raise SystemExit("usage: refresh_forecast.py [--staged]")
+    if "--staged" in args:
+        return refresh(STAGED_CACHE, ["staged.py", "--build"], golden=False)
     return refresh(CACHE, ["make_map_picker.py", "--build"], golden=True)
 
 

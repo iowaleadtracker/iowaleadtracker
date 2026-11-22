@@ -1,21 +1,21 @@
-"""Unlisted Tuesday and Wednesday maps: same model, other days, GFS and ECMWF only.
+"""Staged Tuesday and Wednesday maps: same model, other days, GFS and ECMWF only.
 
 A set of maps at a hard-to-guess address on the main site, for people who have the link:
 blasts on Tuesday, Nov. 24 and Wednesday, Nov. 25, 2026, from 11 a.m. to 1 p.m. every 30
 minutes, for all four release cases, with only the GFS and ECMWF forecasts (GFS shown,
 ECMWF in the weather-model spread).
 
-Unlisted is not private. Nothing on the site links here, the pages are noindex, and the
+These maps are not private. Nothing on the site links here, the pages are noindex, and the
 folder is left out of the sitemap, robots.txt, llms.txt and the GitHub Pages mirror. But
 this repository is public, so anyone reading it can find the address.
 
-The forecasts are saved in their own file (``met_cache/unlisted_forecasts.json``), so the
+The forecasts are saved in their own file (``met_cache/staged_forecasts.json``), so the
 hourly refresh of the public maps never touches them. They are downloaded only by the
-hand-started "Refresh unlisted forecast" workflow (``tools/refresh_forecast.py
---unlisted``), which proposes them as a pull request. Until that file exists, the build
-makes no unlisted maps.
+hand-started "Refresh staged forecast" workflow (``tools/refresh_forecast.py
+--staged``), which proposes them as a pull request. Until that file exists, the build
+makes no staged maps.
 
-Run ``python unlisted.py --build`` to build only these maps (downloading the forecasts if
+Run ``python staged.py --build`` to build only these maps (downloading the forecasts if
 the file is missing), or let ``make_map_picker.py --build`` build them with the rest.
 """
 
@@ -33,11 +33,11 @@ from zoneinfo import ZoneInfo
 
 HERE = Path(__file__).resolve().parent
 #: The folder on the site. Hard to guess, but committed to a public repository.
-DIR_NAME = "u-d8ac68fd00"
+DIR_NAME = "s-d8ac68fd00"
 SITE = HERE / "outputs" / "site"
 OUT = SITE / DIR_NAME
 MAPS = OUT / "maps"
-CACHE = HERE / "met_cache" / "unlisted_forecasts.json"
+CACHE = HERE / "met_cache" / "staged_forecasts.json"
 TZ = ZoneInfo("America/Chicago")
 DAYS = ["2026-11-24", "2026-11-25"]  # Tuesday and Wednesday after the planned Monday blast
 TIMES = ["11:00", "11:30", "12:00", "12:30", "13:00"]
@@ -49,6 +49,27 @@ MODELS_TEXT = "GFS and ECMWF only (GFS shown; ECMWF in the weather-model spread)
 
 UNOFFICIAL = "This is an unofficial estimate, not from the Army or any government agency."
 NOT_SAFE = "Don't use it to decide if you're safe."
+
+
+#: The picker page's styles (plain, so the page needs nothing from outside).
+CSS = """
+  :root { color-scheme: light dark; --bg: #fff; --ink: #1d1d1b; --muted: #555;
+    --warn: #fde8c8; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1d1d1b; --ink: #f2f2f0; --muted: #b8b8b4; } }
+  body { margin: 0; font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--ink); }
+  header { padding: 10px 16px; }
+  h1 { font-size: 18px; margin: 0 0 6px; }
+  .warn { background: var(--warn); color: #1d1d1b; padding: 8px 12px; border-radius: 6px;
+    margin: 6px 0; }
+  .about { color: var(--muted); font-size: 13.5px; margin: 6px 0; }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center;
+    margin: 8px 0 4px; }
+  select, button { font: inherit; padding: 4px 8px; }
+  iframe { display: block; width: 100%; border: 0; height: calc(100svh - 230px);
+    min-height: 480px; }
+"""
 
 
 def map_name(day: str, case: str, t: str) -> str:
@@ -106,7 +127,7 @@ def build() -> None:
                     *("--legend-note", note),
                     *("-o", str(MAPS / map_name(day, case, t))),
                 ]
-                print(f"building unlisted {day} {case} {t}", flush=True)
+                print(f"building staged {day} {case} {t}", flush=True)
                 # Arguments are built here from constants; no shell is involved.
                 r = subprocess.run(  # noqa: S603
                     cmd, cwd=site.TOOL, capture_output=True, text=True, check=False
@@ -116,7 +137,7 @@ def build() -> None:
                         print("  " + line)
                 if r.returncode:
                     raise SystemExit(
-                        f"model run failed for unlisted {day} {case} {t}:\n{r.stderr[-2000:]}"
+                        f"model run failed for staged {day} {case} {t}:\n{r.stderr[-2000:]}"
                     )
                 if not as_of and CACHE.exists():  # replay the same pull for the rest
                     first = site.retrieved_at(CACHE)
@@ -128,14 +149,12 @@ def complete_times(day: str) -> list[str]:
     import make_map_picker as site  # noqa: PLC0415
 
     return [
-        t
-        for t in TIMES
-        if all((MAPS / map_name(day, c, t)).exists() for c, _, _ in site.CASES)
+        t for t in TIMES if all((MAPS / map_name(day, c, t)).exists() for c, _, _ in site.CASES)
     ]
 
 
 def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
-    """Return the picker page for the unlisted maps."""
+    """Return the picker page for the staged maps."""
     import make_map_picker as site  # noqa: PLC0415
 
     files = {
@@ -166,19 +185,7 @@ def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 <title>{site.SITE_NAME}: Tuesday and Wednesday runs</title>
-<style>
-  :root {{ color-scheme: light dark; --bg: #fff; --ink: #1d1d1b; --muted: #555; --warn: #fde8c8; }}
-  @media (prefers-color-scheme: dark) {{ :root {{ --bg: #1d1d1b; --ink: #f2f2f0; --muted: #b8b8b4; }} }}
-  body {{ margin: 0; font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg); color: var(--ink); }}
-  header {{ padding: 10px 16px; }}
-  h1 {{ font-size: 18px; margin: 0 0 6px; }}
-  .warn {{ background: var(--warn); color: #1d1d1b; padding: 8px 12px; border-radius: 6px; margin: 6px 0; }}
-  .about {{ color: var(--muted); font-size: 13.5px; margin: 6px 0; }}
-  .controls {{ display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin: 8px 0 4px; }}
-  select, button {{ font: inherit; padding: 4px 8px; }}
-  iframe {{ display: block; width: 100%; border: 0; height: calc(100svh - 230px); min-height: 480px; }}
-</style>
+<style>{CSS}</style>
 </head>
 <body>
 <header>
@@ -217,7 +224,7 @@ show();
 </script>
 </body>
 </html>
-"""
+"""  # noqa: S608 - HTML (its <select> menus), not SQL
 
 
 def write_pages() -> int:
@@ -244,20 +251,20 @@ def write_pages() -> int:
     return sum(len(ts) for ts in days.values()) * len(site.CASES)
 
 
-def links_to_unlisted(text: str) -> bool:
-    """Say whether public text mentions the unlisted folder."""
+def links_to_staged(text: str) -> bool:
+    """Say whether public text mentions the staged folder."""
     return re.search(re.escape(DIR_NAME), text) is not None
 
 
 def main(argv: list[str] | None = None) -> None:
-    """Build (optionally) and write the unlisted maps."""
+    """Build (optionally) and write the staged maps."""
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--build", action="store_true", help="run the model first")
     a = ap.parse_args(argv)
     if a.build:
         build()
     n = write_pages()
-    print(f"wrote {n} unlisted maps to {OUT}" if n else "no unlisted maps built")
+    print(f"wrote {n} staged maps to {OUT}" if n else "no staged maps built")
 
 
 if __name__ == "__main__":
