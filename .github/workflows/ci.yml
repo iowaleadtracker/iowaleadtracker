@@ -1,10 +1,15 @@
-# Checks every branch push and pull request: the same hooks as `pre-commit run --all-files`,
-# the full test suite (including the slow model runs), and an offline build of the site.
+# Checks every branch push: the same hooks as `pre-commit run --all-files`, the full test
+# suite (including the slow model runs), and an offline build of the site. A pull request
+# shows the checks of its head commit, so there's no `pull_request` trigger: it ran CI a
+# second time on every pull request, and on the forecast refresh pull requests (opened by
+# github-actions[bot]) GitHub held that run for a maintainer to approve. The refresh
+# workflows start CI on their branches themselves (`gh workflow run ci.yml`), because
+# pushes made with the workflow token don't start other workflows. A pull request from a
+# fork gets no automatic CI; run this workflow on its branch by hand.
 name: CI
 
 on:
   push:
-  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -62,3 +67,16 @@ jobs:
         # A download would rewrite the saved forecasts, and the maps would no longer
         # match the ones on the site.
         run: git diff --exit-code -- 'scenarios/*/met_cache/'
+      - name: Key for the files this build read
+        id: key
+        run: echo "key=$(python tools/site_key.py)" >> "$GITHUB_OUTPUT"
+      - name: Save the site for the deploy
+        # deploy.yml reuses this build when main has the same files (the same key), so
+        # merging doesn't build the site a second time.
+        uses: actions/upload-artifact@v7
+        with:
+          name: site-${{ steps.key.outputs.key }}
+          path: scenarios/iowa-aap-lead-azide/outputs/site/
+          if-no-files-found: error
+          retention-days: 7
+          overwrite: true

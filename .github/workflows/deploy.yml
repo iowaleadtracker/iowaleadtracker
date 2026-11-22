@@ -1,7 +1,16 @@
 # Deploys https://iowaleadtracker.com/ (Cloudflare Worker) from `main`: on every merge
-# that touches the model or the site, and by hand. It runs the full tests, builds the
-# site from the saved forecasts (no downloads), deploys, checks the live page, and starts
-# the GitHub Pages mirror build.
+# that touches the model or the site, and by hand. It reuses the site CI already built
+# from the same files, or else runs the full tests and builds the site from the saved
+# forecasts (no downloads). Then it deploys, checks the live page, and starts the GitHub
+# Pages mirror build.
+#
+# Reusing CI's build: CI saves the site it builds as `site-<key>`, where the key
+# (tools/site_key.py) covers every file the build reads and CI's workflow. The deploy
+# takes the newest such site from a finished, passing CI run in this repository, after
+# checking that the run's own commit has the same key. Merging an up-to-date pull request
+# whose CI passed takes a minute or two instead of about 20. If main has changed since
+# the branch's CI ran, or CI hasn't finished, the deploy builds the site itself. Either
+# way the deploy rewrites the landing page, so "Last updated" is the deploy time.
 #
 # Merging is deploying: check the news for the dated statements (court hold, Army time)
 # before merging. The deploy restamps "As of this update".
@@ -30,6 +39,7 @@ on:
 
 permissions:
   contents: read
+  actions: read # find and download CI's build of the site
 
 concurrency:
   group: deploy
@@ -53,10 +63,55 @@ jobs:
       - name: Install
         run: python -m pip install -r requirements.txt -r requirements-dev.txt
 
+      - name: Find CI's build of these files
+        id: ci
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          key=$(python tools/site_key.py)
+          echo "key=$key" >> "$GITHUB_OUTPUT"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=site-$key&per_page=20" \
+            --jq '.artifacts[] | select(.expired | not) | "\(.workflow_run.id) \(.workflow_run.head_sha)"' \
+            > "$RUNNER_TEMP/candidates" || : > "$RUNNER_TEMP/candidates"
+          while read -r run sha <&3; do
+            info=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run" \
+              --jq '"\(.path) \(.status) \(.conclusion) \(.head_repository.full_name)"') || continue
+            if [ "$info" != ".github/workflows/ci.yml completed success $GITHUB_REPOSITORY" ]; then
+              echo "skip CI run $run: $info"
+              continue
+            fi
+            # The artifact's name is only a hint: check the run's own commit.
+            if ! git fetch -q --depth=1 origin "$sha"; then
+              echo "skip CI run $run: can't fetch $sha"
+              continue
+            fi
+            if [ "$(python tools/site_key.py "$sha")" != "$key" ]; then
+              echo "skip CI run $run: its commit $sha has different files"
+              continue
+            fi
+            echo "run=$run" >> "$GITHUB_OUTPUT"
+            echo "Reusing the site built and tested by CI run $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$run ($sha)." \
+              | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          done 3< "$RUNNER_TEMP/candidates"
+          echo "No finished, passing CI build of these files; testing and building here." \
+            | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Download CI's build
+        if: steps.ci.outputs.run
+        uses: actions/download-artifact@v8
+        with:
+          name: site-${{ steps.ci.outputs.key }}
+          run-id: ${{ steps.ci.outputs.run }}
+          github-token: ${{ github.token }}
+          path: scenarios/iowa-aap-lead-azide/outputs/site/
+
       - name: Test (full suite)
+        if: ${{ !steps.ci.outputs.run }}
         run: python -m pytest -q
 
       - name: Build the site from the saved forecasts
+        if: ${{ !steps.ci.outputs.run }}
         working-directory: scenarios/iowa-aap-lead-azide
         run: python make_map_picker.py --build
 

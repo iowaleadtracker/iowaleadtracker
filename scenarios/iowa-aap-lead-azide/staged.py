@@ -49,6 +49,13 @@ MODELS_TEXT = "GFS and ECMWF only (GFS shown; ECMWF in the weather-model spread)
 
 UNOFFICIAL = "This is an unofficial estimate, not from the Army or any government agency."
 NOT_SAFE = "Don't use it to decide if you're safe."
+#: When the blasts could happen, from the government's Nov. 21 court filing ({url}).
+WHEN_HTML = (
+    "The Army planned the detonation for Monday, Nov. 23. In a "
+    '<a href="{url}">court filing on Nov. 21</a>, the government said the Army intends to '
+    "carry it out by Tuesday, Nov. 24, but no time has been given for that day, and "
+    "Wednesday hasn&rsquo;t been announced."
+)
 
 
 #: The picker page's styles (plain, so the page needs nothing from outside).
@@ -155,6 +162,7 @@ def complete_times(day: str) -> list[str]:
 
 def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
     """Return the picker page for the staged maps."""
+    import forecast_summary as fs  # noqa: PLC0415
     import make_map_picker as site  # noqa: PLC0415
 
     files = {
@@ -177,6 +185,7 @@ def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
         for c, _, n in site.CASES
     )
     day_list = " and ".join(day_label(d) for d in days)
+    when = WHEN_HTML.format(url=html.escape(fs.FILING_URL))
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -192,8 +201,7 @@ def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
   <h1>{site.SITE_NAME}: Tuesday and Wednesday runs</h1>
   <p class="warn" role="note"><b>{UNOFFICIAL} {NOT_SAFE}</b> Follow official instructions.</p>
   <p class="about">These maps model blasts on {day_list}, from 11 a.m. to 1 p.m., with
-    {MODELS_TEXT}. The Army has planned the detonation for Monday, Nov. 23; it hasn&rsquo;t
-    announced these days. Forecasts this far ahead change more and are less certain than
+    {MODELS_TEXT}. {when} Forecasts this far ahead change more and are less certain than
     the main site&rsquo;s. Weather forecast from {html.escape(got_txt)}. Last updated
     {html.escape(built_txt)}. Main site, summary and sources:
     <a href="{site.SITE_URL}">{site.SITE_URL.removeprefix("https://").rstrip("/")}</a>.</p>

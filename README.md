@@ -27,6 +27,7 @@ officials.
 | `scenarios/iowa-aap-lead-azide/` | the Iowa scenario: site build scripts, saved forecasts, and a README with every assumption and source |
 | `tests/` | the test suite: physics checked against published values, model properties, a golden run, and the site's safety wording |
 | `tools/compare_site.py` | proves two site builds are identical apart from build times |
+| `tools/site_key.py` | the key that lets a deploy reuse CI's build of the same files |
 | `tools/refresh_forecast.py` | downloads fresh forecasts, rebuilds the site and regenerates the golden test numbers |
 
 ## Run it
@@ -70,7 +71,7 @@ pre-commit run --all-files  # every check on every file
 ```
 
 GitHub Actions (`.github/workflows/ci.yml`) runs the same hooks, the full test suite and
-an offline build of the site on every branch push and pull request.
+an offline build of the site on every branch push (a pull request shows its branch's checks).
 
 Linting is ruff with nearly every rule on, plus mypy type checking; the settings and the
 reasons for each exception are in `pyproject.toml`. Tests never use the network: model
