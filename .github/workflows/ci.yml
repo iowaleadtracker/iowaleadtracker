@@ -67,3 +67,16 @@ jobs:
         # A download would rewrite the saved forecasts, and the maps would no longer
         # match the ones on the site.
         run: git diff --exit-code -- 'scenarios/*/met_cache/'
+      - name: Key for the files this build read
+        id: key
+        run: echo "key=$(python tools/site_key.py)" >> "$GITHUB_OUTPUT"
+      - name: Save the site for the deploy
+        # deploy.yml reuses this build when main has the same files (the same key), so
+        # merging doesn't build the site a second time.
+        uses: actions/upload-artifact@v7
+        with:
+          name: site-${{ steps.key.outputs.key }}
+          path: scenarios/iowa-aap-lead-azide/outputs/site/
+          if-no-files-found: error
+          retention-days: 7
+          overwrite: true

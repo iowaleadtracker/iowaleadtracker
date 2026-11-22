@@ -98,6 +98,12 @@ python3 make_map_picker.py --build --publish --deploy
 **Deploying from GitHub.** `.github/workflows/deploy.yml` does the same on every merge to
 `main` that touches the model or the site, and on demand: full tests, an offline build
 from the saved forecasts, `--deploy`, then a check that the live page shows that build.
+It skips the tests and the build (about 20 minutes) when CI already built and tested the
+same files: CI saves its site as `site-<key>` (`tools/site_key.py` hashes everything the
+build reads), and the deploy downloads it after checking the CI run passed and its commit
+has the same key. `--deploy` still rewrites the landing page, so "Last updated" is the
+deploy time. Merging a pull request that isn't up to date with `main`, or before its CI
+finishes, falls back to building.
 Its secrets live in the `cloudflare` environment, which only `main` can use:
 `CLOUDFLARE_API_TOKEN` (the "Edit Cloudflare Workers" token template),
 `CLOUDFLARE_ACCOUNT_ID`, and optionally `MIRROR_DISPATCH_TOKEN` (a fine-grained GitHub token
