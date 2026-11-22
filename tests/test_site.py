@@ -30,8 +30,8 @@ UNOFFICIAL = "unofficial estimate, not from the Army or any government agency"
 
 
 @pytest.fixture(scope="module")
-def rendered(tmp_path_factory: pytest.TempPathFactory) -> tuple[str, list[tuple[str, str]], str]:
-    """Summary HTML, FAQ and llms.txt for four noon maps under a steady north wind."""
+def facts_ctx(tmp_path_factory: pytest.TempPathFactory) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Facts and build context for four noon maps under a steady north wind."""
     folder = tmp_path_factory.mktemp("maps")
     maps: dict[tuple[str, str], str | Path] = {}
     pct = {}
@@ -66,7 +66,21 @@ def rendered(tmp_path_factory: pytest.TempPathFactory) -> tuple[str, list[tuple[
         "lat": site.LAT,
         "lon": site.LON,
     }
-    return fs.render(facts, ctx)
+    return facts, ctx
+
+
+@pytest.fixture(scope="module")
+def rendered(facts_ctx: tuple[dict[str, Any], dict[str, Any]]) -> tuple[str, list, str]:
+    """Summary HTML, FAQ and llms.txt for the planned day only."""
+    return fs.render(*facts_ctx)
+
+
+@pytest.fixture(scope="module")
+def rendered_two_days(facts_ctx: tuple[dict[str, Any], dict[str, Any]]) -> tuple[str, list, str]:
+    """Render it again with the same maps standing in for Tuesday as a second day."""
+    facts, ctx = facts_ctx
+    tuesday = {**facts, "day": "Tuesday, Nov. 24", "n_models": "two"}
+    return fs.render(facts, ctx, [tuesday])
 
 
 @pytest.mark.slow
@@ -171,7 +185,7 @@ def test_court_pause_note_in_about_dialog() -> None:
     assert "<b>Court pause.</b> $court_pause" in about
     assert "$court_sources" in about
     assert f'href="{fs.COURT_URL}"' in fs.COURT_SOURCES_HTML
-    assert f'href="{fs.EPA_FILING_URL}"' in fs.COURT_SOURCES_HTML
+    assert f'href="{fs.FILING_URL}"' in fs.COURT_SOURCES_HTML
     assert fs.COURT_URL.startswith("https://www.iowapublicradio.org/")
     assert "until it rules on a request" in fs.COURT_PAUSE
     assert "in case they do" in fs.COURT_PAUSE
@@ -229,11 +243,12 @@ def test_faq_links_are_live() -> None:
 def test_court_hold_leads_the_summary_and_faq(rendered: tuple[str, list, str]) -> None:
     """The court hold comes before any statement that the blast is Monday."""
     summary, faq, llms = rendered
-    assert summary.index("Court hold") < summary.index("Why the map is for Monday")
+    assert summary.index("Court hold") < summary.index("When will the detonation happen?")
     assert fs.COURT_URL in summary
     when = dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
     assert when.startswith(
-        "The Army planned it for Monday, Nov. 23, 2026, but a court has put it on hold."
+        "The Army planned it for Monday, Nov. 23, 2026, but a court has put its permit on hold, "
+        "and the government told the court the Army intends to act by Tuesday, Nov. 24."
     )
     assert fs.COURT_PAUSE in when
     assert "on hold by court order" in llms
@@ -327,3 +342,181 @@ def test_missing_addresses_get_a_real_page() -> None:
     assert "Follow official instructions." in page
     assert not staged.links_to_staged(page)
     assert "404.html" in site.PUBLISHED_FILES
+
+
+def test_days_and_map_names() -> None:
+    """Monday's maps keep their old names; other days are prefixed with their date."""
+    assert [d for d, _ in site.DAYS] == ["2026-11-23", "2026-11-24"]
+    assert site.map_name("permit", "12:00") == "permit-1200.html"
+    assert site.map_name("permit", "12:00", "2026-11-24") == "2026-11-24-permit-1200.html"
+    assert site.map_key("2026-11-24", "low", "11:15") == "2026-11-24-low-1115"
+    assert site.day_label("2026-11-24") == "Tuesday, Nov. 24"
+    assert site.blast_label("12:00", "2026-11-24") == "Tuesday, Nov. 24, 2026, 12:00 p.m. CST"
+
+
+def test_forecast_order_rrfs_then_gfs() -> None:
+    """RRFS is shown where it covers the run (Monday); otherwise GFS (Tuesday)."""
+    assert site.WEATHER.split(",")[:2] == ["ncep_rrfs_conus", "gfs_seamless"]
+
+
+def test_days_to_build(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A deploy builds only the days its saved forecasts cover; a refresh builds them all."""
+    cache = tmp_path / "map_met_all.json"
+    monkeypatch.setattr(site, "MET_CACHE", cache)
+    assert site.days_to_build() == ["2026-11-23", "2026-11-24"]  # no file: downloading
+    cache.write_text('{"x?start_date=2026-11-23&end_date=2026-11-24": 1}', encoding="utf-8")
+    assert site.days_to_build() == ["2026-11-23"]
+    cache.write_text(
+        '{"a?start_date=2026-11-23&x": 1, "b?start_date=2026-11-24&x": 1}', encoding="utf-8"
+    )
+    assert site.days_to_build() == ["2026-11-23", "2026-11-24"]
+
+
+def test_page_has_a_day_menu() -> None:
+    page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    assert '<select id="d">$day_options</select>' in page
+    assert "$header_days" in page
+    assert "MAP_FILES[day.value + '-' + cas.value + '-' + t]" in page
+
+
+@pytest.mark.slow
+def test_second_day_in_summary_faq_and_llms(rendered_two_days: tuple[str, list, str]) -> None:
+    summary, faq, llms = rendered_two_days
+    assert "<h3>If the blasts are on Tuesday, Nov. 24</h3>" in summary
+    assert summary.index("If the blasts are on Tuesday") > summary.index("Lead in the air")
+    assert "For noon Tuesday the forecast has surface winds" in summary
+    assert "from two weather models" in summary  # its own model count
+    assert summary.count(fs.TOWN_CAVEAT) >= 2  # the caveat after every list of towns
+    answers = dict(faq)
+    tue = answers["What if the blasts are on Tuesday, Nov. 24?"]
+    assert fs.TOWN_CAVEAT in tue
+    assert fs.CAVEAT in tue
+    assert f"- Tuesday, Nov. 24 (also modeled): {fs.SAME_WINDOW}" in llms
+
+
+@pytest.mark.slow
+def test_one_day_has_no_second_day_text(rendered: tuple[str, list, str]) -> None:
+    summary, faq, llms = rendered
+    assert "If the blasts are on" not in summary
+    assert not any(q.startswith("What if the blasts are on") for q, _ in faq)
+    assert "also modeled" not in llms
+
+
+def test_court_paragraph_names_the_days_modeled() -> None:
+    """The court paragraph cites the Tuesday filing and names only the days built."""
+    assert "emergency exclusion in EPA\u2019s rules to detonate the lead azide without" in (
+        fs.COURT_HOLD
+    )
+    assert fs.WHY_TUESDAY == (
+        "In a court filing on Nov. 21, 2026, the government said the Army intends to carry out "
+        "the controlled detonation by Tuesday, Nov. 24; one passage says \u201con\u201d Nov. 24."
+    )
+    assert fs.court_pause().endswith("These maps model Monday, Nov. 23, in case they do.")
+    assert fs.court_pause(["Tuesday, Nov. 24"]).endswith(
+        "These maps model Monday, Nov. 23, and Tuesday, Nov. 24, in case they do."
+    )
+    # the filing is the primary source; KCCI is the news report of it
+    assert fs.FILING_URL.startswith("https://s3.documentcloud.org/documents/28930203/")
+    assert fs.TUESDAY_SOURCES_HTML.index(fs.FILING_URL) < fs.TUESDAY_SOURCES_HTML.index(fs.KCCI_URL)
+    assert any("No. 26-3374" in r and "documentcloud" in r for r in works_cited.REFERENCES)
+    assert any("kcci.com" in r for r in works_cited.REFERENCES)
+
+
+@pytest.mark.slow
+def test_two_days_court_paragraph(rendered_two_days: tuple[str, list, str]) -> None:
+    summary, faq, llms = rendered_two_days
+    both = "These maps model Monday, Nov. 23, and Tuesday, Nov. 24, in case they do."
+    assert both in summary
+    assert both in dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
+    assert both in llms
+
+
+def test_about_box_cites_the_tuesday_filing() -> None:
+    """The About box's "When." paragraph gives Monday (Army) and Tuesday (KCCI), each sourced."""
+    page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    start = page.index('<dialog id="note"')
+    about = " ".join(page[start : page.index("</dialog>", start)].split())
+    assert "<b>When.</b> $why_monday Source:" in about
+    assert "$why_tuesday Sources: $tuesday_sources." in about
+
+
+@pytest.mark.slow
+def test_summary_why_section_cites_both(rendered: tuple[str, list, str]) -> None:
+    summary, faq, llms = rendered
+    assert "<h3>When will the detonation happen?</h3>" in summary
+    assert fs.WHY_TUESDAY in summary
+    assert fs.TUESDAY_SOURCES_HTML in summary
+    assert (
+        fs.WHY_TUESDAY
+        in dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
+    )
+    assert f"- Why Tuesday: {fs.WHY_TUESDAY} Sources: {fs.TUESDAY_SOURCES_TEXT}" in llms
+
+
+@pytest.mark.slow
+def test_two_days_label_monday_and_keep_notes(rendered_two_days: tuple[str, list, str]) -> None:
+    """With a second day, Monday's parts say Monday and each day keeps its notes."""
+    summary, faq, llms = rendered_two_days
+    for h in ("Where the cloud goes", "How far lead on the ground could reach", "Lead in the air"):
+        assert f"<h3>{h} on Monday, Nov. 23</h3>" in summary
+    # Monday's permit weather stays with the Army comparison, before the Tuesday section
+    assert (
+        summary.index("For noon Monday the forecast")
+        < summary.index("If the blasts are on Tuesday")
+        < summary.index("For noon Tuesday the forecast")
+    )
+    tue = summary[summary.index("If the blasts are on Tuesday") :]
+    assert fs.REACH_NOTE in tue
+    assert fs.SAME_WINDOW in tue
+    assert "change before the blasts" in summary
+    assert "before Monday" not in summary
+    answers = dict(faq)
+    assert answers["Where could the lead go?"].startswith("For Monday, Nov. 23: ")
+    assert fs.REACH_NOTE in answers["What if the blasts are on Tuesday, Nov. 24?"]
+    assert "- Monday, Nov. 23: Forecast pulled" in llms
+
+
+def _fake_map(models: list[str]) -> str:
+    return '{"airborneFraction": 0.07, "models":' + json.dumps(models) + "}"
+
+
+def test_read_maps_days_and_model_counts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A day missing any blast time is left out; each day counts its own models."""
+    monkeypatch.setattr(site, "MAPS", tmp_path)
+    seven = site.WEATHER.split(",")[:7]
+    for c, _, _ in site.CASES:
+        for t in site.TIMES:
+            (tmp_path / site.map_name(c, t)).write_text(_fake_map(seven), encoding="utf-8")
+            if t != "12:30":  # Tuesday is missing one time
+                (tmp_path / site.map_name(c, t, "2026-11-24")).write_text(
+                    _fake_map(seven[1:]), encoding="utf-8"
+                )
+    maps = site.read_maps()
+    assert list(maps.days) == ["2026-11-23"]  # partly built Tuesday left out
+    for c, _, _ in site.CASES:
+        (tmp_path / site.map_name(c, "12:30", "2026-11-24")).write_text(
+            _fake_map(seven[1:]), encoding="utf-8"
+        )
+    maps = site.read_maps()
+    assert list(maps.days) == ["2026-11-23", "2026-11-24"]
+    assert maps.days["2026-11-24"] == site.TIMES
+    assert site.model_count(maps.pages_by_day["2026-11-23"]) == "seven"
+    assert site.model_count(maps.pages_by_day["2026-11-24"]) == "six"
+
+
+def test_remove_days_not_built(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(site, "MAPS", tmp_path)
+    (tmp_path / "permit-1200.html").write_text("mon", encoding="utf-8")
+    (tmp_path / "2026-11-24-permit-1200.html").write_text("old tue", encoding="utf-8")
+    site.remove_days_not_built(["2026-11-24", "2026-11-23"])
+    assert (tmp_path / "2026-11-24-permit-1200.html").exists()
+    site.remove_days_not_built(["2026-11-23"])
+    assert not (tmp_path / "2026-11-24-permit-1200.html").exists()
+    assert (tmp_path / "permit-1200.html").exists()  # the planned day is never removed
+
+
+def test_link_to_a_day_not_in_this_update_says_so() -> None:
+    page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    assert '<p class="daynote" id="daynote" role="status" hidden></p>' in page
+    assert "const ALL_DAYS = $all_days;" in page
+    assert "maps aren\\u2019t in this update; showing " in page

@@ -95,7 +95,7 @@ jobs:
           print("Changes: `met_cache/map_met_all.json` (the new pull) and `tests/data/` "
                 "(golden numbers regenerated for it). The full test suite passed.\n")
           print("**Before merging**, check the news: the court hold, the Iowa HHS time and "
-                "\"the Army hasn't announced a Monday time\" (`forecast_summary.py`). "
+                "\"the Army hasn't announced a time\" (`forecast_summary.py`). "
                 "Merging deploys iowaleadtracker.com (the Deploy workflow) and updates "
                 "the GitHub Pages mirror.")
           print(f"\nTITLE=Refresh forecast (pulled {cst:%b %-d, %-I:%M %p} CST)")

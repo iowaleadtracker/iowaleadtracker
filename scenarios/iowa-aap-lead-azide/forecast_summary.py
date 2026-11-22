@@ -118,6 +118,13 @@ WHY_MONDAY = (
     "Army moved it \u201cuntil the latest possible moment prior to a forecasted temperature "
     "drop,\u201d which \u201cwould risk further destabilization of the material.\u201d"
 )
+# The government's notice to the 8th Circuit (No. 26-3374), filed Nov. 21, 2026: "the Army
+# intends to act by November 24, 2026" (p. 1), "intends to act on November 24, 2026" (p. 6),
+# "by November 24, 2026" (p. 7). Read in full on Nov. 22, 2026. KCCI reported it Nov. 22.
+WHY_TUESDAY = (
+    "In a court filing on Nov. 21, 2026, the government said the Army intends to carry out "
+    "the controlled detonation by Tuesday, Nov. 24; one passage says \u201con\u201d Nov. 24."
+)
 PERMIT_URL = (
     "https://www.epa.gov/system/files/documents/2026-11/"
     "iaaap-emergency-permit-for-treatment-and-storage-final_redacted.pdf"
@@ -143,24 +150,54 @@ COURT_URL = (
     "court-injunction-army-planned-lead-azide-detonation"
 )
 COURT_CITE = "Iowa Public Radio, Nov. 20, 2026"
-COURT_PAUSE = (
+# The hold and the government's latest filing. The last sentence names the days the maps
+# model, so it's built by court_pause() from the days actually built.
+COURT_HOLD = (
     "Late on Nov. 19, 2026, the 8th U.S. Circuit Court of Appeals put the EPA\u2019s emergency "
     "permit for the blasts on hold until it rules on a request by the Iowa Environmental "
     "Council and the Sierra Club\u2019s Iowa chapter to block them, Iowa Public Radio "
-    "reported. In a court filing on Nov. 20, EPA suggested the Army may be able to go ahead "
-    "without the permit under EPA\u2019s emergency rules, and the Justice Department said it "
-    "would file its full response by Sunday, Nov. 22, KCRG reported. The court could rule "
-    "before Monday, so it\u2019s unclear whether the blasts will go ahead then. These maps "
-    "still model Monday, Nov. 23, in case they do."
+    "reported. In a court filing on Nov. 21, the government said the Army intends to use an "
+    "emergency exclusion in EPA\u2019s rules to detonate the lead azide without the permit, "
+    "while following the permit\u2019s terms and its measures to limit lead dust. "
+    "It\u2019s unclear whether the blasts will happen Monday or Tuesday, or wait for the "
+    "court to rule."
 )
-# EPA's and the Justice Department's Nov. 20 filing (the response-by-Sunday date is also in
-# Iowa Capital Dispatch, Nov. 20, 2026; both checked Nov. 21, 2026).
-EPA_FILING_URL = "https://www.kcrg.com/2026/11/20/appeals-court-pauses-lead-azide-detonation/"
-EPA_FILING_CITE = "KCRG, Nov. 20, 2026"
-COURT_SOURCES_TEXT = f"{COURT_CITE}, {COURT_URL}; {EPA_FILING_CITE}, {EPA_FILING_URL}"
+
+
+PLANNED_DAY = "Monday, Nov. 23"
+# Said for each other modeled day: its blast times are borrowed from the planned day's.
+SAME_WINDOW = (
+    "No time has been given for that day, so these maps use the same 11 a.m. to 12:30 p.m. "
+    "window as Monday."
+)
+
+
+def court_pause(more_days: list[str] | None = None) -> str:
+    """Return the court-hold paragraph, ending with the days the maps model."""
+    days = [PLANNED_DAY, *(more_days or [])]
+    named = days[0] if len(days) == 1 else ", ".join(days[:-1]) + ", and " + days[-1]
+    return f"{COURT_HOLD} These maps model {named}, in case they do."
+
+
+COURT_PAUSE = court_pause()
+# The filing itself (primary source), and KCCI's report of it (updated 7:55 a.m. CST, Nov. 22,
+# 2026; headline, subheading and first paragraph checked by the maintainer on the page).
+FILING_URL = (
+    "https://s3.documentcloud.org/documents/28930203/"
+    "iowa-environmental-council-v-us-environmental-protection-agency.pdf"
+)
+FILING_CITE = "Government notice, 8th Cir. No. 26-3374, Nov. 21, 2026"
+KCCI_URL = "https://www.kcci.com/article/lead-azide-bomb-detonation-iowa-tuesday/74499570"
+KCCI_CITE = "KCCI, Nov. 22, 2026"
+COURT_SOURCES_TEXT = f"{COURT_CITE}, {COURT_URL}; {FILING_CITE}, {FILING_URL}"
 COURT_SOURCES_HTML = (
     f'<a href="{COURT_URL}" rel="noopener">{COURT_CITE}</a>; '
-    f'<a href="{EPA_FILING_URL}" rel="noopener">{EPA_FILING_CITE}</a>'
+    f'<a href="{FILING_URL}" rel="noopener">{FILING_CITE}</a>'
+)
+TUESDAY_SOURCES_TEXT = f"{FILING_CITE}, {FILING_URL}; {KCCI_CITE}, {KCCI_URL}"
+TUESDAY_SOURCES_HTML = (
+    f'<a href="{FILING_URL}" rel="noopener">{FILING_CITE}</a>; '
+    f'<a href="{KCCI_URL}" rel="noopener">{KCCI_CITE}</a>'
 )
 # Army mitigation (public advisory, Nov. 18, 2026) and what runs of the model's spray option
 # showed with guessed setups (README, "Water misting and soil soaking"): 0.1% at 528 gal/min
@@ -432,11 +469,11 @@ TIME_HEAD = "Planned for about noon."
 
 
 def time_note(built_txt: str) -> str:
-    """Say the state gives about noon for Monday, the Army hasn't itself, and what's modeled."""
+    """Say the state gives about noon for Monday, the Army hasn't given a time, what's modeled."""
     return (
         "Iowa HHS\u2019s fact sheet for Nov. 23 says the Army plans two detonations on Monday "
         "at approximately noon (Iowa HHS fact sheet). As of this update "
-        f"({built_txt}), the Army hasn\u2019t announced a Monday time itself. This map models "
+        f"({built_txt}), the Army hasn\u2019t announced a time itself. These maps model "
         "blasts from 11 a.m. to 12:30 p.m."
     )
 
@@ -609,7 +646,8 @@ def _permit_weather_text(f: Facts) -> str:
     return (
         "The permit bars the blast with surface winds under 1 or over 15 mph, winds over 30 mph "
         "at 1,000 to 3,000 feet, rain, thunderstorms, fog, a low overcast, or an inversion. "
-        f"For {f['blast']} Monday the forecast has surface winds of about {w['sfc_mph']:.0f} mph"
+        f"For {f['blast']} {f.get('day', 'Monday').split(',')[0]} the forecast has surface winds "
+        f"of about {w['sfc_mph']:.0f} mph"
         + aloft
         + f", {w['cloud']:.0f}% cloud cover, and {'no rain' if not w['precip'] else 'rain'}, "
         + ("which is inside those limits." if ok else "which is outside at least one of them.")
@@ -633,6 +671,8 @@ class _Text:
 
 
 def _text(f: Facts, ctx: dict[str, Any]) -> _Text:
+    if f.get("n_models"):  # another day can have fewer models (RRFS may not reach it)
+        ctx = {**ctx, "n_models": f["n_models"]}
     shown = f["shown_model"] or ""
     model = shown
     for code, short in MODEL_SHORT.items():
@@ -662,21 +702,56 @@ def _text(f: Facts, ctx: dict[str, Any]) -> _Text:
     )
 
 
-def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text) -> str:
+def _day_html(f: Facts, ctx: dict[str, Any]) -> str:
+    """Return the summary section for another modeled day (f["day"], e.g. Tuesday)."""
+    t = _text(f, ctx)
+    return f"""
+  <h3>If the blasts are on {f["day"]}</h3>
+  <p>The map also models {f["day"]}; choose it under &ldquo;Day&rdquo; above the map. \
+{SAME_WINDOW} {wind_sentence(f)} {path_sentence(f)} {t.forecast_line}</p>
+  <div class="tablewrap"><table>
+    {DEP_TABLE_HEAD}
+    <tbody>{"".join(t.rows_html)}</tbody></table></div>
+  <p>{t.town} Town checks use approximate town centers. {TOWN_CAVEAT}</p>
+  <p>{REACH_NOTE}</p>
+  <p>{t.air_html}</p>
+  <p>{t.weather}</p>"""
+
+
+def _day_plain(f: Facts, ctx: dict[str, Any]) -> list[str]:
+    """Return llms.txt lines for another modeled day."""
+    t = _text(f, ctx)
+    return [
+        (
+            f"- {f['day']} (also modeled): {SAME_WINDOW} {wind_sentence(f)} "
+            f"{path_sentence(f, html=False)} {t.forecast_line}"
+        ),
+        f"  {t.town} {TOWN_CAVEAT}",
+        "  Farthest reach of ground lead (yellow 5, orange 40, red 100 \u00b5g/ft\u00b2):",
+        *[f"  {r}" for r in t.rows_txt],
+        f"  {REACH_NOTE}",
+        f"  {t.air_plain}",
+        f"  {t.weather}",
+    ]
+
+
+def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
     built = ctx["built_txt"]
+    on = f" on {PLANNED_DAY}" if more else ""  # label the planned day's parts when there are more
     no_time = time_note(built).replace("(Iowa HHS fact sheet)", f"({HHS_LINK})")
     return f"""<section id="summary" aria-labelledby="summary-h">
   <h2 id="summary-h">What the forecast shows</h2>
   <p class="caveat"><b>{CAVEAT}</b></p>
   <h3>Court hold</h3>
-  <p>{COURT_PAUSE} Sources: {COURT_SOURCES_HTML}.</p>
-  <h3>Why the map is for Monday, Nov. 23</h3>
-  <p>{WHY_MONDAY} Source: <a href="{ARMY_URL}" rel="noopener">{ARMY_CITE}</a>.</p>
+  <p>{court_pause([m["day"] for m in more])} Sources: {COURT_SOURCES_HTML}.</p>
+  <h3>When will the detonation happen?</h3>
+  <p>{WHY_MONDAY} Source: <a href="{ARMY_URL}" rel="noopener">{ARMY_CITE}</a>.
+    {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_HTML}.</p>
   <p><b>{TIME_HEAD}</b> {no_time}</p>
-  <h3>Where the cloud goes</h3>
+  <h3>Where the cloud goes{on}</h3>
   <p>{wind_sentence(f)} {path_sentence(f)} Other blast times in the window follow almost the same
     path. {t.forecast_line}</p>
-  <h3>How far lead on the ground could reach</h3>
+  <h3>How far lead on the ground could reach{on}</h3>
   <p>Farthest distance from the plant where lead on the ground reaches each EPA dust-lead action
     level by the end of the 8-hour run, for any blast time from 11 a.m. to 12:30 p.m. The
     levels are 5 \u00b5g/ft\u00b2 (floors), 40 \u00b5g/ft\u00b2 (window sills), and \
@@ -692,20 +767,35 @@ shows
     <tbody>{"".join(t.rows_html)}</tbody></table></div>
   <p>{t.town} Town checks use approximate town centers. {TOWN_CAVEAT}</p>
   <p>{REACH_NOTE}</p>
-  <h3>Lead in the air</h3>
+  <h3>Lead in the air{on}</h3>
   <p>{t.air_html}</p>
   <h3>How this compares with the Army\u2019s maps</h3>
   <p>{ARMY_COMPARE} Source: <a href="{PERMIT_URL}" rel="noopener">{PERMIT_CITE}</a>.</p>
-  <p>{t.weather}</p>
+  <p>{t.weather}</p>{"".join(_day_html(m, ctx) for m in more)}
   <h3>How sure is this?</h3>
   <p>Not very. Nobody outside the Army knows how much lead will get into the air, and the wind
-    forecast will change before Monday. The four cases show the range. Use the map
+    forecast will change before the blasts. The four cases show the range. Use the map
     above to see each case and blast time. Last updated {built}.</p>
 </section>"""
 
 
-def _faq(f: Facts, ctx: dict[str, Any], t: _Text) -> list[tuple[str, str]]:
+def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tuple[str, str]]:
     pct = ctx["pct"]
+    mon = f"For {PLANNED_DAY}: " if more else ""  # the planned day's answers say so
+    days = [
+        (
+            f"What if the blasts are on {m['day']}?",
+            f"The map also models {m['day']}. {SAME_WINDOW} {wind_sentence(m)} "
+            f"{path_sentence(m, html=False)} {_text(m, ctx).town} {TOWN_CAVEAT} "
+            "Farthest reach of ground lead: "
+            + " ".join(r[2:] for r in _text(m, ctx).rows_txt)
+            + " "
+            + REACH_NOTE
+            + " "
+            + CAVEAT,
+        )
+        for m in more
+    ]
     return [
         (
             "Is the Iowa Lead Tracker official?",
@@ -719,24 +809,32 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text) -> list[tuple[str, str]]:
         ),
         (
             "When is the lead azide blast at the Iowa Army Ammunition Plant?",
-            "The Army planned it for Monday, Nov. 23, 2026, but a court has put it on hold. "
-            f"{COURT_PAUSE} (Sources: {COURT_SOURCES_TEXT}.) {WHY_MONDAY} (Source: "
-            f"{ARMY_CITE}, {ARMY_URL}.) " + time_note(ctx["built_txt"]),
+            "The Army planned it for Monday, Nov. 23, 2026, but a court has put its permit on "
+            "hold, and the government told the court the Army intends to act by Tuesday, "
+            "Nov. 24. "
+            f"{court_pause([m['day'] for m in more])} (Sources: {COURT_SOURCES_TEXT}.) "
+            f"{WHY_MONDAY} (Source: "
+            f"{ARMY_CITE}, {ARMY_URL}.) {WHY_TUESDAY} (Sources: {TUESDAY_SOURCES_TEXT}.) "
+            + time_note(ctx["built_txt"]),
         ),
         (
             "Where could the lead go?",
-            f"{wind_sentence(f)} {path_sentence(f, html=False)} {t.town} {TOWN_CAVEAT} {CAVEAT}",
+            (
+                f"{mon}{wind_sentence(f)} {path_sentence(f, html=False)} {t.town} "
+                f"{TOWN_CAVEAT} {CAVEAT}"
+            ),
         ),
         (
             "How far could lead on the ground reach?",
-            "Farthest distance where ground lead reaches EPA dust-lead action levels (yellow 5, "
-            "orange 40, red 100 \u00b5g/ft\u00b2) by the end of an 8-hour run: "
+            f"{mon}Farthest distance where ground lead reaches EPA dust-lead action levels "
+            "(yellow 5, orange 40, red 100 \u00b5g/ft\u00b2) by the end of an 8-hour run: "
             + " ".join(r[2:] for r in t.rows_txt)
             + " "
             + REACH_NOTE
             + " "
             + CAVEAT,
         ),
+        *days,
         (
             "How much lead does the map assume?",
             (
@@ -755,7 +853,8 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text) -> list[tuple[str, str]]:
     ]
 
 
-def _llms(f: Facts, ctx: dict[str, Any], t: _Text) -> str:
+def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
+    mon = f"{PLANNED_DAY}: " if more else ""  # the planned day's lines say so
     return "\n".join(
         [
             f"# {ctx['site_name']}",
@@ -773,14 +872,18 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text) -> str:
             "## Key facts",
             "",
             (
-                "- Blast: planned for Monday, Nov. 23, 2026, and on hold by court order (see "
-                "Court hold), Iowa Army Ammunition Plant, Middletown, Iowa "
-                f"({ctx['lat']:.4f}, {ctx['lon']:.4f}). Blast times modeled: 11 a.m. to 12:30 p.m. "
-                "CST."
+                "- Blast: planned for Monday, Nov. 23, 2026 (Nov. 21 court filing: by Tuesday, "
+                "Nov. 24), with its permit on hold by court order (see Court hold), Iowa Army "
+                "Ammunition "
+                f"Plant, Middletown, Iowa ({ctx['lat']:.4f}, {ctx['lon']:.4f}). Blast times "
+                "modeled: 11 a.m. to 12:30 p.m. CST on "
+                + ", ".join(["Monday, Nov. 23", *[m["day"] for m in more]])
+                + "."
             ),
-            f"- Court hold: {COURT_PAUSE} Sources: {COURT_SOURCES_TEXT}",
+            f"- Court hold: {court_pause([m['day'] for m in more])} Sources: {COURT_SOURCES_TEXT}",
             f"- Time: {time_note(ctx['built_txt'])} Source: {HHS_URL}",
             f"- Why Monday: {WHY_MONDAY} Source: {ARMY_CITE}, {ARMY_URL}",
+            f"- Why Tuesday: {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_TEXT}",
             f"- Water misting: {MISTING} Source: Army public advisory, {ADVISORY_URL}",
             (
                 f"- Assumed: {t.amount} (Army Sustainment Command spokesperson via ABC News, "
@@ -788,17 +891,18 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text) -> str:
                 "all in breathable sizes."
             ),
             f"- Army comparison: {ARMY_COMPARE}",
-            f"- {t.weather}",
-            f"- {t.forecast_line}",
-            f"- {wind_sentence(f)} {path_sentence(f, html=False)}",
-            f"- {t.town} {TOWN_CAVEAT}",
+            f"- {mon}{t.weather}",
+            f"- {mon}{t.forecast_line}",
+            f"- {mon}{wind_sentence(f)} {path_sentence(f, html=False)}",
+            f"- {mon}{t.town} {TOWN_CAVEAT}",
             (
-                "- Farthest reach of ground lead at EPA dust-lead action levels (yellow 5, orange "
-                "40, red 100 \u00b5g/ft\u00b2), any blast time:"
+                f"- {mon}Farthest reach of ground lead at EPA dust-lead action levels (yellow 5, "
+                "orange 40, red 100 \u00b5g/ft\u00b2), any blast time:"
             ),
             *[f"  {r}" for r in t.rows_txt],
             f"  {REACH_NOTE}",
-            f"- {t.air_plain}",
+            f"- {mon}{t.air_plain}",
+            *[line for m in more for line in _day_plain(m, ctx)],
             f"- Last updated {ctx['built_txt']}.",
             "",
             "## Sources",
@@ -815,7 +919,9 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text) -> str:
     )
 
 
-def render(f: Facts, ctx: dict[str, Any]) -> tuple[str, list[tuple[str, str]], str]:
+def render(
+    f: Facts, ctx: dict[str, Any], more: list[Facts] | None = None
+) -> tuple[str, list[tuple[str, str]], str]:
     """Return the summary section HTML, the FAQ (question, answer) pairs, and llms.txt.
 
     Parameters
@@ -825,6 +931,14 @@ def render(f: Facts, ctx: dict[str, Any]) -> tuple[str, list[tuple[str, str]], s
     ctx
         Build facts: ``pct``, ``got_txt``, ``n_models``, ``built_txt``, ``site_name``,
         ``site_url``, ``description``, ``lat`` and ``lon``.
+    more
+        :func:`facts` for other modeled days, each with ``day`` ("Tuesday, Nov. 24") and,
+        optionally, ``n_models``; described after the planned day.
     """
+    more = more or []
     t = _text(f, ctx)
-    return _summary_html(f, ctx, t), _faq(f, ctx, t), _llms(f, ctx, t)
+    return (
+        _summary_html(f, ctx, t, more),
+        _faq(f, ctx, t, more),
+        _llms(f, ctx, t, more),
+    )

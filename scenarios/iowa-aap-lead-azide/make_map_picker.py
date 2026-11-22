@@ -29,7 +29,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from string import Template
 from zoneinfo import ZoneInfo
@@ -46,7 +46,10 @@ MAPS = SITE / "maps"
 HASHED = SITE / "m"  # content-hashed copies of the maps, cached for a year
 PAGE_TEMPLATE = HERE / "index_template.html"
 MET_CACHE = HERE / "met_cache" / "map_met_all.json"
-DATE = "2026-11-23"  # blast day (CST, UTC-6)
+DATE = "2026-11-23"  # the planned blast day (CST, UTC-6); its maps keep their old names
+# Days modeled, as (date, short code used in links). A day is built only when the saved
+# forecasts include it (see build()), so adding one never makes a deploy download weather.
+DAYS = [("2026-11-23", "mon"), ("2026-11-24", "tue")]
 LAT, LON = 40.825518, -91.266502
 TIMES = ["11:00", "11:15", "11:30", "11:45", "12:00", "12:15", "12:30"]
 DEFAULT = "12:00"  # the Nov. 20 detonation had been set for about noon (Iowa HHS)
@@ -59,9 +62,10 @@ CASES = [
     ("permit", "permit-100", "EPA permit"),
 ]
 DEFAULT_CASE = "permit"  # most conservative by default: better than a false sense of security
-# HRRR shown when it covers the run, then RRFS, then GFS; models with no data are skipped.
+# The first model with data for the whole run is shown; the rest make up the spread. RRFS
+# first (Monday), then GFS (Tuesday, until RRFS reaches that far), then the others.
 WEATHER = (
-    "ncep_hrrr_conus,ncep_rrfs_conus,gfs_seamless,ecmwf_ifs025,icon_seamless,"
+    "ncep_rrfs_conus,gfs_seamless,ncep_hrrr_conus,ecmwf_ifs025,icon_seamless,"
     "gem_seamless,ukmo_seamless,meteofrance_seamless"
 )
 WEATHER_ORDER = WEATHER.split(",")
@@ -233,9 +237,30 @@ def cf_account_id() -> str:
 # Names and times
 
 
-def map_name(case: str, t: str) -> str:
-    """Return the map file name for a case and blast time: 'permit-1200.html'."""
-    return f"{case}-{t.replace(':', '')}.html"
+def map_name(case: str, t: str, day: str = DATE) -> str:
+    """Return a map's file name: 'permit-1200.html' (Monday), '2026-11-24-permit-1200.html'."""
+    base = f"{case}-{t.replace(':', '')}.html"
+    return base if day == DATE else f"{day}-{base}"
+
+
+def map_key(day: str, case: str, t: str) -> str:
+    """Return the page's key for a map: '2026-11-23-permit-1200'."""
+    return f"{day}-{case}-{t.replace(':', '')}"
+
+
+def day_label(day: str) -> str:
+    """Return a day as 'Monday, Nov. 23'."""
+    d = dt.date.fromisoformat(day)
+    month = AP_MONTHS.get(d.strftime("%B"), d.strftime("%B"))
+    return f"{d.strftime('%A')}, {month} {d.day}"
+
+
+def cache_has_day(day: str, cache: Path | None = None) -> bool:
+    """Say whether the saved forecasts (default: MET_CACHE) hold blasts on ``day``."""
+    try:
+        return f"start_date={day}" in (cache or MET_CACHE).read_text(encoding="utf-8")
+    except OSError:
+        return False
 
 
 def label(t: str) -> str:
@@ -254,9 +279,9 @@ def fmt_time(t: dt.datetime) -> str:
     )
 
 
-def blast_label(t: str) -> str:
-    """Return a blast time on the blast day as 'Monday, Nov. 23, 2026, 12:00 p.m. CST'."""
-    d = dt.datetime.fromisoformat(f"{DATE}T{t}").replace(tzinfo=TZ)
+def blast_label(t: str, day: str = DATE) -> str:
+    """Return a blast time on a day as 'Monday, Nov. 23, 2026, 12:00 p.m. CST'."""
+    d = dt.datetime.fromisoformat(f"{day}T{t}").replace(tzinfo=TZ)
     month = AP_MONTHS.get(d.strftime("%B"), d.strftime("%B"))
     return f"{d.strftime('%A')}, {month} {d.day}, {d.year}, {label(t)} {d.strftime('%Z')}"
 
@@ -316,38 +341,67 @@ def find_python() -> str:
     return sys.executable
 
 
+def days_to_build() -> list[str]:
+    """Return the days to build: all of them while downloading, else those saved.
+
+    With no saved forecasts (a refresh), every day is built and downloaded. With saved
+    forecasts (a deploy, which must not download), a day they don't cover is left out.
+    """
+    if not MET_CACHE.exists():
+        return [d for d, _ in DAYS]
+    days = [d for d, _ in DAYS if d == DATE or cache_has_day(d)]
+    for d, _ in DAYS:
+        if d not in days:
+            print(f"no saved forecasts for {d} yet; leaving that day out")
+    return days
+
+
+def remove_days_not_built(days: list[str]) -> None:
+    """Delete maps of extra days not being built: left over, they'd mix two forecasts."""
+    for day, _ in DAYS:
+        if day not in days and day != DATE:
+            for old in MAPS.glob(f"{day}-*.html"):
+                old.unlink()
+
+
 def build() -> None:
-    """Run the model for every case and time, one after another (Open-Meteo rate limits)."""
+    """Run the model for every day, case and time, one after another (Open-Meteo limits)."""
     MAPS.mkdir(parents=True, exist_ok=True)
     py = find_python()
+    days = days_to_build()
+    remove_days_not_built(days)
     # Replay the saved forecasts as of when they were pulled, so a rebuild on any later
     # date (or another machine) uses the same weather and makes the same maps.
     pulled = retrieved_at() if MET_CACHE.exists() else None
     as_of = ("--as-of", pulled.isoformat()) if pulled else ()
     forecast = f", forecast from {pulled_label(pulled)}" if pulled else ""
-    for case, release_case, name in CASES:
-        for t in TIMES:
-            cmd = [
-                py,
-                str(TOOL / "puff_dispersal.py"),
-                *("--lat", str(LAT)),
-                *("--lon", str(LON)),
-                *("--time", f"{DATE}T{t}-06:00"),
-                *("--release-case", release_case),
-                *MODEL_ARGS,
-                *as_of,
-                *("--home-url", SITE_URL),
-                *("--legend-note", f"{name} case, blast {blast_label(t)}{forecast}"),
-                *("-o", str(MAPS / map_name(case, t))),
-            ]
-            print(f"building {case} {t}", flush=True)
-            # Arguments are built here from constants; no shell is involved.
-            r = subprocess.run(cmd, cwd=TOOL, capture_output=True, text=True, check=False)  # noqa: S603
-            for line in r.stdout.splitlines() + r.stderr.splitlines():
-                if any(marker in line for marker in BUILD_LOG_MARKERS):
-                    print("  " + line)
-            if r.returncode:
-                raise SystemExit(f"model run failed for {case} {t}:\n{r.stderr[-2000:]}")
+    for day in days:
+        for case, release_case, name in CASES:
+            for t in TIMES:
+                cmd = [
+                    py,
+                    str(TOOL / "puff_dispersal.py"),
+                    *("--lat", str(LAT)),
+                    *("--lon", str(LON)),
+                    *("--time", f"{day}T{t}-06:00"),
+                    *("--release-case", release_case),
+                    *MODEL_ARGS,
+                    *as_of,
+                    *("--home-url", SITE_URL),
+                    *("--legend-note", f"{name} case, blast {blast_label(t, day)}{forecast}"),
+                    *("-o", str(MAPS / map_name(case, t, day))),
+                ]
+                which = f"{case} {t}" if day == DATE else f"{day} {case} {t}"
+                print(f"building {which}", flush=True)
+                # Arguments are built here from constants; no shell is involved.
+                r = subprocess.run(  # noqa: S603
+                    cmd, cwd=TOOL, capture_output=True, text=True, check=False
+                )
+                for line in r.stdout.splitlines() + r.stderr.splitlines():
+                    if any(marker in line for marker in BUILD_LOG_MARKERS):
+                        print("  " + line)
+                if r.returncode:
+                    raise SystemExit(f"model run failed for {which}:\n{r.stderr[-2000:]}")
     if staged.CACHE.exists():  # the staged Tuesday/Wednesday maps, from their own file
         staged.build()
 
@@ -362,30 +416,60 @@ class Maps:
 
     pages: list[str]
     pct: dict[str, str]
-    times: list[str]
+    times: list[str]  # the planned day's (DATE)
     default: str
+    days: dict[str, list[str]] = field(default_factory=dict)  # every built day's times
+    pages_by_day: dict[str, list[str]] = field(default_factory=dict)
+
+
+def complete_times(day: str) -> list[str]:
+    """Return the blast times on ``day`` with a map for every case."""
+    return [t for t in TIMES if all((MAPS / map_name(c, t, day)).exists() for c, _, _ in CASES)]
+
+
+def days_shown(times: list[str]) -> dict[str, list[str]]:
+    """Return {day: blast times} for the planned day and every other day built in full.
+
+    Another day is shown only with every one of the planned day's blast times, so the
+    page's one time menu always has a map for the day chosen.
+    """
+    days = {DATE: times}
+    for day, _ in DAYS:
+        if day == DATE or not complete_times(day):
+            continue
+        if complete_times(day) == times:
+            days[day] = times
+        else:
+            print(f"maps for {day} don't cover every blast time; leaving that day out")
+    return days
 
 
 def read_maps() -> Maps:
     """Read every complete blast time's maps and the share of lead airborne per case."""
-    times = [t for t in TIMES if all((MAPS / map_name(c, t)).exists() for c, _, _ in CASES)]
+    times = complete_times(DATE)
     if not times:
         raise SystemExit(f"no complete set of maps in {MAPS}; run with --build first")
     for t in TIMES:
         if t not in times:
             print(f"missing a map for {t}, leaving it out")
+    days = days_shown(times)
     pages: list[str] = []
+    pages_by_day: dict[str, list[str]] = {}
     share: dict[str, float] = {}
-    for case, _, _ in CASES:
-        for t in times:
-            page = (MAPS / map_name(case, t)).read_text(encoding="utf-8")
-            pages.append(page)
-            m = re.search(r'"airborneFraction":\s*([0-9.eE+-]+)', page)
-            if m and case not in share:
-                share[case] = float(m.group(1))
+    for day, day_times in days.items():
+        for case, _, _ in CASES:
+            for t in day_times:
+                page = (MAPS / map_name(case, t, day)).read_text(encoding="utf-8")
+                pages.append(page)
+                pages_by_day.setdefault(day, []).append(page)
+                m = re.search(r'"airborneFraction":\s*([0-9.eE+-]+)', page)
+                if m and case not in share:
+                    share[case] = float(m.group(1))
     pct = {c: f"{share.get(c, 0) * 100:.0f}%" for c, _, _ in CASES}
     default = DEFAULT if DEFAULT in times else times[0]
-    return Maps(pages=pages, pct=pct, times=times, default=default)
+    return Maps(
+        pages=pages, pct=pct, times=times, default=default, days=days, pages_by_day=pages_by_day
+    )
 
 
 def models_used(pages: list[str]) -> list[str]:
@@ -451,8 +535,8 @@ def json_ld(faq: list[tuple[str, str]], now: dt.datetime) -> str:
     return json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
 
 
-def write_hashed_maps(times: list[str]) -> dict[str, str]:
-    """Copy each map to m/ under a content-hashed name and return {case-HHMM: path}.
+def write_hashed_maps(days: dict[str, list[str]]) -> dict[str, str]:
+    """Copy each map to m/ under a content-hashed name; return {day-case-HHMM: path}.
 
     The plain maps/ files stay for old links. A map opened on its own points search
     engines at the home page.
@@ -460,20 +544,25 @@ def write_hashed_maps(times: list[str]) -> dict[str, str]:
     shutil.rmtree(HASHED, ignore_errors=True)
     HASHED.mkdir(parents=True)
     map_files = {}
-    for case, _, _ in CASES:
-        for t in times:
-            mp = MAPS / map_name(case, t)
-            txt = mp.read_text(encoding="utf-8")
-            add = ("" if 'name="robots"' in txt else '\n<meta name="robots" content="noindex">') + (
-                "" if 'rel="canonical"' in txt else f'\n<link rel="canonical" href="{SITE_URL}">'
-            )
-            if add:
-                txt = txt.replace("<head>", "<head>" + add, 1)
-                mp.write_text(txt, encoding="utf-8")
-            key = f"{case}-{t.replace(':', '')}"
-            h = hashlib.sha256(txt.encode("utf-8")).hexdigest()[:10]
-            shutil.copyfile(mp, HASHED / f"{key}-{h}.html")
-            map_files[key] = f"m/{key}-{h}"
+    for day, times in days.items():
+        for case, _, _ in CASES:
+            for t in times:
+                mp = MAPS / map_name(case, t, day)
+                txt = mp.read_text(encoding="utf-8")
+                add = (
+                    "" if 'name="robots"' in txt else '\n<meta name="robots" content="noindex">'
+                ) + (
+                    ""
+                    if 'rel="canonical"' in txt
+                    else f'\n<link rel="canonical" href="{SITE_URL}">'
+                )
+                if add:
+                    txt = txt.replace("<head>", "<head>" + add, 1)
+                    mp.write_text(txt, encoding="utf-8")
+                stem = mp.name.removesuffix(".html")
+                h = hashlib.sha256(txt.encode("utf-8")).hexdigest()[:10]
+                shutil.copyfile(mp, HASHED / f"{stem}-{h}.html")
+                map_files[map_key(day, case, t)] = f"m/{stem}-{h}"
     return map_files
 
 
@@ -509,13 +598,28 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
     pct, times = maps.pct, maps.times
     got = retrieved_at()
     got_txt = fmt_time(got) if got else "unknown"
-    n_models = model_count(maps.pages)
+    n_models = model_count(maps.pages_by_day.get(DATE, maps.pages))  # the planned day's
     f_facts = forecast_summary.facts(
         {(c, t): MAPS / map_name(c, t) for c, _, _ in CASES for t in times},
         CASES,
         times,
         maps.default,
     )
+    # Other modeled days, described after the planned day in the summary, FAQ and llms.txt.
+    more = []
+    for day, day_times in maps.days.items():
+        if day == DATE:
+            continue
+        default = maps.default if maps.default in day_times else day_times[0]
+        f_day = forecast_summary.facts(
+            {(c, t): MAPS / map_name(c, t, day) for c, _, _ in CASES for t in day_times},
+            CASES,
+            day_times,
+            default,
+        )
+        f_day["day"] = day_label(day)
+        f_day["n_models"] = model_count(maps.pages_by_day[day])
+        more.append(f_day)
     summary_html, faq, llms_txt = forecast_summary.render(
         f_facts,
         {
@@ -529,15 +633,33 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
             "lat": LAT,
             "lon": LON,
         },
+        more,
     )
     shown = f_facts["shown_model"]
     model_name = forecast_summary.MODEL_SHORT.get(shown, shown or "the first model")
+    cite_models, cite_count = model_name, n_models
+    if more:  # name each day's shown model and count in the References
+        per_day = [(day_label(DATE).split(",")[0], model_name, n_models)] + [
+            (
+                m["day"].split(",")[0],
+                forecast_summary.MODEL_SHORT.get(
+                    m["shown_model"], m["shown_model"] or "the first model"
+                ),
+                m["n_models"],
+            )
+            for m in more
+        ]
+        cite_models = ", ".join(f"{model} ({wd})" for wd, model, _ in per_day)
+        counts = {n for _, _, n in per_day}
+        cite_count = (
+            n_models if len(counts) == 1 else " and ".join(f"{n} ({wd})" for wd, _, n in per_day)
+        )
     cite_html = works_cited.render(
         {
             "pct": pct,
-            "n_models": n_models,
+            "n_models": cite_count,
             "got_txt": got_txt,
-            "shown_model": model_name,
+            "shown_model": cite_models,
             "models": models_used(maps.pages),
         },
         SITE_URL,
@@ -558,6 +680,20 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "og_image": og_image,
         "twitter_card": "summary_large_image" if og_image else "summary",
         "json_ld": json_ld(faq, now),
+        "day_options": "".join(
+            f'<option value="{d}"{" selected" if d == DATE else ""}>{day_label(d)}</option>'
+            for d in maps.days
+        ),
+        "day_hidden": "" if len(maps.days) > 1 else " hidden",
+        "day_codes": json.dumps({d: c for d, c in DAYS if d in maps.days}),
+        "all_days": json.dumps({c: day_label(d) for d, c in DAYS}),
+        "header_days": (
+            day_label(DATE)
+            if len(maps.days) == 1
+            else f"{day_label(DATE)} (also modeled: "
+            + ", ".join(day_label(d) for d in maps.days if d != DATE)
+            + ")"
+        ),
         "time_options": "".join(
             f'<option value="{t}"{" selected" if t == maps.default else ""}>{label(t)}</option>'
             for t in times
@@ -580,12 +716,14 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "contact_html": works_cited.CONTACT_HTML,
         "misting": forecast_summary.MISTING,
         "advisory_url": forecast_summary.ADVISORY_URL,
-        "court_pause": forecast_summary.COURT_PAUSE,
+        "court_pause": forecast_summary.court_pause([day_label(d) for d in maps.days if d != DATE]),
         "court_url": forecast_summary.COURT_URL,
         "court_cite": forecast_summary.COURT_CITE,
         "court_sources": forecast_summary.COURT_SOURCES_HTML,
         "time_head": forecast_summary.TIME_HEAD,
         "why_monday": forecast_summary.WHY_MONDAY,
+        "why_tuesday": forecast_summary.WHY_TUESDAY,
+        "tuesday_sources": forecast_summary.TUESDAY_SOURCES_HTML,
         "army_url": forecast_summary.ARMY_URL,
         "army_cite": forecast_summary.ARMY_CITE,
         "time_note": forecast_summary.time_note(built_txt).replace(
@@ -596,7 +734,7 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "cite_html": cite_html,
         "summary_html": summary_html,
         "faq_html": faq_html(faq),
-        "map_files": json.dumps(write_hashed_maps(times), separators=(",", ":")),
+        "map_files": json.dumps(write_hashed_maps(maps.days), separators=(",", ":")),
     }
     template = Template(PAGE_TEMPLATE.read_text(encoding="utf-8").removesuffix("\n"))
     return template.substitute(values), llms_txt

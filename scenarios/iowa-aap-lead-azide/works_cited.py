@@ -137,6 +137,10 @@ REFERENCES = [
     f"Department of Health and Human Services, {ACCESSED}, "
     + _a("https://hhs.iowa.gov/media/19822/download?inline=")
     + ".",
+    "KCCI, 2026: Court records: Army plans to detonate lead azide by Tuesday. KCCI 8 News, "
+    "22 November 2026, accessed 22 November 2026, "
+    + _a("https://www.kcci.com/article/lead-azide-bomb-detonation-iowa-tuesday/74499570")
+    + ".",
     "MACTEC Federal Programs, 2008: Emission factors developed based on Exploding Ordnance "
     "Emission Study Phase II Series 7 testing conducted at Aberdeen Proving Ground, Maryland. "
     "Draft background report, AP-42 5th ed., Chapter 15, U.S. Army Environmental Command and "
@@ -186,6 +190,16 @@ REFERENCES = [
     "U.S. Army, 2026: Public and media advisory regarding the detonation of lead azide at Iowa "
     "Army Ammunition Plant in Middletown, Iowa. U.S. Army Sustainment Command, 18 November 2026, "
     + _a("https://d34w7g4gy10iej.cloudfront.net/pubs/pdf_78366.pdf")
+    + ".",
+    "U.S. Department of Justice, 2026: Respondents&rsquo; notice of the Army&rsquo;s intent to "
+    "respond to immediate threat under RCRA&rsquo;s emergency exclusion. <i>Iowa Environmental "
+    "Council v. U.S. Environmental Protection Agency</i>, No. 26-3374, U.S. Court of Appeals for "
+    "the Eighth Circuit, filed 21 November 2026, with the declaration of Col. A. C. Teller, "
+    "accessed 22 November 2026, "
+    + _a(
+        "https://s3.documentcloud.org/documents/28930203/"
+        "iowa-environmental-council-v-us-environmental-protection-agency.pdf"
+    )
     + ".",
     "Zhang, L., S. Gong, J. Padro, and L. Barrie, 2001: A size-segregated particle dry "
     "deposition scheme for an atmospheric aerosol module. <i>Atmos. Environ.</i>, <b>35</b>, "
@@ -305,7 +319,8 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
         (
             "Weather",
             (
-                f"{ctx['n_models'].capitalize()} forecast models pulled {ctx['got_txt']}; "
+                f"{ctx['n_models'][:1].upper() + ctx['n_models'][1:]} forecast models pulled "
+                f"{ctx['got_txt']}; "
                 f"{html.escape(ctx['shown_model'])} shown; &plusmn;5&deg; direction error around "
                 "each"
             ),

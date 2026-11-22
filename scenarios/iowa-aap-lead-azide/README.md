@@ -61,8 +61,10 @@ Useful changes:
 - **Near the site:** add `--extent-km 15 --hours 2`.
 
 The site's maps use `--weather-model
-ncep_hrrr_conus,ncep_rrfs_conus,gfs_seamless,ecmwf_ifs025,icon_seamless,gem_seamless,ukmo_seamless,meteofrance_seamless`:
-HRRR is shown when it covers the run, then RRFS, then GFS. Models with no data yet are skipped.
+ncep_rrfs_conus,gfs_seamless,ncep_hrrr_conus,ecmwf_ifs025,icon_seamless,gem_seamless,ukmo_seamless,meteofrance_seamless`:
+RRFS is shown when it covers the run (Monday), then GFS (Tuesday, until RRFS reaches it), then
+HRRR. Models with no data yet are skipped. (HRRR used to be first; RRFS is shown for Monday
+on purpose, Nov. 22, 2026.)
 
 In the page, "Levels of concern" with the "weather-model spread" box ticked shows
 everywhere any model puts lead.
@@ -334,12 +336,30 @@ Forecasts improve as the event approaches. The page and `met_cache/map_met_all.j
    saved file, if the forecasts haven't changed.
 2. Check the news for the dated statements and open a pull request. Merging it deploys
    both sites (`.github/workflows/deploy.yml`).
-3. HRRR and RRFS are already first in the list and take over as soon as they cover the
-   whole run (HRRR reaches 18 to 48 hours ahead depending on the cycle).
+3. RRFS is first in the list and takes over from GFS as soon as it covers the whole run.
+   HRRR (18 to 48 hours ahead depending on the cycle) is in the spread but not shown.
 
 `.github/workflows/refresh-forecast.yml` does step 1 every hour until the blast
 date and pushes the result to the `forecast-refresh` branch with a pull request. It
 never deploys; merging the pull request does.
+
+### More than one day
+
+`DAYS` in `make_map_picker.py` lists the days the main site models (Monday, Nov. 23 and
+Tuesday, Nov. 24), each with the same blast times. The page gets a "Day" menu, links carry
+the day (`#1200-permit-tue`; links without one open Monday), and the summary, FAQ and
+`llms.txt` add an "If the blasts are on Tuesday" section. Monday's maps keep their old
+file names; other days' are prefixed with the date.
+
+The forecast list puts RRFS first and GFS second: the first model with data for the whole
+run is shown, so Monday shows RRFS and Tuesday shows GFS until RRFS reaches that far.
+
+A day is built only if the saved forecasts include it (a refresh, which starts with no
+saved file, downloads every day). So adding a day changes nothing until the next refresh,
+and a deploy never has to download weather.
+
+The staged page (`staged.py`, below) also has Tuesday, but with GFS and ECMWF only and its own
+saved forecasts, so its Tuesday numbers differ from the main site's.
 
 ### Staged Tuesday/Wednesday maps
 
