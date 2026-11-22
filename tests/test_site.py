@@ -30,8 +30,8 @@ UNOFFICIAL = "unofficial estimate, not from the Army or any government agency"
 
 
 @pytest.fixture(scope="module")
-def rendered(tmp_path_factory: pytest.TempPathFactory) -> tuple[str, list[tuple[str, str]], str]:
-    """Summary HTML, FAQ and llms.txt for four noon maps under a steady north wind."""
+def facts_ctx(tmp_path_factory: pytest.TempPathFactory) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Facts and build context for four noon maps under a steady north wind."""
     folder = tmp_path_factory.mktemp("maps")
     maps: dict[tuple[str, str], str | Path] = {}
     pct = {}
@@ -66,7 +66,21 @@ def rendered(tmp_path_factory: pytest.TempPathFactory) -> tuple[str, list[tuple[
         "lat": site.LAT,
         "lon": site.LON,
     }
-    return fs.render(facts, ctx)
+    return facts, ctx
+
+
+@pytest.fixture(scope="module")
+def rendered(facts_ctx: tuple[dict[str, Any], dict[str, Any]]) -> tuple[str, list, str]:
+    """Summary HTML, FAQ and llms.txt for the planned day only."""
+    return fs.render(*facts_ctx)
+
+
+@pytest.fixture(scope="module")
+def rendered_two_days(facts_ctx: tuple[dict[str, Any], dict[str, Any]]) -> tuple[str, list, str]:
+    """Render it again with the same maps standing in for Tuesday as a second day."""
+    facts, ctx = facts_ctx
+    tuesday = {**facts, "day": "Tuesday, Nov. 24", "n_models": "two"}
+    return fs.render(facts, ctx, [tuesday])
 
 
 @pytest.mark.slow
@@ -327,3 +341,61 @@ def test_missing_addresses_get_a_real_page() -> None:
     assert "Follow official instructions." in page
     assert not staged.links_to_staged(page)
     assert "404.html" in site.PUBLISHED_FILES
+
+
+def test_days_and_map_names() -> None:
+    """Monday's maps keep their old names; other days are prefixed with their date."""
+    assert [d for d, _ in site.DAYS] == ["2026-11-23", "2026-11-24"]
+    assert site.map_name("permit", "12:00") == "permit-1200.html"
+    assert site.map_name("permit", "12:00", "2026-11-24") == "2026-11-24-permit-1200.html"
+    assert site.map_key("2026-11-24", "low", "11:15") == "2026-11-24-low-1115"
+    assert site.day_label("2026-11-24") == "Tuesday, Nov. 24"
+    assert site.blast_label("12:00", "2026-11-24") == "Tuesday, Nov. 24, 2026, 12:00 p.m. CST"
+
+
+def test_forecast_order_rrfs_then_gfs() -> None:
+    """RRFS is shown where it covers the run (Monday); otherwise GFS (Tuesday)."""
+    assert site.WEATHER.split(",")[:2] == ["ncep_rrfs_conus", "gfs_seamless"]
+
+
+def test_days_to_build(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A deploy builds only the days its saved forecasts cover; a refresh builds them all."""
+    cache = tmp_path / "map_met_all.json"
+    monkeypatch.setattr(site, "MET_CACHE", cache)
+    assert site.days_to_build() == ["2026-11-23", "2026-11-24"]  # no file: downloading
+    cache.write_text('{"x?start_date=2026-11-23&end_date=2026-11-24": 1}', encoding="utf-8")
+    assert site.days_to_build() == ["2026-11-23"]
+    cache.write_text(
+        '{"a?start_date=2026-11-23&x": 1, "b?start_date=2026-11-24&x": 1}', encoding="utf-8"
+    )
+    assert site.days_to_build() == ["2026-11-23", "2026-11-24"]
+
+
+def test_page_has_a_day_menu() -> None:
+    page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    assert '<select id="d">$day_options</select>' in page
+    assert "$header_days" in page
+    assert "MAP_FILES[day.value + '-' + cas.value + '-' + t]" in page
+
+
+@pytest.mark.slow
+def test_second_day_in_summary_faq_and_llms(rendered_two_days: tuple[str, list, str]) -> None:
+    summary, faq, llms = rendered_two_days
+    assert "<h3>If the blasts are on Tuesday, Nov. 24</h3>" in summary
+    assert summary.index("If the blasts are on Tuesday") > summary.index("Lead in the air")
+    assert "For noon Tuesday the forecast has surface winds" in summary
+    assert "from two weather models" in summary  # its own model count
+    assert summary.count(fs.TOWN_CAVEAT) >= 2  # the caveat after every list of towns
+    answers = dict(faq)
+    tue = answers["What if the blasts are on Tuesday, Nov. 24?"]
+    assert fs.TOWN_CAVEAT in tue
+    assert fs.CAVEAT in tue
+    assert "- Tuesday, Nov. 24 (also modeled, 11 a.m. to 12:30 p.m.):" in llms
+
+
+@pytest.mark.slow
+def test_one_day_has_no_second_day_text(rendered: tuple[str, list, str]) -> None:
+    summary, faq, llms = rendered
+    assert "If the blasts are on" not in summary
+    assert not any(q.startswith("What if the blasts are on") for q, _ in faq)
+    assert "also modeled" not in llms

@@ -341,6 +341,21 @@ Forecasts improve as the event approaches. The page and `met_cache/map_met_all.j
 date and pushes the result to the `forecast-refresh` branch with a pull request. It
 never deploys; merging the pull request does.
 
+### More than one day
+
+`DAYS` in `make_map_picker.py` lists the days the main site models (Monday, Nov. 23 and
+Tuesday, Nov. 24), each with the same blast times. The page gets a "Day" menu, links carry
+the day (`#1200-permit-tue`; links without one open Monday), and the summary, FAQ and
+`llms.txt` add an "If the blasts are on Tuesday" section. Monday's maps keep their old
+file names; other days' are prefixed with the date.
+
+The forecast list puts RRFS first and GFS second: the first model with data for the whole
+run is shown, so Monday shows RRFS and Tuesday shows GFS until RRFS reaches that far.
+
+A day is built only if the saved forecasts include it (a refresh, which starts with no
+saved file, downloads every day). So adding a day changes nothing until the next refresh,
+and a deploy never has to download weather.
+
 ### Staged Tuesday/Wednesday maps
 
 `staged.py` builds a separate set of maps for blasts on Tuesday, Nov. 24 and Wednesday,

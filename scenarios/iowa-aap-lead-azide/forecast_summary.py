@@ -609,7 +609,8 @@ def _permit_weather_text(f: Facts) -> str:
     return (
         "The permit bars the blast with surface winds under 1 or over 15 mph, winds over 30 mph "
         "at 1,000 to 3,000 feet, rain, thunderstorms, fog, a low overcast, or an inversion. "
-        f"For {f['blast']} Monday the forecast has surface winds of about {w['sfc_mph']:.0f} mph"
+        f"For {f['blast']} {f.get('day', 'Monday').split(',')[0]} the forecast has surface winds "
+        f"of about {w['sfc_mph']:.0f} mph"
         + aloft
         + f", {w['cloud']:.0f}% cloud cover, and {'no rain' if not w['precip'] else 'rain'}, "
         + ("which is inside those limits." if ok else "which is outside at least one of them.")
@@ -633,6 +634,8 @@ class _Text:
 
 
 def _text(f: Facts, ctx: dict[str, Any]) -> _Text:
+    if f.get("n_models"):  # another day can have fewer models (RRFS may not reach it)
+        ctx = {**ctx, "n_models": f["n_models"]}
     shown = f["shown_model"] or ""
     model = shown
     for code, short in MODEL_SHORT.items():
@@ -662,7 +665,38 @@ def _text(f: Facts, ctx: dict[str, Any]) -> _Text:
     )
 
 
-def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text) -> str:
+def _day_html(f: Facts, ctx: dict[str, Any]) -> str:
+    """Return the summary section for another modeled day (f["day"], e.g. Tuesday)."""
+    t = _text(f, ctx)
+    return f"""
+  <h3>If the blasts are on {f["day"]}</h3>
+  <p>The map also models {f["day"]}, from 11 a.m. to 12:30 p.m.; choose it under
+    &ldquo;Day&rdquo; above the map. {wind_sentence(f)} {path_sentence(f)} {t.forecast_line}</p>
+  <div class="tablewrap"><table>
+    {DEP_TABLE_HEAD}
+    <tbody>{"".join(t.rows_html)}</tbody></table></div>
+  <p>{t.town} Town checks use approximate town centers. {TOWN_CAVEAT}</p>
+  <p>{t.air_html}</p>
+  <p>{t.weather}</p>"""
+
+
+def _day_plain(f: Facts, ctx: dict[str, Any]) -> list[str]:
+    """Return llms.txt lines for another modeled day."""
+    t = _text(f, ctx)
+    return [
+        (
+            f"- {f['day']} (also modeled, 11 a.m. to 12:30 p.m.): {wind_sentence(f)} "
+            f"{path_sentence(f, html=False)} {t.forecast_line}"
+        ),
+        f"  {t.town} {TOWN_CAVEAT}",
+        "  Farthest reach of ground lead (yellow 5, orange 40, red 100 \u00b5g/ft\u00b2):",
+        *[f"  {r}" for r in t.rows_txt],
+        f"  {t.air_plain}",
+        f"  {t.weather}",
+    ]
+
+
+def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
     built = ctx["built_txt"]
     no_time = time_note(built).replace("(Iowa HHS fact sheet)", f"({HHS_LINK})")
     return f"""<section id="summary" aria-labelledby="summary-h">
@@ -693,7 +727,7 @@ shows
   <p>{t.town} Town checks use approximate town centers. {TOWN_CAVEAT}</p>
   <p>{REACH_NOTE}</p>
   <h3>Lead in the air</h3>
-  <p>{t.air_html}</p>
+  <p>{t.air_html}</p>{"".join(_day_html(m, ctx) for m in more)}
   <h3>How this compares with the Army\u2019s maps</h3>
   <p>{ARMY_COMPARE} Source: <a href="{PERMIT_URL}" rel="noopener">{PERMIT_CITE}</a>.</p>
   <p>{t.weather}</p>
@@ -704,8 +738,20 @@ shows
 </section>"""
 
 
-def _faq(f: Facts, ctx: dict[str, Any], t: _Text) -> list[tuple[str, str]]:
+def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tuple[str, str]]:
     pct = ctx["pct"]
+    days = [
+        (
+            f"What if the blasts are on {m['day']}?",
+            f"The map also models {m['day']}. {wind_sentence(m)} "
+            f"{path_sentence(m, html=False)} {_text(m, ctx).town} {TOWN_CAVEAT} "
+            "Farthest reach of ground lead: "
+            + " ".join(r[2:] for r in _text(m, ctx).rows_txt)
+            + " "
+            + CAVEAT,
+        )
+        for m in more
+    ]
     return [
         (
             "Is the Iowa Lead Tracker official?",
@@ -727,6 +773,7 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text) -> list[tuple[str, str]]:
             "Where could the lead go?",
             f"{wind_sentence(f)} {path_sentence(f, html=False)} {t.town} {TOWN_CAVEAT} {CAVEAT}",
         ),
+        *days,
         (
             "How far could lead on the ground reach?",
             "Farthest distance where ground lead reaches EPA dust-lead action levels (yellow 5, "
@@ -755,7 +802,7 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text) -> list[tuple[str, str]]:
     ]
 
 
-def _llms(f: Facts, ctx: dict[str, Any], t: _Text) -> str:
+def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
     return "\n".join(
         [
             f"# {ctx['site_name']}",
@@ -799,6 +846,7 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text) -> str:
             *[f"  {r}" for r in t.rows_txt],
             f"  {REACH_NOTE}",
             f"- {t.air_plain}",
+            *[line for m in more for line in _day_plain(m, ctx)],
             f"- Last updated {ctx['built_txt']}.",
             "",
             "## Sources",
@@ -815,7 +863,9 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text) -> str:
     )
 
 
-def render(f: Facts, ctx: dict[str, Any]) -> tuple[str, list[tuple[str, str]], str]:
+def render(
+    f: Facts, ctx: dict[str, Any], more: list[Facts] | None = None
+) -> tuple[str, list[tuple[str, str]], str]:
     """Return the summary section HTML, the FAQ (question, answer) pairs, and llms.txt.
 
     Parameters
@@ -825,6 +875,14 @@ def render(f: Facts, ctx: dict[str, Any]) -> tuple[str, list[tuple[str, str]], s
     ctx
         Build facts: ``pct``, ``got_txt``, ``n_models``, ``built_txt``, ``site_name``,
         ``site_url``, ``description``, ``lat`` and ``lon``.
+    more
+        :func:`facts` for other modeled days, each with ``day`` ("Tuesday, Nov. 24") and,
+        optionally, ``n_models``; described after the planned day.
     """
+    more = more or []
     t = _text(f, ctx)
-    return _summary_html(f, ctx, t), _faq(f, ctx, t), _llms(f, ctx, t)
+    return (
+        _summary_html(f, ctx, t, more),
+        _faq(f, ctx, t, more),
+        _llms(f, ctx, t, more),
+    )

@@ -95,10 +95,13 @@
   dialog form { margin: 14px 0 0; text-align: right; }
   dialog form button { font: inherit; padding: 6px 16px; border-radius: 6px; border: 0;
                         background: #1f2933; color: #fff; cursor: pointer; }
+  header label[hidden] { display: none; }
 </style></head><body>
 <header>
   <div class="title"><h1>$site_name</h1>
-    <p>Lead from the planned blast at the Iowa Army Ammunition Plant, Monday, Nov. 23</p></div>
+    <p>Lead from the planned blast at the Iowa Army Ammunition Plant, $header_days</p></div>
+  <label for="d"$day_hidden>Day
+    <select id="d">$day_options</select></label>
   <label for="t">Blast time (CST)
     <select id="t">$time_options</select></label>
   <button id="prev" type="button">&lsaquo; Earlier</button>
@@ -180,6 +183,9 @@
 </nav>
 <script>
 const sel = document.getElementById('t'), cas = document.getElementById('c'), frame = document.getElementById('map');
+const day = document.getElementById('d');
+// Short codes for the days in links (#1200-permit-tue); the planned day needs none.
+const DAY_CODES = $day_codes, FIRST_DAY = day.options[0].value;
 // Map files carry a content hash so browsers can cache them for good. The live site serves
 // them without ".html"; a local server or a file:// copy needs the extension.
 const MAP_FILES = $map_files;
@@ -198,12 +204,16 @@ function mapH() {
 }
 function show() {
   const t = sel.value.replace(':', '');
-  frame.src = MAP_FILES[cas.value + '-' + t] + EXT + '#u=' + sys + (narrow.matches ? '&h=' + mapH() : '');
-  history.replaceState(null, '', '#' + t + '-' + cas.value);
+  const f = MAP_FILES[day.value + '-' + cas.value + '-' + t];
+  if (!f) return;
+  frame.src = f + EXT + '#u=' + sys + (narrow.matches ? '&h=' + mapH() : '');
+  history.replaceState(null, '', '#' + t + '-' + cas.value +
+    (day.value === FIRST_DAY ? '' : '-' + DAY_CODES[day.value]));
 }
 function step(d) { const i = sel.selectedIndex + d; if (i >= 0 && i < sel.options.length) { sel.selectedIndex = i; show(); } }
 sel.addEventListener('change', show);
 cas.addEventListener('change', show);
+day.addEventListener('change', show);
 document.getElementById('prev').onclick = () => step(-1);
 document.getElementById('next').onclick = () => step(1);
 const note = document.getElementById('note');
@@ -277,8 +287,10 @@ frame.addEventListener('load', () => { if (frame.contentWindow) frame.contentWin
 setSys(sys, false);
 // #HHMM-case picks the time and case, on load and when the hash changes
 function applyHash() {
-  const [ht, hc] = location.hash.slice(1).split('-');
+  const [ht, hc, hd] = location.hash.slice(1).split('-');
   let changed = false;
+  const want = Object.keys(DAY_CODES).find((k) => DAY_CODES[k] === hd) || FIRST_DAY;
+  for (const o of day.options) if (o.value === want && !o.selected) { o.selected = true; changed = true; }
   for (const o of sel.options) if (o.value.replace(':', '') === ht && !o.selected) { o.selected = true; changed = true; }
   for (const o of cas.options) if (o.value === hc && !o.selected) { o.selected = true; changed = true; }
   return changed;
