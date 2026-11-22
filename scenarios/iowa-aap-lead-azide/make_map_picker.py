@@ -99,6 +99,7 @@ MIRROR_TOKEN_ENV = "IOWALEADTRACKER_MIRROR_TOKEN"  # noqa: S105 - a variable nam
 # Files besides maps/, m/ and brand/ that --publish copies.
 PUBLISHED_FILES = (
     "index.html",
+    "404.html",
     "robots.txt",
     "sitemap.xml",
     "og.png",
@@ -601,9 +602,49 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
     return template.substitute(values), llms_txt
 
 
+def not_found_page() -> str:
+    """Return the page served for any address that doesn't exist (404.html).
+
+    Without it, Cloudflare answers a missing address with a bare 404 that has no content
+    type, which iPhone Safari offers to download as a file.
+    """
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Page not found · {SITE_NAME}</title>
+<style>
+  :root {{ color-scheme: light dark; }}
+  body {{ margin: 0; padding: 32px 16px; font: 16px/1.5 system-ui, -apple-system, "Segoe UI",
+    Roboto, sans-serif; background: #fff; color: #1d1d1b; }}
+  @media (prefers-color-scheme: dark) {{ body {{ background: #1d1d1b; color: #f2f2f0; }}
+    a {{ color: #8ab4f8; }} }}
+  main {{ max-width: 560px; margin: 0 auto; }}
+  h1 {{ font-size: 22px; margin: 0 0 8px; }}
+  .warn {{ background: #fde8c8; color: #1d1d1b; padding: 10px 12px; border-radius: 6px; }}
+</style>
+</head>
+<body>
+<main>
+  <h1>Page not found</h1>
+  <p>There&rsquo;s no page at this address. It may have been mistyped, or not be
+    published yet.</p>
+  <p><a href="/">Go to the {SITE_NAME} map</a></p>
+  <p class="warn"><b>This is an unofficial estimate, not from the Army or any government
+    agency. Don&rsquo;t use it to decide if you&rsquo;re safe.</b> Follow official
+    instructions.</p>
+</main>
+</body>
+</html>
+"""
+
+
 def write_site(page: str, llms_txt: str, now: dt.datetime) -> Path:
     """Write index.html and the small site files; return the index path."""
     (SITE / "_headers").write_text(HEADERS, encoding="utf-8")
+    (SITE / "404.html").write_text(not_found_page(), encoding="utf-8")
     (SITE / "llms.txt").write_text(llms_txt, encoding="utf-8")
     (SITE / "robots.txt").write_text(
         f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}sitemap.xml\n", encoding="utf-8"
@@ -637,6 +678,21 @@ def publish() -> None:
     print(f"copied index.html and maps/ to {dest}")
 
 
+def wrangler_config(project: str) -> dict[str, object]:
+    """Return the Worker settings for wrangler deploy."""
+    return {
+        "name": project,
+        "compatibility_date": "2026-11-18",
+        # A missing address gets 404.html (a real page), not a bare 404 that iPhone
+        # Safari offers to download.
+        "assets": {"directory": "./public", "not_found_handling": "404-page"},
+        # Serve only on the custom domain: the workers.dev and preview
+        # addresses contain the account's username.
+        "workers_dev": False,
+        "preview_urls": False,
+    }
+
+
 def deploy(project: str) -> None:
     """Upload the site to the Cloudflare Worker `project` with wrangler."""
     with tempfile.TemporaryDirectory() as d:
@@ -644,15 +700,7 @@ def deploy(project: str) -> None:
         shutil.copytree(
             SITE, Path(d) / "public", ignore=shutil.ignore_patterns(".*", "__pycache__", "*.pyc")
         )
-        config = {
-            "name": project,
-            "compatibility_date": "2026-11-18",
-            "assets": {"directory": "./public"},
-            # Serve only on the custom domain: the workers.dev and preview
-            # addresses contain the account's username.
-            "workers_dev": False,
-            "preview_urls": False,
-        }
+        config = wrangler_config(project)
         (Path(d) / "wrangler.jsonc").write_text(json.dumps(config, indent=2), encoding="utf-8")
         cmd = ["npx", "--yes", WRANGLER, "deploy"]
         print("running:", " ".join(cmd), "in", d)

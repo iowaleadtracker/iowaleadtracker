@@ -114,6 +114,11 @@ def write_mirror(site: Path, out: Path, csp: str) -> int:
     index = out / "index.html"
     index.write_text(mirror_index(index.read_text(encoding="utf-8"), csp), encoding="utf-8")
     pages = 1
+    not_found = out / "404.html"  # GitHub Pages serves it for missing addresses too
+    if not_found.exists():
+        not_found.write_text(
+            mirror_page(not_found.read_text(encoding="utf-8"), csp), encoding="utf-8"
+        )
     for page in sorted([*(out / "maps").glob("*.html"), *(out / "m").glob("*.html")]):
         page.write_text(mirror_page(page.read_text(encoding="utf-8"), csp), encoding="utf-8")
         pages += 1
