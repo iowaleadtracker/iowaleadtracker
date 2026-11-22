@@ -185,7 +185,7 @@ def test_court_pause_note_in_about_dialog() -> None:
     assert "<b>Court pause.</b> $court_pause" in about
     assert "$court_sources" in about
     assert f'href="{fs.COURT_URL}"' in fs.COURT_SOURCES_HTML
-    assert f'href="{fs.EPA_FILING_URL}"' in fs.COURT_SOURCES_HTML
+    assert f'href="{fs.FILING_URL}"' in fs.COURT_SOURCES_HTML
     assert fs.COURT_URL.startswith("https://www.iowapublicradio.org/")
     assert "until it rules on a request" in fs.COURT_PAUSE
     assert "in case they do" in fs.COURT_PAUSE
@@ -248,7 +248,7 @@ def test_court_hold_leads_the_summary_and_faq(rendered: tuple[str, list, str]) -
     when = dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
     assert when.startswith(
         "The Army planned it for Monday, Nov. 23, 2026, but a court has put its permit on hold, "
-        "and court records say the Army plans to detonate on or by Tuesday, Nov. 24."
+        "and the government told the court the Army intends to act by Tuesday, Nov. 24."
     )
     assert fs.COURT_PAUSE in when
     assert "on hold by court order" in llms
@@ -404,19 +404,21 @@ def test_one_day_has_no_second_day_text(rendered: tuple[str, list, str]) -> None
 
 def test_court_paragraph_names_the_days_modeled() -> None:
     """The court paragraph cites the Tuesday filing and names only the days built."""
-    assert "still plans a controlled blast after the court paused the permit, KCCI reported" in (
+    assert "emergency exclusion in EPA\u2019s rules to detonate the lead azide without" in (
         fs.COURT_HOLD
     )
-    assert "emergency exclusion" not in fs.COURT_HOLD  # not in the part of the article checked
     assert fs.WHY_TUESDAY == (
-        "Federal court records filed late Saturday, Nov. 21, say the Department of the Army plans "
-        "to detonate the lead azide on or by Tuesday, Nov. 24, KCCI reported."
+        "In a court filing on Nov. 21, 2026, the government said the Army intends to carry out "
+        "the controlled detonation by Tuesday, Nov. 24; one passage says \u201con\u201d Nov. 24."
     )
     assert fs.court_pause().endswith("These maps model Monday, Nov. 23, in case they do.")
     assert fs.court_pause(["Tuesday, Nov. 24"]).endswith(
         "These maps model Monday, Nov. 23, and Tuesday, Nov. 24, in case they do."
     )
-    assert fs.EPA_FILING_URL.startswith("https://www.kcci.com/")
+    # the filing is the primary source; KCCI is the news report of it
+    assert fs.FILING_URL.startswith("https://s3.documentcloud.org/documents/28930203/")
+    assert fs.TUESDAY_SOURCES_HTML.index(fs.FILING_URL) < fs.TUESDAY_SOURCES_HTML.index(fs.KCCI_URL)
+    assert any("No. 26-3374" in r and "documentcloud" in r for r in works_cited.REFERENCES)
     assert any("kcci.com" in r for r in works_cited.REFERENCES)
 
 
@@ -435,7 +437,7 @@ def test_about_box_cites_the_tuesday_filing() -> None:
     start = page.index('<dialog id="note"')
     about = " ".join(page[start : page.index("</dialog>", start)].split())
     assert "<b>When.</b> $why_monday Source:" in about
-    assert '$why_tuesday Source: <a href="$filing_url" rel="noopener">$filing_cite</a>.' in about
+    assert "$why_tuesday Sources: $tuesday_sources." in about
 
 
 @pytest.mark.slow
@@ -443,12 +445,12 @@ def test_summary_why_section_cites_both(rendered: tuple[str, list, str]) -> None
     summary, faq, llms = rendered
     assert "<h3>When will the detonation happen?</h3>" in summary
     assert fs.WHY_TUESDAY in summary
-    assert f'<a href="{fs.EPA_FILING_URL}" rel="noopener">{fs.EPA_FILING_CITE}</a>' in summary
+    assert fs.TUESDAY_SOURCES_HTML in summary
     assert (
         fs.WHY_TUESDAY
         in dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
     )
-    assert f"- Why Tuesday: {fs.WHY_TUESDAY} Source: {fs.EPA_FILING_CITE}" in llms
+    assert f"- Why Tuesday: {fs.WHY_TUESDAY} Sources: {fs.TUESDAY_SOURCES_TEXT}" in llms
 
 
 @pytest.mark.slow

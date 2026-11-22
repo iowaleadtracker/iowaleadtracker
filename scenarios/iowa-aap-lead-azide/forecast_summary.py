@@ -118,11 +118,12 @@ WHY_MONDAY = (
     "Army moved it \u201cuntil the latest possible moment prior to a forecasted temperature "
     "drop,\u201d which \u201cwould risk further destabilization of the material.\u201d"
 )
-# KCCI, Nov. 22, 2026: "Federal court records filed late Saturday say the Department of the
-# Army plans to detonate the lead azide waste in Middletown, Iowa, on or by Tuesday, Nov. 24."
+# The government's notice to the 8th Circuit (No. 26-3374), filed Nov. 21, 2026: "the Army
+# intends to act by November 24, 2026" (p. 1), "intends to act on November 24, 2026" (p. 6),
+# "by November 24, 2026" (p. 7). Read in full on Nov. 22, 2026. KCCI reported it Nov. 22.
 WHY_TUESDAY = (
-    "Federal court records filed late Saturday, Nov. 21, say the Department of the Army plans "
-    "to detonate the lead azide on or by Tuesday, Nov. 24, KCCI reported."
+    "In a court filing on Nov. 21, 2026, the government said the Army intends to carry out "
+    "the controlled detonation by Tuesday, Nov. 24; one passage says \u201con\u201d Nov. 24."
 )
 PERMIT_URL = (
     "https://www.epa.gov/system/files/documents/2026-11/"
@@ -155,9 +156,11 @@ COURT_HOLD = (
     "Late on Nov. 19, 2026, the 8th U.S. Circuit Court of Appeals put the EPA\u2019s emergency "
     "permit for the blasts on hold until it rules on a request by the Iowa Environmental "
     "Council and the Sierra Club\u2019s Iowa chapter to block them, Iowa Public Radio "
-    "reported. A court filing late Nov. 21 says the Army still plans a controlled blast after "
-    "the court paused the permit, KCCI reported. It\u2019s unclear whether the blasts will "
-    "happen Monday or Tuesday, or wait for the court to rule."
+    "reported. In a court filing on Nov. 21, the government said the Army intends to use an "
+    "emergency exclusion in EPA\u2019s rules to detonate the lead azide without the permit, "
+    "while following the permit\u2019s terms and its measures to limit lead dust. "
+    "It\u2019s unclear whether the blasts will happen Monday or Tuesday, or wait for the "
+    "court to rule."
 )
 
 
@@ -177,16 +180,24 @@ def court_pause(more_days: list[str] | None = None) -> str:
 
 
 COURT_PAUSE = court_pause()
-# The government's Nov. 21 filing, as reported by KCCI (updated 7:55 a.m. CST, Nov. 22, 2026).
-# Headline, subheading ("A court filing says the Army still plans a controlled blast of lead
-# azide waste after a federal appeals court paused the EPA permit.") and first paragraph
-# checked by the maintainer on the page on Nov. 22, 2026.
-EPA_FILING_URL = "https://www.kcci.com/article/lead-azide-bomb-detonation-iowa-tuesday/74499570"
-EPA_FILING_CITE = "KCCI, Nov. 22, 2026"
-COURT_SOURCES_TEXT = f"{COURT_CITE}, {COURT_URL}; {EPA_FILING_CITE}, {EPA_FILING_URL}"
+# The filing itself (primary source), and KCCI's report of it (updated 7:55 a.m. CST, Nov. 22,
+# 2026; headline, subheading and first paragraph checked by the maintainer on the page).
+FILING_URL = (
+    "https://s3.documentcloud.org/documents/28930203/"
+    "iowa-environmental-council-v-us-environmental-protection-agency.pdf"
+)
+FILING_CITE = "Government notice, 8th Cir. No. 26-3374, Nov. 21, 2026"
+KCCI_URL = "https://www.kcci.com/article/lead-azide-bomb-detonation-iowa-tuesday/74499570"
+KCCI_CITE = "KCCI, Nov. 22, 2026"
+COURT_SOURCES_TEXT = f"{COURT_CITE}, {COURT_URL}; {FILING_CITE}, {FILING_URL}"
 COURT_SOURCES_HTML = (
     f'<a href="{COURT_URL}" rel="noopener">{COURT_CITE}</a>; '
-    f'<a href="{EPA_FILING_URL}" rel="noopener">{EPA_FILING_CITE}</a>'
+    f'<a href="{FILING_URL}" rel="noopener">{FILING_CITE}</a>'
+)
+TUESDAY_SOURCES_TEXT = f"{FILING_CITE}, {FILING_URL}; {KCCI_CITE}, {KCCI_URL}"
+TUESDAY_SOURCES_HTML = (
+    f'<a href="{FILING_URL}" rel="noopener">{FILING_CITE}</a>; '
+    f'<a href="{KCCI_URL}" rel="noopener">{KCCI_CITE}</a>'
 )
 # Army mitigation (public advisory, Nov. 18, 2026) and what runs of the model's spray option
 # showed with guessed setups (README, "Water misting and soil soaking"): 0.1% at 528 gal/min
@@ -735,7 +746,7 @@ def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) ->
   <p>{court_pause([m["day"] for m in more])} Sources: {COURT_SOURCES_HTML}.</p>
   <h3>When will the detonation happen?</h3>
   <p>{WHY_MONDAY} Source: <a href="{ARMY_URL}" rel="noopener">{ARMY_CITE}</a>.
-    {WHY_TUESDAY} Source: <a href="{EPA_FILING_URL}" rel="noopener">{EPA_FILING_CITE}</a>.</p>
+    {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_HTML}.</p>
   <p><b>{TIME_HEAD}</b> {no_time}</p>
   <h3>Where the cloud goes{on}</h3>
   <p>{wind_sentence(f)} {path_sentence(f)} Other blast times in the window follow almost the same
@@ -799,11 +810,12 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
         (
             "When is the lead azide blast at the Iowa Army Ammunition Plant?",
             "The Army planned it for Monday, Nov. 23, 2026, but a court has put its permit on "
-            "hold, and court records say the Army plans to detonate on or by Tuesday, Nov. 24. "
+            "hold, and the government told the court the Army intends to act by Tuesday, "
+            "Nov. 24. "
             f"{court_pause([m['day'] for m in more])} (Sources: {COURT_SOURCES_TEXT}.) "
             f"{WHY_MONDAY} (Source: "
-            f"{ARMY_CITE}, {ARMY_URL}.) {WHY_TUESDAY} (Source: {EPA_FILING_CITE}, "
-            f"{EPA_FILING_URL}.) " + time_note(ctx["built_txt"]),
+            f"{ARMY_CITE}, {ARMY_URL}.) {WHY_TUESDAY} (Sources: {TUESDAY_SOURCES_TEXT}.) "
+            + time_note(ctx["built_txt"]),
         ),
         (
             "Where could the lead go?",
@@ -860,7 +872,7 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             "## Key facts",
             "",
             (
-                "- Blast: planned for Monday, Nov. 23, 2026 (court records: on or by Tuesday, "
+                "- Blast: planned for Monday, Nov. 23, 2026 (Nov. 21 court filing: by Tuesday, "
                 "Nov. 24), with its permit on hold by court order (see Court hold), Iowa Army "
                 "Ammunition "
                 f"Plant, Middletown, Iowa ({ctx['lat']:.4f}, {ctx['lon']:.4f}). Blast times "
@@ -871,7 +883,7 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             f"- Court hold: {court_pause([m['day'] for m in more])} Sources: {COURT_SOURCES_TEXT}",
             f"- Time: {time_note(ctx['built_txt'])} Source: {HHS_URL}",
             f"- Why Monday: {WHY_MONDAY} Source: {ARMY_CITE}, {ARMY_URL}",
-            f"- Why Tuesday: {WHY_TUESDAY} Source: {EPA_FILING_CITE}, {EPA_FILING_URL}",
+            f"- Why Tuesday: {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_TEXT}",
             f"- Water misting: {MISTING} Source: Army public advisory, {ADVISORY_URL}",
             (
                 f"- Assumed: {t.amount} (Army Sustainment Command spokesperson via ABC News, "

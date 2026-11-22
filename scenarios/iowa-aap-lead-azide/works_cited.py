@@ -191,6 +191,16 @@ REFERENCES = [
     "Army Ammunition Plant in Middletown, Iowa. U.S. Army Sustainment Command, 18 November 2026, "
     + _a("https://d34w7g4gy10iej.cloudfront.net/pubs/pdf_78366.pdf")
     + ".",
+    "U.S. Department of Justice, 2026: Respondents&rsquo; notice of the Army&rsquo;s intent to "
+    "respond to immediate threat under RCRA&rsquo;s emergency exclusion. <i>Iowa Environmental "
+    "Council v. U.S. Environmental Protection Agency</i>, No. 26-3374, U.S. Court of Appeals for "
+    "the Eighth Circuit, filed 21 November 2026, with the declaration of Col. A. C. Teller, "
+    "accessed 22 November 2026, "
+    + _a(
+        "https://s3.documentcloud.org/documents/28930203/"
+        "iowa-environmental-council-v-us-environmental-protection-agency.pdf"
+    )
+    + ".",
     "Zhang, L., S. Gong, J. Padro, and L. Barrie, 2001: A size-segregated particle dry "
     "deposition scheme for an atmospheric aerosol module. <i>Atmos. Environ.</i>, <b>35</b>, "
     "549&ndash;560, " + doi("10.1016/S1352-2310(00)00326-5") + ".",
