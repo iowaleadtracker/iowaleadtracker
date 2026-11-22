@@ -247,7 +247,8 @@ def test_court_hold_leads_the_summary_and_faq(rendered: tuple[str, list, str]) -
     assert fs.COURT_URL in summary
     when = dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
     assert when.startswith(
-        "The Army planned it for Monday, Nov. 23, 2026, but a court has put it on hold."
+        "The Army planned it for Monday, Nov. 23, 2026, but a court has put its permit on hold, "
+        "and court records say the Army plans to detonate by Tuesday, Nov. 24."
     )
     assert fs.COURT_PAUSE in when
     assert "on hold by court order" in llms
@@ -399,3 +400,24 @@ def test_one_day_has_no_second_day_text(rendered: tuple[str, list, str]) -> None
     assert "If the blasts are on" not in summary
     assert not any(q.startswith("What if the blasts are on") for q, _ in faq)
     assert "also modeled" not in llms
+
+
+def test_court_paragraph_names_the_days_modeled() -> None:
+    """The court paragraph cites the Tuesday filing and names only the days built."""
+    assert "by Tuesday, Nov. 24, KCCI reported" in fs.COURT_HOLD
+    assert "emergency exclusion" in fs.COURT_HOLD
+    assert fs.court_pause().endswith("These maps model Monday, Nov. 23, in case they do.")
+    assert fs.court_pause(["Tuesday, Nov. 24"]).endswith(
+        "These maps model Monday, Nov. 23, and Tuesday, Nov. 24, in case they do."
+    )
+    assert fs.EPA_FILING_URL.startswith("https://www.kcci.com/")
+    assert any("kcci.com" in r for r in works_cited.REFERENCES)
+
+
+@pytest.mark.slow
+def test_two_days_court_paragraph(rendered_two_days: tuple[str, list, str]) -> None:
+    summary, faq, llms = rendered_two_days
+    both = "These maps model Monday, Nov. 23, and Tuesday, Nov. 24, in case they do."
+    assert both in summary
+    assert both in dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
+    assert both in llms

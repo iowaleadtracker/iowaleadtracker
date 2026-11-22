@@ -137,6 +137,10 @@ REFERENCES = [
     f"Department of Health and Human Services, {ACCESSED}, "
     + _a("https://hhs.iowa.gov/media/19822/download?inline=")
     + ".",
+    "KCCI, 2026: Court records: Army plans to detonate lead azide by Tuesday. KCCI 8 News, "
+    "22 November 2026, accessed 22 November 2026, "
+    + _a("https://www.kcci.com/article/lead-azide-bomb-detonation-iowa-tuesday/74499570")
+    + ".",
     "MACTEC Federal Programs, 2008: Emission factors developed based on Exploding Ordnance "
     "Emission Study Phase II Series 7 testing conducted at Aberdeen Proving Ground, Maryland. "
     "Draft background report, AP-42 5th ed., Chapter 15, U.S. Army Environmental Command and "
