@@ -95,7 +95,7 @@ jobs:
             echo
             echo "Changes: \`met_cache/staged_forecasts.json\` only. The public maps don't change. The full test suite passed."
             echo
-            echo "**Before merging**, check the news. Merging deploys iowaleadtracker.com (the Deploy workflow); the staged maps stay off the mirror."
+            echo "**Before merging**, check the news. Merging deploys iowaleadtracker.com (the Deploy workflow) and the GitHub Pages mirror, which carries the staged maps too."
           } > "$RUNNER_TEMP/body.md"
 
           git config user.name "github-actions[bot]"

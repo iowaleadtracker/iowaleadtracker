@@ -6,8 +6,9 @@ minutes, for all four release cases, with only the GFS and ECMWF forecasts (GFS 
 ECMWF in the weather-model spread).
 
 These maps are not private. Nothing on the site links here, the pages are noindex, and the
-folder is left out of the sitemap, robots.txt, llms.txt and the GitHub Pages mirror. But
-this repository is public, so anyone reading it can find the address.
+folder is left out of the sitemap, robots.txt and llms.txt. The GitHub Pages mirror
+carries it at the same address. This repository is public, so anyone reading it can find
+the address.
 
 The forecasts are saved in their own file (``met_cache/staged_forecasts.json``), so the
 hourly refresh of the public maps never touches them. They are downloaded only by the
