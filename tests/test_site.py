@@ -243,12 +243,12 @@ def test_faq_links_are_live() -> None:
 def test_court_hold_leads_the_summary_and_faq(rendered: tuple[str, list, str]) -> None:
     """The court hold comes before any statement that the blast is Monday."""
     summary, faq, llms = rendered
-    assert summary.index("Court hold") < summary.index("Why the map is for Monday")
+    assert summary.index("Court hold") < summary.index("Why Monday or Tuesday")
     assert fs.COURT_URL in summary
     when = dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
     assert when.startswith(
         "The Army planned it for Monday, Nov. 23, 2026, but a court has put its permit on hold, "
-        "and court records say the Army plans to detonate by Tuesday, Nov. 24."
+        "and court records say the Army plans to detonate on or by Tuesday, Nov. 24."
     )
     assert fs.COURT_PAUSE in when
     assert "on hold by court order" in llms
@@ -404,8 +404,11 @@ def test_one_day_has_no_second_day_text(rendered: tuple[str, list, str]) -> None
 
 def test_court_paragraph_names_the_days_modeled() -> None:
     """The court paragraph cites the Tuesday filing and names only the days built."""
-    assert "by Tuesday, Nov. 24, KCCI reported" in fs.COURT_HOLD
-    assert "emergency exclusion" in fs.COURT_HOLD
+    assert "emergency exclusion despite the hold, KCCI reported" in fs.COURT_HOLD
+    assert fs.WHY_TUESDAY == (
+        "Federal court records filed late Saturday, Nov. 21, say the Department of the Army plans "
+        "to detonate the lead azide on or by Tuesday, Nov. 24, KCCI reported."
+    )
     assert fs.court_pause().endswith("These maps model Monday, Nov. 23, in case they do.")
     assert fs.court_pause(["Tuesday, Nov. 24"]).endswith(
         "These maps model Monday, Nov. 23, and Tuesday, Nov. 24, in case they do."
@@ -421,3 +424,25 @@ def test_two_days_court_paragraph(rendered_two_days: tuple[str, list, str]) -> N
     assert both in summary
     assert both in dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
     assert both in llms
+
+
+def test_about_box_cites_the_tuesday_filing() -> None:
+    """The About box's "Why" paragraph gives Monday (Army) and Tuesday (KCCI), each sourced."""
+    page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    start = page.index('<dialog id="note"')
+    about = " ".join(page[start : page.index("</dialog>", start)].split())
+    assert "<b>Why Monday or Tuesday.</b> $why_monday Source:" in about
+    assert '$why_tuesday Source: <a href="$filing_url" rel="noopener">$filing_cite</a>.' in about
+
+
+@pytest.mark.slow
+def test_summary_why_section_cites_both(rendered: tuple[str, list, str]) -> None:
+    summary, faq, llms = rendered
+    assert "<h3>Why Monday or Tuesday</h3>" in summary
+    assert fs.WHY_TUESDAY in summary
+    assert f'<a href="{fs.EPA_FILING_URL}" rel="noopener">{fs.EPA_FILING_CITE}</a>' in summary
+    assert (
+        fs.WHY_TUESDAY
+        in dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
+    )
+    assert f"- Why Tuesday: {fs.WHY_TUESDAY} Source: {fs.EPA_FILING_CITE}" in llms

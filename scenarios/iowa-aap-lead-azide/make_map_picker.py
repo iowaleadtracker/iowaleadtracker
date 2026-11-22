@@ -682,6 +682,9 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "court_sources": forecast_summary.COURT_SOURCES_HTML,
         "time_head": forecast_summary.TIME_HEAD,
         "why_monday": forecast_summary.WHY_MONDAY,
+        "why_tuesday": forecast_summary.WHY_TUESDAY,
+        "filing_url": forecast_summary.EPA_FILING_URL,
+        "filing_cite": forecast_summary.EPA_FILING_CITE,
         "army_url": forecast_summary.ARMY_URL,
         "army_cite": forecast_summary.ARMY_CITE,
         "time_note": forecast_summary.time_note(built_txt).replace(

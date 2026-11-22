@@ -118,6 +118,12 @@ WHY_MONDAY = (
     "Army moved it \u201cuntil the latest possible moment prior to a forecasted temperature "
     "drop,\u201d which \u201cwould risk further destabilization of the material.\u201d"
 )
+# KCCI, Nov. 22, 2026: "Federal court records filed late Saturday say the Department of the
+# Army plans to detonate the lead azide waste in Middletown, Iowa, on or by Tuesday, Nov. 24."
+WHY_TUESDAY = (
+    "Federal court records filed late Saturday, Nov. 21, say the Department of the Army plans "
+    "to detonate the lead azide on or by Tuesday, Nov. 24, KCCI reported."
+)
 PERMIT_URL = (
     "https://www.epa.gov/system/files/documents/2026-11/"
     "iaaap-emergency-permit-for-treatment-and-storage-final_redacted.pdf"
@@ -149,11 +155,9 @@ COURT_HOLD = (
     "Late on Nov. 19, 2026, the 8th U.S. Circuit Court of Appeals put the EPA\u2019s emergency "
     "permit for the blasts on hold until it rules on a request by the Iowa Environmental "
     "Council and the Sierra Club\u2019s Iowa chapter to block them, Iowa Public Radio "
-    "reported. In federal court records filed late Nov. 21, the government argued the Army "
-    "can go ahead under an emergency exclusion despite the hold and said the Army plans to "
-    "detonate the lead azide by Tuesday, Nov. 24, KCCI reported; one part of the filing says "
-    "\u201con\u201d Nov. 24 instead. It\u2019s unclear whether the blasts will happen Monday "
-    "or Tuesday, or wait for the court to rule."
+    "reported. In court records filed late Nov. 21, the government argued the Army can go "
+    "ahead under an emergency exclusion despite the hold, KCCI reported. It\u2019s unclear "
+    "whether the blasts will happen Monday or Tuesday, or wait for the court to rule."
 )
 
 
@@ -716,8 +720,9 @@ def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) ->
   <p class="caveat"><b>{CAVEAT}</b></p>
   <h3>Court hold</h3>
   <p>{court_pause([m["day"] for m in more])} Sources: {COURT_SOURCES_HTML}.</p>
-  <h3>Why the map is for Monday, Nov. 23</h3>
-  <p>{WHY_MONDAY} Source: <a href="{ARMY_URL}" rel="noopener">{ARMY_CITE}</a>.</p>
+  <h3>Why Monday or Tuesday</h3>
+  <p>{WHY_MONDAY} Source: <a href="{ARMY_URL}" rel="noopener">{ARMY_CITE}</a>.
+    {WHY_TUESDAY} Source: <a href="{EPA_FILING_URL}" rel="noopener">{EPA_FILING_CITE}</a>.</p>
   <p><b>{TIME_HEAD}</b> {no_time}</p>
   <h3>Where the cloud goes</h3>
   <p>{wind_sentence(f)} {path_sentence(f)} Other blast times in the window follow almost the same
@@ -778,10 +783,11 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
         (
             "When is the lead azide blast at the Iowa Army Ammunition Plant?",
             "The Army planned it for Monday, Nov. 23, 2026, but a court has put its permit on "
-            "hold, and court records say the Army plans to detonate by Tuesday, Nov. 24. "
+            "hold, and court records say the Army plans to detonate on or by Tuesday, Nov. 24. "
             f"{court_pause([m['day'] for m in more])} (Sources: {COURT_SOURCES_TEXT}.) "
             f"{WHY_MONDAY} (Source: "
-            f"{ARMY_CITE}, {ARMY_URL}.) " + time_note(ctx["built_txt"]),
+            f"{ARMY_CITE}, {ARMY_URL}.) {WHY_TUESDAY} (Source: {EPA_FILING_CITE}, "
+            f"{EPA_FILING_URL}.) " + time_note(ctx["built_txt"]),
         ),
         (
             "Where could the lead go?",
@@ -834,8 +840,9 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             "## Key facts",
             "",
             (
-                "- Blast: planned for Monday, Nov. 23, 2026 (court records: by Tuesday, Nov. 24), "
-                "with its permit on hold by court order (see Court hold), Iowa Army Ammunition "
+                "- Blast: planned for Monday, Nov. 23, 2026 (court records: on or by Tuesday, "
+                "Nov. 24), with its permit on hold by court order (see Court hold), Iowa Army "
+                "Ammunition "
                 f"Plant, Middletown, Iowa ({ctx['lat']:.4f}, {ctx['lon']:.4f}). Blast times "
                 "modeled: 11 a.m. to 12:30 p.m. CST on "
                 + ", ".join(["Monday, Nov. 23", *[m["day"] for m in more]])
@@ -844,6 +851,7 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             f"- Court hold: {court_pause([m['day'] for m in more])} Sources: {COURT_SOURCES_TEXT}",
             f"- Time: {time_note(ctx['built_txt'])} Source: {HHS_URL}",
             f"- Why Monday: {WHY_MONDAY} Source: {ARMY_CITE}, {ARMY_URL}",
+            f"- Why Tuesday: {WHY_TUESDAY} Source: {EPA_FILING_CITE}, {EPA_FILING_URL}",
             f"- Water misting: {MISTING} Source: Army public advisory, {ADVISORY_URL}",
             (
                 f"- Assumed: {t.amount} (Army Sustainment Command spokesperson via ABC News, "
