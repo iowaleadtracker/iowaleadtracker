@@ -9,6 +9,7 @@ and check that every place the text is generated still carries them.
 from __future__ import annotations
 
 import datetime as dt
+import json
 from typing import TYPE_CHECKING, Any
 
 import forecast_summary as fs
@@ -173,6 +174,44 @@ def test_court_pause_note_in_about_dialog() -> None:
     assert fs.COURT_URL.startswith("https://www.iowapublicradio.org/")
     assert "until it rules on a request" in fs.COURT_PAUSE
     assert "in case they do" in fs.COURT_PAUSE
+
+
+def test_contact_in_about_citation_and_llms(rendered: tuple[str, list, str]) -> None:
+    """The inbox and Instagram are in the About box, the citation, and llms.txt.
+
+    Each time they come with the line that neither can tell anyone whether they're safe.
+    """
+    email = works_cited.CONTACT_EMAIL
+    insta = works_cited.INSTAGRAM_URL
+    assert email == "contact@iowaleadtracker.com"
+    assert insta == "https://www.instagram.com/iowaleadtracker/"
+    assert "follow official instructions" in works_cited.CONTACT_LIMIT
+    page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    start = page.index('<dialog id="note"')
+    assert "<b>Contact.</b> $contact_html" in page[start : page.index("</dialog>", start)]
+    for text in (works_cited.CONTACT_HTML, works_cited.CONTACT_TEXT):
+        assert email in text
+        assert "@iowaleadtracker" in text
+        assert works_cited.CONTACT_LIMIT in text
+    assert f'href="mailto:{email}"' in works_cited.CONTACT_HTML
+    assert f'href="{insta}" rel="noopener"' in works_cited.CONTACT_HTML
+    assert insta in works_cited.CONTACT_TEXT
+    ctx = {
+        "pct": {"low": "7%", "mid": "20%", "high": "55%", "permit": "100%"},
+        "n_models": "seven",
+        "got_txt": "November 21, 2026, at 5:54 p.m. CST",
+        "shown_model": "RRFS",
+        "models": [],
+    }
+    cite = works_cited.render(ctx, works_cited.SOURCE_URL, "now")
+    assert works_cited.CONTACT_HTML in cite[cite.index("Citing this map") :]
+    llms = rendered[2]
+    assert works_cited.CONTACT_TEXT in llms[llms.index("## About") : llms.index("## Key facts")]
+    assert f"- [Instagram @iowaleadtracker]({insta}): updates" in llms
+    ld = json.loads(site.json_ld([], dt.datetime(2026, 11, 21, 18, 0, tzinfo=site.TZ)))
+    publisher = ld["@graph"][0]["publisher"]
+    assert publisher["email"] == email
+    assert publisher["sameAs"] == [insta]
 
 
 def test_faq_links_are_live() -> None:

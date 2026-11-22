@@ -20,7 +20,7 @@ from typing import Any, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
-from works_cited import SOURCE_URL
+from works_cited import CONTACT_TEXT, INSTAGRAM_HANDLE, INSTAGRAM_URL, SOURCE_URL
 
 Facts: TypeAlias = dict[str, Any]
 FloatArray: TypeAlias = npt.NDArray[np.float64]
@@ -768,6 +768,8 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text) -> str:
             "",
             ABOUT_WHO,
             "",
+            CONTACT_TEXT,
+            "",
             "## Key facts",
             "",
             (
@@ -807,6 +809,7 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text) -> str:
             "",
             f"- [Map]({ctx['site_url']}): interactive map by blast time and case",
             f"- [Source code]({SOURCE_URL}): the model, saved forecasts, assumptions and tests",
+            f"- [Instagram @{INSTAGRAM_HANDLE}]({INSTAGRAM_URL}): updates",
             "",
         ]
     )

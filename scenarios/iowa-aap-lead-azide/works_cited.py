@@ -33,6 +33,22 @@ def doi(d: str) -> str:
 
 #: Where the model, saved forecasts, assumptions and tests are published.
 SOURCE_URL = "https://github.com/iowaleadtracker/iowaleadtracker"
+#: The site's role inbox (no personal name; see the README's writing rules).
+CONTACT_EMAIL = "contact@iowaleadtracker.com"
+#: The site's Instagram account, for updates.
+INSTAGRAM_HANDLE = "iowaleadtracker"
+INSTAGRAM_URL = f"https://www.instagram.com/{INSTAGRAM_HANDLE}/"
+#: Said wherever these appear, so neither is read as a safety hotline.
+CONTACT_LIMIT = "Neither can tell you whether you\u2019re safe; follow official instructions."
+CONTACT_HTML = (
+    f'Questions or corrections: <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>. '
+    f'Updates: <a href="{INSTAGRAM_URL}" rel="noopener">Instagram @{INSTAGRAM_HANDLE}</a>. '
+    f"{CONTACT_LIMIT}"
+)
+CONTACT_TEXT = (
+    f"Questions or corrections: {CONTACT_EMAIL}. Updates: Instagram @{INSTAGRAM_HANDLE}, "
+    f"{INSTAGRAM_URL}. {CONTACT_LIMIT}"
+)
 ACCESSED = "accessed 20 November 2026"
 
 # Alphabetical by first author, then year. HTML.
@@ -389,6 +405,7 @@ def render(ctx: dict[str, Any], site_url: str, built_txt: str) -> str:
   <p>Iowa Lead Tracker, 2026: Unofficial estimate of lead dispersal from the planned
     23 November 2026 detonation at the Iowa Army Ammunition Plant. Interactive map, accessed
     {today.day} {today.strftime("%B %Y")}, {_a(site_url)}.</p>
+  <p class="meta">{CONTACT_HTML}</p>
   <p class="meta">Model code: puff_dispersal.py ({_a(SOURCE_URL)}), a Gaussian puff
     screening model. It is not a regulatory or emergency-response model.
     Last updated {html.escape(built_txt)}.</p>"""
