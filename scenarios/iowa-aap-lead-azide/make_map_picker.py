@@ -413,6 +413,13 @@ def json_ld(faq: list[tuple[str, str]], now: dt.datetime) -> str:
         "citation": [forecast_summary.ARMY_URL, forecast_summary.PERMIT_URL],
         "abstract": forecast_summary.ABOUT_WHO,
         "creator": {"@type": "Person", "description": "A concerned Iowan (private citizen)"},
+        "publisher": {
+            "@type": "Organization",
+            "name": SITE_NAME,
+            "url": SITE_URL,
+            "email": works_cited.CONTACT_EMAIL,
+            "sameAs": [works_cited.INSTAGRAM_URL],
+        },
         "isBasedOn": {
             "@type": "SoftwareSourceCode",
             "codeRepository": works_cited.SOURCE_URL,

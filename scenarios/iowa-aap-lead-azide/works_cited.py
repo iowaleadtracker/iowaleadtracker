@@ -35,15 +35,20 @@ def doi(d: str) -> str:
 SOURCE_URL = "https://github.com/iowaleadtracker/iowaleadtracker"
 #: The site's role inbox (no personal name; see the README's writing rules).
 CONTACT_EMAIL = "contact@iowaleadtracker.com"
-#: Said wherever the address appears, so the inbox isn't read as a safety hotline.
-CONTACT_LIMIT = (
-    "This inbox can\u2019t tell you whether you\u2019re safe; follow official instructions."
-)
+#: The site's Instagram account, for updates.
+INSTAGRAM_HANDLE = "iowaleadtracker"
+INSTAGRAM_URL = f"https://www.instagram.com/{INSTAGRAM_HANDLE}/"
+#: Said wherever these appear, so neither is read as a safety hotline.
+CONTACT_LIMIT = "Neither can tell you whether you\u2019re safe; follow official instructions."
 CONTACT_HTML = (
     f'Questions or corrections: <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>. '
+    f'Updates: <a href="{INSTAGRAM_URL}" rel="noopener">Instagram @{INSTAGRAM_HANDLE}</a>. '
     f"{CONTACT_LIMIT}"
 )
-CONTACT_TEXT = f"Questions or corrections: {CONTACT_EMAIL}. {CONTACT_LIMIT}"
+CONTACT_TEXT = (
+    f"Questions or corrections: {CONTACT_EMAIL}. Updates: Instagram @{INSTAGRAM_HANDLE}, "
+    f"{INSTAGRAM_URL}. {CONTACT_LIMIT}"
+)
 ACCESSED = "accessed 20 November 2026"
 
 # Alphabetical by first author, then year. HTML.
