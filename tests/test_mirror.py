@@ -91,3 +91,16 @@ def test_write_mirror(tmp_path: Path) -> None:
 def test_mirror_needs_a_built_site(tmp_path: Path) -> None:
     with pytest.raises(SystemExit):
         mirror.write_mirror(tmp_path / "missing", tmp_path / "out", site.CSP)
+
+
+def test_mirror_not_found_page_gets_the_policy(tmp_path: Path) -> None:
+    built = tmp_path / "site"
+    (built / "maps").mkdir(parents=True)
+    (built / "m").mkdir()
+    (built / "index.html").write_text(INDEX, encoding="utf-8")
+    (built / "404.html").write_text(site.not_found_page(), encoding="utf-8")
+    out = tmp_path / "mirror"
+    mirror.write_mirror(built, out, site.CSP)
+    text = (out / "404.html").read_text(encoding="utf-8")
+    assert "Content-Security-Policy" in text
+    assert "Page not found" in text

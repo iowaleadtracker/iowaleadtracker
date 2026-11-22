@@ -310,3 +310,20 @@ def test_public_text_does_not_mention_staged_maps(rendered: tuple[str, list, str
     summary, faq, llms = rendered
     for text in (summary, llms, *(a for _, a in faq)):
         assert not staged.links_to_staged(text)
+
+
+def test_missing_addresses_get_a_real_page() -> None:
+    """A missing address gets 404.html, not a bare 404 iPhone Safari offers to download."""
+    assert site.wrangler_config("x")["assets"] == {
+        "directory": "./public",
+        "not_found_handling": "404-page",
+    }
+    page = " ".join(site.not_found_page().split())
+    assert "<title>Page not found" in page
+    assert '<meta name="robots" content="noindex">' in page
+    assert '<a href="/">' in page  # works on the main site and the mirror
+    assert "This is an unofficial estimate, not from the Army or any government agency." in page
+    assert "Don&rsquo;t use it to decide if you&rsquo;re safe." in page
+    assert "Follow official instructions." in page
+    assert not staged.links_to_staged(page)
+    assert "404.html" in site.PUBLISHED_FILES
