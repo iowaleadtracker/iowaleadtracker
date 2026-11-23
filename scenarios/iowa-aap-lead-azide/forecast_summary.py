@@ -173,16 +173,18 @@ COURT_URL = (
 COURT_CITE = "Iowa Public Radio, Nov. 20, 2026"
 # The hold and the government's latest filing. The last sentence names the days the maps
 # model, so it's built by court_pause() from the days actually built.
+# Newest first (maintainer's choice, Nov. 22, 2026).
 COURT_HOLD = (
-    "Late on Nov. 19, 2026, the 8th U.S. Circuit Court of Appeals put the EPA\u2019s emergency "
-    "permit for the blasts on hold until it rules on a request by the Iowa Environmental "
-    "Council and the Sierra Club\u2019s Iowa chapter to block them, Iowa Public Radio "
-    "reported. In a court filing on Nov. 21, the government said the Army intends to use an "
-    "emergency exclusion in EPA\u2019s rules to detonate the lead azide without the permit, "
-    "while following the permit\u2019s terms and its measures to limit lead dust. On Nov. 22, "
-    "it asked the court to lift the hold and said the Army had postponed the blasts to "
-    "Tuesday, Nov. 24. The court hadn\u2019t ruled as of that filing. Later that day, the Army "
-    "said the blasts are now scheduled for Wednesday, Nov. 25."
+    "Late on Nov. 22, 2026, the Army said the blasts are now scheduled for Wednesday, "
+    "Nov. 25. Earlier that day, the government asked the 8th U.S. Circuit Court of Appeals "
+    "to lift its hold on the EPA\u2019s emergency permit for the blasts and said the Army had "
+    "postponed them to Tuesday, Nov. 24; the court hadn\u2019t ruled as of that filing. In a "
+    "court filing on Nov. 21, the government said the Army intends to use an emergency "
+    "exclusion in EPA\u2019s rules to detonate the lead azide without the permit, while "
+    "following the permit\u2019s terms and its measures to limit lead dust. Late on Nov. 19, "
+    "the court put the permit on hold until it rules on a request by the Iowa Environmental "
+    "Council and the Sierra Club\u2019s Iowa chapter to block the blasts, Iowa Public Radio "
+    "reported."
 )
 
 
@@ -234,13 +236,16 @@ RESPONSE_URL = (
 RESPONSE_CITE = "Government response, 8th Cir. No. 26-3374, Nov. 22, 2026"
 KCCI_URL = "https://www.kcci.com/article/lead-azide-bomb-detonation-iowa-tuesday/74499570"
 KCCI_CITE = "KCCI, Nov. 22, 2026"
+# Newest first, like the paragraph.
 COURT_SOURCES_TEXT = (
-    f"{COURT_CITE}, {COURT_URL}; {FILING_CITE}, {FILING_URL}; {RESPONSE_CITE}, {RESPONSE_URL}"
+    f"{WEDNESDAY_SOURCE_TEXT}; {RESPONSE_CITE}, {RESPONSE_URL}; {FILING_CITE}, {FILING_URL}; "
+    f"{COURT_CITE}, {COURT_URL}"
 )
 COURT_SOURCES_HTML = (
-    f'<a href="{COURT_URL}" rel="noopener">{COURT_CITE}</a>; '
+    f"{WEDNESDAY_SOURCE_HTML}; "
+    f'<a href="{RESPONSE_URL}" rel="noopener">{RESPONSE_CITE}</a>; '
     f'<a href="{FILING_URL}" rel="noopener">{FILING_CITE}</a>; '
-    f'<a href="{RESPONSE_URL}" rel="noopener">{RESPONSE_CITE}</a>'
+    f'<a href="{COURT_URL}" rel="noopener">{COURT_CITE}</a>'
 )
 TUESDAY_SOURCES_TEXT = (
     f"{RESPONSE_CITE}, {RESPONSE_URL}; {FILING_CITE}, {FILING_URL}; {KCCI_CITE}, {KCCI_URL}"
@@ -810,9 +815,9 @@ def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) ->
   <h3>Court hold</h3>
   <p>{court_pause([m["day"] for m in more], lead)} Sources: {COURT_SOURCES_HTML}.</p>
   <h3>When will the detonation happen?</h3>
-  <p>{WHY_MONDAY} Source: <a href="{ARMY_URL}" rel="noopener">{ARMY_CITE}</a>.
-    {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_HTML}.</p>
   <p>{WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_HTML}.</p>
+  <p>{WHY_TUESDAY} Sources: {TUESDAY_SOURCES_HTML}.
+    {WHY_MONDAY} Source: <a href="{ARMY_URL}" rel="noopener">{ARMY_CITE}</a>.</p>
   <p><b>{TIME_HEAD}</b> {no_time}</p>
   <h3>Where the cloud goes{on}</h3>
   <p>{note + " " if note else ""}{wind_sentence(f)} {path_sentence(f)} Other blast times in \
@@ -882,9 +887,9 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
             "planned Monday, Nov. 23, a court has put its permit on hold, and on Nov. 22 the "
             "government told the court the Army had postponed it to Tuesday, Nov. 24. "
             f"{court_pause([m['day'] for m in more], lead)} (Sources: {COURT_SOURCES_TEXT}.) "
-            f"{WHY_MONDAY} (Source: "
-            f"{ARMY_CITE}, {ARMY_URL}.) {WHY_TUESDAY} (Sources: {TUESDAY_SOURCES_TEXT}.) "
-            f"{WHY_WEDNESDAY} (Source: {WEDNESDAY_SOURCE_TEXT}.) " + time_note(ctx["built_txt"]),
+            f"{WHY_WEDNESDAY} (Source: {WEDNESDAY_SOURCE_TEXT}.) "
+            f"{WHY_TUESDAY} (Sources: {TUESDAY_SOURCES_TEXT}.) "
+            f"{WHY_MONDAY} (Source: {ARMY_CITE}, {ARMY_URL}.) " + time_note(ctx["built_txt"]),
         ),
         (
             "Where could the lead go?",
@@ -954,9 +959,9 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
                 f"Sources: {COURT_SOURCES_TEXT}"
             ),
             f"- Time: {time_note(ctx['built_txt'])} Source: {HHS_URL}",
-            f"- Why Monday: {WHY_MONDAY} Source: {ARMY_CITE}, {ARMY_URL}",
-            f"- Why Tuesday: {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_TEXT}",
             f"- Why Wednesday: {WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_TEXT}",
+            f"- Why Tuesday: {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_TEXT}",
+            f"- Why Monday: {WHY_MONDAY} Source: {ARMY_CITE}, {ARMY_URL}",
             f"- Water misting: {MISTING} Source: Army public advisory, {ADVISORY_URL}",
             (
                 f"- Assumed: {t.amount} (Army Sustainment Command spokesperson via ABC News, "

@@ -420,7 +420,7 @@ def test_court_paragraph_names_the_days_modeled() -> None:
     )
     # no longer "unclear" which day: the Nov. 22 filing says Tuesday
     assert "unclear" not in fs.COURT_HOLD
-    assert "postponed the blasts to Tuesday, Nov. 24" in fs.COURT_HOLD
+    assert "had postponed them to Tuesday, Nov. 24" in fs.COURT_HOLD
     assert fs.court_pause().endswith("These maps model Monday, Nov. 23.")
     assert fs.court_pause(["Tuesday, Nov. 24"]).endswith(
         "These maps model Monday, Nov. 23, and Tuesday, Nov. 24."
@@ -446,11 +446,11 @@ def test_two_days_court_paragraph(rendered_two_days: tuple[str, list, str]) -> N
 
 
 def test_about_box_cites_the_tuesday_filing() -> None:
-    """The About box's "When." paragraph gives Monday (Army) and Tuesday (KCCI), each sourced."""
+    """The About box's "When." paragraph: Wednesday, Tuesday, then Monday, each sourced."""
     page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
     start = page.index('<dialog id="note"')
     about = " ".join(page[start : page.index("</dialog>", start)].split())
-    assert "<b>When.</b> $why_monday Source:" in about
+    assert "<b>When.</b> $why_wednesday Source: $wednesday_source. $why_tuesday" in about
     assert "$why_tuesday Sources: $tuesday_sources." in about
 
 
@@ -665,7 +665,17 @@ def test_wednesday_leads(rendered_wednesday_lead: tuple[str, list, str]) -> None
     assert "These maps model Monday, Nov. 23, Tuesday, Nov. 24, and Wednesday, Nov. 25." in summary
     assert fs.WHY_WEDNESDAY in summary
     assert fs.WEDNESDAY_SOURCE_HTML in summary
-    assert "Later that day, the Army said the blasts are now scheduled for Wednesday" in summary
+    assert "Late on Nov. 22, 2026, the Army said the blasts are now scheduled for Wednesday" in (
+        summary
+    )
+    # newest first: Wednesday, then Tuesday, then Monday, in the court and "When" text
+    assert fs.COURT_HOLD.startswith("Late on Nov. 22, 2026, the Army said")
+    assert fs.COURT_HOLD.index("Tuesday, Nov. 24") < fs.COURT_HOLD.index("Late on Nov. 19")
+    assert fs.COURT_SOURCES_HTML.startswith(fs.WEDNESDAY_SOURCE_HTML)
+    when = summary[summary.index("When will the detonation happen?") :]
+    assert when.index(fs.WHY_WEDNESDAY) < when.index(fs.WHY_TUESDAY) < when.index(fs.WHY_MONDAY)
+    why = [llms.index(f"- Why {d}:") for d in ("Wednesday", "Tuesday", "Monday")]
+    assert why == sorted(why)
     assert "- Why Wednesday: " in llms
     assert "on Monday, Nov. 23, Tuesday, Nov. 24, Wednesday, Nov. 25." in llms
     assert "What would the map show for Tuesday, Nov. 24, an earlier planned date?" in dict(faq)
