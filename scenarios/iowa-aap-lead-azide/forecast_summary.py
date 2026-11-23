@@ -949,8 +949,9 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
                 "spokesperson quoted by ABC News on Nov. 19, 2026 (EPA's permit lists 68 drums). "
                 "The share that gets airborne is unknown, so the map shows four cases: low "
                 f"{pct['low']} (based on "
-                f"EPA AP-42 blasting-cap tests), middle {pct['mid']}, high {pct['high']} (a "
-                "Department of Energy handbook rule for explosions), and EPA permit "
+                f"EPA AP-42 blasting-cap tests), middle {pct['mid']} (an upper bound from a "
+                "Department of Energy handbook for a different kind of blast), high "
+                f"{pct['high']} (a rule from the same handbook for explosions), and EPA permit "
                 f"{pct.get('permit', '100%')} (the emission factor EPA requires for the Army's "
                 "official plume maps)."
             ),
