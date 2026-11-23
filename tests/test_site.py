@@ -450,8 +450,13 @@ def test_about_box_cites_the_tuesday_filing() -> None:
     page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
     start = page.index('<dialog id="note"')
     about = " ".join(page[start : page.index("</dialog>", start)].split())
-    assert "<b>When.</b> $why_wednesday Source: $wednesday_source. $why_tuesday" in about
-    assert "$why_tuesday Sources: $tuesday_sources." in about
+    assert "<b>When.</b> $why_wednesday Source: $wednesday_source.</p>" in about
+    assert "<p><b>$time_head</b> $time_note</p>" in about
+    assert "<b>$earlier_head</b> $why_tuesday Sources: $tuesday_sources. $why_monday" in about
+    assert fs.TIME_HEAD == "No time yet."
+    assert fs.time_note("X").startswith(
+        "As of this update (X), the Army hasn\u2019t announced a time for Wednesday."
+    )
 
 
 @pytest.mark.slow
@@ -464,7 +469,7 @@ def test_summary_why_section_cites_both(rendered: tuple[str, list, str]) -> None
         fs.WHY_TUESDAY
         in dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
     )
-    assert f"- Why Tuesday: {fs.WHY_TUESDAY} Sources: {fs.TUESDAY_SOURCES_TEXT}" in llms
+    assert f"- Earlier date, Tuesday: {fs.WHY_TUESDAY} Sources: {fs.TUESDAY_SOURCES_TEXT}" in llms
 
 
 @pytest.mark.slow
@@ -674,8 +679,11 @@ def test_wednesday_leads(rendered_wednesday_lead: tuple[str, list, str]) -> None
     assert fs.COURT_SOURCES_HTML.startswith(fs.WEDNESDAY_SOURCE_HTML)
     when = summary[summary.index("When will the detonation happen?") :]
     assert when.index(fs.WHY_WEDNESDAY) < when.index(fs.WHY_TUESDAY) < when.index(fs.WHY_MONDAY)
-    why = [llms.index(f"- Why {d}:") for d in ("Wednesday", "Tuesday", "Monday")]
+    why = [
+        llms.index(k)
+        for k in ("- Why Wednesday:", "- Time:", "- Earlier date, Tuesday:", "- Earlier date, Mon")
+    ]
     assert why == sorted(why)
-    assert "- Why Wednesday: " in llms
+    assert "<p><b>Earlier dates.</b> " in summary
     assert "on Monday, Nov. 23, Tuesday, Nov. 24, Wednesday, Nov. 25." in llms
     assert "What would the map show for Tuesday, Nov. 24, an earlier planned date?" in dict(faq)

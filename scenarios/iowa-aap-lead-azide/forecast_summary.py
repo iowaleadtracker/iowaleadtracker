@@ -142,7 +142,7 @@ ARMY_WED_CITE = "U.S. Army on Facebook, Nov. 22, 2026"
 WHY_WEDNESDAY = (
     "Late on Nov. 22, the Army said the controlled detonation \u201cis now scheduled on "
     "Wednesday, November 25, 2026 to allow for optimal weather conditions and all mitigation "
-    "measures to be emplaced.\u201d It hasn\u2019t given a time."
+    "measures to be emplaced.\u201d"
 )
 WEDNESDAY_SOURCE_HTML = f'<a href="{html.escape(ARMY_WED_URL)}" rel="noopener">{ARMY_WED_CITE}</a>'
 WEDNESDAY_SOURCE_TEXT = f"{ARMY_WED_CITE}, {ARMY_WED_URL}"
@@ -521,16 +521,18 @@ def facts(
 # Wording
 
 
-TIME_HEAD = "Planned for about noon."
+TIME_HEAD = "No time yet."
+# Subheading for the dates the Army planned before the current one, newest first.
+EARLIER_HEAD = "Earlier dates."
 
 
 def time_note(built_txt: str) -> str:
-    """Say the state gives about noon for Monday, the Army hasn't given a time, what's modeled."""
+    """Say the Army hasn't given a time, what's modeled, and where the window comes from."""
     return (
-        "Iowa HHS\u2019s fact sheet for Nov. 23 says the Army plans two detonations on Monday "
-        "at approximately noon (Iowa HHS fact sheet). As of this update "
-        f"({built_txt}), the Army hasn\u2019t announced a time itself. These maps model "
-        "blasts from 11 a.m. to 12:30 p.m."
+        f"As of this update ({built_txt}), the Army hasn\u2019t announced a time for "
+        "Wednesday. These maps model blasts from 11 a.m. to 12:30 p.m., around the "
+        "\u201capproximately noon\u201d that Iowa HHS\u2019s fact sheet gave for the earlier "
+        "Monday, Nov. 23 date (Iowa HHS fact sheet)."
     )
 
 
@@ -816,9 +818,9 @@ def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) ->
   <p>{court_pause([m["day"] for m in more], lead)} Sources: {COURT_SOURCES_HTML}.</p>
   <h3>When will the detonation happen?</h3>
   <p>{WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_HTML}.</p>
-  <p>{WHY_TUESDAY} Sources: {TUESDAY_SOURCES_HTML}.
-    {WHY_MONDAY} Source: <a href="{ARMY_URL}" rel="noopener">{ARMY_CITE}</a>.</p>
   <p><b>{TIME_HEAD}</b> {no_time}</p>
+  <p><b>{EARLIER_HEAD}</b> {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_HTML}.
+    {WHY_MONDAY} Source: <a href="{ARMY_URL}" rel="noopener">{ARMY_CITE}</a>.</p>
   <h3>Where the cloud goes{on}</h3>
   <p>{note + " " if note else ""}{wind_sentence(f)} {path_sentence(f)} Other blast times in \
 the window follow almost the same path. {t.forecast_line}</p>
@@ -888,8 +890,9 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
             "government told the court the Army had postponed it to Tuesday, Nov. 24. "
             f"{court_pause([m['day'] for m in more], lead)} (Sources: {COURT_SOURCES_TEXT}.) "
             f"{WHY_WEDNESDAY} (Source: {WEDNESDAY_SOURCE_TEXT}.) "
-            f"{WHY_TUESDAY} (Sources: {TUESDAY_SOURCES_TEXT}.) "
-            f"{WHY_MONDAY} (Source: {ARMY_CITE}, {ARMY_URL}.) " + time_note(ctx["built_txt"]),
+            + time_note(ctx["built_txt"])
+            + f" Earlier dates: {WHY_TUESDAY} (Sources: {TUESDAY_SOURCES_TEXT}.) "
+            f"{WHY_MONDAY} (Source: {ARMY_CITE}, {ARMY_URL}.)",
         ),
         (
             "Where could the lead go?",
@@ -958,10 +961,10 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
                 f"- Court hold: {court_pause([m['day'] for m in more], lead)} "
                 f"Sources: {COURT_SOURCES_TEXT}"
             ),
-            f"- Time: {time_note(ctx['built_txt'])} Source: {HHS_URL}",
             f"- Why Wednesday: {WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_TEXT}",
-            f"- Why Tuesday: {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_TEXT}",
-            f"- Why Monday: {WHY_MONDAY} Source: {ARMY_CITE}, {ARMY_URL}",
+            f"- Time: {time_note(ctx['built_txt'])} Source: {HHS_URL}",
+            f"- Earlier date, Tuesday: {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_TEXT}",
+            f"- Earlier date, Monday: {WHY_MONDAY} Source: {ARMY_CITE}, {ARMY_URL}",
             f"- Water misting: {MISTING} Source: Army public advisory, {ADVISORY_URL}",
             (
                 f"- Assumed: {t.amount} (Army Sustainment Command spokesperson via ABC News, "
