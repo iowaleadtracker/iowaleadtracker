@@ -247,7 +247,8 @@ def test_court_hold_leads_the_summary_and_faq(rendered: tuple[str, list, str]) -
     when = dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
     assert when.startswith(
         "The Army planned it for Monday, Nov. 23, 2026, but a court has put its permit on hold, "
-        "and the government told the court the Army intends to act by Tuesday, Nov. 24."
+        "and on Nov. 22 the government told the court the Army had postponed it to Tuesday, "
+        "Nov. 24, and intends to act that day."
     )
     assert fs.COURT_PAUSE in when
     assert "on hold by court order" in llms
@@ -406,17 +407,27 @@ def test_court_paragraph_names_the_days_modeled() -> None:
     assert "emergency exclusion in EPA\u2019s rules to detonate the lead azide without" in (
         fs.COURT_HOLD
     )
-    assert fs.WHY_TUESDAY == (
-        "In a court filing on Nov. 21, 2026, the government said the Army intends to carry out "
-        "the controlled detonation by Tuesday, Nov. 24; one passage says \u201con\u201d Nov. 24."
+    assert fs.WHY_TUESDAY.startswith(
+        "In a court filing on Nov. 22, 2026, the government said the Army postponed the "
+        "controlled detonation again, to Tuesday, Nov. 24, and intends to act that day."
     )
+    assert "at least 48 hours before the blasts and hourly from six hours before" in (
+        fs.WHY_TUESDAY
+    )
+    # no longer "unclear" which day: the Nov. 22 filing says Tuesday
+    assert "unclear" not in fs.COURT_HOLD
+    assert "postponed the blasts to Tuesday, Nov. 24" in fs.COURT_HOLD
     assert fs.court_pause().endswith("These maps model Monday, Nov. 23, in case they do.")
     assert fs.court_pause(["Tuesday, Nov. 24"]).endswith(
         "These maps model Monday, Nov. 23, and Tuesday, Nov. 24, in case they do."
     )
-    # the filing is the primary source; KCCI is the news report of it
+    # the filings are the primary sources, newest first; KCCI is the news report
     assert fs.FILING_URL.startswith("https://s3.documentcloud.org/documents/28930203/")
-    assert fs.TUESDAY_SOURCES_HTML.index(fs.FILING_URL) < fs.TUESDAY_SOURCES_HTML.index(fs.KCCI_URL)
+    assert fs.RESPONSE_URL.endswith("/gov.uscourts.ca8.116088.805661522.0.pdf")
+    src = fs.TUESDAY_SOURCES_HTML
+    assert src.index(fs.RESPONSE_URL) < src.index(fs.FILING_URL) < src.index(fs.KCCI_URL)
+    assert f'href="{fs.RESPONSE_URL}"' in fs.COURT_SOURCES_HTML
+    assert any("805661522" in r and "opposition" in r for r in works_cited.REFERENCES)
     assert any("No. 26-3374" in r and "documentcloud" in r for r in works_cited.REFERENCES)
     assert any("kcci.com" in r for r in works_cited.REFERENCES)
 

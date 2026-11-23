@@ -120,10 +120,18 @@ WHY_MONDAY = (
 )
 # The government's notice to the 8th Circuit (No. 26-3374), filed Nov. 21, 2026: "the Army
 # intends to act by November 24, 2026" (p. 1), "intends to act on November 24, 2026" (p. 6),
-# "by November 24, 2026" (p. 7). Read in full on Nov. 22, 2026. KCCI reported it Nov. 22.
+# "by November 24, 2026" (p. 7). KCCI reported it Nov. 22. Its response to the stay motion,
+# filed Nov. 22 (Entry 5708599; read in full Nov. 23): "The Army postponed the planned
+# detonation to November 23, 2026, and then to November 24" (p. 9); "the Army intends to act
+# on November 24, 2026" (p. 10); the permit has the Army update its air dispersion estimate
+# "at least 48 hours before treatment, and begin hourly updates six hours before
+# detonation" (pp. 7-8).
 WHY_TUESDAY = (
-    "In a court filing on Nov. 21, 2026, the government said the Army intends to carry out "
-    "the controlled detonation by Tuesday, Nov. 24; one passage says \u201con\u201d Nov. 24."
+    "In a court filing on Nov. 22, 2026, the government said the Army postponed the "
+    "controlled detonation again, to Tuesday, Nov. 24, and intends to act that day. "
+    "(Its Nov. 21 filing had said \u201cby\u201d Nov. 24.) The permit has the Army update its "
+    "estimate of where lead dust could go at least 48 hours before the blasts and hourly "
+    "from six hours before."
 )
 PERMIT_URL = (
     "https://www.epa.gov/system/files/documents/2026-11/"
@@ -158,9 +166,9 @@ COURT_HOLD = (
     "Council and the Sierra Club\u2019s Iowa chapter to block them, Iowa Public Radio "
     "reported. In a court filing on Nov. 21, the government said the Army intends to use an "
     "emergency exclusion in EPA\u2019s rules to detonate the lead azide without the permit, "
-    "while following the permit\u2019s terms and its measures to limit lead dust. "
-    "It\u2019s unclear whether the blasts will happen Monday or Tuesday, or wait for the "
-    "court to rule."
+    "while following the permit\u2019s terms and its measures to limit lead dust. On Nov. 22, "
+    "it asked the court to lift the hold and said the Army had postponed the blasts to "
+    "Tuesday, Nov. 24. The court hadn\u2019t ruled as of that filing."
 )
 
 
@@ -187,15 +195,28 @@ FILING_URL = (
     "iowa-environmental-council-v-us-environmental-protection-agency.pdf"
 )
 FILING_CITE = "Government notice, 8th Cir. No. 26-3374, Nov. 21, 2026"
+# Its Nov. 22 response to the stay motion (RECAP copy on CourtListener; the maintainer's copy
+# was read in full).
+RESPONSE_URL = (
+    "https://storage.courtlistener.com/recap/gov.uscourts.ca8.116088/"
+    "gov.uscourts.ca8.116088.805661522.0.pdf"
+)
+RESPONSE_CITE = "Government response, 8th Cir. No. 26-3374, Nov. 22, 2026"
 KCCI_URL = "https://www.kcci.com/article/lead-azide-bomb-detonation-iowa-tuesday/74499570"
 KCCI_CITE = "KCCI, Nov. 22, 2026"
-COURT_SOURCES_TEXT = f"{COURT_CITE}, {COURT_URL}; {FILING_CITE}, {FILING_URL}"
+COURT_SOURCES_TEXT = (
+    f"{COURT_CITE}, {COURT_URL}; {FILING_CITE}, {FILING_URL}; {RESPONSE_CITE}, {RESPONSE_URL}"
+)
 COURT_SOURCES_HTML = (
     f'<a href="{COURT_URL}" rel="noopener">{COURT_CITE}</a>; '
-    f'<a href="{FILING_URL}" rel="noopener">{FILING_CITE}</a>'
+    f'<a href="{FILING_URL}" rel="noopener">{FILING_CITE}</a>; '
+    f'<a href="{RESPONSE_URL}" rel="noopener">{RESPONSE_CITE}</a>'
 )
-TUESDAY_SOURCES_TEXT = f"{FILING_CITE}, {FILING_URL}; {KCCI_CITE}, {KCCI_URL}"
+TUESDAY_SOURCES_TEXT = (
+    f"{RESPONSE_CITE}, {RESPONSE_URL}; {FILING_CITE}, {FILING_URL}; {KCCI_CITE}, {KCCI_URL}"
+)
 TUESDAY_SOURCES_HTML = (
+    f'<a href="{RESPONSE_URL}" rel="noopener">{RESPONSE_CITE}</a>; '
     f'<a href="{FILING_URL}" rel="noopener">{FILING_CITE}</a>; '
     f'<a href="{KCCI_URL}" rel="noopener">{KCCI_CITE}</a>'
 )
@@ -810,8 +831,8 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
         (
             "When is the lead azide blast at the Iowa Army Ammunition Plant?",
             "The Army planned it for Monday, Nov. 23, 2026, but a court has put its permit on "
-            "hold, and the government told the court the Army intends to act by Tuesday, "
-            "Nov. 24. "
+            "hold, and on Nov. 22 the government told the court the Army had postponed it to "
+            "Tuesday, Nov. 24, and intends to act that day. "
             f"{court_pause([m['day'] for m in more])} (Sources: {COURT_SOURCES_TEXT}.) "
             f"{WHY_MONDAY} (Source: "
             f"{ARMY_CITE}, {ARMY_URL}.) {WHY_TUESDAY} (Sources: {TUESDAY_SOURCES_TEXT}.) "
@@ -872,9 +893,9 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             "## Key facts",
             "",
             (
-                "- Blast: planned for Monday, Nov. 23, 2026 (Nov. 21 court filing: by Tuesday, "
-                "Nov. 24), with its permit on hold by court order (see Court hold), Iowa Army "
-                "Ammunition "
+                "- Blast: planned for Monday, Nov. 23, 2026, then postponed to Tuesday, Nov. 24 "
+                "(Nov. 22 court filing), with its permit on hold by court order (see Court "
+                "hold), Iowa Army Ammunition "
                 f"Plant, Middletown, Iowa ({ctx['lat']:.4f}, {ctx['lon']:.4f}). Blast times "
                 "modeled: 11 a.m. to 12:30 p.m. CST on "
                 + ", ".join(["Monday, Nov. 23", *[m["day"] for m in more]])

@@ -201,6 +201,15 @@ REFERENCES = [
         "iowa-environmental-council-v-us-environmental-protection-agency.pdf"
     )
     + ".",
+    "U.S. Department of Justice, 2026: Respondents&rsquo; opposition to petitioners&rsquo; "
+    "emergency motion for stay. <i>Iowa Environmental Council v. U.S. Environmental Protection "
+    "Agency</i>, No. 26-3374, U.S. Court of Appeals for the Eighth Circuit, filed 22 November "
+    "2026, accessed 23 November 2026, "
+    + _a(
+        "https://storage.courtlistener.com/recap/gov.uscourts.ca8.116088/"
+        "gov.uscourts.ca8.116088.805661522.0.pdf"
+    )
+    + ".",
     "Zhang, L., S. Gong, J. Padro, and L. Barrie, 2001: A size-segregated particle dry "
     "deposition scheme for an atmospheric aerosol module. <i>Atmos. Environ.</i>, <b>35</b>, "
     "549&ndash;560, " + doi("10.1016/S1352-2310(00)00326-5") + ".",
