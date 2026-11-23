@@ -833,6 +833,7 @@ def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) ->
   <p><b>{TIME_HEAD}</b> {no_time}</p>
   <p><b>{EARLIER_HEAD}</b> {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_HTML}.
     {WHY_MONDAY} Source: <a href="{ARMY_URL}" rel="noopener">{ARMY_CITE}</a>.</p>
+  {f'<p class="caveat">{ctx["pending_note"]}</p>' if ctx.get("pending_note") else ""}
   <h3>Where the cloud goes{on}</h3>
   <p>{note + " " if note else ""}{wind_sentence(f)} {path_sentence(f)} Other blast times in \
 the window follow almost the same path. {t.forecast_line}</p>
@@ -898,8 +899,8 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
         (
             "When is the lead azide blast at the Iowa Army Ammunition Plant?",
             "The Army now says Wednesday, Nov. 25, 2026; it hasn\u2019t given a time. It had "
-            "planned Monday, Nov. 23, a court has put its permit on hold, and on Nov. 22 the "
-            "government told the court the Army had postponed it to Tuesday, Nov. 24. "
+            "planned Monday, Nov. 23. On Nov. 22, the government told the court, which has put "
+            "the permit on hold, that the Army had postponed it to Tuesday, Nov. 24. "
             f"{court_pause([m['day'] for m in more], lead)} (Sources: {COURT_SOURCES_TEXT}.) "
             f"{WHY_WEDNESDAY} (Source: {WEDNESDAY_SOURCE_TEXT}.) "
             + time_note(ctx["built_txt"])
@@ -973,6 +974,7 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
                 f"- Court hold: {court_pause([m['day'] for m in more], lead)} "
                 f"Sources: {COURT_SOURCES_TEXT}"
             ),
+            *([f"- Note: {ctx['pending_note']}"] if ctx.get("pending_note") else []),
             f"- Why Wednesday: {WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_TEXT}",
             f"- Time: {time_note(ctx['built_txt'])} Sources: {HHS_URL}; {RESPONSE_URL}",
             f"- Earlier date, Tuesday: {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_TEXT}",

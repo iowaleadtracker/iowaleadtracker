@@ -248,8 +248,8 @@ def test_court_hold_leads_the_summary_and_faq(rendered: tuple[str, list, str]) -
     when = dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
     assert when.startswith(
         "The Army now says Wednesday, Nov. 25, 2026; it hasn\u2019t given a time. It had "
-        "planned Monday, Nov. 23, a court has put its permit on hold, and on Nov. 22 the "
-        "government told the court the Army had postponed it to Tuesday, Nov. 24."
+        "planned Monday, Nov. 23. On Nov. 22, the government told the court, which has put "
+        "the permit on hold, that the Army had postponed it to Tuesday, Nov. 24."
     )
     assert fs.WHY_WEDNESDAY in when
     assert fs.ARMY_WED_URL in when
@@ -690,3 +690,70 @@ def test_wednesday_leads(rendered_wednesday_lead: tuple[str, list, str]) -> None
     assert "<p><b>Earlier dates.</b> " in summary
     assert "on Monday, Nov. 23, Tuesday, Nov. 24, Wednesday, Nov. 25." in llms
     assert "What would the map show for Tuesday, Nov. 24, an earlier planned date?" in dict(faq)
+
+
+def _maps_for(days: list[str]) -> site.Maps:
+    """Return a Maps with the given days built (no files needed for the day values)."""
+    return site.Maps(
+        pages=[],
+        pct={},
+        times=site.TIMES,
+        default=site.DEFAULT,
+        days=dict.fromkeys(days, site.TIMES),
+        pages_by_day={d: [] for d in days},
+    )
+
+
+def test_page_says_when_the_planned_day_is_not_built_yet() -> None:
+    """Before a refresh adds Wednesday, the page leads with Tuesday and says so."""
+    maps = _maps_for(["2026-11-23", "2026-11-24"])
+    lead = site.lead_day(maps)
+    v = site.day_values(maps, lead)
+    assert lead == "2026-11-24"
+    assert v["header_lead"] == "Lead from the blast at the Iowa Army Ammunition Plant"
+    assert v["header_days"] == "Tuesday, Nov. 24 (also modeled: Monday, Nov. 23)"
+    assert v["pending_note"] == (
+        "Wednesday, Nov. 25 maps aren\u2019t in this update yet; the latest day modeled is shown."
+    )
+    assert v["pending_hidden"] == ""
+    assert '<option value="2026-11-24" selected>' in v["day_options"]
+    assert v["open_day"] == '"2026-11-24"'
+    assert v["link_day"] == '"2026-11-23"'  # links without a day keep meaning Monday
+    assert "planned Nov. 25" not in site.DESCRIPTION_NO_DATE
+
+    maps = _maps_for(["2026-11-23", "2026-11-24", "2026-11-25"])
+    v = site.day_values(maps, site.lead_day(maps))
+    assert v["header_lead"] == "Lead from the planned blast at the Iowa Army Ammunition Plant"
+    assert v["header_days"].startswith("Wednesday, Nov. 25 (also modeled: Monday, Nov. 23, ")
+    assert v["pending_note"] == ""
+    assert v["pending_hidden"] == " hidden"
+    assert '<option value="2026-11-25" selected>' in v["day_options"]
+    page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    assert "<p>$header_lead, $header_days</p>" in page
+    assert '<p class="daynote" id="pendingnote"$pending_hidden>$pending_note</p>' in page
+
+
+def test_one_model_order_per_day(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A day's maps never mix HRRR and RRFS, even when 18 hours falls inside the window."""
+    cache = tmp_path / "met.json"
+    cache.write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(site, "MET_CACHE", cache)
+    monkeypatch.setattr(site, "MAPS", tmp_path / "maps")
+    monkeypatch.setattr(site.staged, "CACHE", tmp_path / "none.json")
+    monkeypatch.setattr(site, "days_to_build", lambda: ["2026-11-25"])
+    # 5:40 p.m. CST Tuesday: 11:00 Wednesday is 17.3 h away, noon 18.3 h (rounded: 17 h, 19 h)
+    pulled = dt.datetime.fromisoformat("2026-11-24T17:40-06:00")
+    monkeypatch.setattr(site, "retrieved_at", lambda *_a, **_k: pulled)
+    orders = set()
+
+    class Done:
+        returncode = 0
+        stdout = stderr = ""
+
+    def fake_run(cmd: list[str], **_: object) -> Done:
+        orders.add(cmd[cmd.index("--weather-model") + 1])
+        return Done()
+
+    monkeypatch.setattr(site.subprocess, "run", fake_run)
+    site.build()
+    assert orders == {site.WEATHER}  # one order for the whole day: noon is over 18 h out

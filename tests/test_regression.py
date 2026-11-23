@@ -35,8 +35,8 @@ def site_argv() -> list[str]:
     """Return the site's options for the noon permit map, in the model order its build picks."""
     blast = f"{site.DATE}T12:00-06:00"
     args = list(site.MODEL_ARGS)
-    args[args.index("--weather-model") + 1] = site.weather_for(
-        dt.datetime.fromisoformat(blast), site.retrieved_at() or conftest.FORECAST_PULLED
+    args[args.index("--weather-model") + 1] = site.weather_for_day(
+        site.DATE, site.retrieved_at() or conftest.FORECAST_PULLED
     )
     return [
         *("--lat", str(site.LAT)),

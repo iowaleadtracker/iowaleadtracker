@@ -7,8 +7,8 @@ name: Refresh forecast
 on:
   workflow_dispatch:
   schedule:
-    # Every 3 hours: one run downloads 4 models (8 until Nov. 23) for a 25-point grid and 2
-    # days, and hourly runs hit Open-Meteo's free daily limit on Nov. 22.
+    # Every 3 hours: one run downloads 4 models (8 until Nov. 23) for a 25-point grid and
+    # each modeled day (DAYS), and hourly runs hit Open-Meteo's free daily limit on Nov. 22.
     - cron: "40 */3 * * *"
 
 permissions:

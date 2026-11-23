@@ -101,7 +101,7 @@
 </style></head><body>
 <header>
   <div class="title"><h1>$site_name</h1>
-    <p>Lead from the planned blast at the Iowa Army Ammunition Plant, $header_days</p></div>
+    <p>$header_lead, $header_days</p></div>
   <label for="d"$day_hidden>Day
     <select id="d">$day_options</select></label>
   <label for="t">Blast time (CST)
@@ -120,6 +120,7 @@
     <button id="tosummary" type="button">What the forecast shows</button> &middot;
     <button id="cites" type="button" aria-haspopup="dialog">References</button></p>
   <p class="daynote" id="daynote" role="status" hidden></p>
+  <p class="daynote" id="pendingnote"$pending_hidden>$pending_note</p>
 </header>
 <dialog id="note" aria-labelledby="note-h">
   <h2 id="note-h" tabindex="-1" autofocus>About this map</h2>

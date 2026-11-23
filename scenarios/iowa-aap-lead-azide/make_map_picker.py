@@ -132,6 +132,8 @@ DESCRIPTION = (
     "Iowa Army Ammunition Plant could travel and settle, with its data, assumptions, and "
     "sources published."
 )
+# The same without the date, for an update whose maps don't include the planned day yet.
+DESCRIPTION_NO_DATE = DESCRIPTION.replace("the planned Nov. 25, 2026 blast", "the planned blast")
 # Response headers for Workers static assets (written to the site as _headers).
 CSP = (
     "default-src 'none'; "
@@ -386,6 +388,17 @@ def weather_for(blast: dt.datetime, ref: dt.datetime) -> str:
     return WEATHER
 
 
+def weather_for_day(day: str, pulled: dt.datetime | None) -> str:
+    """Return the model order for every map of ``day``, forecast as of ``pulled``.
+
+    Picked once per day, at the default blast time, so a day's maps never mix HRRR and
+    RRFS. ``pulled`` (the saved forecasts' time; the clock for a refresh) is rounded down
+    to the hour, so a refresh and a later rebuild of its forecasts agree.
+    """
+    ref = (pulled or dt.datetime.now(dt.timezone.utc)).replace(minute=0, second=0, microsecond=0)
+    return weather_for(dt.datetime.fromisoformat(f"{day}T{DEFAULT}-06:00"), ref)
+
+
 def build() -> None:
     """Run the model for every day, case and time, one after another (Open-Meteo limits)."""
     MAPS.mkdir(parents=True, exist_ok=True)
@@ -397,13 +410,12 @@ def build() -> None:
     pulled = retrieved_at() if MET_CACHE.exists() else None
     as_of = ("--as-of", pulled.isoformat()) if pulled else ()
     forecast = f", forecast from {pulled_label(pulled)}" if pulled else ""
-    ref = pulled or dt.datetime.now(dt.timezone.utc)  # a refresh downloads now
     args = list(MODEL_ARGS)
     w = args.index("--weather-model") + 1
     for day in days:
+        args[w] = weather_for_day(day, pulled)  # one order per day (see weather_for_day)
         for case, release_case, name in CASES:
             for t in TIMES:
-                args[w] = weather_for(dt.datetime.fromisoformat(f"{day}T{t}-06:00"), ref)
                 cmd = [
                     py,
                     str(TOOL / "puff_dispersal.py"),
@@ -456,6 +468,41 @@ def complete_times(day: str) -> list[str]:
 def lead_day(maps: Maps) -> str:
     """Return the day the page opens on: the first of LEAD_DAYS that is built, else DATE."""
     return next((d for d in LEAD_DAYS if d in maps.days), DATE)
+
+
+def pending_note(lead: str) -> str:
+    """Say the planned day's maps aren't in this update ("" when the page leads with it)."""
+    if lead == LEAD_DAYS[0]:
+        return ""
+    return (
+        f"{day_label(LEAD_DAYS[0])} maps aren\u2019t in this update yet; the latest day "
+        "modeled is shown."
+    )
+
+
+def day_values(maps: Maps, lead: str) -> dict[str, str]:
+    """Return the page template's day values: the menu, links, header and pending note."""
+    note = pending_note(lead)
+    others = [day_label(d) for d in maps.days if d != lead]
+    return {
+        "day_options": "".join(
+            f'<option value="{d}"{" selected" if d == lead else ""}>{day_label(d)}</option>'
+            for d in maps.days
+        ),
+        "open_day": json.dumps(lead),
+        "link_day": json.dumps(DATE),
+        "day_hidden": "" if len(maps.days) > 1 else " hidden",
+        "day_codes": json.dumps({d: c for d, c in DAYS if d in maps.days}),
+        "all_days": json.dumps({c: day_label(d) for d, c in DAYS}),
+        # "planned" only for the planned day; an older day is just "the blast".
+        "header_lead": "Lead from the "
+        + ("blast" if note else "planned blast")
+        + " at the Iowa Army Ammunition Plant",
+        "header_days": day_label(lead)
+        + (f" (also modeled: {', '.join(others)})" if others else ""),
+        "pending_note": html.escape(note),
+        "pending_hidden": "" if note else " hidden",
+    }
 
 
 def days_shown(times: list[str]) -> dict[str, list[str]]:
@@ -512,13 +559,13 @@ def models_used(pages: list[str]) -> list[str]:
     return sorted(found, key=lambda m: WEATHER_ORDER.index(m) if m in WEATHER_ORDER else 99)
 
 
-def json_ld(faq: list[tuple[str, str]], now: dt.datetime) -> str:
+def json_ld(faq: list[tuple[str, str]], now: dt.datetime, description: str = DESCRIPTION) -> str:
     """Return the page's schema.org structured data (WebPage and FAQPage)."""
     page = {
         "@type": "WebPage",
         "name": SITE_NAME,
         "url": SITE_URL,
-        "description": DESCRIPTION,
+        "description": description,
         "inLanguage": "en-US",
         "isAccessibleForFree": True,
         "dateModified": now.isoformat(timespec="minutes"),
@@ -630,6 +677,7 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
     got = retrieved_at()
     got_txt = fmt_time(got) if got else "unknown"
     lead = lead_day(maps)
+    description = DESCRIPTION if lead == LEAD_DAYS[0] else DESCRIPTION_NO_DATE
     by_day: dict[str, forecast_summary.Facts] = {}
     for day, day_times in maps.days.items():
         default = maps.default if maps.default in day_times else day_times[0]
@@ -655,7 +703,8 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
             "built_txt": built_txt,
             "site_name": SITE_NAME,
             "site_url": SITE_URL,
-            "description": DESCRIPTION,
+            "description": description,
+            "pending_note": pending_note(lead),
             "lat": LAT,
             "lon": LON,
         },
@@ -702,26 +751,11 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
     values = {
         "site_name": SITE_NAME,
         "site_url": SITE_URL,
-        "description": html.escape(DESCRIPTION),
+        "description": html.escape(description),
         "og_image": og_image,
         "twitter_card": "summary_large_image" if og_image else "summary",
-        "json_ld": json_ld(faq, now),
-        "day_options": "".join(
-            f'<option value="{d}"{" selected" if d == lead else ""}>{day_label(d)}</option>'
-            for d in maps.days
-        ),
-        "open_day": json.dumps(lead),
-        "link_day": json.dumps(DATE),
-        "day_hidden": "" if len(maps.days) > 1 else " hidden",
-        "day_codes": json.dumps({d: c for d, c in DAYS if d in maps.days}),
-        "all_days": json.dumps({c: day_label(d) for d, c in DAYS}),
-        "header_days": (
-            day_label(lead)
-            if len(maps.days) == 1
-            else f"{day_label(lead)} (also modeled: "
-            + ", ".join(day_label(d) for d in maps.days if d != lead)
-            + ")"
-        ),
+        "json_ld": json_ld(faq, now, description),
+        **day_values(maps, lead),
         "time_options": "".join(
             f'<option value="{t}"{" selected" if t == maps.default else ""}>{label(t)}</option>'
             for t in times

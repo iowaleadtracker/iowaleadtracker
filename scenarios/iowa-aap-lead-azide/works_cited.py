@@ -436,7 +436,8 @@ def render(ctx: dict[str, Any], site_url: str, built_txt: str) -> str:
     <tbody>{rows}</tbody></table></div>
   <h3>Citing this map</h3>
   <p>Iowa Lead Tracker, 2026: Unofficial estimate of lead dispersal from the planned
-    23 November 2026 detonation at the Iowa Army Ammunition Plant. Interactive map, accessed
+    detonation at the Iowa Army Ammunition Plant (25 November 2026, per the Army on
+    22 November). Interactive map, accessed
     {today.day} {today.strftime("%B %Y")}, {_a(site_url)}.</p>
   <p class="meta">{CONTACT_HTML}</p>
   <p class="meta">Model code: puff_dispersal.py ({_a(SOURCE_URL)}), a Gaussian puff
