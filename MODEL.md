@@ -328,6 +328,14 @@ This is a screening tool, not a regulatory or emergency-response model:
   assumptions, and the results are sensitive to all three;
 - there are no terrain effects, buildings, plume rise, or resuspension;
 - Pasquill–Gifford σ values are empirical fits from flat terrain;
+- puffs grow along the Briggs curves, which describe a continuous plume averaged over
+  about an hour. A single instantaneous puff spreads more slowly at first, so near the
+  source the real cloud may be narrower, with higher peaks over a smaller area, than the
+  model shows. The difference shrinks downwind and over an hour;
+- settling is counted twice: the puff centre sinks at the settling velocity, and the
+  deposition velocity at the ground also includes it. This can remove somewhat too much
+  of the largest particles (10 µm, about 3 cm/s) near the source; for breathable sizes
+  the effect is negligible;
 - near-source peaks are smoothed by the grid cell size (printed when the script runs
   and shown in the page footer); use `--extent-km` for near-field numbers;
 - the explosion cloud uses an empirical rise formula. Observed clouds (e.g. Beirut 2020)
