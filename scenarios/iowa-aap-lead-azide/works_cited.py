@@ -166,6 +166,10 @@ REFERENCES = [
     "22 November 2026, accessed 22 November 2026, "
     + _a("https://www.kcci.com/article/lead-azide-bomb-detonation-iowa-tuesday/74499570")
     + ".",
+    "KCRG, 2026: Trump orders the Army not to detonate bomb-making chemicals in Iowa without "
+    "court approval. KCRG-TV9, 23 November 2026, accessed 23 November 2026, "
+    + _a("https://www.kcrg.com/2026/11/23/president-trump-orders-military-pause-iowa-detonation/")
+    + ".",
     "MACTEC Federal Programs, 2008: Emission factors developed based on Exploding Ordnance "
     "Emission Study Phase II Series 7 testing conducted at Aberdeen Proving Ground, Maryland. "
     "Draft background report, AP-42 5th ed., Chapter 15, U.S. Army Environmental Command and "

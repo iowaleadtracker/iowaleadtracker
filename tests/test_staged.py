@@ -80,7 +80,10 @@ def test_picker_page(built: Path) -> None:
     assert "November 21, 2026, at 9:08 p.m. CST" in page  # forecast pull time
     # When: the Nov. 22 court filing, then the Army's Wednesday announcement, both linked.
     assert "the government said the Army postponed it to Tuesday, Nov. 24" in page
-    assert "it is now scheduled for Wednesday, Nov. 25. No time has been given" in page
+    assert "it is now scheduled for Wednesday, Nov. 25. On Monday, Nov. 23," in page
+    assert f'<a href="{forecast_summary.TRUMP_URL}">President Trump said</a>' in page
+    assert "until the Eighth Circuit agrees and Governor-elect Rob Sand agrees" in page
+    assert "The Army hasn&rsquo;t announced a new date or a time" in page
     assert "Thursday and Friday haven&rsquo;t been announced." in page
     assert f'<a href="{html.escape(forecast_summary.ARMY_WED_URL)}">the Army said</a>' in page
     assert f'<a href="{forecast_summary.RESPONSE_URL}">court filing on Nov. 22</a>' in page

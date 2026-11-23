@@ -257,15 +257,18 @@ def test_court_hold_leads_the_summary_and_faq(rendered: tuple[str, list, str]) -
     assert summary.index("Court hold") < summary.index("When will the detonation happen?")
     assert fs.COURT_URL in summary
     when = dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
-    assert when.startswith(
-        "The Army now says Wednesday, Nov. 25, 2026; it hasn\u2019t given a time. It had "
+    # Newest first: the president's Nov. 23 order, then the Army's Wednesday date.
+    assert when.startswith(f"{fs.TRUMP_HOLD} (Source: {fs.TRUMP_SOURCE_TEXT}.) ")
+    assert (
+        "The Army had said Wednesday, Nov. 25, 2026; it hasn\u2019t given a time. It had "
         "planned Monday, Nov. 23. On Nov. 22, the government told the court, which has put "
         "the permit on hold, that the Army had postponed it to Tuesday, Nov. 24."
-    )
+    ) in when
     assert fs.WHY_WEDNESDAY in when
     assert fs.ARMY_WED_URL in when
     assert fs.COURT_PAUSE in when
     assert "on hold by court order" in llms
+    assert f"- Presidential hold: {fs.TRUMP_HOLD} Source: {fs.TRUMP_SOURCE_TEXT}" in llms
     assert fs.COURT_PAUSE in llms
 
 
@@ -466,7 +469,10 @@ def test_about_box_cites_the_tuesday_filing() -> None:
     page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
     start = page.index('<dialog id="note"')
     about = " ".join(page[start : page.index("</dialog>", start)].split())
-    assert "<b>When.</b> $why_wednesday Source: $wednesday_source.</p>" in about
+    assert (
+        "<b>When.</b> $trump_hold Source: $trump_source. $why_wednesday Source: "
+        "$wednesday_source.</p>"
+    ) in about
     assert "<p><b>$time_head</b> $time_note</p>" in about
     assert "<b>$earlier_head</b> $why_tuesday Sources: $tuesday_sources. $why_monday" in about
     assert fs.TIME_HEAD == "No time yet."
