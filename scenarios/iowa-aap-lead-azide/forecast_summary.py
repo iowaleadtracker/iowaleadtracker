@@ -186,9 +186,11 @@ COURT_HOLD = (
 )
 
 
-# The first planned day, the one Iowa HHS gave a time for (about noon). Other days borrow its
-# blast times. The summary can lead with another day (facts()["day"], e.g. Tuesday).
-PLANNED_DAY = "Monday, Nov. 23"
+# The planned day (the Army's Nov. 22 announcement), which the summary leads with by
+# default (facts()["day"] can name another), and the earlier day Iowa HHS gave "approximately
+# noon" for, which the 11 a.m. to 12:30 p.m. window comes from ("No time yet." says so).
+PLANNED_DAY = "Wednesday, Nov. 25"
+HHS_DAY = "Monday, Nov. 23"
 
 
 def day_num(day: str) -> int:
@@ -197,17 +199,20 @@ def day_num(day: str) -> int:
 
 
 def window_note(day: str) -> str:
-    """Say a day's blast times are borrowed from the planned day's ("" for the planned day)."""
-    if day == PLANNED_DAY:
+    """Say another day's maps use the same blast times ("" for the planned and HHS days).
+
+    The planned day's time is covered by the "No time yet." paragraph (time_note).
+    """
+    if day in (PLANNED_DAY, HHS_DAY):
         return ""
     weekday = day.split(",", maxsplit=1)[0]
     return (
         f"No time has been given for {weekday}, so these maps use the same 11 a.m. to "
-        "12:30 p.m. window as Monday."
+        "12:30 p.m. window."
     )
 
 
-SAME_WINDOW = window_note("Tuesday, Nov. 24")
+SAME_WINDOW = window_note("Thursday, Nov. 26")
 
 
 def court_pause(more_days: list[str] | None = None, first: str = PLANNED_DAY) -> str:
@@ -716,8 +721,8 @@ def _permit_weather_text(f: Facts) -> str:
     return (
         "The permit bars the blast with surface winds under 1 or over 15 mph, winds over 30 mph "
         "at 1,000 to 3,000 feet, rain, thunderstorms, fog, a low overcast, or an inversion. "
-        f"For {f['blast']} {f.get('day', 'Monday').split(',')[0]} the forecast has surface winds "
-        f"of about {w['sfc_mph']:.0f} mph"
+        f"For {f['blast']} {f.get('day', PLANNED_DAY).split(',')[0]} the forecast has surface "
+        f"winds of about {w['sfc_mph']:.0f} mph"
         + aloft
         + f", {w['cloud']:.0f}% cloud cover, and {'no rain' if not w['precip'] else 'rain'}, "
         + ("which is inside those limits." if ok else "which is outside at least one of them.")

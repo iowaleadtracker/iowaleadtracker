@@ -155,10 +155,12 @@ def test_missing_staged_file_has_no_time(tmp_path: Path) -> None:
 
 
 def test_refreshes_run_through_wednesday() -> None:
-    """Both refreshes run on a schedule through the last day the maps model."""
+    """Both refreshes run on a schedule through the last day their maps model."""
     root = Path(__file__).resolve().parent.parent / ".github" / "workflows"
-    last = staged.DAYS[-1]
-    for name in ("refresh-forecast.yml", "refresh-staged.yml"):
+    for name, last in (
+        ("refresh-forecast.yml", site.DAYS[-1][0]),  # Thursday, a Day menu option
+        ("refresh-staged.yml", staged.DAYS[-1]),  # Wednesday
+    ):
         text = (root / name).read_text(encoding="utf-8")
         assert f'LAST_DAY: "{last}"' in text, name
         assert "schedule:" in text, name

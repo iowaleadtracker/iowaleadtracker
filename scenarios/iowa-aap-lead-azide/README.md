@@ -365,26 +365,26 @@ never deploys; merging the pull request does.
 
 ### More than one day
 
-`DAYS` in `make_map_picker.py` lists the days the main site models (Monday, Nov. 23,
-Tuesday, Nov. 24 and Wednesday, Nov. 25), each with the same blast times. The page gets a "Day" menu and links
-carry the day (`#1200-permit-tue`; links without one open Monday, as they always have).
+`DAYS` in `make_map_picker.py` lists the days the main site models: Wednesday, Nov. 25 (the
+date the Army announced late on Nov. 22) and Thursday, Nov. 26, with the same blast times.
+`DATE` (Wednesday) is always built, its maps have no date in their names, and the page
+opens on it. Links carry the day (`#1200-permit-thu`); links without one open Wednesday.
+Monday and Tuesday, the earlier planned dates, are no longer modeled (`PAST_DAYS` only lets
+an old `-mon` or `-tue` link say so by name), and their old maps are deleted on the next
+build.
 
-`LEAD_DAYS` (Wednesday, which the Army announced late on Nov. 22, then Tuesday, from the
-government's court filing that day) picks the day the page opens on and the header,
-summary, FAQ and `llms.txt` lead with: the first one whose maps are built, else Monday.
-Each other day gets its own section after it ("Tuesday, Nov. 24, an earlier planned date",
-or "If the blasts are on …" for a later day). Days other than Monday say their blast times are borrowed from
-Monday's. Monday's maps keep their old file names; other days' are prefixed with the date.
+`MENU_ONLY_DAYS` (Thursday) are built and in the "Day" menu, but the header, About box,
+summary, FAQ, References and `llms.txt` describe only Wednesday. A day that isn't menu-only
+would get its own section after the lead day ("If the blasts are on …"), saying its blast
+times are borrowed.
 
-The forecast list puts RRFS first and GFS second: the first model with data for the whole
-run is shown, so Monday shows RRFS and Tuesday shows GFS until RRFS reaches that far.
+Another day is built only if the saved forecasts include it (a refresh, which starts with
+no saved file, downloads every day). So adding a day changes nothing until the next
+refresh, and a deploy never has to download weather. `DATE` itself must be in the saved
+forecasts, so changing it needs a refresh in the same change.
 
-A day is built only if the saved forecasts include it (a refresh, which starts with no
-saved file, downloads every day). So adding a day changes nothing until the next refresh,
-and a deploy never has to download weather.
-
-The staged page (`staged.py`, below) also has Tuesday, but with GFS and ECMWF only and its own
-saved forecasts, so its Tuesday numbers differ from the main site's.
+The staged page (`staged.py`, below) also has Wednesday, but with GFS and ECMWF only and its
+own saved forecasts, so its numbers differ from the main site's.
 
 ### Staged Tuesday/Wednesday maps
 

@@ -77,10 +77,13 @@ def rendered(facts_ctx: tuple[dict[str, Any], dict[str, Any]]) -> tuple[str, lis
 
 @pytest.fixture(scope="module")
 def rendered_two_days(facts_ctx: tuple[dict[str, Any], dict[str, Any]]) -> tuple[str, list, str]:
-    """Render it again with the same maps standing in for Tuesday as a second day."""
+    """Render it again with the same maps standing in for Thursday as a second day.
+
+    (The site's Thursday is menu-only; this checks the text for any later day named.)
+    """
     facts, ctx = facts_ctx
-    tuesday = {**facts, "day": "Tuesday, Nov. 24", "n_models": "two"}
-    return fs.render(facts, ctx, [tuesday])
+    thursday = {**facts, "day": "Thursday, Nov. 26", "n_models": "two"}
+    return fs.render(facts, ctx, [thursday])
 
 
 @pytest.mark.slow
@@ -138,8 +141,8 @@ def test_security_headers() -> None:
 
 
 def test_blast_label_names_the_date() -> None:
-    assert site.blast_label("12:00") == "Monday, Nov. 23, 2026, 12:00 p.m. CST"
-    assert site.blast_label("11:15") == "Monday, Nov. 23, 2026, 11:15 a.m. CST"
+    assert site.blast_label("12:00") == "Wednesday, Nov. 25, 2026, 12:00 p.m. CST"
+    assert site.blast_label("11:15") == "Wednesday, Nov. 25, 2026, 11:15 a.m. CST"
 
 
 def test_pulled_label_for_the_legend() -> None:
@@ -188,7 +191,7 @@ def test_court_pause_note_in_about_dialog() -> None:
     assert f'href="{fs.FILING_URL}"' in fs.COURT_SOURCES_HTML
     assert fs.COURT_URL.startswith("https://www.iowapublicradio.org/")
     assert "until it rules on a request" in fs.COURT_PAUSE
-    assert fs.COURT_PAUSE.endswith("These maps model Monday, Nov. 23.")
+    assert fs.COURT_PAUSE.endswith("These maps model Wednesday, Nov. 25.")
 
 
 def test_contact_in_about_citation_and_llms(rendered: tuple[str, list, str]) -> None:
@@ -348,14 +351,16 @@ def test_missing_addresses_get_a_real_page() -> None:
 
 
 def test_days_and_map_names() -> None:
-    """Monday's maps keep their old names; other days are prefixed with their date."""
-    assert [d for d, _ in site.DAYS] == ["2026-11-23", "2026-11-24", "2026-11-25"]
+    """Wednesday's maps have plain names; Thursday's are prefixed with its date."""
+    assert [d for d, _ in site.DAYS] == ["2026-11-25", "2026-11-26"] == [site.DATE, "2026-11-26"]
+    assert {"2026-11-26"} == site.MENU_ONLY_DAYS  # Thursday: only in the Day menu
+    assert [d for d, _ in site.PAST_DAYS] == ["2026-11-23", "2026-11-24"]
     assert site.day_label("2026-11-25") == "Wednesday, Nov. 25"
     assert site.map_name("permit", "12:00") == "permit-1200.html"
-    assert site.map_name("permit", "12:00", "2026-11-24") == "2026-11-24-permit-1200.html"
-    assert site.map_key("2026-11-24", "low", "11:15") == "2026-11-24-low-1115"
-    assert site.day_label("2026-11-24") == "Tuesday, Nov. 24"
-    assert site.blast_label("12:00", "2026-11-24") == "Tuesday, Nov. 24, 2026, 12:00 p.m. CST"
+    assert site.map_name("permit", "12:00", "2026-11-26") == "2026-11-26-permit-1200.html"
+    assert site.map_key("2026-11-26", "low", "11:15") == "2026-11-26-low-1115"
+    assert site.day_label("2026-11-26") == "Thursday, Nov. 26"
+    assert site.blast_label("12:00", "2026-11-26") == "Thursday, Nov. 26, 2026, 12:00 p.m. CST"
 
 
 def test_forecast_order_rrfs_then_gfs() -> None:
@@ -367,13 +372,13 @@ def test_days_to_build(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """A deploy builds only the days its saved forecasts cover; a refresh builds them all."""
     cache = tmp_path / "map_met_all.json"
     monkeypatch.setattr(site, "MET_CACHE", cache)
-    assert site.days_to_build() == ["2026-11-23", "2026-11-24", "2026-11-25"]  # downloading
-    cache.write_text('{"x?start_date=2026-11-23&end_date=2026-11-24": 1}', encoding="utf-8")
-    assert site.days_to_build() == ["2026-11-23"]
+    assert site.days_to_build() == ["2026-11-25", "2026-11-26"]  # downloading
+    cache.write_text('{"x?start_date=2026-11-25&end_date=2026-11-26": 1}', encoding="utf-8")
+    assert site.days_to_build() == ["2026-11-25"]
     cache.write_text(
-        '{"a?start_date=2026-11-23&x": 1, "b?start_date=2026-11-24&x": 1}', encoding="utf-8"
+        '{"a?start_date=2026-11-25&x": 1, "b?start_date=2026-11-26&x": 1}', encoding="utf-8"
     )
-    assert site.days_to_build() == ["2026-11-23", "2026-11-24"]
+    assert site.days_to_build() == ["2026-11-25", "2026-11-26"]
 
 
 def test_page_has_a_day_menu() -> None:
@@ -386,16 +391,16 @@ def test_page_has_a_day_menu() -> None:
 @pytest.mark.slow
 def test_second_day_in_summary_faq_and_llms(rendered_two_days: tuple[str, list, str]) -> None:
     summary, faq, llms = rendered_two_days
-    assert "<h3>If the blasts are on Tuesday, Nov. 24</h3>" in summary
-    assert summary.index("If the blasts are on Tuesday") > summary.index("Lead in the air")
-    assert "For noon Tuesday the forecast has surface winds" in summary
+    assert "<h3>If the blasts are on Thursday, Nov. 26</h3>" in summary
+    assert summary.index("If the blasts are on Thursday") > summary.index("Lead in the air")
+    assert "For noon Thursday the forecast has surface winds" in summary
     assert "from two weather models" in summary  # its own model count
     assert summary.count(fs.TOWN_CAVEAT) >= 2  # the caveat after every list of towns
     answers = dict(faq)
-    tue = answers["What if the blasts are on Tuesday, Nov. 24?"]
+    tue = answers["What if the blasts are on Thursday, Nov. 26?"]
     assert fs.TOWN_CAVEAT in tue
     assert fs.CAVEAT in tue
-    assert f"- Tuesday, Nov. 24 (also modeled): {fs.SAME_WINDOW}" in llms
+    assert f"- Thursday, Nov. 26 (also modeled): {fs.SAME_WINDOW}" in llms
 
 
 @pytest.mark.slow
@@ -424,9 +429,9 @@ def test_court_paragraph_names_the_days_modeled() -> None:
     # no longer "unclear" which day: the Nov. 22 filing says Tuesday
     assert "unclear" not in fs.COURT_HOLD
     assert "had postponed them to Tuesday, Nov. 24" in fs.COURT_HOLD
-    assert fs.court_pause().endswith("These maps model Monday, Nov. 23.")
-    assert fs.court_pause(["Tuesday, Nov. 24"]).endswith(
-        "These maps model Monday, Nov. 23, and Tuesday, Nov. 24."
+    assert fs.court_pause().endswith("These maps model Wednesday, Nov. 25.")
+    assert fs.court_pause(["Thursday, Nov. 26"]).endswith(
+        "These maps model Wednesday, Nov. 25, and Thursday, Nov. 26."
     )
     # the filings are the primary sources, newest first; KCCI is the news report
     assert fs.FILING_URL.startswith("https://s3.documentcloud.org/documents/28930203/")
@@ -442,7 +447,7 @@ def test_court_paragraph_names_the_days_modeled() -> None:
 @pytest.mark.slow
 def test_two_days_court_paragraph(rendered_two_days: tuple[str, list, str]) -> None:
     summary, faq, llms = rendered_two_days
-    both = "These maps model Monday, Nov. 23, and Tuesday, Nov. 24."
+    both = "These maps model Wednesday, Nov. 25, and Thursday, Nov. 26."
     assert both in summary
     assert both in dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
     assert both in llms
@@ -477,25 +482,25 @@ def test_summary_why_section_cites_both(rendered: tuple[str, list, str]) -> None
 
 @pytest.mark.slow
 def test_two_days_label_monday_and_keep_notes(rendered_two_days: tuple[str, list, str]) -> None:
-    """With a second day, Monday's parts say Monday and each day keeps its notes."""
+    """With a second day, the lead day's parts say Wednesday and each day keeps its notes."""
     summary, faq, llms = rendered_two_days
     for h in ("Where the cloud goes", "How far lead on the ground could reach", "Lead in the air"):
-        assert f"<h3>{h} on Monday, Nov. 23</h3>" in summary
-    # Monday's permit weather stays with the Army comparison, before the Tuesday section
+        assert f"<h3>{h} on Wednesday, Nov. 25</h3>" in summary
+    # Wednesday's permit weather stays with the Army comparison, before the Thursday section
     assert (
-        summary.index("For noon Monday the forecast")
-        < summary.index("If the blasts are on Tuesday")
-        < summary.index("For noon Tuesday the forecast")
+        summary.index("For noon Wednesday the forecast")
+        < summary.index("If the blasts are on Thursday")
+        < summary.index("For noon Thursday the forecast")
     )
-    tue = summary[summary.index("If the blasts are on Tuesday") :]
-    assert fs.REACH_NOTE in tue
-    assert fs.SAME_WINDOW in tue
+    thu = summary[summary.index("If the blasts are on Thursday") :]
+    assert fs.REACH_NOTE in thu
+    assert fs.SAME_WINDOW in thu
     assert "change before the blasts" in summary
-    assert "before Monday" not in summary
+    assert "before Wednesday" not in summary
     answers = dict(faq)
-    assert answers["Where could the lead go?"].startswith("For Monday, Nov. 23: ")
-    assert fs.REACH_NOTE in answers["What if the blasts are on Tuesday, Nov. 24?"]
-    assert "- Monday, Nov. 23: Forecast pulled" in llms
+    assert answers["Where could the lead go?"].startswith("For Wednesday, Nov. 25: ")
+    assert fs.REACH_NOTE in answers["What if the blasts are on Thursday, Nov. 26?"]
+    assert "- Wednesday, Nov. 25: Forecast pulled" in llms
 
 
 def _fake_map(models: list[str]) -> str:
@@ -505,35 +510,28 @@ def _fake_map(models: list[str]) -> str:
 def test_read_maps_days_and_model_counts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """A day missing any blast time is left out; each day counts its own models."""
     monkeypatch.setattr(site, "MAPS", tmp_path)
-    seven = [*site.WEATHER.split(","), "icon_seamless", "gem_seamless", "ukmo_seamless"]
+    four = site.WEATHER.split(",")
+    thu = "2026-11-26"
     for c, _, _ in site.CASES:
         for t in site.TIMES:
-            (tmp_path / site.map_name(c, t)).write_text(_fake_map(seven), encoding="utf-8")
-            if t != "12:30":  # Tuesday is missing one time
-                (tmp_path / site.map_name(c, t, "2026-11-24")).write_text(
-                    _fake_map(seven[1:]), encoding="utf-8"
+            (tmp_path / site.map_name(c, t)).write_text(_fake_map(four), encoding="utf-8")
+            if t != "12:30":  # Thursday is missing one time
+                (tmp_path / site.map_name(c, t, thu)).write_text(
+                    _fake_map(four[:3]), encoding="utf-8"
                 )
     maps = site.read_maps()
-    assert list(maps.days) == ["2026-11-23"]  # partly built Tuesday left out
-    assert site.lead_day(maps) == site.DATE  # opens on Monday without Tuesday
+    assert list(maps.days) == ["2026-11-25"]  # partly built Thursday left out
+    assert site.lead_day(maps) == site.DATE == site.LEAD_DAY  # opens on Wednesday
     for c, _, _ in site.CASES:
-        (tmp_path / site.map_name(c, "12:30", "2026-11-24")).write_text(
-            _fake_map(seven[1:]), encoding="utf-8"
+        (tmp_path / site.map_name(c, "12:30", thu)).write_text(
+            _fake_map(four[:3]), encoding="utf-8"
         )
     maps = site.read_maps()
-    assert list(maps.days) == ["2026-11-23", "2026-11-24"]
-    assert maps.days["2026-11-24"] == site.TIMES
-    assert site.lead_day(maps) == "2026-11-24"  # Tuesday leads while Wednesday isn't built
-    for c, _, _ in site.CASES:
-        for t in site.TIMES:
-            (tmp_path / site.map_name(c, t, "2026-11-25")).write_text(
-                _fake_map(seven[:3]), encoding="utf-8"
-            )
-    maps = site.read_maps()
-    assert list(maps.days) == ["2026-11-23", "2026-11-24", "2026-11-25"]
-    assert site.lead_day(maps) == "2026-11-25" == site.LEAD_DAY  # then Wednesday
-    assert site.model_count(maps.pages_by_day["2026-11-23"]) == "seven"
-    assert site.model_count(maps.pages_by_day["2026-11-24"]) == "six"
+    assert list(maps.days) == ["2026-11-25", thu]
+    assert maps.days[thu] == site.TIMES
+    assert site.lead_day(maps) == "2026-11-25"  # still Wednesday
+    assert site.model_count(maps.pages_by_day["2026-11-25"]) == "four"
+    assert site.model_count(maps.pages_by_day[thu]) == "three"
 
 
 def test_remove_days_not_built(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -545,41 +543,12 @@ def test_remove_days_not_built(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     site.remove_days_not_built(["2026-11-23"])
     assert not (tmp_path / "2026-11-24-permit-1200.html").exists()
     assert (tmp_path / "permit-1200.html").exists()  # the planned day is never removed
-
-
-@pytest.fixture(scope="module")
-def rendered_tuesday_lead(
-    facts_ctx: tuple[dict[str, Any], dict[str, Any]],
-) -> tuple[str, list, str]:
-    """Render with Tuesday leading and Monday (the earlier planned date) after it."""
-    facts, ctx = facts_ctx
-    tuesday = {**facts, "day": "Tuesday, Nov. 24", "n_models": "one"}
-    monday = {**facts, "day": fs.PLANNED_DAY, "n_models": "one"}
-    return fs.render(tuesday, ctx, [monday])
-
-
-@pytest.mark.slow
-def test_tuesday_leads_and_monday_follows(rendered_tuesday_lead: tuple[str, list, str]) -> None:
-    summary, faq, llms = rendered_tuesday_lead
-    tue = "Tuesday, Nov. 24"
-    note = fs.window_note(tue)
-    assert note.startswith("No time has been given for Tuesday, so these maps use")
-    assert fs.window_note(fs.PLANNED_DAY) == ""  # Monday has Iowa HHS's "about noon"
-    assert summary.index(f"<h3>Where the cloud goes on {tue}</h3>") < summary.index(
-        "<h3>Monday, Nov. 23, an earlier planned date</h3>"
-    )
-    lead = summary[summary.index("<h3>Where the cloud goes") :]
-    assert lead.split("<p>", 1)[1].startswith(note)  # Tuesday's window is borrowed
-    monday = summary[summary.index("an earlier planned date</h3>") :]
-    assert "No time has been given" not in monday.split("</p>", 1)[0]
-    days = "These maps model Monday, Nov. 23, and Tuesday, Nov. 24."
-    assert days in summary
-    qs = dict(faq)
-    assert "What would the map show for Monday, Nov. 23, an earlier planned date?" in qs
-    assert qs["Where could the lead go?"].startswith(f"For {tue}: ")
-    assert "11 a.m. to 12:30 p.m. CST on Monday, Nov. 23, Tuesday, Nov. 24." in llms
-    assert f"- {tue}: {note}" in llms
-    assert "- Monday, Nov. 23 (also modeled): " in llms
+    # a dropped day's maps go too, even though DAYS no longer lists it
+    (tmp_path / "2026-11-24-low-1100.html").write_text("dropped", encoding="utf-8")
+    (tmp_path / "2026-11-26-low-1100.html").write_text("thu", encoding="utf-8")
+    site.remove_days_not_built(["2026-11-25", "2026-11-26"])
+    assert not (tmp_path / "2026-11-24-low-1100.html").exists()
+    assert (tmp_path / "2026-11-26-low-1100.html").exists()
 
 
 def test_page_opens_on_the_lead_day_and_old_links_keep_monday() -> None:
@@ -614,7 +583,7 @@ def test_refresh_pr_text_finds_the_path_section(
     assert m
     for summary, _, _ in (rendered, rendered_two_days):
         assert m.group(1) in summary
-    assert "<h3>Where the cloud goes on Monday, Nov. 23</h3>" in rendered_two_days[0]
+    assert "<h3>Where the cloud goes on Wednesday, Nov. 25</h3>" in rendered_two_days[0]
 
 
 def test_four_weather_models_and_hrrr_first_near_the_blast() -> None:
@@ -657,7 +626,7 @@ def rendered_wednesday_lead(
 ) -> tuple[str, list, str]:
     """Render with Wednesday leading, then Monday and Tuesday (earlier planned dates)."""
     facts, ctx = facts_ctx
-    days = [fs.PLANNED_DAY, "Tuesday, Nov. 24", "Wednesday, Nov. 25"]
+    days = [fs.HHS_DAY, "Tuesday, Nov. 24", "Wednesday, Nov. 25"]
     by = {d: {**facts, "day": d, "n_models": "one"} for d in days}
     return fs.render(by[days[2]], ctx, [by[days[0]], by[days[1]]])
 
@@ -666,7 +635,7 @@ def rendered_wednesday_lead(
 def test_wednesday_leads(rendered_wednesday_lead: tuple[str, list, str]) -> None:
     summary, faq, llms = rendered_wednesday_lead
     assert "<h3>Where the cloud goes on Wednesday, Nov. 25</h3>" in summary
-    assert fs.window_note("Wednesday, Nov. 25") in summary
+    assert fs.window_note("Wednesday, Nov. 25") == ""  # "No time yet." covers Wednesday
     for d in ("Monday, Nov. 23", "Tuesday, Nov. 24"):
         assert f"<h3>{d}, an earlier planned date</h3>" in summary
     assert summary.index("Wednesday, Nov. 25</h3>") < summary.index("Monday, Nov. 23, an")
@@ -704,33 +673,29 @@ def _maps_for(days: list[str]) -> site.Maps:
     )
 
 
-def test_page_says_when_the_planned_day_is_not_built_yet() -> None:
-    """Before a refresh adds Wednesday, the page leads with Tuesday and says so."""
-    maps = _maps_for(["2026-11-23", "2026-11-24"])
+def test_day_values_wednesday_with_thursday_in_the_menu_only() -> None:
+    """Wednesday leads; Thursday is a Day menu option but not in the header."""
+    maps = _maps_for(["2026-11-25", "2026-11-26"])
     lead = site.lead_day(maps)
     v = site.day_values(maps, lead)
-    assert lead == "2026-11-24"
-    assert v["header_lead"] == "Lead from the blast at the Iowa Army Ammunition Plant"
-    assert v["header_days"] == "Tuesday, Nov. 24 (also modeled: Monday, Nov. 23)"
-    assert v["pending_note"] == (
-        "Wednesday, Nov. 25 maps aren\u2019t in this update yet; the latest day modeled is shown."
-    )
-    assert v["pending_hidden"] == ""
-    assert '<option value="2026-11-24" selected>' in v["day_options"]
-    assert v["open_day"] == '"2026-11-24"'
-    assert v["link_day"] == '"2026-11-23"'  # links without a day keep meaning Monday
-    assert "planned Nov. 25" not in site.DESCRIPTION_NO_DATE
-
-    maps = _maps_for(["2026-11-23", "2026-11-24", "2026-11-25"])
-    v = site.day_values(maps, site.lead_day(maps))
+    assert lead == "2026-11-25"
     assert v["header_lead"] == "Lead from the planned blast at the Iowa Army Ammunition Plant"
-    assert v["header_days"].startswith("Wednesday, Nov. 25 (also modeled: Monday, Nov. 23, ")
+    assert v["header_days"] == "Wednesday, Nov. 25"  # no "also modeled: Thursday"
     assert v["pending_note"] == ""
     assert v["pending_hidden"] == " hidden"
-    assert '<option value="2026-11-25" selected>' in v["day_options"]
+    assert '<option value="2026-11-25" selected>Wednesday, Nov. 25</option>' in v["day_options"]
+    assert '<option value="2026-11-26">Thursday, Nov. 26</option>' in v["day_options"]
+    assert v["day_hidden"] == ""  # the menu shows
+    assert v["open_day"] == v["link_day"] == '"2026-11-25"'
+    assert json.loads(v["day_codes"]) == {"2026-11-25": "wed", "2026-11-26": "thu"}
+    # an old Monday or Tuesday link says that day isn't modeled, by name
+    assert json.loads(v["all_days"])["tue"] == "Tuesday, Nov. 24"
     page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
     assert "<p>$header_lead, $header_days</p>" in page
     assert '<p class="daynote" id="pendingnote"$pending_hidden>$pending_note</p>' in page
+    assert "planned Nov. 25" not in site.DESCRIPTION_NO_DATE
+    # Wednesday is always built, so the "not in this update" note never shows
+    assert site.pending_note(site.DATE) == ""
 
 
 def test_one_model_order_per_day(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
