@@ -67,13 +67,11 @@ MENTIONS = [
         ),
     ),
 ]
-#: Said after the list, so a mention isn't read as a check of the map.
-MENTIONS_LIMIT = "A news mention isn\u2019t a check of the map\u2019s accuracy."
 MENTIONS_HTML = (
     "; ".join(
         f'<a href="{url}" rel="noopener">{outlet}</a>, {date}' for outlet, date, url in MENTIONS
     )
-    + f". {MENTIONS_LIMIT}"
+    + "."
 )
 ACCESSED = "accessed 20 November 2026"
 
