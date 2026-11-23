@@ -253,6 +253,16 @@ COURT_SOURCES_HTML = (
 TUESDAY_SOURCES_TEXT = (
     f"{RESPONSE_CITE}, {RESPONSE_URL}; {FILING_CITE}, {FILING_URL}; {KCCI_CITE}, {KCCI_URL}"
 )
+# Sources cited in plain text as "Citation, URL". The visible FAQ shows each as a link
+# on the citation (make_map_picker.linkify); JSON-LD and llms.txt keep the full address.
+CITED_SOURCES = (
+    (ARMY_WED_CITE, ARMY_WED_URL),
+    (RESPONSE_CITE, RESPONSE_URL),
+    (FILING_CITE, FILING_URL),
+    (COURT_CITE, COURT_URL),
+    (KCCI_CITE, KCCI_URL),
+    (ARMY_CITE, ARMY_URL),
+)
 TUESDAY_SOURCES_HTML = (
     f'<a href="{RESPONSE_URL}" rel="noopener">{RESPONSE_CITE}</a>; '
     f'<a href="{FILING_URL}" rel="noopener">{FILING_CITE}</a>; '
@@ -271,6 +281,12 @@ MISTING = (
 )
 HHS_URL = "https://hhs.iowa.gov/media/19822/download?inline="
 HHS_LINK = f'<a href="{HHS_URL}" rel="noopener">Iowa HHS fact sheet</a>'
+# Sources named in parentheses without their address, as "(Iowa HHS fact sheet)". The page
+# links each name (time_note_html, and make_map_picker.linkify for the FAQ).
+NAMED_SOURCES = (
+    ("Iowa HHS fact sheet", HHS_URL),
+    ("Nov. 22 court filing", RESPONSE_URL),
+)
 # Far-reach distances swing a lot between forecast updates (see README "Why the numbers move").
 REACH_NOTE = (
     "The farthest distances depend heavily on the evening forecast, especially how "
@@ -543,14 +559,10 @@ def time_note(built_txt: str) -> str:
 
 def time_note_html(built_txt: str) -> str:
     """Return time_note() with its two sources linked."""
-    return (
-        time_note(built_txt)
-        .replace("(Iowa HHS fact sheet)", f"({HHS_LINK})")
-        .replace(
-            "(Nov. 22 court filing)",
-            f'(<a href="{RESPONSE_URL}" rel="noopener">Nov. 22 court filing</a>)',
-        )
-    )
+    out = time_note(built_txt)
+    for name, url in NAMED_SOURCES:
+        out = out.replace(f"({name})", f'(<a href="{url}" rel="noopener">{name}</a>)')
+    return out
 
 
 def lb(x: float) -> str:
