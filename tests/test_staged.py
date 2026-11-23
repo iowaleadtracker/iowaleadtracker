@@ -79,8 +79,8 @@ def test_picker_page(built: Path) -> None:
     assert "November 21, 2026, at 9:08 p.m. CST" in page  # forecast pull time
     # When: from the Nov. 22 court filing, linked, not the old "Monday only" line.
     assert "the government said the Army postponed it to Tuesday, Nov. 24" in page
-    assert "no time has been given" in page
-    assert "Wednesday hasn&rsquo;t been announced." in page
+    assert "it is now scheduled for Wednesday, Nov. 25. No time has been given." in page
+    assert f'<a href="{forecast_summary.ARMY_WED_URL}">the Army said</a>' in page
     assert f'<a href="{forecast_summary.RESPONSE_URL}">court filing on Nov. 22</a>' in page
     assert "it hasn&rsquo;t\n    announced these days" not in page
     m = re.search(r"const FILES = (\{.*?\});", page)

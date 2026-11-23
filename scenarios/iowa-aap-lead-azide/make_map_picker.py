@@ -49,11 +49,13 @@ MET_CACHE = HERE / "met_cache" / "map_met_all.json"
 DATE = "2026-11-23"  # the planned blast day (CST, UTC-6); its maps keep their old names
 # Days modeled, as (date, short code used in links). A day is built only when the saved
 # forecasts include it (see build()), so adding one never makes a deploy download weather.
-DAYS = [("2026-11-23", "mon"), ("2026-11-24", "tue")]
-# The day the page opens on and the summary leads with, when its maps are built: the
-# government's Nov. 22 court filing says the Army postponed the blasts to Tuesday. Links
-# without a day code (#1200-permit) still mean DATE, as they always have.
-LEAD_DAY = "2026-11-24"
+DAYS = [("2026-11-23", "mon"), ("2026-11-24", "tue"), ("2026-11-25", "wed")]
+# The day the page opens on and the summary leads with: the first of these whose maps are
+# built (else DATE). The Army said on Nov. 22 that the blasts are now scheduled for
+# Wednesday; earlier that day the government had told the court Tuesday. Links without a
+# day code (#1200-permit) still mean DATE, as they always have.
+LEAD_DAYS = ["2026-11-25", "2026-11-24"]
+LEAD_DAY = LEAD_DAYS[0]
 LAT, LON = 40.825518, -91.266502
 TIMES = ["11:00", "11:15", "11:30", "11:45", "12:00", "12:15", "12:30"]
 DEFAULT = "12:00"  # the Nov. 20 detonation had been set for about noon (Iowa HHS)
@@ -126,7 +128,7 @@ TZ = ZoneInfo("America/Chicago")
 SITE_URL = "https://iowaleadtracker.com/"
 SITE_NAME = "Iowa Lead Tracker"
 DESCRIPTION = (
-    "Unofficial, open-model map of where lead from the planned Nov. 24, 2026 blast at the "
+    "Unofficial, open-model map of where lead from the planned Nov. 25, 2026 blast at the "
     "Iowa Army Ammunition Plant could travel and settle, with its data, assumptions, and "
     "sources published."
 )
@@ -452,8 +454,8 @@ def complete_times(day: str) -> list[str]:
 
 
 def lead_day(maps: Maps) -> str:
-    """Return the day the page opens on: LEAD_DAY when its maps are built, else DATE."""
-    return LEAD_DAY if LEAD_DAY in maps.days else DATE
+    """Return the day the page opens on: the first of LEAD_DAYS that is built, else DATE."""
+    return next((d for d in LEAD_DAYS if d in maps.days), DATE)
 
 
 def days_shown(times: list[str]) -> dict[str, list[str]]:
@@ -749,6 +751,8 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "time_head": forecast_summary.TIME_HEAD,
         "why_monday": forecast_summary.WHY_MONDAY,
         "why_tuesday": forecast_summary.WHY_TUESDAY,
+        "why_wednesday": forecast_summary.WHY_WEDNESDAY,
+        "wednesday_source": forecast_summary.WEDNESDAY_SOURCE_HTML,
         "tuesday_sources": forecast_summary.TUESDAY_SOURCES_HTML,
         "army_url": forecast_summary.ARMY_URL,
         "army_cite": forecast_summary.ARMY_CITE,

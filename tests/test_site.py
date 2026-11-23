@@ -247,10 +247,12 @@ def test_court_hold_leads_the_summary_and_faq(rendered: tuple[str, list, str]) -
     assert fs.COURT_URL in summary
     when = dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
     assert when.startswith(
-        "The Army planned it for Monday, Nov. 23, 2026, but a court has put its permit on hold, "
-        "and on Nov. 22 the government told the court the Army had postponed it to Tuesday, "
-        "Nov. 24, and intends to act that day."
+        "The Army now says Wednesday, Nov. 25, 2026; it hasn\u2019t given a time. It had "
+        "planned Monday, Nov. 23, a court has put its permit on hold, and on Nov. 22 the "
+        "government told the court the Army had postponed it to Tuesday, Nov. 24."
     )
+    assert fs.WHY_WEDNESDAY in when
+    assert fs.ARMY_WED_URL in when
     assert fs.COURT_PAUSE in when
     assert "on hold by court order" in llms
     assert fs.COURT_PAUSE in llms
@@ -347,7 +349,8 @@ def test_missing_addresses_get_a_real_page() -> None:
 
 def test_days_and_map_names() -> None:
     """Monday's maps keep their old names; other days are prefixed with their date."""
-    assert [d for d, _ in site.DAYS] == ["2026-11-23", "2026-11-24"]
+    assert [d for d, _ in site.DAYS] == ["2026-11-23", "2026-11-24", "2026-11-25"]
+    assert site.day_label("2026-11-25") == "Wednesday, Nov. 25"
     assert site.map_name("permit", "12:00") == "permit-1200.html"
     assert site.map_name("permit", "12:00", "2026-11-24") == "2026-11-24-permit-1200.html"
     assert site.map_key("2026-11-24", "low", "11:15") == "2026-11-24-low-1115"
@@ -364,7 +367,7 @@ def test_days_to_build(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """A deploy builds only the days its saved forecasts cover; a refresh builds them all."""
     cache = tmp_path / "map_met_all.json"
     monkeypatch.setattr(site, "MET_CACHE", cache)
-    assert site.days_to_build() == ["2026-11-23", "2026-11-24"]  # no file: downloading
+    assert site.days_to_build() == ["2026-11-23", "2026-11-24", "2026-11-25"]  # downloading
     cache.write_text('{"x?start_date=2026-11-23&end_date=2026-11-24": 1}', encoding="utf-8")
     assert site.days_to_build() == ["2026-11-23"]
     cache.write_text(
@@ -512,7 +515,15 @@ def test_read_maps_days_and_model_counts(tmp_path: Path, monkeypatch: pytest.Mon
     maps = site.read_maps()
     assert list(maps.days) == ["2026-11-23", "2026-11-24"]
     assert maps.days["2026-11-24"] == site.TIMES
-    assert site.lead_day(maps) == "2026-11-24" == site.LEAD_DAY  # Tuesday leads once built
+    assert site.lead_day(maps) == "2026-11-24"  # Tuesday leads while Wednesday isn't built
+    for c, _, _ in site.CASES:
+        for t in site.TIMES:
+            (tmp_path / site.map_name(c, t, "2026-11-25")).write_text(
+                _fake_map(seven[:3]), encoding="utf-8"
+            )
+    maps = site.read_maps()
+    assert list(maps.days) == ["2026-11-23", "2026-11-24", "2026-11-25"]
+    assert site.lead_day(maps) == "2026-11-25" == site.LEAD_DAY  # then Wednesday
     assert site.model_count(maps.pages_by_day["2026-11-23"]) == "seven"
     assert site.model_count(maps.pages_by_day["2026-11-24"]) == "six"
 
@@ -547,16 +558,16 @@ def test_tuesday_leads_and_monday_follows(rendered_tuesday_lead: tuple[str, list
     assert note.startswith("No time has been given for Tuesday, so these maps use")
     assert fs.window_note(fs.PLANNED_DAY) == ""  # Monday has Iowa HHS's "about noon"
     assert summary.index(f"<h3>Where the cloud goes on {tue}</h3>") < summary.index(
-        "<h3>Monday, Nov. 23, the earlier planned date</h3>"
+        "<h3>Monday, Nov. 23, an earlier planned date</h3>"
     )
     lead = summary[summary.index("<h3>Where the cloud goes") :]
     assert lead.split("<p>", 1)[1].startswith(note)  # Tuesday's window is borrowed
-    monday = summary[summary.index("the earlier planned date</h3>") :]
+    monday = summary[summary.index("an earlier planned date</h3>") :]
     assert "No time has been given" not in monday.split("</p>", 1)[0]
     days = "These maps model Monday, Nov. 23, and Tuesday, Nov. 24."
     assert days in summary
     qs = dict(faq)
-    assert "What would the map show for Monday, Nov. 23, the earlier planned date?" in qs
+    assert "What would the map show for Monday, Nov. 23, an earlier planned date?" in qs
     assert qs["Where could the lead go?"].startswith(f"For {tue}: ")
     assert "11 a.m. to 12:30 p.m. CST on Monday, Nov. 23, Tuesday, Nov. 24." in llms
     assert f"- {tue}: {note}" in llms
@@ -630,3 +641,31 @@ def test_coverage_check_counts_only_the_run_hours() -> None:
     assert met._data_problem(data, start, end) is None  # just the run
     gap = {"hourly": {"time": times, "wind_speed_10m": [3.0] * 18 + [None] * 30}}
     assert met._data_problem(gap, start, end) == "data missing for the requested period"
+
+
+@pytest.fixture(scope="module")
+def rendered_wednesday_lead(
+    facts_ctx: tuple[dict[str, Any], dict[str, Any]],
+) -> tuple[str, list, str]:
+    """Render with Wednesday leading, then Monday and Tuesday (earlier planned dates)."""
+    facts, ctx = facts_ctx
+    days = [fs.PLANNED_DAY, "Tuesday, Nov. 24", "Wednesday, Nov. 25"]
+    by = {d: {**facts, "day": d, "n_models": "one"} for d in days}
+    return fs.render(by[days[2]], ctx, [by[days[0]], by[days[1]]])
+
+
+@pytest.mark.slow
+def test_wednesday_leads(rendered_wednesday_lead: tuple[str, list, str]) -> None:
+    summary, faq, llms = rendered_wednesday_lead
+    assert "<h3>Where the cloud goes on Wednesday, Nov. 25</h3>" in summary
+    assert fs.window_note("Wednesday, Nov. 25") in summary
+    for d in ("Monday, Nov. 23", "Tuesday, Nov. 24"):
+        assert f"<h3>{d}, an earlier planned date</h3>" in summary
+    assert summary.index("Wednesday, Nov. 25</h3>") < summary.index("Monday, Nov. 23, an")
+    assert "These maps model Monday, Nov. 23, Tuesday, Nov. 24, and Wednesday, Nov. 25." in summary
+    assert fs.WHY_WEDNESDAY in summary
+    assert fs.WEDNESDAY_SOURCE_HTML in summary
+    assert "Later that day, the Army said the blasts are now scheduled for Wednesday" in summary
+    assert "- Why Wednesday: " in llms
+    assert "on Monday, Nov. 23, Tuesday, Nov. 24, Wednesday, Nov. 25." in llms
+    assert "What would the map show for Tuesday, Nov. 24, an earlier planned date?" in dict(faq)
