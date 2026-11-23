@@ -823,6 +823,8 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "earlier_head": forecast_summary.EARLIER_HEAD,
         "why_monday": forecast_summary.WHY_MONDAY,
         "why_tuesday": forecast_summary.WHY_TUESDAY,
+        "trump_hold": forecast_summary.TRUMP_HOLD,
+        "trump_source": forecast_summary.TRUMP_SOURCE_HTML,
         "why_wednesday": forecast_summary.WHY_WEDNESDAY,
         "wednesday_source": forecast_summary.WEDNESDAY_SOURCE_HTML,
         "tuesday_sources": forecast_summary.TUESDAY_SOURCES_HTML,
