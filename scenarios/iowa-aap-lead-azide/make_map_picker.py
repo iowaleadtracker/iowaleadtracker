@@ -66,12 +66,16 @@ CASES = [
     ("permit", "permit-100", "EPA permit"),
 ]
 DEFAULT_CASE = "permit"  # most conservative by default: better than a false sense of security
-# The first model with data for the whole run is shown; the rest make up the spread. RRFS
-# first (Monday), then GFS (Tuesday, until RRFS reaches that far), then the others.
-WEATHER = (
-    "ncep_rrfs_conus,gfs_seamless,ncep_hrrr_conus,ecmwf_ifs025,icon_seamless,"
-    "gem_seamless,ukmo_seamless,meteofrance_seamless"
-)
+# The first model with data for the whole run is shown; the rest make up the spread.
+# RRFS first (3 km, gives the mixing height), then GFS (also gives it, reaches farthest),
+# HRRR (when it covers the run) and ECMWF (best global model, but no mixing height, so it
+# stays in the spread). ICON, GEM, UKMO and Meteo-France were dropped on Nov. 23, 2026: no
+# mixing height, coarse over Iowa, and they doubled the downloads against Open-Meteo's
+# daily limit.
+WEATHER = "ncep_rrfs_conus,gfs_seamless,ncep_hrrr_conus,ecmwf_ifs025"
+# Close to the blast, HRRR (hourly runs with the newest observations) goes first.
+HRRR_FIRST_HOURS = 18
+WEATHER_SHORT_RANGE = "ncep_hrrr_conus,ncep_rrfs_conus,gfs_seamless,ecmwf_ifs025"
 WEATHER_ORDER = WEATHER.split(",")
 MODEL_ARGS = [
     *("--material", "lead-azide"),
@@ -368,6 +372,18 @@ def remove_days_not_built(days: list[str]) -> None:
                 old.unlink()
 
 
+def weather_for(blast: dt.datetime, ref: dt.datetime) -> str:
+    """Return the model order for a blast at ``blast``, forecast as of ``ref``.
+
+    HRRR goes first once the blast is within HRRR_FIRST_HOURS of the forecast (the saved
+    pull's time, so a rebuild picks the same order); otherwise RRFS does. Either way a
+    model that doesn't cover the whole run is passed over for the next one.
+    """
+    if blast - ref <= dt.timedelta(hours=HRRR_FIRST_HOURS):
+        return WEATHER_SHORT_RANGE
+    return WEATHER
+
+
 def build() -> None:
     """Run the model for every day, case and time, one after another (Open-Meteo limits)."""
     MAPS.mkdir(parents=True, exist_ok=True)
@@ -379,9 +395,13 @@ def build() -> None:
     pulled = retrieved_at() if MET_CACHE.exists() else None
     as_of = ("--as-of", pulled.isoformat()) if pulled else ()
     forecast = f", forecast from {pulled_label(pulled)}" if pulled else ""
+    ref = pulled or dt.datetime.now(dt.timezone.utc)  # a refresh downloads now
+    args = list(MODEL_ARGS)
+    w = args.index("--weather-model") + 1
     for day in days:
         for case, release_case, name in CASES:
             for t in TIMES:
+                args[w] = weather_for(dt.datetime.fromisoformat(f"{day}T{t}-06:00"), ref)
                 cmd = [
                     py,
                     str(TOOL / "puff_dispersal.py"),
@@ -389,7 +409,7 @@ def build() -> None:
                     *("--lon", str(LON)),
                     *("--time", f"{day}T{t}-06:00"),
                     *("--release-case", release_case),
-                    *MODEL_ARGS,
+                    *args,
                     *as_of,
                     *("--home-url", SITE_URL),
                     *("--legend-note", f"{name} case, blast {blast_label(t, day)}{forecast}"),

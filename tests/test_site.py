@@ -20,6 +20,7 @@ import pytest
 import staged
 import works_cited
 
+from dispersal import met
 from dispersal.output import load_template, write_html
 
 from .conftest import run_puff
@@ -493,7 +494,7 @@ def _fake_map(models: list[str]) -> str:
 def test_read_maps_days_and_model_counts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """A day missing any blast time is left out; each day counts its own models."""
     monkeypatch.setattr(site, "MAPS", tmp_path)
-    seven = site.WEATHER.split(",")[:7]
+    seven = [*site.WEATHER.split(","), "icon_seamless", "gem_seamless", "ukmo_seamless"]
     for c, _, _ in site.CASES:
         for t in site.TIMES:
             (tmp_path / site.map_name(c, t)).write_text(_fake_map(seven), encoding="utf-8")
@@ -595,3 +596,37 @@ def test_refresh_pr_text_finds_the_path_section(
     for summary, _, _ in (rendered, rendered_two_days):
         assert m.group(1) in summary
     assert "<h3>Where the cloud goes on Monday, Nov. 23</h3>" in rendered_two_days[0]
+
+
+def test_four_weather_models_and_hrrr_first_near_the_blast() -> None:
+    """RRFS leads a day or more out; HRRR leads within 18 hours; four models in all."""
+    assert site.WEATHER.split(",") == [
+        "ncep_rrfs_conus",
+        "gfs_seamless",
+        "ncep_hrrr_conus",
+        "ecmwf_ifs025",
+    ]
+    assert sorted(site.WEATHER_SHORT_RANGE.split(",")) == sorted(site.WEATHER.split(","))
+    assert site.WEATHER_SHORT_RANGE.startswith("ncep_hrrr_conus,")
+    blast = dt.datetime.fromisoformat("2026-11-24T12:00-06:00")
+    early = dt.datetime.fromisoformat("2026-11-23T10:00-06:00")  # 26 hours ahead
+    late = dt.datetime.fromisoformat("2026-11-23T18:00-06:00")  # 18 hours ahead
+    assert site.weather_for(blast, early) == site.WEATHER
+    assert site.weather_for(blast, late) == site.WEATHER_SHORT_RANGE
+    assert site.MODEL_ARGS[site.MODEL_ARGS.index("--weather-model") + 1] == site.WEATHER
+
+
+def test_coverage_check_counts_only_the_run_hours() -> None:
+    """A model that stops after the run (HRRR's 48-hour runs) isn't skipped any more."""
+    times = [f"2026-11-24T{h:02d}:00" for h in range(24)] + [
+        f"2026-11-25T{h:02d}:00" for h in range(24)
+    ]
+    ws = [3.0] * 30 + [None] * 18  # data until 2026-11-25 05:00 UTC, then nothing
+    data = {"hourly": {"time": times, "wind_speed_10m": ws}}
+    utc = dt.timezone.utc
+    start = dt.datetime(2026, 11, 24, 17, tzinfo=utc)  # 11 a.m. CST
+    end = dt.datetime(2026, 11, 25, 2, tzinfo=utc)  # the 8-hour run and a margin
+    assert met._data_problem(data) == "data missing for the requested period"  # whole days
+    assert met._data_problem(data, start, end) is None  # just the run
+    gap = {"hourly": {"time": times, "wind_speed_10m": [3.0] * 18 + [None] * 30}}
+    assert met._data_problem(gap, start, end) == "data missing for the requested period"

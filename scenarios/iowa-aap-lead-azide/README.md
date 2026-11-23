@@ -60,11 +60,25 @@ Useful changes:
 - **Wind-direction spread:** add `--ensemble 5 --dir-spread 10`.
 - **Near the site:** add `--extent-km 15 --hours 2`.
 
-The site's maps use `--weather-model
-ncep_rrfs_conus,gfs_seamless,ncep_hrrr_conus,ecmwf_ifs025,icon_seamless,gem_seamless,ukmo_seamless,meteofrance_seamless`:
-RRFS is shown when it covers the run (Monday), then GFS (Tuesday, until RRFS reaches it), then
-HRRR. Models with no data yet are skipped. (HRRR used to be first; RRFS is shown for Monday
-on purpose, Nov. 22, 2026.)
+The site's maps use four models (`WEATHER` in `make_map_picker.py`): `--weather-model
+ncep_rrfs_conus,gfs_seamless,ncep_hrrr_conus,ecmwf_ifs025`. The first that covers the whole
+run is shown, and the rest make up the spread. Within 18 hours of a blast (counted from when
+the saved forecasts were pulled, so a rebuild picks the same order) HRRR goes first instead
+(`WEATHER_SHORT_RANGE`). Why these four, as of Nov. 23, 2026:
+
+- **HRRR** (3 km, rerun hourly with the newest observations) has the best near-surface
+  wind in the first hours; its 48-hour runs reach about two days.
+- **RRFS** (3 km, NOAA's successor to HRRR, out to about 60 hours) leads from about a day
+  to two and a half days out.
+- **GFS** reaches farthest. It, RRFS and HRRR are the only models that give the mixing
+  height through Open-Meteo; for the others the model assumes one from the stability class.
+- **ECMWF** is the best global model for the large-scale pattern, so it stays in the
+  spread, but without a mixing height it isn't shown.
+
+ICON, GEM, UKMO and Météo-France were dropped: no mixing height (UKMO also has no 120 m
+wind), coarse over Iowa, and they doubled the downloads, which hit Open-Meteo's free daily
+limit on Nov. 22. A model counts as covering a day if it has 80% of the run's hours; hours
+after the run don't count, so HRRR's 48-hour runs qualify sooner.
 
 In the page, "Levels of concern" with the "weather-model spread" box ticked shows
 everywhere any model puts lead.
@@ -342,8 +356,8 @@ Forecasts improve as the event approaches. The page and `met_cache/map_met_all.j
    saved file, if the forecasts haven't changed.
 2. Check the news for the dated statements and open a pull request. Merging it deploys
    both sites (`.github/workflows/deploy.yml`).
-3. RRFS is first in the list and takes over from GFS as soon as it covers the whole run.
-   HRRR (18 to 48 hours ahead depending on the cycle) is in the spread but not shown.
+3. RRFS is shown a day or more out, and HRRR within 18 hours of the blast (see the weather
+   models above); GFS is shown if neither covers the whole run.
 
 `.github/workflows/refresh-forecast.yml` does step 1 every 3 hours through
 Wednesday, Nov. 25, and pushes the result to the `forecast-refresh` branch with a pull request. It
