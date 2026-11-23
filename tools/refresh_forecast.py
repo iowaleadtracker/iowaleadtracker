@@ -13,11 +13,11 @@ Steps:
 It doesn't commit, deploy or publish. Run it by hand (``python tools/refresh_forecast.py``)
 or let ``.github/workflows/refresh-forecast.yml`` run it and open a pull request.
 
-With ``--staged`` it does the same for the staged Tuesday/Wednesday maps
+With ``--staged`` it does the same for the staged Wednesday-Friday maps
 (``scenarios/iowa-aap-lead-azide/staged.py``): their own saved file
 (``met_cache/staged_forecasts.json``), only those maps rebuilt (``staged.py --build``),
 no golden data. The first run, before that file exists, downloads it. The
-``refresh-staged.yml`` workflow runs it every 6 hours through Wednesday, Nov. 25, and by hand.
+``refresh-staged.yml`` workflow runs it every 6 hours through Friday, Nov. 27, and by hand.
 """
 
 from __future__ import annotations

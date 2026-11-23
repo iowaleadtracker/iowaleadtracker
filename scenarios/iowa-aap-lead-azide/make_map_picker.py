@@ -449,7 +449,7 @@ def build() -> None:
                         print("  " + line)
                 if r.returncode:
                     raise SystemExit(f"model run failed for {which}:\n{r.stderr[-2000:]}")
-    if staged.CACHE.exists():  # the staged Tuesday/Wednesday maps, from their own file
+    if staged.CACHE.exists():  # the staged Wednesday-Friday maps, from their own file
         staged.build()
 
 

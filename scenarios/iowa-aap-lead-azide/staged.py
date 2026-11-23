@@ -1,9 +1,9 @@
-"""Staged Tuesday and Wednesday maps: same model, other days, GFS and ECMWF only.
+"""Staged Wednesday to Friday maps: same model, other days, GFS and ECMWF only.
 
 A set of maps at a hard-to-guess address on the main site, for people who have the link:
-blasts on Tuesday, Nov. 24 and Wednesday, Nov. 25, 2026, from 11 a.m. to 1 p.m. every 30
-minutes, for all four release cases, with only the GFS and ECMWF forecasts (GFS shown,
-ECMWF in the weather-model spread).
+blasts on Wednesday, Nov. 25, Thursday, Nov. 26 and Friday, Nov. 27, 2026, from 11 a.m.
+to 1 p.m. every 30 minutes, for all four release cases, with only the GFS and ECMWF
+forecasts (GFS shown, ECMWF in the weather-model spread).
 
 These maps are not private. Nothing on the site links here, the pages are noindex, and the
 folder is left out of the sitemap, robots.txt and llms.txt. The GitHub Pages mirror
@@ -40,7 +40,8 @@ OUT = SITE / DIR_NAME
 MAPS = OUT / "maps"
 CACHE = HERE / "met_cache" / "staged_forecasts.json"
 TZ = ZoneInfo("America/Chicago")
-DAYS = ["2026-11-24", "2026-11-25"]  # Tuesday and Wednesday after the planned Monday blast
+#: Wednesday (the Army's announced date, Nov. 22) through Friday.
+DAYS = ["2026-11-25", "2026-11-26", "2026-11-27"]
 TIMES = ["11:00", "11:30", "12:00", "12:30", "13:00"]
 DEFAULT_DAY = DAYS[0]
 DEFAULT_TIME = "12:00"
@@ -56,7 +57,8 @@ WHEN_HTML = (
     "The Army planned the detonation for Monday, Nov. 23. In a "
     '<a href="{url}">court filing on Nov. 22</a>, the government said the Army postponed it '
     'to Tuesday, Nov. 24; later that day, <a href="{army}">the Army said</a> it is now '
-    "scheduled for Wednesday, Nov. 25. No time has been given."
+    "scheduled for Wednesday, Nov. 25. No time has been given, and Thursday and Friday "
+    "haven&rsquo;t been announced."
 )
 
 
@@ -82,12 +84,12 @@ CSS = """
 
 
 def map_name(day: str, case: str, t: str) -> str:
-    """Return the file name of one map, e.g. ``2026-11-24-permit-1200.html``."""
+    """Return the file name of one map, e.g. ``2026-11-25-permit-1200.html``."""
     return f"{day}-{case}-{t.replace(':', '')}.html"
 
 
 def day_label(day: str) -> str:
-    """Return a day as 'Tuesday, Nov. 24, 2026'."""
+    """Return a day as 'Wednesday, Nov. 25, 2026'."""
     import make_map_picker as site  # noqa: PLC0415 - avoids a circular import
 
     d = dt.date.fromisoformat(day)
@@ -186,7 +188,8 @@ def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
         f'<option value="{c}"{" selected" if c == site.DEFAULT_CASE else ""}>{n}</option>'
         for c, _, n in site.CASES
     )
-    day_list = " and ".join(day_label(d) for d in days)
+    labels = [day_label(d) for d in days]
+    day_list = labels[0] if len(labels) == 1 else "; ".join(labels[:-1]) + "; and " + labels[-1]
     when = WHEN_HTML.format(url=html.escape(fs.RESPONSE_URL), army=html.escape(fs.ARMY_WED_URL))
     return f"""<!doctype html>
 <html lang="en">
@@ -195,12 +198,12 @@ def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
-<title>{site.SITE_NAME}: Tuesday and Wednesday runs</title>
+<title>{site.SITE_NAME}: Wednesday to Friday runs</title>
 <style>{CSS}</style>
 </head>
 <body>
 <header>
-  <h1>{site.SITE_NAME}: Tuesday and Wednesday runs</h1>
+  <h1>{site.SITE_NAME}: Wednesday to Friday runs</h1>
   <p class="warn" role="note"><b>{UNOFFICIAL} {NOT_SAFE}</b> Follow official instructions.</p>
   <p class="about">These maps model blasts on {day_list}, from 11 a.m. to 1 p.m., with
     {MODELS_TEXT}. {when} Forecasts this far ahead change more and are less certain than
