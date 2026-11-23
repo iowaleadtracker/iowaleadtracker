@@ -51,8 +51,8 @@ DEPOSITION_SCHEMES = ("zhang", "emerson")
 DEPOSITION_CITES = {"zhang": "Zhang et al. (2001)", "emerson": "Emerson et al. (2020)"}
 
 
-def zhang_surface_terms(d_p: FloatArray, rho_p: FloatArray | float, T: float = T_REF) -> FloatArray:
-    """Schmidt number of each particle, the per-particle constant of the Zhang scheme.
+def schmidt_number(d_p: FloatArray, rho_p: FloatArray | float, T: float = T_REF) -> FloatArray:
+    """Schmidt number of each particle, the per-particle constant of both deposition schemes.
 
     ``Sc = nu / D_B`` with the Stokes-Einstein Brownian diffusivity
     ``D_B = k T Cc / (3 pi mu d_p)``. ``rho_p`` is accepted for a uniform signature.
@@ -68,7 +68,7 @@ def zhang_surface_terms(d_p: FloatArray, rho_p: FloatArray | float, T: float = T
     return out
 
 
-def zhang_deposition_velocity(
+def deposition_velocity(
     d_p: FloatArray,
     v_g: FloatArray,
     schmidt: FloatArray,

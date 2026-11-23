@@ -45,7 +45,7 @@ import numpy as np
 
 import puff_dispersal as puff
 from dispersal.constants import KG_PER_LB, TNT_MJ_PER_KG
-from dispersal.deposition import zhang_deposition_velocity, zhang_surface_terms
+from dispersal.deposition import deposition_velocity, schmidt_number
 from dispersal.dispersion import (
     PROFILE_P,
     SY_C,
@@ -562,9 +562,9 @@ def _check_deposition() -> bool:
     """Check (e), size-resolved dry deposition over grass (Zhang et al. 2001)."""
     ds = np.array([0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0]) * 1e-6
     vg = np.array([particle_properties(9500 * math.pi * d**3 / 6, 9500)[1] for d in ds])
-    sc = zhang_surface_terms(ds, 9500.0)
-    vd5 = zhang_deposition_velocity(ds, vg, sc, np.full(7, 5.0), "grass")
-    vd10 = zhang_deposition_velocity(ds, vg, sc, np.full(7, 10.0), "grass")
+    sc = schmidt_number(ds, 9500.0)
+    vd5 = deposition_velocity(ds, vg, sc, np.full(7, 5.0), "grass")
+    vd10 = deposition_velocity(ds, vg, sc, np.full(7, 10.0), "grass")
     k = int(np.argmin(vd5))
     t = bool(
         np.all(vd5 >= vg)

@@ -49,8 +49,8 @@ from dispersal.deposition import (
     DEPOSITION_CITES,
     DEPOSITION_SCHEMES,
     LAND_USE,
-    zhang_deposition_velocity,
-    zhang_surface_terms,
+    deposition_velocity,
+    schmidt_number,
 )
 from dispersal.grid import angular_smear, grid_fields
 from dispersal.met import (
@@ -959,10 +959,10 @@ def _bins_output(a: argparse.Namespace, bins: Sequence[Bin]) -> list[Json]:
         d, _, _ = particle_properties(pm, rho_b)
         if a.vd_extra is None:  # deposition velocity in a 5 m/s wind, for display
             vd = float(
-                zhang_deposition_velocity(
+                deposition_velocity(
                     np.array([d]),
                     np.array([vs]),
-                    zhang_surface_terms(np.array([d]), rho_b),
+                    schmidt_number(np.array([d]), rho_b),
                     np.array([5.0]),
                     a.land_use,
                     getattr(a, "deposition", "zhang"),

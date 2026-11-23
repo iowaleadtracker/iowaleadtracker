@@ -14,10 +14,10 @@ import numpy as np
 
 from .constants import R_EARTH
 from .deposition import (
+    deposition_velocity,
+    schmidt_number,
     slinn_efficiency,
     spray_coefficient,
-    zhang_deposition_velocity,
-    zhang_surface_terms,
 )
 from .dispersion import (
     SY_C,
@@ -369,9 +369,9 @@ def run_model(  # noqa: PLR0915 - one time step, kept in one place on purpose
     rho_of = getattr(a, "rho_of", {})
     rho_all = np.array([rho_of.get(pm_, a.density) for pm_ in pm_all])
     d_all = (6.0 * pm_all / (math.pi * rho_all)) ** (1.0 / 3.0)
-    zhang = getattr(a, "vd_extra", None) is None
-    if zhang:
-        sc_all = zhang_surface_terms(d_all, rho_all)
+    size_resolved = getattr(a, "vd_extra", None) is None  # Zhang or Emerson, not --vd-extra
+    if size_resolved:
+        sc_all = schmidt_number(d_all, rho_all)
     else:
         vd_all = vs_all + a.vd_extra
     coslat0 = math.cos(math.radians(lat0))
@@ -403,9 +403,9 @@ def run_model(  # noqa: PLR0915 - one time step, kept in one place on purpose
             gz = ground_factor(st.z[idx], st.sz[idx], lid)
             if resid:
                 gz = _residual_layer_step(st, idx, blh, lid, gz)
-            if zhang:
+            if size_resolved:
                 u10 = np.hypot(met.sample("u", th, lat, lon), met.sample("v", th, lat, lon))
-                vd_now = zhang_deposition_velocity(
+                vd_now = deposition_velocity(
                     d_all[idx],
                     vs_all[idx],
                     sc_all[idx],
