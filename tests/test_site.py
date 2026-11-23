@@ -764,6 +764,7 @@ def test_methodology_and_references_dialog() -> None:
     note = works_cited.method_intro(pct)
     assert note in body
     assert body.index(note) < body.index("<h3>References</h3>") < body.index("Key assumptions")
+    assert '<a href="https://narac.llnl.gov/hotspot" rel="noopener">HotSpot</a>' in note
     for part in ("Gaussian puff", "71.1%", "6,900 lb", "Church (1969)", "100%, which EPA"):
         assert part in note
     assert "55% (high), 20% (middle) and 7% (low)" in note
