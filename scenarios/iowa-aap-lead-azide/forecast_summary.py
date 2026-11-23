@@ -281,6 +281,12 @@ MISTING = (
 )
 HHS_URL = "https://hhs.iowa.gov/media/19822/download?inline="
 HHS_LINK = f'<a href="{HHS_URL}" rel="noopener">Iowa HHS fact sheet</a>'
+# Sources named in parentheses without their address, as "(Iowa HHS fact sheet)". The page
+# links each name (time_note_html, and make_map_picker.linkify for the FAQ).
+NAMED_SOURCES = (
+    ("Iowa HHS fact sheet", HHS_URL),
+    ("Nov. 22 court filing", RESPONSE_URL),
+)
 # Far-reach distances swing a lot between forecast updates (see README "Why the numbers move").
 REACH_NOTE = (
     "The farthest distances depend heavily on the evening forecast, especially how "
@@ -553,14 +559,10 @@ def time_note(built_txt: str) -> str:
 
 def time_note_html(built_txt: str) -> str:
     """Return time_note() with its two sources linked."""
-    return (
-        time_note(built_txt)
-        .replace("(Iowa HHS fact sheet)", f"({HHS_LINK})")
-        .replace(
-            "(Nov. 22 court filing)",
-            f'(<a href="{RESPONSE_URL}" rel="noopener">Nov. 22 court filing</a>)',
-        )
-    )
+    out = time_note(built_txt)
+    for name, url in NAMED_SOURCES:
+        out = out.replace(f"({name})", f'(<a href="{url}" rel="noopener">{name}</a>)')
+    return out
 
 
 def lb(x: float) -> str:

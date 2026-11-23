@@ -241,6 +241,9 @@ def test_faq_links_are_live() -> None:
     assert f'<a href="{works_cited.SOURCE_URL}" rel="noopener">{works_cited.SOURCE_URL}</a>.' in out
     assert '<a href="https://www.army.mil/a/1" rel="noopener">https://www.army.mil/a/1</a>).' in out
     assert site.linkify("<b> & no links") == "&lt;b&gt; &amp; no links"
+    named = site.linkify("noon (Iowa HHS fact sheet). Then (Nov. 22 court filing).")
+    assert f'(<a href="{html.escape(fs.HHS_URL)}" rel="noopener">Iowa HHS fact sheet</a>)' in named
+    assert f'(<a href="{fs.RESPONSE_URL}" rel="noopener">Nov. 22 court filing</a>).' in named
     cited = site.linkify(f"(Source: {fs.ARMY_WED_CITE}, {fs.ARMY_WED_URL}.)")
     assert cited == (
         f'(Source: <a href="{html.escape(fs.ARMY_WED_URL)}" rel="noopener">{fs.ARMY_WED_CITE}</a>.)'

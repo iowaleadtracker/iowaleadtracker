@@ -659,8 +659,11 @@ _CITED = {
     html.escape(f"{cite}, {url}"): (html.escape(cite), html.escape(url))
     for cite, url in forecast_summary.CITED_SOURCES
 }
+# "(Name)" for a source named without its address, linked on the name.
+_NAMED = {html.escape(name): html.escape(url) for name, url in forecast_summary.NAMED_SOURCES}
 _URL = re.compile(
     "(?P<cited>" + "|".join(re.escape(k) for k in sorted(_CITED, key=len, reverse=True)) + ")"
+    r"|\((?P<named>" + "|".join(re.escape(k) for k in _NAMED) + r")\)"
     "|(?P<url>" + _URL_RE + ")"
 )
 
@@ -669,7 +672,9 @@ def linkify(text: str) -> str:
     """Escape plain text for HTML and turn each web address in it into a link.
 
     A known source written "Citation, URL" (forecast_summary.CITED_SOURCES) becomes a link
-    whose text is the citation; any other address links as itself. Trailing sentence
+    whose text is the citation, and a source named in parentheses without its address
+    (forecast_summary.NAMED_SOURCES, as "(Iowa HHS fact sheet)") links on its name. Any
+    other address links as itself. Trailing sentence
     punctuation (".", ",", ")") stays outside the link.
     """
 
@@ -677,6 +682,9 @@ def linkify(text: str) -> str:
         if m.group("cited"):
             cite, url = _CITED[m.group("cited")]
             return f'<a href="{url}" rel="noopener">{cite}</a>'
+        if m.group("named"):
+            name = m.group("named")
+            return f'(<a href="{_NAMED[name]}" rel="noopener">{name}</a>)'
         return f'<a href="{m.group(0)}" rel="noopener">{m.group(0)}</a>'
 
     return _URL.sub(link, html.escape(text))
