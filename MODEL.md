@@ -51,6 +51,8 @@ python3 puff_dispersal.py --lat 39.74 --lon -104.99 \
 | `--ensemble`, `--dir-spread` | 1, 10 | number of wind-direction runs and the ± range in degrees (see Wind uncertainty) |
 | `--met-cache FILE` | – | store Open-Meteo responses in a JSON file and reuse them on later runs |
 | `--land-use` | `grass` | surface type for dry deposition: `grass`, `crops`, `forest`, `urban`, `desert`, `water` |
+| `--deposition` | `zhang` | dry-deposition scheme: `zhang` (Zhang et al. 2001) or `emerson` (Emerson et al. 2020) |
+| `--deposition-spread` | off | also run every weather model with the other scheme, and include those runs in the uncertainty view |
 | `--vd-extra` | – | use settling plus this fixed speed (m/s) instead of the size-resolved scheme |
 | `--rain` | from weather | override precipitation everywhere (mm/h) to test wet removal; one scavenging coefficient applies to every particle size, so removal of 1–3 µm particles is overstated |
 
@@ -289,6 +291,12 @@ historical runs fall back to a power-law profile above 100 m.
   default `grass`; the Iowa maps use `crops`). The aerodynamic part assumes neutral
   stability. The land-use constants are the paper's Table 3 values for late autumn after
   frost (its seasonal category 3), checked against the paper.
+  `--deposition emerson` uses the revised collection efficiencies of Emerson et al. (2020,
+  SI Table S1), fitted to size-resolved flux measurements over forest, grassland and
+  water: Brownian 0.2·Sc^−2/3, interception 2.5·(d/A)^0.8, impaction
+  0.4·(St/(α+St))^1.7, with Zhang's land-use table. It moves the deposition minimum from
+  about 1–2 µm to about 0.05 µm. `--deposition-spread` runs both schemes for every
+  weather model, so the uncertainty view covers both; the Iowa maps use it.
   `--vd-extra` switches back to settling plus a fixed speed. Wet
   scavenging is Λ = 10⁻⁴ s⁻¹ per mm/h of rain. Both deplete the puff's mass, so mass
   is conserved: airborne + deposited = released.
@@ -339,9 +347,10 @@ This is a screening tool, not a regulatory or emergency-response model:
   the effect is negligible;
 - later studies (Petroff and Zhang 2010; Emerson et al. 2020) found that the Zhang et al.
   (2001) dry-deposition scheme overestimates deposition of fine particles and
-  underestimates it for coarse ones; the deposition maps carry that uncertainty. The air
+  underestimates it for coarse ones; the deposition maps carry that uncertainty, and the
+  weather-model spread (`--deposition-spread`) includes Emerson et al.'s revision. The air
   maps are barely affected, since fine particles lose only a few percent of their mass to
-  dry deposition over an 8-hour run;
+  dry deposition over an 8-hour run. Neither scheme was fitted over harvested cropland;
 - near-source peaks are smoothed by the grid cell size (printed when the script runs
   and shown in the page footer); use `--extent-km` for near-field numbers;
 - the explosion cloud uses an empirical rise formula. Observed clouds (e.g. Beirut 2020)

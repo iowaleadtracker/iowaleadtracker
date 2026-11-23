@@ -45,7 +45,13 @@ from typing import TYPE_CHECKING, TextIO, TypeAlias
 import numpy as np
 
 from dispersal.constants import CLASSES, R_EARTH, TNT_MJ_PER_KG
-from dispersal.deposition import LAND_USE, zhang_deposition_velocity, zhang_surface_terms
+from dispersal.deposition import (
+    DEPOSITION_CITES,
+    DEPOSITION_SCHEMES,
+    LAND_USE,
+    zhang_deposition_velocity,
+    zhang_surface_terms,
+)
 from dispersal.grid import angular_smear, grid_fields
 from dispersal.met import (
     MET_CACHE,
@@ -323,6 +329,19 @@ def _add_run_args(p: argparse.ArgumentParser) -> None:
         choices=sorted(LAND_USE),
         default="grass",
         help="surface type for the Zhang et al. (2001) dry-deposition scheme",
+    )
+    p.add_argument(
+        "--deposition",
+        choices=DEPOSITION_SCHEMES,
+        default="zhang",
+        help="size-resolved dry-deposition scheme: 'zhang' (Zhang et al. 2001) or 'emerson' "
+        "(its observational revision, Emerson et al. 2020)",
+    )
+    p.add_argument(
+        "--deposition-spread",
+        action="store_true",
+        help="also run every weather model with the other dry-deposition scheme and include "
+        "those runs in the uncertainty view (doubles the model runs)",
     )
 
 
@@ -787,7 +806,24 @@ def _run_members(
             )
             label = (mname or "wind") + (f" {off:+g}°" if off else "")
             members.append((label, rec_m, hourly_m))
+    for scheme in _other_schemes(a):
+        b = argparse.Namespace(**vars(a))
+        b.deposition = scheme
+        for mname, _, met_k, _ in mets:
+            for off in offsets:
+                rec_m, hourly_m = run_model(
+                    b, rotated_met(met_k, off) if off else met_k, bins, a.lat, a.lon
+                )
+                label = (mname or "wind") + (f" {off:+g}°" if off else "") + f" ({scheme})"
+                members.append((label, rec_m, hourly_m))
     return members
+
+
+def _other_schemes(a: argparse.Namespace) -> list[str]:
+    """Dry-deposition schemes run as extra members (``--deposition-spread``), else none."""
+    if not getattr(a, "deposition_spread", False) or getattr(a, "vd_extra", None) is not None:
+        return []
+    return [s for s in DEPOSITION_SCHEMES if s != getattr(a, "deposition", "zhang")]
 
 
 def _member_domain(
@@ -827,6 +863,11 @@ def _envelope(
         "models": [m for m, _, _, _ in mets] if len(mets) > 1 else None,
         "shown": mets[0][0],
         "rotations": n_ens if n_ens > 1 else 0,
+        "deposition": (
+            [DEPOSITION_CITES[s] for s in (getattr(a, "deposition", "zhang"), *_other_schemes(a))]
+            if _other_schemes(a)
+            else None
+        ),
         "labels": [lb for lb, _, _ in members],
         "tracks": [[h_["centroid"] for h_ in hourly_m] for _, _, hourly_m in members],
     }
@@ -924,6 +965,7 @@ def _bins_output(a: argparse.Namespace, bins: Sequence[Bin]) -> list[Json]:
                     zhang_surface_terms(np.array([d]), rho_b),
                     np.array([5.0]),
                     a.land_use,
+                    getattr(a, "deposition", "zhang"),
                 )[0]
             )
         else:
@@ -973,7 +1015,9 @@ def _meta(
         "sizeNote": a.size_note,
         "releaseNote": a.release_note,
         "deposition": (
-            "Zhang et al. (2001) size-resolved scheme over " + a.land_use
+            DEPOSITION_CITES[getattr(a, "deposition", "zhang")]
+            + " size-resolved scheme over "
+            + a.land_use
             if a.vd_extra is None
             else f"settling plus a fixed {a.vd_extra * 100:g} cm/s"
         ),

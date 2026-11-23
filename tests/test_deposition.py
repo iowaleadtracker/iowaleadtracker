@@ -94,3 +94,57 @@ def test_land_use_constants_match_zhang_table_3_late_autumn() -> None:
     assert LAND_USE["urban"] == (1.0, 10e-3, 1.5, 0.56)  # LUC 15
     assert LAND_USE["desert"] == (0.04, None, 50.0, 0.54)  # LUC 8
     assert LAND_USE["water"][1:] == (None, 100.0, 0.50)  # LUC 13/14 (z0 a function of wind)
+
+
+def test_emerson_coefficients_match_table_s1() -> None:
+    """Emerson et al. (2020), SI Appendix Table S1, "Revised" column."""
+    from dispersal import deposition as dep  # noqa: PLC0415
+
+    assert (dep.EMERSON_C_B, dep.EMERSON_GAMMA) == (0.2, 2.0 / 3.0)
+    assert (dep.EMERSON_C_IN, dep.EMERSON_NU) == (2.5, 0.8)
+    assert (dep.EMERSON_C_IM, dep.EMERSON_BETA) == (0.4, 1.7)
+    assert dep.DEPOSITION_SCHEMES == ("zhang", "emerson")
+
+
+def test_zhang_is_the_default_and_unchanged() -> None:
+    d = SIZES_UM * 1e-6
+    vg = np.array([particle_properties(1000.0 * math.pi * x**3 / 6, 1000.0)[1] for x in d])
+    sc = zhang_surface_terms(d, 1000.0)
+    u = np.full_like(d, 5.0)
+    default = zhang_deposition_velocity(d, vg, sc, u, "crops")
+    assert np.array_equal(default, zhang_deposition_velocity(d, vg, sc, u, "crops", "zhang"))
+
+
+def test_emerson_matches_its_figure_2b() -> None:
+    """Emerson et al. (2020) Fig. 2B (needleleaf forest, u* = 0.4 m/s, 1,500 kg/m3).
+
+    Minimum near 0.05 um at about 0.1-0.2 cm/s; about 0.6 cm/s at 1 um and about 3 cm/s
+    at 10 um. Zhang's minimum (Fig. 2A) is near 1-2 um.
+    """
+    from dispersal import deposition as dep  # noqa: PLC0415
+
+    rho = 1500.0
+    sizes = np.array([0.01, 0.03, 0.05, 0.1, 0.3, 1.0, 2.0, 3.0, 10.0])
+    d = sizes * 1e-6
+    vg = np.array([particle_properties(rho * math.pi * x**3 / 6, rho)[1] for x in d])
+    sc = zhang_surface_terms(d, rho)
+    dep.LAND_USE["_needleleaf"] = (1.15, 2e-3, 1.0, 0.56)  # LUC 1 alpha and A (Table 3)
+    try:
+        u10 = np.full_like(d, 0.4 * math.log(10 / 1.15) / 0.41)  # u* = 0.4 m/s
+        em = zhang_deposition_velocity(d, vg, sc, u10, "_needleleaf", "emerson") * 100
+        zh = zhang_deposition_velocity(d, vg, sc, u10, "_needleleaf", "zhang") * 100
+    finally:
+        del dep.LAND_USE["_needleleaf"]
+    assert sizes[np.argmin(em)] in (0.03, 0.05, 0.1)
+    assert sizes[np.argmin(zh)] in (1.0, 2.0)
+    assert 0.08 < float(np.min(em)) < 0.25
+    assert 0.4 < em[sizes == 1.0][0] < 0.9
+    assert 2.0 < em[sizes == 10.0][0] < 4.5
+    assert em[sizes == 0.01][0] < zh[sizes == 0.01][0]  # less Brownian loss
+    assert em[sizes == 1.0][0] > 3 * zh[sizes == 1.0][0]  # more interception
+
+
+def test_unknown_scheme_is_refused() -> None:
+    d = np.array([1e-6])
+    with pytest.raises(ValueError, match="unknown deposition scheme"):
+        zhang_deposition_velocity(d, d, d, d, "grass", "other")

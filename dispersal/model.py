@@ -406,7 +406,12 @@ def run_model(  # noqa: PLR0915 - one time step, kept in one place on purpose
             if zhang:
                 u10 = np.hypot(met.sample("u", th, lat, lon), met.sample("v", th, lat, lon))
                 vd_now = zhang_deposition_velocity(
-                    d_all[idx], vs_all[idx], sc_all[idx], u10, a.land_use
+                    d_all[idx],
+                    vs_all[idx],
+                    sc_all[idx],
+                    u10,
+                    a.land_use,
+                    getattr(a, "deposition", "zhang"),
                 )
             else:
                 vd_now = vd_all[idx]

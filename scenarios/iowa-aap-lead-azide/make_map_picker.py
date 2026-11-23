@@ -95,6 +95,8 @@ MODEL_ARGS = [
     # Mostly harvested cropland around the plant in late November (Zhang et al. 2001,
     # "crops, mixed farming", late autumn).
     *("--land-use", "crops"),
+    # The spread also runs each weather model with Emerson et al. (2020) deposition.
+    "--deposition-spread",
     *("--hours", "8"),
     *("--dt", "60"),
     *("--grid", "360"),
