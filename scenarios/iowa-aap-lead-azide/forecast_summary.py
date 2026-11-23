@@ -130,9 +130,7 @@ WHY_MONDAY = (
 WHY_TUESDAY = (
     "In a court filing on Nov. 22, 2026, the government said the Army postponed the "
     "controlled detonation again, to Tuesday, Nov. 24, and intends to act that day. "
-    "(Its Nov. 21 filing had said \u201cby\u201d Nov. 24.) The permit has the Army update its "
-    "estimate of where lead dust could go at least 48 hours before the blasts and hourly "
-    "from six hours before."
+    "(Its Nov. 21 filing had said \u201cby\u201d Nov. 24.)"
 )
 # The Army's own announcement (verified U.S. Army account on Facebook, Nov. 22, 2026, about
 # 7:45 p.m. CST; text checked from the maintainer's screenshot). The post's permalink, from
@@ -532,7 +530,21 @@ def time_note(built_txt: str) -> str:
         f"As of this update ({built_txt}), the Army hasn\u2019t announced a time for "
         "Wednesday. These maps model blasts from 11 a.m. to 12:30 p.m., around the "
         "\u201capproximately noon\u201d that Iowa HHS\u2019s fact sheet gave for the earlier "
-        "Monday, Nov. 23 date (Iowa HHS fact sheet)."
+        "Monday, Nov. 23 date (Iowa HHS fact sheet). The permit has the Army update its "
+        "estimate of where lead dust could go at least 48 hours before the blasts and hourly "
+        "from six hours before (Nov. 22 court filing)."
+    )
+
+
+def time_note_html(built_txt: str) -> str:
+    """Return time_note() with its two sources linked."""
+    return (
+        time_note(built_txt)
+        .replace("(Iowa HHS fact sheet)", f"({HHS_LINK})")
+        .replace(
+            "(Nov. 22 court filing)",
+            f'(<a href="{RESPONSE_URL}" rel="noopener">Nov. 22 court filing</a>)',
+        )
     )
 
 
@@ -810,7 +822,7 @@ def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) ->
     lead = f.get("day", PLANNED_DAY)
     on = f" on {lead}" if more else ""  # label the lead day's parts when there are more
     note = window_note(lead)
-    no_time = time_note(built).replace("(Iowa HHS fact sheet)", f"({HHS_LINK})")
+    no_time = time_note_html(built)
     return f"""<section id="summary" aria-labelledby="summary-h">
   <h2 id="summary-h">What the forecast shows</h2>
   <p class="caveat"><b>{CAVEAT}</b></p>
@@ -962,7 +974,7 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
                 f"Sources: {COURT_SOURCES_TEXT}"
             ),
             f"- Why Wednesday: {WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_TEXT}",
-            f"- Time: {time_note(ctx['built_txt'])} Source: {HHS_URL}",
+            f"- Time: {time_note(ctx['built_txt'])} Sources: {HHS_URL}; {RESPONSE_URL}",
             f"- Earlier date, Tuesday: {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_TEXT}",
             f"- Earlier date, Monday: {WHY_MONDAY} Source: {ARMY_CITE}, {ARMY_URL}",
             f"- Water misting: {MISTING} Source: Army public advisory, {ADVISORY_URL}",

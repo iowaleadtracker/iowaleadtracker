@@ -757,9 +757,7 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "tuesday_sources": forecast_summary.TUESDAY_SOURCES_HTML,
         "army_url": forecast_summary.ARMY_URL,
         "army_cite": forecast_summary.ARMY_CITE,
-        "time_note": forecast_summary.time_note(built_txt).replace(
-            "(Iowa HHS fact sheet)", f"({forecast_summary.HHS_LINK})"
-        ),
+        "time_note": forecast_summary.time_note_html(built_txt),
         "not_checked": forecast_summary.NOT_CHECKED,
         "who": who,
         "cite_html": cite_html,

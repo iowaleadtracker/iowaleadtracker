@@ -416,7 +416,10 @@ def test_court_paragraph_names_the_days_modeled() -> None:
         "controlled detonation again, to Tuesday, Nov. 24, and intends to act that day."
     )
     assert "at least 48 hours before the blasts and hourly from six hours before" in (
-        fs.WHY_TUESDAY
+        fs.time_note("X")
+    )
+    assert f'<a href="{fs.RESPONSE_URL}" rel="noopener">Nov. 22 court filing</a>' in (
+        fs.time_note_html("X")
     )
     # no longer "unclear" which day: the Nov. 22 filing says Tuesday
     assert "unclear" not in fs.COURT_HOLD
