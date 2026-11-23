@@ -13,6 +13,7 @@ The social media manager posts for iowaleadtracker.com, an unofficial open model
 4. **Caption** that compares the two updates, with at most 5 hashtags.
 5. **Optional three-case post**, when the social media manager asks to compare airborne-share assumptions (e.g. EPA permit 100%, high 55%, middle 20%): a Story video and a Facebook image from one forecast. See "Three-case comparison post" below.
 6. **Optional side-by-side day post**, when the site models more than one blast day (e.g. Monday vs. Tuesday): a Story video with both days in one frame, plus a Facebook image. Use the weather-model spread view. See "Side-by-side day comparison" below.
+7. **Optional air vs. ground post**, for one blast day: a Story video with lead in the air (hourly average) beside lead on the ground. See "Air vs. ground post" below.
 
 ## Requirements
 - The workspace must reach iowaleadtracker.com and Esri's tile servers (server.arcgisonline.com, services.arcgisonline.com). The social media manager has set Settings > Capabilities > Allowed websites to "Any website". If a request is refused, tell the social media manager which domain and stop. Don't try another route.
@@ -675,6 +676,265 @@ def main():
     render(frames, [2.0] + [1.5] * 6 + [4.5], [0.6] * 7, os.path.join(od, f"iaap-{tag}-story-{cfg['stamp']}.mp4"))
     fb_image(cfg, fdir, os.path.join(od, f"iaap-{tag}-fb-{cfg['stamp']}.png"))
     print("done:", od)
+
+if __name__ == "__main__":
+    main()
+```
+
+## Air vs. ground post
+Use for one blast day: lead in the air (the site's "Hourly mean" view) on the left and lead on the ground ("Levels of concern") on the right, both with weather-model spread on, in one 1080×1920 Story video from Noon–1 p.m. to 7–8 p.m. Both panels share one zoom and position. The script loads the site's standalone map page for the day, so it works on the main site and on a staged page (`/s-<id>/`), whose layout differs.
+
+1. **Get the numbers.** Write `ag.json` (below), save `air_ground_post.py` next to `make_assets.py`, and run `python3 air_ground_post.py ag.json --stats` (about 1 minute). It prints the map page's header (forecast-pulled time and models), then, with spread off and on:
+   - each hour's peak one-hour air and the airborne center. These are the main model's numbers, and the same with spread on or off.
+   - the ground reach table by 8 p.m. (red, orange, yellow).
+   - the reach of the highest one-hour air at 32 / 320 / 3,200 µg/m³. The first row is PAC-1 (32 µg/m³). The table keeps the ground rows' labels, so ignore them and read the values.
+   Report reach as a range from main model to spread (e.g. yellow "~100–110 mi"). Take the models and the forecast time from the header: a staged page may use only GFS and ECMWF.
+2. **Check the timing.** Search the news first and set `status_line` (about 50 characters). Say whether the Army has announced the day and that no time has been given, if so.
+3. **Pick the framing.** `zoom` 6 with `release_at` [470, 150] fits a ~100-mile west-southwest plume and its spread. For other directions, move the release point to the opposite side. The map area is 540 × ~794 and the panel shows 790 rows starting `above` pixels over the release point.
+4. **Run** `python3 air_ground_post.py ag.json` (about 2.5 minutes). `--no-capture` recomposes only.
+5. **Check** `frames/story_8.png` and `frames/story_2.png`: the release point below the label bar, the whole 8 p.m. ground plume in frame, nothing covering the plume.
+6. **Caption:** follow Voice and tone, and add:
+   - 📅 what the Army has said about the day, and that no time has been given (if none). Say the video assumes a noon blast.
+   - 🧭 left is the average lead in the air over each hour, in micrograms per cubic meter (µg/m³). Right is the total lead settled on the ground since the blast, in micrograms per square foot (µg/ft²). The dashed lines are the weather models' paths, and the shading uses the highest.
+   - 🔴 the peak one-hour air near the plant.
+   - 🟠 the PAC-1 explainer, word for word: "PAC-1 is the Department of Energy's emergency planning level for a one-hour exposure. Above it, most people could start to have mild, temporary health effects that go away once the exposure stops. For lead it is 32 µg/m³. On <day>'s forecast, air could stay above that level out to about <N> miles. It is not a "safe" level. Lead builds up in the body, and the EPA's outdoor air standard is 0.15 µg/m³ averaged over three months." (Checked Nov. 22: DOE PAC database lists lead PAC-1 as 0.032 mg/m³; EPA's lead NAAQS is 0.15 µg/m³ as a rolling 3-month average.) Don't name symptoms such as headache: the lead PAC-1 comes from a German short-term workplace limit, not from observed symptoms.
+   - 🟡 ground: the permit's "stay indoors" line (5 µg/ft²) and the red "wet-clean" line (100 µg/ft²) reach.
+   - ⏰ the run's models, that the numbers come from the EPA permit case (100% of the lead airborne), and that the site updates as new forecast data is available. For a day only on the staged page or far ahead, say it is an early run and less certain.
+   - ⚠️ end with: "This is an unofficial estimate, not the Army's or any agency's. Do not use it as a safety tool or to make health or evacuation decisions. It is provided as is, with no warranty of any kind. Follow official instructions."
+   Count the characters (keep under 2,200).
+
+`ag.json` example (Wednesday, Nov. 22, 9:28 p.m. staged run):
+```json
+{"outdir": "/home/claude/out/ag-wed", "stamp": "nov22-928pm-wed", "url": "https://iowaleadtracker.com/s-d8ac68fd00/",
+ "day": {"value": "2026-11-25", "title": "WEDNESDAY, NOV. 25", "short": "Wednesday"}, "case": "permit",
+ "zoom": 6, "release_at": [470, 150], "above": 130,
+ "models": "GFS + ECMWF", "models_n": "2", "models_list": "GFS, ECMWF",
+ "status_line": "Army: now set for Wed., Nov. 25. No time given.",
+ "air_note": "Peak 1,490 µg/m³ · PAC-1 to ~60 mi",
+ "ground_note": "By 8 p.m.: yellow to ~100–110 mi",
+ "ground_meaning": ["wet-clean", "", "stay indoors"],
+ "case_line": "Noon blast assumed · EPA permit case (100% airborne)",
+ "source_line": "iowaleadtracker.com early Tue/Wed runs · forecast Nov. 22, 5:29 p.m. · Esri, OSM, Open-Meteo"}
+```
+
+### air_ground_post.py
+```python
+#!/usr/bin/env python3
+"""One blast day, two views side by side: lead in the air (site's "Hourly mean") | lead on the ground
+("Levels of concern"), weather-model spread on. Story video, 1080x1920, noon-1 p.m. through 7-8 p.m.
+
+Usage: python3 air_ground_post.py ag.json [--stats] [--no-capture]     (make_assets.py must be in the same folder)
+  --stats       print the numbers for the caption (peak air, path, ground reach, PAC-1 reach) and stop
+  --no-capture  recompose from frames already captured
+
+ag.json:
+{ "outdir": "...", "stamp": "nov22-928pm-wed",
+  "url": "https://iowaleadtracker.com/",            # page with the Day menu (a staged page works too)
+  "day": {"value": "2026-11-25", "title": "WEDNESDAY, NOV. 25", "short": "Wednesday"},
+  "case": "permit",                                 # select#c value, if the page has one
+  "map_url": "",                                    # optional: skip the lookup and load this map page
+  "zoom": 6, "release_at": [470, 150], "above": 130,
+  "models": "GFS + ECMWF", "models_n": "2", "models_list": "GFS, ECMWF",
+  "status_line": "Army: now set for Wed., Nov. 25. No time given.",
+  "air_note": "Peak 1,490 µg/m³ · PAC-1 to ~60 mi",
+  "ground_note": "By 8 p.m.: yellow to ~100–110 mi",
+  "ground_meaning": ["wet-clean", "", "stay indoors"],
+  "case_line": "Noon blast assumed · EPA permit case (100% airborne)",
+  "source_line": "iowaleadtracker.com · forecast Nov. 22, 5:29 p.m. · Esri, OSM, Open-Meteo" }
+
+zoom: steps in after zooming all the way out. release_at: where the release point sits inside the
+540 x ~794 map area. Pick both so the 8 p.m. ground plume (the bigger one) fits.
+"""
+import asyncio, json, math, os, re, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from make_assets import find_release, bold, semi, reg, BG, AMBER, GOLD, GREY, LEVELS, render
+from PIL import Image, ImageDraw
+
+PW, PH, PY = 538, 790, 505
+WIN = {1: "Noon–1 p.m.", 2: "1–2 p.m.", 3: "2–3 p.m.", 4: "3–4 p.m.", 5: "4–5 p.m.", 6: "5–6 p.m.", 7: "6–7 p.m.", 8: "7–8 p.m."}
+# Site's hourly-mean scale: 0.15-1,500 ug/m3 over 4 decades, ramp drawn with alpha 0.35 + 0.6 f.
+RAMP = ["#5a200a", "#8a3412", "#bd4a1d", "#d95926", "#f0814f", "#f7ad85", "#fdd9c4"]
+TICKS = [("0.15", 0.0), ("10", 0.456), ("100", 0.706), ("1,500", 1.0)]
+PAC1 = math.log10(32 / 0.15) / 4          # DOE PAC-1 for lead, 0.032 mg/m3
+HOOK = 'window.__H = { S, toScreen, schedule, fit, plumeBounds }; new ResizeObserver(resize).observe($("mapwrap"));'
+
+
+def ramp_bar(w, h):
+    st = [[int(c[i:i + 2], 16) for i in (1, 3, 5)] for c in RAMP]
+    im = Image.new("RGB", (w, h)); d = ImageDraw.Draw(im)
+    for x in range(w):
+        f = x / (w - 1); p = f * 6; k = min(5, int(p)); t = p - k; a = 0.35 + 0.6 * f
+        c = [st[k][j] + (st[k + 1][j] - st[k][j]) * t for j in range(3)]
+        d.line((x, 0, x, h), fill=tuple(int(c[j] * a + BG[j] * (1 - a)) for j in range(3)))
+    return im
+
+
+async def open_map(p, cfg, dpr=1, hook=False):
+    b = await p.chromium.launch(executable_path="/usr/bin/google-chrome", args=["--no-sandbox"])
+    ctx = await b.new_context(viewport={"width": 540, "height": 1280}, device_scale_factor=dpr, color_scheme="dark")
+    if hook:
+        async def patch(route):
+            if route.request.resource_type != "document":
+                return await route.continue_()
+            r = await route.fetch(); body = await r.text()
+            await route.fulfill(response=r, body=body.replace('new ResizeObserver(resize).observe($("mapwrap"));', HOOK, 1))
+        await ctx.route("**/*", patch)
+    pg = await ctx.new_page()
+    url = cfg.get("map_url")
+    if not url:   # find the map page for this day and case from the main page's iframe
+        await pg.goto(cfg["url"] + "?nc=" + cfg["stamp"], wait_until="networkidle", timeout=90000)
+        await pg.locator("select#d").select_option(cfg["day"]["value"])
+        if cfg.get("case") and await pg.locator("select#c").count():
+            await pg.locator("select#c").select_option(cfg["case"])
+        await pg.wait_for_timeout(4000)
+        url = pg.frame(name="map").url.split("?")[0]
+        print("map page:", url)
+    await pg.goto(url + "?nc=" + cfg["stamp"], wait_until="networkidle", timeout=90000)
+    await pg.wait_for_timeout(2000)
+    return b, pg
+
+
+async def set_hour(pg, h):
+    await pg.locator("input[type=range]").first.evaluate(
+        "(e, v) => { e.value = v; e.dispatchEvent(new Event('input', {bubbles:true})); e.dispatchEvent(new Event('change', {bubbles:true})); }", str(h))
+    await pg.wait_for_timeout(1500)
+
+
+async def click(pg, name):
+    await pg.get_by_role("button", name=name, exact=True).first.evaluate("b => b.click()"); await pg.wait_for_timeout(900)
+
+
+async def set_spread(pg, on):
+    cb = pg.get_by_label("weather-model spread", exact=False).first
+    if await cb.is_checked() != on:
+        await cb.evaluate("e => e.click()"); await pg.wait_for_timeout(1500)
+
+
+async def stats(cfg):
+    """Numbers for the caption. Peak and center are the main model's; reach tables follow the spread toggle."""
+    from playwright.async_api import async_playwright
+    async with async_playwright() as p:
+        b, pg = await open_map(p, cfg, hook=True)
+        body = await pg.inner_text("body")
+        print(body[:600].replace("\n", " | "))
+        await click(pg, "Levels of concern")
+        for spread in (False, True):
+            await set_spread(pg, spread)
+            print(f"\n##### weather-model spread {'ON' if spread else 'OFF'}")
+            for h in range(1, 9):
+                await set_hour(pg, h); t = await pg.inner_text("body")
+                pk = re.search(r"Air, hourly mean\n(.+)", t); c = re.search(r"Airborne center\n(.+)", t)
+                print(WIN[h], "| peak air", pk.group(1) if pk else "?", "| center", c.group(1) if c else "?")
+            print("-- ground reach by 8 p.m.:\n" + await pg.evaluate("() => document.getElementById('zonetab').innerText"))
+            await pg.evaluate("() => { __H.S.zoneMetric = 'm60'; __H.S.locs = [3.2e-8, 3.2e-7, 3.2e-6]; __H.schedule(); }")
+            await pg.wait_for_timeout(1500)
+            print("-- max one-hour air reach (row values 32 / 320 / 3,200 µg/m³; ignore the row labels):\n"
+                  + await pg.evaluate("() => document.getElementById('zonetab').innerText"))
+            await pg.evaluate("() => { __H.S.zoneMetric = 'dep'; __H.schedule(); }"); await pg.wait_for_timeout(800)
+        await b.close()
+
+
+async def capture(cfg, mode, fdir):
+    from playwright.async_api import async_playwright
+    T = cfg["release_at"]; K = int(cfg.get("zoom", 6)); dpr = 2
+    async with async_playwright() as p:
+        b, pg = await open_map(p, cfg, dpr=dpr)
+        await pg.evaluate("""() => document.querySelectorAll('button').forEach(b => {
+            const l = b.getAttribute('aria-label') || ''; if (/^(Zoom in|Zoom out|Fit plume)$/.test(l)) b.style.visibility = 'hidden'; })""")
+        box = await pg.evaluate("() => { const r = document.getElementById('mapwrap').getBoundingClientRect(); return {x: r.left, y: r.top + window.scrollY, width: r.width, height: r.height}; }")
+        await click(pg, "Levels of concern"); await set_spread(pg, False); await set_hour(pg, 1)   # no air colors while finding the marker
+        for _ in range(12):
+            await pg.locator('button[aria-label="Zoom out"]').first.evaluate("b => b.click()"); await pg.wait_for_timeout(250)
+        await pg.wait_for_timeout(800)
+        for _ in range(K):
+            await pg.locator('button[aria-label="Zoom in"]').first.evaluate("b => b.click()"); await pg.wait_for_timeout(900)
+        await pg.wait_for_timeout(1200)
+        tmp = os.path.join(fdir, "_p.png")
+        for _ in range(5):
+            await pg.screenshot(path=tmp, clip=box)
+            im = Image.open(tmp); im.resize((im.width // dpr, im.height // dpr)).save(tmp)
+            pos = find_release(tmp)
+            if not pos:
+                raise SystemExit("Could not find the release marker")
+            dx, dy = T[0] - pos[0], T[1] - pos[1]
+            if abs(dx) < 4 and abs(dy) < 4:
+                break
+            sx, sy = box["x"] + 270, box["y"] + box["height"] / 2
+            await pg.mouse.move(sx, sy); await pg.mouse.down(); await pg.mouse.move(sx + dx, sy + dy, steps=15); await pg.mouse.up()
+            await pg.wait_for_timeout(1300)
+        print(mode, "release at", pos, "map area", round(box["width"]), "x", round(box["height"]))
+        await click(pg, mode); await set_spread(pg, True)
+        for h in range(1, 9):
+            await set_hour(pg, h)
+            await pg.screenshot(path=os.path.join(fdir, f"h{h}.jpg"), type="jpeg", quality=92, clip=box)
+        await b.close()
+
+
+def panel(cfg, sub, h):
+    src = Image.open(os.path.join(cfg["outdir"], sub, f"h{h}.jpg")).convert("RGB")
+    src = src.resize((src.width // 2, src.height // 2), Image.LANCZOS)
+    y0 = max(0, int(cfg["release_at"][1]) - cfg.get("above", 130))
+    return src.crop((0, y0, PW, y0 + PH))
+
+
+def bar(im, px, y, h, alpha=225):
+    b_ = Image.new("RGBA", (PW, h), (18, 18, 18, alpha)); im.paste(b_, (px, y), b_)
+
+
+def frame(cfg, h, out):
+    X = 60; day = cfg["day"]
+    im = Image.new("RGB", (1080, 1920), BG); d = ImageDraw.Draw(im)
+    d.text((X, 272), f"{day['title']} · AIR VS. GROUND · {cfg['models']}", font=semi(30), fill=AMBER)
+    d.text((X, 310), "Iowa Army Ammunition Plant", font=bold(54), fill="white")
+    d.text((X, 374), WIN[h], font=bold(66), fill="white")
+    d.text((X + d.textlength(WIN[h], font=bold(66)) + 22, 398), "after a noon blast", font=reg(32), fill=GREY)
+    d.text((X, 456), cfg["status_line"], font=semi(29), fill=GOLD)
+    im.paste(panel(cfg, "air", h), (0, PY)); im.paste(panel(cfg, "ground", h), (PW + 4, PY))
+    for px, title, sub, note in ((0, "LEAD IN THE AIR", "Average over this hour", cfg["air_note"]),
+                                 (PW + 4, "LEAD ON THE GROUND", "Total settled since the blast", cfg["ground_note"])):
+        bar(im, px, PY, 78); bar(im, px, PY + PH - 46, 46)
+        d = ImageDraw.Draw(im)
+        d.text((px + 18, PY + 8), title, font=bold(30), fill="white"); d.text((px + 18, PY + 44), sub, font=reg(24), fill=GOLD)
+        d.text((px + 18, PY + PH - 38), note, font=semi(22), fill="white")
+    d.rectangle((PW, PY, PW + 3, PY + PH), fill=(10, 10, 10))
+    ly = PY + PH + 22
+    d.text((30, ly), "Air, hourly average (µg/m³)", font=semi(22), fill="white")
+    bx, bw, bh = 30, 478, 20; by = ly + 62
+    im.paste(ramp_bar(bw, bh), (bx, by)); d = ImageDraw.Draw(im)
+    for lab, f in TICKS:
+        tx = bx + f * bw - d.textlength(lab, font=reg(19)) * (0 if f == 0 else (1 if f == 1 else 0.5))
+        d.text((tx, by + bh + 4), lab, font=reg(19), fill=GREY)
+    px_ = bx + PAC1 * bw; d.line((px_, by - 6, px_, by + bh + 1), fill="white", width=3)
+    d.text((px_ - d.textlength("PAC-1 (32)", font=semi(19)) / 2, by - 30), "PAC-1 (32)", font=semi(19), fill="white")
+    gx = PW + 34
+    d.text((gx, ly), "Ground, settled lead (µg/ft²)", font=semi(22), fill="white")
+    for i, (name, col, lvl) in enumerate(LEVELS):
+        yy = ly + 36 + i * 30
+        d.rounded_rectangle((gx, yy + 3, gx + 22, yy + 25), radius=4, fill=col)
+        d.text((gx + 32, yy), f"{name} {lvl.replace(' µg/ft²', '')}", font=semi(21), fill="white")
+        d.text((gx + 190, yy), cfg.get("ground_meaning", ["", "", ""])[i], font=reg(20), fill=GREY)
+    y = ly + 150
+    d.text((X, y), f"Shading = highest of {cfg['models_n']} weather models ({cfg['models_list']}). Dashed = other paths.", font=reg(23), fill=GREY)
+    d.text((X, y + 40), "Unofficial estimate — not from the Army or any agency.", font=semi(29), fill=GOLD)
+    d.text((X, y + 80), "Not a safety tool. Provided as is, with no warranty.", font=reg(24), fill=(225, 225, 225))
+    d.text((X, y + 112), cfg["case_line"], font=reg(24), fill=(225, 225, 225))
+    d.text((X, y + 144), cfg["source_line"], font=reg(21), fill=(165, 165, 165))
+    im.save(out)
+
+
+def main():
+    cfg = json.load(open(sys.argv[1])); od = cfg["outdir"]
+    if "--stats" in sys.argv:
+        return asyncio.run(stats(cfg))
+    if "--no-capture" not in sys.argv:
+        for sub, btn in (("air", "Hourly mean"), ("ground", "Levels of concern")):
+            os.makedirs(os.path.join(od, sub), exist_ok=True); asyncio.run(capture(cfg, btn, os.path.join(od, sub)))
+    fd = os.path.join(od, "frames"); os.makedirs(fd, exist_ok=True); frames = []
+    for h in range(1, 9):
+        o = os.path.join(fd, f"story_{h}.png"); frame(cfg, h, o); frames.append(o)
+    out = os.path.join(od, f"iaap-{cfg['day']['short'].lower()}-air-vs-ground-story-{cfg['stamp']}.mp4")
+    render(frames, [2.2] + [1.6] * 6 + [4.0], [0.6] * 7, out); print("done:", out)
+
 
 if __name__ == "__main__":
     main()
