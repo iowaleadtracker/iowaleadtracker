@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import base64
 import datetime as dt
+import html
 import json
 import math
 import zlib
@@ -134,15 +135,16 @@ WHY_TUESDAY = (
     "from six hours before."
 )
 # The Army's own announcement (verified U.S. Army account on Facebook, Nov. 22, 2026, about
-# 7:45 p.m. CST; text checked from the maintainer's screenshot).
-ARMY_WED_URL = "https://www.facebook.com/USarmy"
+# 7:45 p.m. CST; text checked from the maintainer's screenshot). The post's permalink, from
+# the maintainer, without tracking parameters (not a personal "share" link).
+ARMY_WED_URL = "https://www.facebook.com/story.php?story_fbid=1611961230959211&id=100064360494281"
 ARMY_WED_CITE = "U.S. Army on Facebook, Nov. 22, 2026"
 WHY_WEDNESDAY = (
     "Late on Nov. 22, the Army said the controlled detonation \u201cis now scheduled on "
     "Wednesday, November 25, 2026 to allow for optimal weather conditions and all mitigation "
     "measures to be emplaced.\u201d It hasn\u2019t given a time."
 )
-WEDNESDAY_SOURCE_HTML = f'<a href="{ARMY_WED_URL}" rel="noopener">{ARMY_WED_CITE}</a>'
+WEDNESDAY_SOURCE_HTML = f'<a href="{html.escape(ARMY_WED_URL)}" rel="noopener">{ARMY_WED_CITE}</a>'
 WEDNESDAY_SOURCE_TEXT = f"{ARMY_WED_CITE}, {ARMY_WED_URL}"
 PERMIT_URL = (
     "https://www.epa.gov/system/files/documents/2026-11/"
