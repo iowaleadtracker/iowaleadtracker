@@ -433,8 +433,33 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
     ]
 
 
+#: The short methodology note that opens the Methodology and References dialog. Every fact
+#: in it is in the key-assumptions table, with its source.
+#: The short note that opens the Methodology and References dialog. Every fact in it is in
+#: the key-assumptions table below it, with its source.
+METHOD_HEAD = "How the map works."
+
+
+def method_intro(pct: dict[str, str]) -> str:
+    """Return the methodology note, with the release cases' shares from the build."""
+    return (
+        "The map uses a Gaussian puff model, the approach behind emergency-response codes such "
+        "as HotSpot (Homann and Aluzzi 2013). A puff fits a one-time explosion better than a "
+        "model of a steady plume from a smokestack. The model tracks only the lead: lead azide "
+        "is 71.1% lead by weight, so about 9,700 lb of it holds about 6,900 lb of lead. How "
+        "high the cloud starts comes from Church (1969). No one has measured how much of the "
+        "lead gets airborne in a blast like this, so the map runs four cases instead of picking "
+        f"one most likely number: {pct['permit']}, which EPA\u2019s permit requires the Army to "
+        "assume for its official plume maps and which the map shows first as the worst case, "
+        f"and {pct['high']} (high), {pct['mid']} (middle) and {pct['low']} (low), based on "
+        "Department of Energy and Army\u2013EPA research. The Army hasn\u2019t said what share it "
+        "expects; that is the most important number to check. Every setting and its source is "
+        "in the key-assumptions table below."
+    )
+
+
 def render(ctx: dict[str, Any], site_url: str, built_txt: str) -> str:
-    """Return the HTML body of the References dialog.
+    """Return the HTML body of the Methodology and References dialog.
 
     Parameters
     ----------
@@ -451,6 +476,8 @@ def render(ctx: dict[str, Any], site_url: str, built_txt: str) -> str:
     )
     today = dt.datetime.now(SITE_TZ).date()
     return f"""
+  <p><b>{METHOD_HEAD}</b> {method_intro(ctx["pct"])}</p>
+  <h3>References</h3>
   <p class="meta">Sources for the model, data, and assumptions.</p>
   <ul class="refs">{refs}</ul>
   <p class="meta">{data_credits(ctx.get("models", []))}</p>

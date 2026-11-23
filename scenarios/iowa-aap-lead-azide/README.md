@@ -181,7 +181,8 @@ invisible to them. Each build also writes plain text from the map data
 - Head tags: title, description, canonical, Open Graph/Twitter card with `og.png`;
   `robots.txt` allows all crawlers and lists `sitemap.xml`; the map files are `noindex`.
 
-- **References** pop-over (link next to "What the forecast shows"): one alphabetical list
+- **Methodology and References** pop-over (link next to "What the forecast shows"): a
+  short "How the map works." note (`works_cited.method_intro`), then one alphabetical list
   in AMS author-date style (the format of the dispersion and meteorology literature it
   draws on) covering the event, the dispersion and deposition methods, the release-fraction
   sources, the levels of concern, weather data and software, then data and map credits, a

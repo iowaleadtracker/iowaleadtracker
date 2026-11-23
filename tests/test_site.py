@@ -744,3 +744,26 @@ def test_mentions_in_about_box() -> None:
         assert f'<a href="{url}" rel="noopener">{outlet}</a>, {date}' in works_cited.MENTIONS_HTML
         assert "yahoo.com" not in url  # the original publisher, not a syndicated copy
     assert works_cited.MENTIONS_HTML.endswith(works_cited.MENTIONS_LIMIT)
+
+
+def test_methodology_and_references_dialog() -> None:
+    """The dialog is "Methodology and References" and opens with a short note on the method."""
+    page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    assert '<h2 id="cite-h" tabindex="-1" autofocus>Methodology and References</h2>' in page
+    assert 'aria-haspopup="dialog">Methodology and References</button>' in page
+    pct = {"low": "7%", "mid": "20%", "high": "55%", "permit": "100%"}
+    ctx = {
+        "pct": pct,
+        "n_models": "two",
+        "got_txt": "November 23, 2026, at 2:34 p.m. CST",
+        "shown_model": "GFS",
+        "models": [],
+    }
+    body = works_cited.render(ctx, "https://example.org/", "now")
+    assert body.lstrip().startswith(f"<p><b>{works_cited.METHOD_HEAD}</b> ")
+    note = works_cited.method_intro(pct)
+    assert note in body
+    assert body.index(note) < body.index("<h3>References</h3>") < body.index("Key assumptions")
+    for part in ("Gaussian puff", "71.1%", "6,900 lb", "Church (1969)", "100%, which EPA"):
+        assert part in note
+    assert "55% (high), 20% (middle) and 7% (low)" in note
