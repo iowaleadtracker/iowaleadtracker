@@ -38,7 +38,8 @@ HOURLY_VARS = [
 STD_PRESSURE_LEVELS = [1000, 975, 950, 925, 900, 850, 800, 700, 600, 500]  # hPa
 
 
-# Built-in weather-model ensemble (Open-Meteo model names). The first is the run shown;
+# Built-in weather-model ensemble for --weather-model ensemble (Open-Meteo model names; the
+# Iowa site passes its own list). The first is the run shown;
 # the rest feed the uncertainty view. HRRR is used only when it covers the whole run.
 WEATHER_ENSEMBLE = [
     "ecmwf_ifs025",
@@ -151,12 +152,26 @@ def _error_detail(e: Exception) -> str:
         return str(e)
 
 
-def _data_problem(data: Any) -> str | None:  # noqa: ANN401 - Open-Meteo JSON
-    """Describe why a response can't be used, or return None if it can."""
+def _data_problem(
+    data: Any,  # noqa: ANN401 - Open-Meteo JSON
+    start: dt.datetime | None = None,
+    end: dt.datetime | None = None,
+) -> str | None:
+    """Describe why a response can't be used, or return None if it can.
+
+    Only the hours from ``start`` to ``end`` (the run) count when they are given: a
+    request covers whole days, and a model that stops after the run is still usable.
+    """
     if isinstance(data, dict) and data.get("error"):
         return str(data.get("reason"))
     points = data if isinstance(data, list) else [data]
     ws = np.array([d["hourly"]["wind_speed_10m"] for d in points], dtype=float)
+    times = points[0]["hourly"].get("time") if points else None
+    if start is not None and end is not None and start.tzinfo is not None and times:
+        t = [dt.datetime.fromisoformat(s_).replace(tzinfo=dt.timezone.utc) for s_ in times]
+        keep = [i for i, ti in enumerate(t) if start <= ti <= end]
+        if keep:
+            ws = ws[:, keep]
     if np.isnan(ws).mean() > 0.2:
         return "data missing for the requested period"
     return None
@@ -227,7 +242,7 @@ def fetch_open_meteo(
                 if upper and getattr(e, "code", None) == 400:
                     continue  # maybe an upper-level variable; retry with fewer
                 break
-            problem = _data_problem(data)
+            problem = _data_problem(data, start, end)
             if problem:
                 errors.append(f"{name}: {problem}")
                 break

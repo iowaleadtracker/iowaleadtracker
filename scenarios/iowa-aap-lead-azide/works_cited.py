@@ -187,6 +187,11 @@ REFERENCES = [
         "Turner, D. B., 1970: <i>Workbook of Atmospheric Dispersion Estimates</i>. Rev. ed. Public "
         "Health Service Publ. 999-AP-26, National Air Pollution Control Administration."
     ),
+    "U.S. Army, 2026: &ldquo;The controlled detonation at Iowa Army Ammunition Plant is now "
+    "scheduled on Wednesday, November 25, 2026&hellip;&rdquo; Post by the U.S. Army on "
+    "Facebook, 22 November 2026, accessed 23 November 2026, "
+    + _a("https://www.facebook.com/story.php?story_fbid=1611961230959211&id=100064360494281")
+    + ".",
     "U.S. Army, 2026: Public and media advisory regarding the detonation of lead azide at Iowa "
     "Army Ammunition Plant in Middletown, Iowa. U.S. Army Sustainment Command, 18 November 2026, "
     + _a("https://d34w7g4gy10iej.cloudfront.net/pubs/pdf_78366.pdf")
@@ -199,6 +204,15 @@ REFERENCES = [
     + _a(
         "https://s3.documentcloud.org/documents/28930203/"
         "iowa-environmental-council-v-us-environmental-protection-agency.pdf"
+    )
+    + ".",
+    "U.S. Department of Justice, 2026: Respondents&rsquo; opposition to petitioners&rsquo; "
+    "emergency motion for stay. <i>Iowa Environmental Council v. U.S. Environmental Protection "
+    "Agency</i>, No. 26-3374, U.S. Court of Appeals for the Eighth Circuit, filed 22 November "
+    "2026, accessed 23 November 2026, "
+    + _a(
+        "https://storage.courtlistener.com/recap/gov.uscourts.ca8.116088/"
+        "gov.uscourts.ca8.116088.805661522.0.pdf"
     )
     + ".",
     "Zhang, L., S. Gong, J. Padro, and L. Barrie, 2001: A size-segregated particle dry "
@@ -267,9 +281,13 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
         ),
         (
             "Charges",
-            "Two equal blasts around noon, inside earth-covered magazines",
             (
-                "Two detonations at about noon (Iowa HHS 2026); drums detonated in place in the "
+                "Two equal blasts inside earth-covered magazines, modeled from 11 a.m. to "
+                "12:30 p.m. (no time has been given for Wednesday)"
+            ),
+            (
+                "Two detonations at about noon on the earlier Monday date (Iowa HHS 2026); drums "
+                "detonated in place in the "
                 "magazines, "
                 "simultaneously or in rapid succession (EPA 2026)"
             ),
@@ -418,7 +436,8 @@ def render(ctx: dict[str, Any], site_url: str, built_txt: str) -> str:
     <tbody>{rows}</tbody></table></div>
   <h3>Citing this map</h3>
   <p>Iowa Lead Tracker, 2026: Unofficial estimate of lead dispersal from the planned
-    23 November 2026 detonation at the Iowa Army Ammunition Plant. Interactive map, accessed
+    detonation at the Iowa Army Ammunition Plant (25 November 2026, per the Army on
+    22 November). Interactive map, accessed
     {today.day} {today.strftime("%B %Y")}, {_a(site_url)}.</p>
   <p class="meta">{CONTACT_HTML}</p>
   <p class="meta">Model code: puff_dispersal.py ({_a(SOURCE_URL)}), a Gaussian puff

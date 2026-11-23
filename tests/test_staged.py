@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import json
 import re
 import sys
@@ -77,11 +78,11 @@ def test_picker_page(built: Path) -> None:
     assert "Tuesday, Nov. 24, 2026" in page
     assert "Wednesday, Nov. 25, 2026" in page
     assert "November 21, 2026, at 9:08 p.m. CST" in page  # forecast pull time
-    # When: from the Nov. 21 court filing, linked, not the old "Monday only" line.
-    assert "the government said the Army intends to carry it out by Tuesday, Nov. 24" in page
-    assert "no time has been given for that day" in page
-    assert "Wednesday hasn&rsquo;t been announced." in page
-    assert f'<a href="{forecast_summary.FILING_URL}">court filing on Nov. 21</a>' in page
+    # When: from the Nov. 22 court filing, linked, not the old "Monday only" line.
+    assert "the government said the Army postponed it to Tuesday, Nov. 24" in page
+    assert "it is now scheduled for Wednesday, Nov. 25. No time has been given." in page
+    assert f'<a href="{html.escape(forecast_summary.ARMY_WED_URL)}">the Army said</a>' in page
+    assert f'<a href="{forecast_summary.RESPONSE_URL}">court filing on Nov. 22</a>' in page
     assert "it hasn&rsquo;t\n    announced these days" not in page
     m = re.search(r"const FILES = (\{.*?\});", page)
     assert m
@@ -154,10 +155,12 @@ def test_missing_staged_file_has_no_time(tmp_path: Path) -> None:
 
 
 def test_refreshes_run_through_wednesday() -> None:
-    """Both refreshes run on a schedule through the last day the maps model."""
+    """Both refreshes run on a schedule through the last day their maps model."""
     root = Path(__file__).resolve().parent.parent / ".github" / "workflows"
-    last = staged.DAYS[-1]
-    for name in ("refresh-forecast.yml", "refresh-staged.yml"):
+    for name, last in (
+        ("refresh-forecast.yml", site.DAYS[-1][0]),  # Thursday, a Day menu option
+        ("refresh-staged.yml", staged.DAYS[-1]),  # Wednesday
+    ):
         text = (root / name).read_text(encoding="utf-8")
         assert f'LAST_DAY: "{last}"' in text, name
         assert "schedule:" in text, name

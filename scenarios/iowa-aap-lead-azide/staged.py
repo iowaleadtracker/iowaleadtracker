@@ -50,12 +50,13 @@ MODELS_TEXT = "GFS and ECMWF only (GFS shown; ECMWF in the weather-model spread)
 
 UNOFFICIAL = "This is an unofficial estimate, not from the Army or any government agency."
 NOT_SAFE = "Don't use it to decide if you're safe."
-#: When the blasts could happen, from the government's Nov. 21 court filing ({url}).
+#: When the blasts could happen: the government's Nov. 22 court filing ({url}), then the
+#: Army's announcement later that day ({army}).
 WHEN_HTML = (
     "The Army planned the detonation for Monday, Nov. 23. In a "
-    '<a href="{url}">court filing on Nov. 21</a>, the government said the Army intends to '
-    "carry it out by Tuesday, Nov. 24, but no time has been given for that day, and "
-    "Wednesday hasn&rsquo;t been announced."
+    '<a href="{url}">court filing on Nov. 22</a>, the government said the Army postponed it '
+    'to Tuesday, Nov. 24; later that day, <a href="{army}">the Army said</a> it is now '
+    "scheduled for Wednesday, Nov. 25. No time has been given."
 )
 
 
@@ -186,7 +187,7 @@ def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
         for c, _, n in site.CASES
     )
     day_list = " and ".join(day_label(d) for d in days)
-    when = WHEN_HTML.format(url=html.escape(fs.FILING_URL))
+    when = WHEN_HTML.format(url=html.escape(fs.RESPONSE_URL), army=html.escape(fs.ARMY_WED_URL))
     return f"""<!doctype html>
 <html lang="en">
 <head>

@@ -101,7 +101,7 @@
 </style></head><body>
 <header>
   <div class="title"><h1>$site_name</h1>
-    <p>Lead from the planned blast at the Iowa Army Ammunition Plant, $header_days</p></div>
+    <p>$header_lead, $header_days</p></div>
   <label for="d"$day_hidden>Day
     <select id="d">$day_options</select></label>
   <label for="t">Blast time (CST)
@@ -120,6 +120,7 @@
     <button id="tosummary" type="button">What the forecast shows</button> &middot;
     <button id="cites" type="button" aria-haspopup="dialog">References</button></p>
   <p class="daynote" id="daynote" role="status" hidden></p>
+  <p class="daynote" id="pendingnote"$pending_hidden>$pending_note</p>
 </header>
 <dialog id="note" aria-labelledby="note-h">
   <h2 id="note-h" tabindex="-1" autofocus>About this map</h2>
@@ -130,7 +131,7 @@
     into the air or how the Army will set up the charges. This map assumes <span class="u-us">about
     9,700 pounds</span><span class="u-metric" hidden>about 4,400 kg (9,700 pounds)</span> of lead
     azide in 68 drums (the amount an Army spokesperson gave), which the Army plans to set off in two blasts
-    around noon inside earth-covered bunkers. The Iowa Lead Tracker lets you simulate four
+    inside earth-covered bunkers (no time has been given). The Iowa Lead Tracker lets you simulate four
     possibilities for how much of the lead gets into the air: Low ($pct_low), Middle
     ($pct_mid), High ($pct_high), or EPA permit ($pct_permit). In each case, the lead in
     the air comes in pieces small enough to breathe in, and the rest stays at the plant.</p>
@@ -144,10 +145,10 @@
     <a href="$advisory_url" rel="noopener">Army public advisory, Nov. 18, 2026</a>.</p>
   <p><b>Court pause.</b> $court_pause Sources:
     $court_sources.</p>
-  <p><b>When.</b> $why_monday Source:
-    <a href="$army_url" rel="noopener">$army_cite</a>. $why_tuesday Sources:
-    $tuesday_sources.</p>
+  <p><b>When.</b> $why_wednesday Source: $wednesday_source.</p>
   <p><b>$time_head</b> $time_note</p>
+  <p><b>$earlier_head</b> $why_tuesday Sources: $tuesday_sources. $why_monday Source:
+    <a href="$army_url" rel="noopener">$army_cite</a>.</p>
   <p><b>The weather is a forecast.</b> The winds come from $n_models weather forecasts, current as
     of $got_txt. If the wind changes, the cloud will go somewhere else. The shaded areas show where
     the cloud <i>could</i> go, not where it <i>will</i> go.</p>
@@ -188,8 +189,9 @@
 <script>
 const sel = document.getElementById('t'), cas = document.getElementById('c'), frame = document.getElementById('map');
 const day = document.getElementById('d');
-// Short codes for the days in links (#1200-permit-tue); the planned day needs none.
-const DAY_CODES = $day_codes, FIRST_DAY = day.options.length ? day.options[0].value : '';
+// Short codes for the days in links (#1200-permit-tue). A link without one means LINK_DAY
+// (the first planned day, as links always have); the page opens on OPEN_DAY.
+const DAY_CODES = $day_codes, LINK_DAY = $link_day, OPEN_DAY = $open_day;
 // Every day the site can model, built or not, so a link to one not in this update says so.
 const ALL_DAYS = $all_days;
 const dayNote = document.getElementById('daynote');
@@ -215,7 +217,7 @@ function show() {
   if (!f) return;
   frame.src = f + EXT + '#u=' + sys + (narrow.matches ? '&h=' + mapH() : '');
   history.replaceState(null, '', '#' + t + '-' + cas.value +
-    (day.value === FIRST_DAY ? '' : '-' + DAY_CODES[day.value]));
+    (day.value === LINK_DAY ? '' : '-' + DAY_CODES[day.value]));
 }
 function step(d) { const i = sel.selectedIndex + d; if (i >= 0 && i < sel.options.length) { sel.selectedIndex = i; show(); } }
 sel.addEventListener('change', show);
@@ -297,11 +299,13 @@ function applyHash() {
   const [ht, hc, hd] = location.hash.slice(1).split('-');
   let changed = false;
   const found = Object.keys(DAY_CODES).find((k) => DAY_CODES[k] === hd);
-  const want = found || FIRST_DAY;
-  // A link to a day this update doesn't have opens the planned day, and says so.
+  // No link: OPEN_DAY. A link without a day: LINK_DAY. A day this update doesn't have:
+  // OPEN_DAY, and a note saying so.
+  const want = found || (ht && !hd ? LINK_DAY : OPEN_DAY);
   dayNote.hidden = !hd || !!found;
+  const openLabel = [...day.options].find((o) => o.value === OPEN_DAY);
   if (hd && !found) dayNote.textContent = (ALL_DAYS[hd] || 'That day') +
-    ' maps aren\u2019t in this update; showing ' + day.options[0].textContent + '.';
+    ' maps aren\u2019t in this update; showing ' + (openLabel ? openLabel.textContent : 'the main day') + '.';
   for (const o of day.options) if (o.value === want && !o.selected) { o.selected = true; changed = true; }
   for (const o of sel.options) if (o.value.replace(':', '') === ht && !o.selected) { o.selected = true; changed = true; }
   for (const o of cas.options) if (o.value === hc && !o.selected) { o.selected = true; changed = true; }
