@@ -144,6 +144,21 @@ WHY_WEDNESDAY = (
 )
 WEDNESDAY_SOURCE_HTML = f'<a href="{html.escape(ARMY_WED_URL)}" rel="noopener">{ARMY_WED_CITE}</a>'
 WEDNESDAY_SOURCE_TEXT = f"{ARMY_WED_CITE}, {ARMY_WED_URL}"
+# President Trump's Truth Social post of Monday, Nov. 23, 2026, as quoted by KCRG (published
+# 12:29 p.m. CST, updated 12:36 p.m.; read in full on the page Nov. 23, 2026). KCRG: "The Army
+# had no immediate comment when asked about the president's social media post." It gave no
+# new date; the Army had planned Wednesday.
+TRUMP_URL = "https://www.kcrg.com/2026/11/23/president-trump-orders-military-pause-iowa-detonation/"
+TRUMP_CITE = "KCRG, Nov. 23, 2026"
+TRUMP_HOLD = (
+    "On Monday, Nov. 23, President Trump said on Truth Social that he has \u201cordered the "
+    "Military not to do so until such time as the Eighth Circuit agrees that we can go "
+    "forward,\u201d and that the decision is \u201cfully subject to the incoming Governor "
+    "Elect, Rob Sand, agreeing to the operation.\u201d The Army had no immediate comment, "
+    "KCRG reported, and the Army hasn\u2019t announced a new date."
+)
+TRUMP_SOURCE_HTML = f'<a href="{TRUMP_URL}" rel="noopener">{TRUMP_CITE}</a>'
+TRUMP_SOURCE_TEXT = f"{TRUMP_CITE}, {TRUMP_URL}"
 PERMIT_URL = (
     "https://www.epa.gov/system/files/documents/2026-11/"
     "iaaap-emergency-permit-for-treatment-and-storage-final_redacted.pdf"
@@ -256,6 +271,7 @@ TUESDAY_SOURCES_TEXT = (
 # Sources cited in plain text as "Citation, URL". The visible FAQ shows each as a link
 # on the citation (make_map_picker.linkify); JSON-LD and llms.txt keep the full address.
 CITED_SOURCES = (
+    (TRUMP_CITE, TRUMP_URL),
     (ARMY_WED_CITE, ARMY_WED_URL),
     (RESPONSE_CITE, RESPONSE_URL),
     (FILING_CITE, FILING_URL),
@@ -846,6 +862,7 @@ def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) ->
   <h3>Court hold</h3>
   <p>{court_pause([m["day"] for m in more], lead)} Sources: {COURT_SOURCES_HTML}.</p>
   <h3>When will the detonation happen?</h3>
+  <p>{TRUMP_HOLD} Source: {TRUMP_SOURCE_HTML}.</p>
   <p>{WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_HTML}.</p>
   <p><b>{TIME_HEAD}</b> {no_time}</p>
   <p><b>{EARLIER_HEAD}</b> {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_HTML}.
@@ -915,7 +932,8 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
         ),
         (
             "When is the lead azide blast at the Iowa Army Ammunition Plant?",
-            "The Army now says Wednesday, Nov. 25, 2026; it hasn\u2019t given a time. It had "
+            f"{TRUMP_HOLD} (Source: {TRUMP_SOURCE_TEXT}.) "
+            "The Army had said Wednesday, Nov. 25, 2026; it hasn\u2019t given a time. It had "
             "planned Monday, Nov. 23. On Nov. 22, the government told the court, which has put "
             "the permit on hold, that the Army had postponed it to Tuesday, Nov. 24. "
             f"{court_pause([m['day'] for m in more], lead)} (Sources: {COURT_SOURCES_TEXT}.) "
@@ -982,7 +1000,8 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             "## Key facts",
             "",
             (
-                "- Blast: now scheduled for Wednesday, Nov. 25, 2026 (Army, Nov. 22), after "
+                "- Blast: on hold by President Trump\u2019s order (Nov. 23; see Presidential "
+                "hold); the Army had scheduled Wednesday, Nov. 25, 2026 (Army, Nov. 22), after "
                 "Monday, Nov. 23 and Tuesday, Nov. 24 (Nov. 22 court filing), with its permit on "
                 "hold by court order (see Court hold), Iowa Army Ammunition "
                 f"Plant, Middletown, Iowa ({ctx['lat']:.4f}, {ctx['lon']:.4f}). Blast times "
@@ -993,6 +1012,7 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
                 f"Sources: {COURT_SOURCES_TEXT}"
             ),
             *([f"- Note: {ctx['pending_note']}"] if ctx.get("pending_note") else []),
+            f"- Presidential hold: {TRUMP_HOLD} Source: {TRUMP_SOURCE_TEXT}",
             f"- Why Wednesday: {WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_TEXT}",
             f"- Time: {time_note(ctx['built_txt'])} Sources: {HHS_URL}; {RESPONSE_URL}",
             f"- Earlier date, Tuesday: {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_TEXT}",
