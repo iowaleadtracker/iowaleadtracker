@@ -22,7 +22,7 @@ concurrency:
 
 env:
   BRANCH: forecast-refresh
-  LAST_DAY: "2026-11-25" # Wednesday, the last day any map models (Central time); none after it
+  LAST_DAY: "2026-11-25" # Wednesday (Central time); the public maps model Monday and Tuesday
 
 jobs:
   refresh:

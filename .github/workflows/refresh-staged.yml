@@ -1,6 +1,6 @@
-# Downloads GFS and ECMWF forecasts for the staged Tuesday/Wednesday maps
+# Downloads GFS and ECMWF forecasts for the staged Wednesday-Friday maps
 # (scenarios/iowa-aap-lead-azide/staged.py) and proposes them as a pull request. Runs
-# every 6 hours through Wednesday, Nov. 25, at :10 (the main refresh runs every 3 hours
+# every 6 hours through Friday, Nov. 27, at :10 (the main refresh runs every 3 hours
 # at :40), and by hand: Actions → "Refresh staged forecast" → Run workflow. It never deploys;
 # merging the pull request does (.github/workflows/deploy.yml), so check the news first.
 #
@@ -24,7 +24,7 @@ concurrency:
 
 env:
   BRANCH: forecast-refresh-staged
-  LAST_DAY: "2026-11-25" # the last day the staged maps model (Central time)
+  LAST_DAY: "2026-11-27" # the last day the staged maps model (Central time)
 
 jobs:
   refresh:
@@ -92,9 +92,9 @@ jobs:
           print(f"{t.astimezone(dt.timezone(dt.timedelta(hours=-6))):%b %-d, %-I:%M %p} CST")
           PY
           )
-          title="Refresh staged Tue/Wed forecast (GFS, ECMWF; pulled $pulled)"
+          title="Refresh staged Wed-Fri forecast (GFS, ECMWF; pulled $pulled)"
           {
-            echo "GFS and ECMWF forecasts for the staged Tuesday/Wednesday maps, pulled $pulled by the staged refresh."
+            echo "GFS and ECMWF forecasts for the staged Wednesday-Friday maps, pulled $pulled by the staged refresh."
             echo
             echo "Changes: \`met_cache/staged_forecasts.json\` only. The public maps don't change. The full test suite passed."
             echo
@@ -109,7 +109,7 @@ jobs:
           $title
 
           Downloaded by .github/workflows/refresh-staged.yml for the staged
-          Tuesday/Wednesday maps (staged.py). The public maps don't change.
+          Wednesday-Friday maps (staged.py). The public maps don't change.
           MSG
           git push --force origin "$BRANCH"
           gh workflow run ci.yml --ref "$BRANCH"

@@ -320,7 +320,7 @@ def test_mirror_started(
 
 @pytest.mark.slow
 def test_public_text_does_not_mention_staged_maps(rendered: tuple[str, list, str]) -> None:
-    """The summary, FAQ and llms.txt never point to the staged Tuesday/Wednesday maps."""
+    """The summary, FAQ and llms.txt never point to the staged Wednesday-Friday maps."""
     summary, faq, llms = rendered
     for text in (summary, llms, *(a for _, a in faq)):
         assert not staged.links_to_staged(text)
