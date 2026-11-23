@@ -46,10 +46,23 @@ MAPS = SITE / "maps"
 HASHED = SITE / "m"  # content-hashed copies of the maps, cached for a year
 PAGE_TEMPLATE = HERE / "index_template.html"
 MET_CACHE = HERE / "met_cache" / "map_met_all.json"
-DATE = "2026-11-23"  # the planned blast day (CST, UTC-6); its maps keep their old names
-# Days modeled, as (date, short code used in links). A day is built only when the saved
-# forecasts include it (see build()), so adding one never makes a deploy download weather.
-DAYS = [("2026-11-23", "mon"), ("2026-11-24", "tue")]
+# The planned blast day (CST, UTC-6): the Army said on Nov. 22 that the blasts are now
+# scheduled for Wednesday. It is always built, its maps have no date in their names, and
+# links without a day code (#1200-permit) open it. (Monday, Nov. 23, the earlier planned
+# day, had this role until Nov. 23, 2026; Monday and Tuesday are no longer modeled.)
+DATE = "2026-11-25"
+# Days modeled, as (date, short code used in links). Another day is built only when the
+# saved forecasts include it (see build()), so adding one never makes a deploy download.
+DAYS = [("2026-11-25", "wed"), ("2026-11-26", "thu")]
+# Days that are only an option in the Day menu: built and linkable, but left out of the
+# header, About box, summary, FAQ, References and llms.txt (maintainer's choice, Nov. 23).
+MENU_ONLY_DAYS = {"2026-11-26"}
+# Days no longer modeled, so an old link to one (#1200-permit-tue) can say so by name.
+PAST_DAYS = [("2026-11-23", "mon"), ("2026-11-24", "tue")]
+# The day the page opens on and the summary leads with: the first of these that is built
+# (else DATE).
+LEAD_DAYS = ["2026-11-25"]
+LEAD_DAY = LEAD_DAYS[0]
 LAT, LON = 40.825518, -91.266502
 TIMES = ["11:00", "11:15", "11:30", "11:45", "12:00", "12:15", "12:30"]
 DEFAULT = "12:00"  # the Nov. 20 detonation had been set for about noon (Iowa HHS)
@@ -62,12 +75,16 @@ CASES = [
     ("permit", "permit-100", "EPA permit"),
 ]
 DEFAULT_CASE = "permit"  # most conservative by default: better than a false sense of security
-# The first model with data for the whole run is shown; the rest make up the spread. RRFS
-# first (Monday), then GFS (Tuesday, until RRFS reaches that far), then the others.
-WEATHER = (
-    "ncep_rrfs_conus,gfs_seamless,ncep_hrrr_conus,ecmwf_ifs025,icon_seamless,"
-    "gem_seamless,ukmo_seamless,meteofrance_seamless"
-)
+# The first model with data for the whole run is shown; the rest make up the spread.
+# RRFS first (3 km, gives the mixing height), then GFS (also gives it, reaches farthest),
+# HRRR (when it covers the run) and ECMWF (best global model, but no mixing height, so it
+# stays in the spread). ICON, GEM, UKMO and Meteo-France were dropped on Nov. 23, 2026: no
+# mixing height, coarse over Iowa, and they doubled the downloads against Open-Meteo's
+# daily limit.
+WEATHER = "ncep_rrfs_conus,gfs_seamless,ncep_hrrr_conus,ecmwf_ifs025"
+# Close to the blast, HRRR (hourly runs with the newest observations) goes first.
+HRRR_FIRST_HOURS = 18
+WEATHER_SHORT_RANGE = "ncep_hrrr_conus,ncep_rrfs_conus,gfs_seamless,ecmwf_ifs025"
 WEATHER_ORDER = WEATHER.split(",")
 MODEL_ARGS = [
     *("--material", "lead-azide"),
@@ -118,10 +135,12 @@ TZ = ZoneInfo("America/Chicago")
 SITE_URL = "https://iowaleadtracker.com/"
 SITE_NAME = "Iowa Lead Tracker"
 DESCRIPTION = (
-    "Unofficial, open-model map of where lead from the planned Nov. 23, 2026 blast at the "
+    "Unofficial, open-model map of where lead from the planned Nov. 25, 2026 blast at the "
     "Iowa Army Ammunition Plant could travel and settle, with its data, assumptions, and "
     "sources published."
 )
+# The same without the date, for an update whose maps don't include the planned day yet.
+DESCRIPTION_NO_DATE = DESCRIPTION.replace("the planned Nov. 25, 2026 blast", "the planned blast")
 # Response headers for Workers static assets (written to the site as _headers).
 CSP = (
     "default-src 'none'; "
@@ -357,11 +376,36 @@ def days_to_build() -> list[str]:
 
 
 def remove_days_not_built(days: list[str]) -> None:
-    """Delete maps of extra days not being built: left over, they'd mix two forecasts."""
-    for day, _ in DAYS:
-        if day not in days and day != DATE:
-            for old in MAPS.glob(f"{day}-*.html"):
-                old.unlink()
+    """Delete dated maps of days not being built (old or dropped days).
+
+    Left over, they'd mix two forecasts or bring back a day no longer modeled.
+    """
+    for old in MAPS.glob("????-??-??-*.html"):
+        if old.name[:10] not in days:
+            old.unlink()
+
+
+def weather_for(blast: dt.datetime, ref: dt.datetime) -> str:
+    """Return the model order for a blast at ``blast``, forecast as of ``ref``.
+
+    HRRR goes first once the blast is within HRRR_FIRST_HOURS of the forecast (the saved
+    pull's time, so a rebuild picks the same order); otherwise RRFS does. Either way a
+    model that doesn't cover the whole run is passed over for the next one.
+    """
+    if blast - ref <= dt.timedelta(hours=HRRR_FIRST_HOURS):
+        return WEATHER_SHORT_RANGE
+    return WEATHER
+
+
+def weather_for_day(day: str, pulled: dt.datetime | None) -> str:
+    """Return the model order for every map of ``day``, forecast as of ``pulled``.
+
+    Picked once per day, at the default blast time, so a day's maps never mix HRRR and
+    RRFS. ``pulled`` (the saved forecasts' time; the clock for a refresh) is rounded down
+    to the hour, so a refresh and a later rebuild of its forecasts agree.
+    """
+    ref = (pulled or dt.datetime.now(dt.timezone.utc)).replace(minute=0, second=0, microsecond=0)
+    return weather_for(dt.datetime.fromisoformat(f"{day}T{DEFAULT}-06:00"), ref)
 
 
 def build() -> None:
@@ -375,7 +419,10 @@ def build() -> None:
     pulled = retrieved_at() if MET_CACHE.exists() else None
     as_of = ("--as-of", pulled.isoformat()) if pulled else ()
     forecast = f", forecast from {pulled_label(pulled)}" if pulled else ""
+    args = list(MODEL_ARGS)
+    w = args.index("--weather-model") + 1
     for day in days:
+        args[w] = weather_for_day(day, pulled)  # one order per day (see weather_for_day)
         for case, release_case, name in CASES:
             for t in TIMES:
                 cmd = [
@@ -385,7 +432,7 @@ def build() -> None:
                     *("--lon", str(LON)),
                     *("--time", f"{day}T{t}-06:00"),
                     *("--release-case", release_case),
-                    *MODEL_ARGS,
+                    *args,
                     *as_of,
                     *("--home-url", SITE_URL),
                     *("--legend-note", f"{name} case, blast {blast_label(t, day)}{forecast}"),
@@ -425,6 +472,46 @@ class Maps:
 def complete_times(day: str) -> list[str]:
     """Return the blast times on ``day`` with a map for every case."""
     return [t for t in TIMES if all((MAPS / map_name(c, t, day)).exists() for c, _, _ in CASES)]
+
+
+def lead_day(maps: Maps) -> str:
+    """Return the day the page opens on: the first of LEAD_DAYS that is built, else DATE."""
+    return next((d for d in LEAD_DAYS if d in maps.days), DATE)
+
+
+def pending_note(lead: str) -> str:
+    """Say the planned day's maps aren't in this update ("" when the page leads with it)."""
+    if lead == LEAD_DAYS[0]:
+        return ""
+    return (
+        f"{day_label(LEAD_DAYS[0])} maps aren\u2019t in this update yet; the latest day "
+        "modeled is shown."
+    )
+
+
+def day_values(maps: Maps, lead: str) -> dict[str, str]:
+    """Return the page template's day values: the menu, links, header and pending note."""
+    note = pending_note(lead)
+    others = [day_label(d) for d in maps.days if d != lead and d not in MENU_ONLY_DAYS]
+    return {
+        "day_options": "".join(
+            f'<option value="{d}"{" selected" if d == lead else ""}>{day_label(d)}</option>'
+            for d in maps.days
+        ),
+        "open_day": json.dumps(lead),
+        "link_day": json.dumps(DATE),
+        "day_hidden": "" if len(maps.days) > 1 else " hidden",
+        "day_codes": json.dumps({d: c for d, c in DAYS if d in maps.days}),
+        "all_days": json.dumps({c: day_label(d) for d, c in [*PAST_DAYS, *DAYS]}),
+        # "planned" only for the planned day; an older day is just "the blast".
+        "header_lead": "Lead from the "
+        + ("blast" if note else "planned blast")
+        + " at the Iowa Army Ammunition Plant",
+        "header_days": day_label(lead)
+        + (f" (also modeled: {', '.join(others)})" if others else ""),
+        "pending_note": html.escape(note),
+        "pending_hidden": "" if note else " hidden",
+    }
 
 
 def days_shown(times: list[str]) -> dict[str, list[str]]:
@@ -481,13 +568,13 @@ def models_used(pages: list[str]) -> list[str]:
     return sorted(found, key=lambda m: WEATHER_ORDER.index(m) if m in WEATHER_ORDER else 99)
 
 
-def json_ld(faq: list[tuple[str, str]], now: dt.datetime) -> str:
+def json_ld(faq: list[tuple[str, str]], now: dt.datetime, description: str = DESCRIPTION) -> str:
     """Return the page's schema.org structured data (WebPage and FAQPage)."""
     page = {
         "@type": "WebPage",
         "name": SITE_NAME,
         "url": SITE_URL,
-        "description": DESCRIPTION,
+        "description": description,
         "inLanguage": "en-US",
         "isAccessibleForFree": True,
         "dateModified": now.isoformat(timespec="minutes"),
@@ -598,18 +685,10 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
     pct, times = maps.pct, maps.times
     got = retrieved_at()
     got_txt = fmt_time(got) if got else "unknown"
-    n_models = model_count(maps.pages_by_day.get(DATE, maps.pages))  # the planned day's
-    f_facts = forecast_summary.facts(
-        {(c, t): MAPS / map_name(c, t) for c, _, _ in CASES for t in times},
-        CASES,
-        times,
-        maps.default,
-    )
-    # Other modeled days, described after the planned day in the summary, FAQ and llms.txt.
-    more = []
+    lead = lead_day(maps)
+    description = DESCRIPTION if lead == LEAD_DAYS[0] else DESCRIPTION_NO_DATE
+    by_day: dict[str, forecast_summary.Facts] = {}
     for day, day_times in maps.days.items():
-        if day == DATE:
-            continue
         default = maps.default if maps.default in day_times else day_times[0]
         f_day = forecast_summary.facts(
             {(c, t): MAPS / map_name(c, t, day) for c, _, _ in CASES for t in day_times},
@@ -618,8 +697,14 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
             default,
         )
         f_day["day"] = day_label(day)
-        f_day["n_models"] = model_count(maps.pages_by_day[day])
-        more.append(f_day)
+        f_day["n_models"] = model_count(maps.pages_by_day.get(day, maps.pages))
+        by_day[day] = f_day
+    # The summary, FAQ and llms.txt lead with one day and describe the others after it
+    # (not the menu-only days, which are only in the Day menu).
+    f_facts = by_day[lead]
+    n_models = f_facts["n_models"]
+    more = [f for day, f in by_day.items() if day != lead and day not in MENU_ONLY_DAYS]
+    told = [d for d in maps.days if d not in MENU_ONLY_DAYS]  # the days the text names
     summary_html, faq, llms_txt = forecast_summary.render(
         f_facts,
         {
@@ -629,7 +714,8 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
             "built_txt": built_txt,
             "site_name": SITE_NAME,
             "site_url": SITE_URL,
-            "description": DESCRIPTION,
+            "description": description,
+            "pending_note": pending_note(lead),
             "lat": LAT,
             "lon": LON,
         },
@@ -638,8 +724,8 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
     shown = f_facts["shown_model"]
     model_name = forecast_summary.MODEL_SHORT.get(shown, shown or "the first model")
     cite_models, cite_count = model_name, n_models
-    if more:  # name each day's shown model and count in the References
-        per_day = [(day_label(DATE).split(",")[0], model_name, n_models)] + [
+    if more:  # name each day's shown model and count in the References, in date order
+        per_day = [
             (
                 m["day"].split(",")[0],
                 forecast_summary.MODEL_SHORT.get(
@@ -647,7 +733,8 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
                 ),
                 m["n_models"],
             )
-            for m in more
+            for d, m in by_day.items()
+            if d in told
         ]
         cite_models = ", ".join(f"{model} ({wd})" for wd, model, _ in per_day)
         counts = {n for _, _, n in per_day}
@@ -676,24 +763,11 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
     values = {
         "site_name": SITE_NAME,
         "site_url": SITE_URL,
-        "description": html.escape(DESCRIPTION),
+        "description": html.escape(description),
         "og_image": og_image,
         "twitter_card": "summary_large_image" if og_image else "summary",
-        "json_ld": json_ld(faq, now),
-        "day_options": "".join(
-            f'<option value="{d}"{" selected" if d == DATE else ""}>{day_label(d)}</option>'
-            for d in maps.days
-        ),
-        "day_hidden": "" if len(maps.days) > 1 else " hidden",
-        "day_codes": json.dumps({d: c for d, c in DAYS if d in maps.days}),
-        "all_days": json.dumps({c: day_label(d) for d, c in DAYS}),
-        "header_days": (
-            day_label(DATE)
-            if len(maps.days) == 1
-            else f"{day_label(DATE)} (also modeled: "
-            + ", ".join(day_label(d) for d in maps.days if d != DATE)
-            + ")"
-        ),
+        "json_ld": json_ld(faq, now, description),
+        **day_values(maps, lead),
         "time_options": "".join(
             f'<option value="{t}"{" selected" if t == maps.default else ""}>{label(t)}</option>'
             for t in times
@@ -716,19 +790,20 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "contact_html": works_cited.CONTACT_HTML,
         "misting": forecast_summary.MISTING,
         "advisory_url": forecast_summary.ADVISORY_URL,
-        "court_pause": forecast_summary.court_pause([day_label(d) for d in maps.days if d != DATE]),
+        "court_pause": forecast_summary.court_pause([day_label(d) for d in told]),
         "court_url": forecast_summary.COURT_URL,
         "court_cite": forecast_summary.COURT_CITE,
         "court_sources": forecast_summary.COURT_SOURCES_HTML,
         "time_head": forecast_summary.TIME_HEAD,
+        "earlier_head": forecast_summary.EARLIER_HEAD,
         "why_monday": forecast_summary.WHY_MONDAY,
         "why_tuesday": forecast_summary.WHY_TUESDAY,
+        "why_wednesday": forecast_summary.WHY_WEDNESDAY,
+        "wednesday_source": forecast_summary.WEDNESDAY_SOURCE_HTML,
         "tuesday_sources": forecast_summary.TUESDAY_SOURCES_HTML,
         "army_url": forecast_summary.ARMY_URL,
         "army_cite": forecast_summary.ARMY_CITE,
-        "time_note": forecast_summary.time_note(built_txt).replace(
-            "(Iowa HHS fact sheet)", f"({forecast_summary.HHS_LINK})"
-        ),
+        "time_note": forecast_summary.time_note_html(built_txt),
         "not_checked": forecast_summary.NOT_CHECKED,
         "who": who,
         "cite_html": cite_html,

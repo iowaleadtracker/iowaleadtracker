@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import json
 import re
 import sys
@@ -77,10 +78,12 @@ def test_picker_page(built: Path) -> None:
     assert "Wednesday to Friday runs" in page
     assert "Wednesday, Nov. 25, 2026; Thursday, Nov. 26, 2026; and Friday, Nov. 27, 2026" in page
     assert "November 21, 2026, at 9:08 p.m. CST" in page  # forecast pull time
-    # When: from the Nov. 21 court filing, linked, not the old "Monday only" line.
-    assert "the government said the Army intends to carry it out by Tuesday, Nov. 24" in page
-    assert "None of the days modeled here, Wednesday through Friday, has been announced." in page
-    assert f'<a href="{forecast_summary.FILING_URL}">court filing on Nov. 21</a>' in page
+    # When: the Nov. 22 court filing, then the Army's Wednesday announcement, both linked.
+    assert "the government said the Army postponed it to Tuesday, Nov. 24" in page
+    assert "it is now scheduled for Wednesday, Nov. 25. No time has been given" in page
+    assert "Thursday and Friday haven&rsquo;t been announced." in page
+    assert f'<a href="{html.escape(forecast_summary.ARMY_WED_URL)}">the Army said</a>' in page
+    assert f'<a href="{forecast_summary.RESPONSE_URL}">court filing on Nov. 22</a>' in page
     assert "it hasn&rsquo;t\n    announced these days" not in page
     m = re.search(r"const FILES = (\{.*?\});", page)
     assert m
@@ -153,15 +156,13 @@ def test_missing_staged_file_has_no_time(tmp_path: Path) -> None:
 
 
 def test_refreshes_run_through_the_last_day() -> None:
-    """Both refreshes run on a schedule; the staged one through the last day it models."""
+    """Both refreshes run on a schedule through the last day their maps model."""
     root = Path(__file__).resolve().parent.parent / ".github" / "workflows"
-    last = staged.DAYS[-1]
-    for name in ("refresh-forecast.yml", "refresh-staged.yml"):
+    for name, last in (
+        ("refresh-forecast.yml", site.DAYS[-1][0]),  # Thursday, a Day menu option
+        ("refresh-staged.yml", staged.DAYS[-1]),  # Friday
+    ):
         text = (root / name).read_text(encoding="utf-8")
-        m = re.search(r'LAST_DAY: "(\d{4}-\d\d-\d\d)"', text)
-        assert m, name
-        assert m.group(1) >= site.DAYS[-1][0], name  # past the public maps' last day
-        if name == "refresh-staged.yml":
-            assert m.group(1) == last
+        assert f'LAST_DAY: "{last}"' in text, name
         assert "schedule:" in text, name
         assert "workflow_dispatch:" in text, name

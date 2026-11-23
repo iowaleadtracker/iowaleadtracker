@@ -40,7 +40,7 @@ OUT = SITE / DIR_NAME
 MAPS = OUT / "maps"
 CACHE = HERE / "met_cache" / "staged_forecasts.json"
 TZ = ZoneInfo("America/Chicago")
-#: Wednesday to Friday, after the planned Monday blast and the Tuesday in the court filing.
+#: Wednesday (the Army's announced date, Nov. 22) through Friday.
 DAYS = ["2026-11-25", "2026-11-26", "2026-11-27"]
 TIMES = ["11:00", "11:30", "12:00", "12:30", "13:00"]
 DEFAULT_DAY = DAYS[0]
@@ -51,12 +51,14 @@ MODELS_TEXT = "GFS and ECMWF only (GFS shown; ECMWF in the weather-model spread)
 
 UNOFFICIAL = "This is an unofficial estimate, not from the Army or any government agency."
 NOT_SAFE = "Don't use it to decide if you're safe."
-#: When the blasts could happen, from the government's Nov. 21 court filing ({url}).
+#: When the blasts could happen: the government's Nov. 22 court filing ({url}), then the
+#: Army's announcement later that day ({army}).
 WHEN_HTML = (
     "The Army planned the detonation for Monday, Nov. 23. In a "
-    '<a href="{url}">court filing on Nov. 21</a>, the government said the Army intends to '
-    "carry it out by Tuesday, Nov. 24. None of the days modeled here, Wednesday through "
-    "Friday, has been announced."
+    '<a href="{url}">court filing on Nov. 22</a>, the government said the Army postponed it '
+    'to Tuesday, Nov. 24; later that day, <a href="{army}">the Army said</a> it is now '
+    "scheduled for Wednesday, Nov. 25. No time has been given, and Thursday and Friday "
+    "haven&rsquo;t been announced."
 )
 
 
@@ -188,7 +190,7 @@ def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
     )
     labels = [day_label(d) for d in days]
     day_list = labels[0] if len(labels) == 1 else "; ".join(labels[:-1]) + "; and " + labels[-1]
-    when = WHEN_HTML.format(url=html.escape(fs.FILING_URL))
+    when = WHEN_HTML.format(url=html.escape(fs.RESPONSE_URL), army=html.escape(fs.ARMY_WED_URL))
     return f"""<!doctype html>
 <html lang="en">
 <head>
