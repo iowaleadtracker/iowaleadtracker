@@ -443,9 +443,10 @@ METHOD_HEAD = "How the map works."
 def method_intro(pct: dict[str, str]) -> str:
     """Return the methodology note, with the release cases' shares from the build."""
     return (
-        "The map uses a Gaussian puff model, the approach behind emergency-response codes such "
-        "as HotSpot (Homann and Aluzzi 2013). A puff fits a one-time explosion better than a "
-        "model of a steady plume from a smokestack. The model tracks only the lead: lead azide "
+        "The map uses a Gaussian puff model, the same kind of model behind emergency-response "
+        "software such as HotSpot (Homann and Aluzzi 2013). A puff fits a one-time explosion "
+        "better than a model of a steady plume from a smokestack. The model tracks only the "
+        "lead: lead azide "
         "is 71.1% lead by weight, so about 9,700 lb of it holds about 6,900 lb of lead. How "
         "high the cloud starts comes from Church (1969). No one has measured how much of the "
         "lead gets airborne in a blast like this, so the map runs four cases instead of picking "
