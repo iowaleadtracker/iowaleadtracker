@@ -352,10 +352,15 @@ never deploys; merging the pull request does.
 ### More than one day
 
 `DAYS` in `make_map_picker.py` lists the days the main site models (Monday, Nov. 23 and
-Tuesday, Nov. 24), each with the same blast times. The page gets a "Day" menu, links carry
-the day (`#1200-permit-tue`; links without one open Monday), and the summary, FAQ and
-`llms.txt` add an "If the blasts are on Tuesday" section. Monday's maps keep their old
-file names; other days' are prefixed with the date.
+Tuesday, Nov. 24), each with the same blast times. The page gets a "Day" menu and links
+carry the day (`#1200-permit-tue`; links without one open Monday, as they always have).
+
+`LEAD_DAY` (Tuesday, since the government's Nov. 22 court filing said the Army postponed
+the blasts to that day) is the day the page opens on and the header, summary, FAQ and
+`llms.txt` lead with, once its maps are built; until then Monday leads. The other day gets
+its own section after it ("Monday, Nov. 23, the earlier planned date", or "If the blasts
+are on …" for a later day). Days other than Monday say their blast times are borrowed from
+Monday's. Monday's maps keep their old file names; other days' are prefixed with the date.
 
 The forecast list puts RRFS first and GFS second: the first model with data for the whole
 run is shown, so Monday shows RRFS and Tuesday shows GFS until RRFS reaches that far.

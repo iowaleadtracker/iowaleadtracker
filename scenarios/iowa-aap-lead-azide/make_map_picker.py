@@ -50,6 +50,10 @@ DATE = "2026-11-23"  # the planned blast day (CST, UTC-6); its maps keep their o
 # Days modeled, as (date, short code used in links). A day is built only when the saved
 # forecasts include it (see build()), so adding one never makes a deploy download weather.
 DAYS = [("2026-11-23", "mon"), ("2026-11-24", "tue")]
+# The day the page opens on and the summary leads with, when its maps are built: the
+# government's Nov. 22 court filing says the Army postponed the blasts to Tuesday. Links
+# without a day code (#1200-permit) still mean DATE, as they always have.
+LEAD_DAY = "2026-11-24"
 LAT, LON = 40.825518, -91.266502
 TIMES = ["11:00", "11:15", "11:30", "11:45", "12:00", "12:15", "12:30"]
 DEFAULT = "12:00"  # the Nov. 20 detonation had been set for about noon (Iowa HHS)
@@ -118,7 +122,7 @@ TZ = ZoneInfo("America/Chicago")
 SITE_URL = "https://iowaleadtracker.com/"
 SITE_NAME = "Iowa Lead Tracker"
 DESCRIPTION = (
-    "Unofficial, open-model map of where lead from the planned Nov. 23, 2026 blast at the "
+    "Unofficial, open-model map of where lead from the planned Nov. 24, 2026 blast at the "
     "Iowa Army Ammunition Plant could travel and settle, with its data, assumptions, and "
     "sources published."
 )
@@ -427,6 +431,11 @@ def complete_times(day: str) -> list[str]:
     return [t for t in TIMES if all((MAPS / map_name(c, t, day)).exists() for c, _, _ in CASES)]
 
 
+def lead_day(maps: Maps) -> str:
+    """Return the day the page opens on: LEAD_DAY when its maps are built, else DATE."""
+    return LEAD_DAY if LEAD_DAY in maps.days else DATE
+
+
 def days_shown(times: list[str]) -> dict[str, list[str]]:
     """Return {day: blast times} for the planned day and every other day built in full.
 
@@ -598,18 +607,9 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
     pct, times = maps.pct, maps.times
     got = retrieved_at()
     got_txt = fmt_time(got) if got else "unknown"
-    n_models = model_count(maps.pages_by_day.get(DATE, maps.pages))  # the planned day's
-    f_facts = forecast_summary.facts(
-        {(c, t): MAPS / map_name(c, t) for c, _, _ in CASES for t in times},
-        CASES,
-        times,
-        maps.default,
-    )
-    # Other modeled days, described after the planned day in the summary, FAQ and llms.txt.
-    more = []
+    lead = lead_day(maps)
+    by_day: dict[str, forecast_summary.Facts] = {}
     for day, day_times in maps.days.items():
-        if day == DATE:
-            continue
         default = maps.default if maps.default in day_times else day_times[0]
         f_day = forecast_summary.facts(
             {(c, t): MAPS / map_name(c, t, day) for c, _, _ in CASES for t in day_times},
@@ -618,8 +618,12 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
             default,
         )
         f_day["day"] = day_label(day)
-        f_day["n_models"] = model_count(maps.pages_by_day[day])
-        more.append(f_day)
+        f_day["n_models"] = model_count(maps.pages_by_day.get(day, maps.pages))
+        by_day[day] = f_day
+    # The summary, FAQ and llms.txt lead with one day and describe the others after it.
+    f_facts = by_day[lead]
+    n_models = f_facts["n_models"]
+    more = [f for day, f in by_day.items() if day != lead]
     summary_html, faq, llms_txt = forecast_summary.render(
         f_facts,
         {
@@ -638,8 +642,8 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
     shown = f_facts["shown_model"]
     model_name = forecast_summary.MODEL_SHORT.get(shown, shown or "the first model")
     cite_models, cite_count = model_name, n_models
-    if more:  # name each day's shown model and count in the References
-        per_day = [(day_label(DATE).split(",")[0], model_name, n_models)] + [
+    if more:  # name each day's shown model and count in the References, in date order
+        per_day = [
             (
                 m["day"].split(",")[0],
                 forecast_summary.MODEL_SHORT.get(
@@ -647,7 +651,7 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
                 ),
                 m["n_models"],
             )
-            for m in more
+            for m in by_day.values()
         ]
         cite_models = ", ".join(f"{model} ({wd})" for wd, model, _ in per_day)
         counts = {n for _, _, n in per_day}
@@ -681,17 +685,19 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "twitter_card": "summary_large_image" if og_image else "summary",
         "json_ld": json_ld(faq, now),
         "day_options": "".join(
-            f'<option value="{d}"{" selected" if d == DATE else ""}>{day_label(d)}</option>'
+            f'<option value="{d}"{" selected" if d == lead else ""}>{day_label(d)}</option>'
             for d in maps.days
         ),
+        "open_day": json.dumps(lead),
+        "link_day": json.dumps(DATE),
         "day_hidden": "" if len(maps.days) > 1 else " hidden",
         "day_codes": json.dumps({d: c for d, c in DAYS if d in maps.days}),
         "all_days": json.dumps({c: day_label(d) for d, c in DAYS}),
         "header_days": (
-            day_label(DATE)
+            day_label(lead)
             if len(maps.days) == 1
-            else f"{day_label(DATE)} (also modeled: "
-            + ", ".join(day_label(d) for d in maps.days if d != DATE)
+            else f"{day_label(lead)} (also modeled: "
+            + ", ".join(day_label(d) for d in maps.days if d != lead)
             + ")"
         ),
         "time_options": "".join(
@@ -716,7 +722,7 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "contact_html": works_cited.CONTACT_HTML,
         "misting": forecast_summary.MISTING,
         "advisory_url": forecast_summary.ADVISORY_URL,
-        "court_pause": forecast_summary.court_pause([day_label(d) for d in maps.days if d != DATE]),
+        "court_pause": forecast_summary.court_pause([day_label(d) for d in maps.days]),
         "court_url": forecast_summary.COURT_URL,
         "court_cite": forecast_summary.COURT_CITE,
         "court_sources": forecast_summary.COURT_SOURCES_HTML,
