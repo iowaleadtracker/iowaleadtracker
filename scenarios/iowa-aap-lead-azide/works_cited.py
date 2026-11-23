@@ -281,9 +281,13 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
         ),
         (
             "Charges",
-            "Two equal blasts around noon, inside earth-covered magazines",
             (
-                "Two detonations at about noon (Iowa HHS 2026); drums detonated in place in the "
+                "Two equal blasts inside earth-covered magazines, modeled from 11 a.m. to "
+                "12:30 p.m. (no time has been given for Wednesday)"
+            ),
+            (
+                "Two detonations at about noon on the earlier Monday date (Iowa HHS 2026); drums "
+                "detonated in place in the "
                 "magazines, "
                 "simultaneously or in rapid succession (EPA 2026)"
             ),
