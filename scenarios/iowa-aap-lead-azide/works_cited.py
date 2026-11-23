@@ -321,7 +321,9 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
                 "Low: floor from AP-42 "
                 "blasting-cap tests (MACTEC 2008). High: TNT-equivalent rule (DOE 1994; Steindler "
                 "and "
-                "Seefeldt 1980). Middle: in between. EPA permit: the emission factor of 1.00 EPA "
+                "Seefeldt 1980). Middle: 20% of the metal as breathable particles, the "
+                "handbook&rsquo;s upper-bound precedent for detonations of nuclear weapon "
+                "assemblies (DOE 1994, p. 4-4). EPA permit: the emission factor of 1.00 EPA "
                 "requires "
                 "for the Army&rsquo;s plume maps (EPA 2026)"
             ),

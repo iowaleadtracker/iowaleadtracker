@@ -69,7 +69,10 @@ RELEASE_CASES = {
         "7% of the lead airborne, all respirable: the lowest share consistent with "
         "EPA AP-42 Ch. 15 blasting-cap tests (low case)"
     ),
-    "fine-20": "20% of the lead airborne, all respirable (middle case)",
+    "fine-20": (
+        "20% of the lead airborne, all respirable: the upper-bound precedent for detonations "
+        "of nuclear weapon assemblies in DOE-HDBK-3010, sec. 4.1, footnote 2 (middle case)"
+    ),
     "tnt-fine": (
         "airborne respirable mass equal to the TNT-equivalent mass, the DOE-HDBK-3010 "
         "bounding rule for detonations, all respirable (high case)"

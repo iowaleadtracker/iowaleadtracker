@@ -419,7 +419,7 @@ The site shows three cases. In each, the share of lead below is airborne in brea
 | Site label | `--release-case` | Lead airborne | Pounds of lead (9,700 lb lead azide) | Basis |
 |---|---|---|---|---|
 | Low | `ap42-floor` | 7% | about 480 | lowest share consistent with EPA AP-42 blasting-cap tests |
-| Middle | `fine-20` | 20% | about 1,380 | in between |
+| Middle | `fine-20` | 20% | about 1,380 | DOE-HDBK-3010 precedent: 20% of the metal released as respirable particles, a general upper bound for detonations of nuclear weapon assemblies |
 | High | `tnt-fine` | 55% | about 3,800 | DOE-HDBK-3010 rule: respirable mass equal to the TNT equivalent |
 | EPA permit | `permit-100` | 100% | about 6,900 | emission factor 1.00 that EPA's Nov. 13, 2026 emergency permit (Appendix B) requires for the Army's plume maps; EPA calls it conservative |
 
@@ -458,10 +458,18 @@ Lead azide, Pb(N3)2, is 71.1% lead by weight, so 9,700 lb holds about 6,900 lb o
 - Poor fit: the handbook's blast data are for inert material shattered by a nearby
   charge. Here the lead azide *is* the explosive; it breaks down into lead and nitrogen
   at high temperature, and much of the lead likely condenses into fine fume.
-- **Unverified:** the earlier `20-percent` case was described as "the general
-  upper-bound precedent quoted in DOE-HDBK-3010", and the site once said past tests ranged
-  "from under 1% to about 22%". Neither number was found in the handbook during a search
-  on Nov 20, 2026. The site no longer uses either wording.
+- **20% (the middle case):** section 4.1, footnote 2 to "Shock Effects" (p. 4-4). The
+  footnote says the handbook's method does not cover high-explosive detonations of nuclear
+  weapons or their assemblies, where mass ratios can be "much less than 1", and that "an
+  estimate of 20% of weapon metal released as respirable particles has precedent as a
+  general upper bound for such events. However, specific configuration studies also
+  support respirable releases in the range of 1% to 10% of the metal." Here the mass ratio
+  is about 1.8 (6,900 lb of lead against 3,800 lb TNT equivalent), so this is a reference
+  point, not a fit. Not the same as the handbook's 20% *of the TNT-equivalent mass* for
+  powders in open air (p. 4-7), which here would be about 11% of the lead.
+- **Not found:** the site once said past tests ranged "from under 1% to about 22%". That
+  range is not in the handbook (its 22% is concrete mass lost on heating), and the site no
+  longer uses it.
 
 ### EPA AP-42 Chapter 15 (ordnance detonation tests)
 
