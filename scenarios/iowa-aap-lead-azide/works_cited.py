@@ -54,6 +54,10 @@ CONTACT_TEXT = (
 #: Yahoo News). Add one only after reading what it says about the map.
 MENTIONS_HEAD = "Mentions of the Iowa Lead Tracker."
 MENTIONS = [
+    # J. Williams, "Army's munition explosion plans delayed. How it could change the risks,"
+    # updated Nov. 23, 2026, 3:40 p.m. ET; read in full Nov. 23. It says: "Initial maps
+    # showed the lead plume extending northward, however, the Iowa Lead Tracker website now
+    # shows the plume potentially moving southwest."
     (
         "Detroit Free Press",
         "Nov. 23, 2026",
