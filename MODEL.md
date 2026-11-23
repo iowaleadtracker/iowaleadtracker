@@ -337,6 +337,11 @@ This is a screening tool, not a regulatory or emergency-response model:
   deposition velocity at the ground also includes it. This can remove somewhat too much
   of the largest particles (10 µm, about 3 cm/s) near the source; for breathable sizes
   the effect is negligible;
+- later studies (Petroff and Zhang 2010; Emerson et al. 2020) found that the Zhang et al.
+  (2001) dry-deposition scheme overestimates deposition of fine particles and
+  underestimates it for coarse ones; the deposition maps carry that uncertainty. The air
+  maps are barely affected, since fine particles lose only a few percent of their mass to
+  dry deposition over an 8-hour run;
 - near-source peaks are smoothed by the grid cell size (printed when the script runs
   and shown in the page footer); use `--extent-km` for near-field numbers;
 - the explosion cloud uses an empirical rise formula. Observed clouds (e.g. Beirut 2020)
