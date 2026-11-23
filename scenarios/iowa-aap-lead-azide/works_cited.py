@@ -49,6 +49,28 @@ CONTACT_TEXT = (
     f"Questions or corrections: {CONTACT_EMAIL}. Updates: Instagram @{INSTAGRAM_HANDLE}, "
     f"{INSTAGRAM_URL}. {CONTACT_LIMIT}"
 )
+#: News stories that mention the Iowa Lead Tracker, newest first: (outlet, date, URL).
+#: Link the original publisher, not a syndicated copy (the Free Press story also ran on
+#: Yahoo News). Add one only after reading what it says about the map.
+MENTIONS_HEAD = "Mentions of the Iowa Lead Tracker."
+MENTIONS = [
+    (
+        "Detroit Free Press",
+        "Nov. 23, 2026",
+        (
+            "https://www.freep.com/story/news/local/michigan/2026/11/23/"
+            "army-lead-azide-munitions-michigan-explosion/92924794007/"
+        ),
+    ),
+]
+#: Said after the list, so a mention isn't read as a check of the map.
+MENTIONS_LIMIT = "A news mention isn\u2019t a check of the map\u2019s accuracy."
+MENTIONS_HTML = (
+    "; ".join(
+        f'<a href="{url}" rel="noopener">{outlet}</a>, {date}' for outlet, date, url in MENTIONS
+    )
+    + f". {MENTIONS_LIMIT}"
+)
 ACCESSED = "accessed 20 November 2026"
 
 # Alphabetical by first author, then year. HTML.

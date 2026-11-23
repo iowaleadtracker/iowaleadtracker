@@ -730,3 +730,17 @@ def test_one_model_order_per_day(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     monkeypatch.setattr(site.subprocess, "run", fake_run)
     site.build()
     assert orders == {site.WEATHER}  # one order for the whole day: noon is over 18 h out
+
+
+def test_mentions_in_about_box() -> None:
+    """News mentions sit in the About box, link the original outlet, and carry their caveat."""
+    page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    start = page.index('<dialog id="note"')
+    about = page[start : page.index("</dialog>", start)]
+    assert "<p><b>$mentions_head</b> $mentions_html</p>" in about
+    assert about.index("$contact_html") < about.index("$mentions_html")
+    assert works_cited.MENTIONS_HEAD == "Mentions of the Iowa Lead Tracker."
+    for outlet, date, url in works_cited.MENTIONS:
+        assert f'<a href="{url}" rel="noopener">{outlet}</a>, {date}' in works_cited.MENTIONS_HTML
+        assert "yahoo.com" not in url  # the original publisher, not a syndicated copy
+    assert works_cited.MENTIONS_HTML.endswith(works_cited.MENTIONS_LIMIT)
