@@ -9,6 +9,7 @@ and check that every place the text is generated still carries them.
 from __future__ import annotations
 
 import datetime as dt
+import html
 import json
 import re
 from pathlib import Path
@@ -240,6 +241,10 @@ def test_faq_links_are_live() -> None:
     assert f'<a href="{works_cited.SOURCE_URL}" rel="noopener">{works_cited.SOURCE_URL}</a>.' in out
     assert '<a href="https://www.army.mil/a/1" rel="noopener">https://www.army.mil/a/1</a>).' in out
     assert site.linkify("<b> & no links") == "&lt;b&gt; &amp; no links"
+    cited = site.linkify(f"(Source: {fs.ARMY_WED_CITE}, {fs.ARMY_WED_URL}.)")
+    assert cited == (
+        f'(Source: <a href="{html.escape(fs.ARMY_WED_URL)}" rel="noopener">{fs.ARMY_WED_CITE}</a>.)'
+    )
 
 
 @pytest.mark.slow

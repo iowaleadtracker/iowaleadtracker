@@ -653,16 +653,33 @@ def write_hashed_maps(days: dict[str, list[str]]) -> dict[str, str]:
     return map_files
 
 
-_URL = re.compile(r"https?://[^\s<>\"]+?(?=[.,;:)]*(?:\s|$))")
+_URL_RE = r"https?://[^\s<>\"]+?(?=[.,;:)]*(?:\s|$))"
+# "Citation, URL" for each known source (HTML-escaped), so it links on the citation.
+_CITED = {
+    html.escape(f"{cite}, {url}"): (html.escape(cite), html.escape(url))
+    for cite, url in forecast_summary.CITED_SOURCES
+}
+_URL = re.compile(
+    "(?P<cited>" + "|".join(re.escape(k) for k in sorted(_CITED, key=len, reverse=True)) + ")"
+    "|(?P<url>" + _URL_RE + ")"
+)
 
 
 def linkify(text: str) -> str:
     """Escape plain text for HTML and turn each web address in it into a link.
 
-    Trailing sentence punctuation (".", ",", ")") stays outside the link.
+    A known source written "Citation, URL" (forecast_summary.CITED_SOURCES) becomes a link
+    whose text is the citation; any other address links as itself. Trailing sentence
+    punctuation (".", ",", ")") stays outside the link.
     """
-    escaped = html.escape(text)
-    return _URL.sub(lambda m: f'<a href="{m.group(0)}" rel="noopener">{m.group(0)}</a>', escaped)
+
+    def link(m: re.Match[str]) -> str:
+        if m.group("cited"):
+            cite, url = _CITED[m.group("cited")]
+            return f'<a href="{url}" rel="noopener">{cite}</a>'
+        return f'<a href="{m.group(0)}" rel="noopener">{m.group(0)}</a>'
+
+    return _URL.sub(link, html.escape(text))
 
 
 def faq_html(faq: list[tuple[str, str]]) -> str:

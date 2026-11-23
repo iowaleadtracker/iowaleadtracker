@@ -253,6 +253,16 @@ COURT_SOURCES_HTML = (
 TUESDAY_SOURCES_TEXT = (
     f"{RESPONSE_CITE}, {RESPONSE_URL}; {FILING_CITE}, {FILING_URL}; {KCCI_CITE}, {KCCI_URL}"
 )
+# Sources cited in plain text as "Citation, URL". The visible FAQ shows each as a link
+# on the citation (make_map_picker.linkify); JSON-LD and llms.txt keep the full address.
+CITED_SOURCES = (
+    (ARMY_WED_CITE, ARMY_WED_URL),
+    (RESPONSE_CITE, RESPONSE_URL),
+    (FILING_CITE, FILING_URL),
+    (COURT_CITE, COURT_URL),
+    (KCCI_CITE, KCCI_URL),
+    (ARMY_CITE, ARMY_URL),
+)
 TUESDAY_SOURCES_HTML = (
     f'<a href="{RESPONSE_URL}" rel="noopener">{RESPONSE_CITE}</a>; '
     f'<a href="{FILING_URL}" rel="noopener">{FILING_CITE}</a>; '
