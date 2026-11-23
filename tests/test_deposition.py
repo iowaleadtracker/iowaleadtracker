@@ -84,3 +84,13 @@ def test_spray_coefficient_formula() -> None:
     d_p, rho, flux, drop = 1e-6, 9500.0, 2e-4, 1e-3
     expected = 1.5 * flux * slinn_efficiency(d_p, rho, drop) / drop
     assert spray_coefficient(d_p, rho, flux, drop) == pytest.approx(expected, rel=1e-15)
+
+
+def test_land_use_constants_match_zhang_table_3_late_autumn() -> None:
+    """Zhang et al. (2001) Table 3, seasonal category 3 (late autumn after frost, no snow)."""
+    assert LAND_USE["grass"] == (0.05, 5e-3, 1.2, 0.54)  # LUC 6
+    assert LAND_USE["crops"] == (0.02, 5e-3, 1.2, 0.54)  # LUC 7, crops and mixed farming
+    assert LAND_USE["forest"] == (1.15, 5e-3, 0.8, 0.56)  # LUC 5, mixed forest
+    assert LAND_USE["urban"] == (1.0, 10e-3, 1.5, 0.56)  # LUC 15
+    assert LAND_USE["desert"] == (0.04, None, 50.0, 0.54)  # LUC 8
+    assert LAND_USE["water"][1:] == (None, 100.0, 0.50)  # LUC 13/14 (z0 a function of wind)

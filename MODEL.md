@@ -286,8 +286,9 @@ historical runs fall back to a power-law profile above 100 m.
   size-resolved scheme of Zhang et al. (2001): settling plus transfer through the air
   and onto the surface by Brownian diffusion, impaction and interception. It depends
   on particle size and density, the 10 m wind and the surface type (`--land-use`,
-  default `grass`). The aerodynamic part assumes neutral stability, and the land-use
-  constants are as recalled from the paper and should be checked against it.
+  default `grass`; the Iowa maps use `crops`). The aerodynamic part assumes neutral
+  stability. The land-use constants are the paper's Table 3 values for late autumn after
+  frost (its seasonal category 3), checked against the paper.
   `--vd-extra` switches back to settling plus a fixed speed. Wet
   scavenging is Λ = 10⁻⁴ s⁻¹ per mm/h of rain. Both deplete the puff's mass, so mass
   is conserved: airborne + deposited = released.

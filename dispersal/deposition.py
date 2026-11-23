@@ -19,14 +19,18 @@ if TYPE_CHECKING:
 
 
 # Zhang et al. (2001) dry-deposition parameters by land use: roughness length z0 (m),
-# collector radius A (m; None = smooth surface), alpha, gamma. Values as recalled from the
-# paper's land-use table; check them against the original before relying on a category.
+# collector radius A (m; None = smooth surface), alpha, gamma. From the paper's Table 3
+# (p. 553), seasonal category 3, "late autumn after frost, no snow" (its Table 2), for a
+# late-November blast; checked against the paper on Nov. 23, 2026. Land-use categories:
+# grass 6, crops 7 ("crops, mixed farming"), forest 5 ("mixed broadleaf and needleleaf
+# trees"), urban 15, desert 8, water 13/14. For water the paper gives z0 as a function of
+# wind speed; a fixed calm-sea value stands in.
 LAND_USE: dict[str, tuple[float, float | None, float, float]] = {
-    "grass": (0.03, 2e-3, 1.2, 0.54),
-    "crops": (0.10, 2e-3, 1.2, 0.54),
-    "forest": (1.0, 5e-3, 0.8, 0.56),
+    "grass": (0.05, 5e-3, 1.2, 0.54),
+    "crops": (0.02, 5e-3, 1.2, 0.54),
+    "forest": (1.15, 5e-3, 0.8, 0.56),
     "urban": (1.0, 10e-3, 1.5, 0.56),
-    "desert": (0.01, None, 50.0, 0.54),
+    "desert": (0.04, None, 50.0, 0.54),
     "water": (0.0002, None, 100.0, 0.50),
 }
 

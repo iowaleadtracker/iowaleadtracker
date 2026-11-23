@@ -92,6 +92,9 @@ MODEL_ARGS = [
     *("--specific-energy", "1.64"),
     *("--shots", "2"),
     *("--confinement", "earth-covered"),
+    # Mostly harvested cropland around the plant in late November (Zhang et al. 2001,
+    # "crops, mixed farming", late autumn).
+    *("--land-use", "crops"),
     *("--hours", "8"),
     *("--dt", "60"),
     *("--grid", "360"),

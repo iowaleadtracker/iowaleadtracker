@@ -394,10 +394,14 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
         (
             "Deposition",
             (
-                "Size-resolved dry deposition over grass; rain washout 10<sup>&minus;4</sup> "
+                "Size-resolved dry deposition over harvested cropland (late autumn); rain "
+                "washout 10<sup>&minus;4</sup> "
                 "s<sup>&minus;1</sup> per mm/h"
             ),
-            "Zhang et al. (2001); Slinn (1984); Seinfeld and Pandis (2016)",
+            (
+                "Zhang et al. (2001), crops and mixed farming, late autumn after frost; "
+                "Slinn (1984); Seinfeld and Pandis (2016)"
+            ),
         ),
         (
             "Run",
