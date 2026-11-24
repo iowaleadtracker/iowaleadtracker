@@ -77,6 +77,8 @@ ACCESSED = "accessed 20 November 2026"
 
 # Alphabetical by first author, then year. HTML.
 REFERENCES = [
+    "AMS, 2026: Rain. Glossary of Meteorology, American Meteorological Society, accessed "
+    "23 November 2026, " + _a("https://glossary.ametsoc.org/wiki/Rain") + ".",
     "Associated Press, 2026: Federal appeals court clears way for U.S. Army to detonate "
     "degraded bomb-making material in Iowa. Published by KCRG-TV9, 23 November 2026, accessed "
     "23 November 2026, "
@@ -90,6 +92,13 @@ REFERENCES = [
         "Aerostat-based sampling of emissions from open burning and open detonation of military "
         "ordnance. <i>J. Hazard. Mater.</i>, <b>284</b>, 108&ndash;120."
     ),
+    "Barton, T., and R. Opsahl, 2026: Court lifts administrative stay, allowing lead azide "
+    "detonation to move forward. Iowa Public Radio, 22 November 2026, updated 23 November 2026, "
+    "accessed 23 November 2026, "
+    + _a(
+        "https://www.iowapublicradio.org/ipr-news/2026-11-23/court-lifts-stay-block-iowa-lead-detonation"
+    )
+    + ".",
     "Billingham, E., and T. Barton, 2026: What public health experts say about Friday&rsquo;s "
     "lead azide detonation. Iowa Public Radio, 19 November 2026, "
     f"{ACCESSED}, "
@@ -158,6 +167,10 @@ REFERENCES = [
         "https://www.epa.gov/air-emissions-factors-and-quantification/ap-42-fifth-edition-volume-i-chapter-15-ordnance"
     )
     + ".",
+    "Fournier, J. D., 1999: Reflectivity-rainfall rate relationships in operational meteorology. "
+    "National Weather Service Forecast Office, Tallahassee, FL, accessed 23 November 2026, "
+    + _a("https://www.weather.gov/tae/research-zrpaper")
+    + ".",
     (
         "Gifford, F. A., 1961: Use of routine meteorological observations for estimating "
         "atmospheric dispersion. <i>Nucl. Saf.</i>, <b>2</b> (4), 47&ndash;51."
@@ -188,6 +201,8 @@ REFERENCES = [
     + ".",
     "McFate, L., 2026: Postponed: Lead azide detonation. U.S. Army Sustainment Command, "
     f"19 November 2026, {ACCESSED}, " + _a("https://www.army.mil/article/296926") + ".",
+    "NOAA, 2025: Radar images: Reflectivity. NOAA JetStream, last updated 11 March 2025, "
+    "accessed 23 November 2026, " + _a("https://www.noaa.gov/jetstream/reflectivity") + ".",
     (
         "Pasquill, F., 1961: The estimation of the dispersion of windborne material. <i>Meteor. "
         "Mag.</i>, <b>90</b>, 33&ndash;49."

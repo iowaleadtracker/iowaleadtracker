@@ -24,6 +24,7 @@ not official guidance.
 | `mirror.py` | turns the built site into the GitHub Pages mirror |
 | `index_template.html` | the landing page's HTML, CSS and script, filled in by `make_map_picker.py` |
 | `met_cache/map_met_all.json` | saved Open-Meteo forecasts for Monday at the new site (download times in `__fetched__`; the page shows when) |
+| `sky_grid.py`, `met_cache/sky_grid.json` | the maps' "sky cover & rain" layer: forecast cloud cover and precipitation on a finer grid, display only (see "The weather layer" below) |
 | `make_icons.py` | builds the site icons and profile images |
 | `outputs/site/` | the site. The repo holds only the hand-made files (`og.png`, icons, `brand/`); `make_map_picker.py --build` writes the page and the maps |
 
@@ -345,6 +346,42 @@ time costs a few hundred.
   another network. The cloud sandbox this was built in shares its address with other
   users and ran out several times.
 - Move or delete `met_cache/map_met_all.json` to download fresh forecasts (see below).
+- The weather layer's grid (`sky_grid.py --fetch`) counts as one request per point:
+  about 770 per model. It skips days that are over, asks HRRR only for days within 48
+  hours, and reuses each model's saved grid (HRRR for 6 hours, GFS for 12), so with the
+  3-hourly refresh it costs at most about 4,600 a day, while both models are needed. Its
+  requests are 25 seconds apart, for the per-minute limit. A failed download keeps the
+  saved grid and never stops the forecast refresh.
+
+### The weather layer
+
+Each map has an optional "sky cover & rain" layer (off by default): forecast cloud cover
+in white or gray, and precipitation as NWS radar reflectivity (dBZ). It is for display only.
+
+The forecast gives a rain rate, not reflectivity, so the map converts it with
+Z = 300R^1.4, the NWS default for the WSR-88D radars (Fournier 1999), and colors it in 5 dBZ
+steps sampled from the reflectivity scale in NOAA (2025), "Radar images: Reflectivity"
+(65 dBZ and up stay that scale's pink; its 70+ purple is left out). The legend also marks
+light, moderate and heavy rain as the AMS Glossary of Meteorology defines them (AMS 2026,
+"Rain": up to 0.25 cm an hour, 0.26 to 0.76, over 0.76). All three are in `works_cited.py`,
+checked against the pages on Nov. 23, 2026. Snow is shown as if it were rain, and an hour's
+total is lighter than a radar's instant peaks. Between points the map uses cubic
+interpolation, clamped to the surrounding points, so it never draws rain heavier or lighter
+than the forecast around it; rows are placed in the map's Web Mercator projection, like the
+lead layer. Deposition is brown: NOAA's scale draws light rain in blues and violets, so a blue
+or purple deposition ramp could be mistaken for rain.
+model keeps its own 5x5 grid (points about 90 miles apart); the layer uses a finer grid
+from `sky_grid.py`: 24 x 32 points 0.35° apart (about 24 miles), shown at full strength
+over 37.0-43.5°N, 96.7-87.5°W (all of Iowa, northern Missouri, western Illinois and every
+map's area) and fading out over two more points on each side. One model per map: HRRR
+when its run covers the map's hours (it reaches 18 to 48 hours ahead, depending on the
+run, so it is only asked for days within 48 hours); otherwise GFS. The legend names the model and when
+it was pulled, and says that the lead's path uses its own forecast.
+
+`met_cache/sky_grid.json` holds the download. The site build only reads it (a deploy
+never downloads), and without it the maps fall back to the lead model's coarse points.
+`sky_grid.py --fetch` downloads it again (or keeps it, as above; `--force` always
+downloads); `sky_grid.py` says what is saved.
 
 ## Refreshing on the day
 
@@ -352,7 +389,8 @@ Forecasts improve as the event approaches. The page and `met_cache/map_met_all.j
 (`__fetched__`) say when the saved ones were downloaded.
 
 1. Run `python3 tools/refresh_forecast.py` from the repository root. It moves the saved
-   file into a dated `met_cache_retrieved_*` folder, downloads new forecasts, rebuilds the
+   file into a dated `met_cache_retrieved_*` folder, downloads new forecasts and the
+   weather layer's grid (`sky_grid.py --fetch`), rebuilds the
    site and regenerates the golden test numbers. It exits with status 3, keeping the
    saved file, if the forecasts haven't changed.
 2. Check the news for the dated statements and open a pull request. Merging it deploys

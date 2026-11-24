@@ -8,19 +8,19 @@
 :root {
   --bg: #f6f5f2; --surface: #ffffff; --ink: #1d1d1b; --ink-2: #55544f; --ink-3: #6b6a64;
   --line: #e3e1db; --accent: #2a78d6; --map-bg: #e9e7e1; --chip: #f0efec;
-  --c-air: #eb6834; --c-dry: #2a78d6; --c-wet: #1baf7a;
+  --c-air: #eb6834; --c-dry: #8b5f31; --c-wet: #1baf7a;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #161615; --surface: #1f1f1d; --ink: #f0efea; --ink-2: #b9b8b1; --ink-3: #9a9993;
     --line: #34332f; --accent: #3987e5; --map-bg: #262624; --chip: #2a2a27;
-    --c-air: #d95926; --c-dry: #3987e5; --c-wet: #199e70;
+    --c-air: #d95926; --c-dry: #ad7f4c; --c-wet: #199e70;
   }
 }
 :root[data-theme="dark"] {
   --bg: #161615; --surface: #1f1f1d; --ink: #f0efea; --ink-2: #b9b8b1; --ink-3: #9a9993;
   --line: #34332f; --accent: #3987e5; --map-bg: #262624; --chip: #2a2a27;
-  --c-air: #d95926; --c-dry: #3987e5; --c-wet: #199e70;
+  --c-air: #d95926; --c-dry: #ad7f4c; --c-wet: #199e70;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -99,6 +99,13 @@ table.zones td.n, table.zones th.n { text-align: right; white-space: nowrap; pad
 aside section > h2:first-child { margin-top: 18px; }
 .zsw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 6px; }
 .legnote { width: 0; min-width: 100%; font-size: 11.5px; color: var(--ink-3); margin-top: 5px; padding-top: 4px; border-top: 1px solid var(--line); white-space: normal; }
+#legsky .legnote { margin-top: 2px; }
+#legskycloud { border: 1px solid var(--line); }
+.sky-rainbar { height: 9px; border-radius: 2px; margin-top: 2px; }
+.legend .sky-ticks { height: 14px; }
+.legend .sky-rate { color: var(--ink-3); }
+.legend .sky-ams { color: var(--ink-3); font-size: 10.5px; height: 13px; }
+.legend .sky-ams span { top: 0; border-left: 1px solid var(--ink-3); border-right: 1px solid var(--ink-3); text-align: center; transform: none; box-sizing: border-box; overflow: hidden; }
 .lz { display: flex; align-items: center; font-size: 12px; color: var(--ink-2); margin: 2px 0; gap: 6px; }
 .lz b { color: var(--ink); font-weight: 600; min-width: 46px; }
 .btnrow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
@@ -159,6 +166,15 @@ body.embedded > header { display: none; }
       <div id="legzones" hidden></div>
       <div class="lz" id="legenv" hidden></div>
       <div class="lz lpath" style="margin-top:4px"><svg width="26" height="8" aria-hidden="true"><line x1="1" y1="4" x2="25" y2="4" stroke="currentColor" stroke-width="2" stroke-dasharray="5 4"/></svg>Path of the cloud's center, labeled with the local time it passes</div>
+      <div id="legsky" hidden>
+        <div class="lz"><span class="zsw" id="legskycloud"></span>Forecast cloud cover (more solid = more overcast)</div>
+        <div class="lz"><span>Forecast rain or snow as radar reflectivity (dBZ)</span></div>
+        <div class="sky-rainbar" id="legskybar" aria-hidden="true"></div>
+        <div class="ticks sky-ticks" id="legskyticks"></div>
+        <div class="ticks sky-ticks sky-rate" id="legskyrate"></div>
+        <div class="ticks sky-ticks sky-ams" id="legskyams"></div>
+        <div class="legnote" id="legskynote"></div>
+      </div>
       <div class="legnote" id="legnote" hidden></div>
     </div>
     <div id="tip"></div>
@@ -174,6 +190,10 @@ body.embedded > header { display: none; }
     <dl id="budget"></dl>
     <h2>Peak on map</h2>
     <dl id="peak"></dl>
+    <section id="skysec" hidden>
+      <h2>Weather layer</h2>
+      <div class="note" id="skynote" style="margin-top:0"></div>
+    </section>
     <section id="zonesec" hidden>
       <h2>Levels of concern, release to end of this hour</h2>
       <div class="zonectl">
@@ -231,6 +251,7 @@ body.embedded > header { display: none; }
   <label class="opt" id="envwrap" hidden><input type="checkbox" id="showEnv"> <span id="envlabel"></span></label>
   <label class="opt"><input type="checkbox" id="showPuffs" checked> puffs</label>
   <label class="opt"><input type="checkbox" id="showWind" checked> wind</label>
+  <label class="opt" id="skywrap"><input type="checkbox" id="showSky"> sky cover &amp; rain</label>
   <label class="opt"><input type="checkbox" id="showTrack" checked> path times</label>
   <label class="opt">Map
     <select id="basemap">
@@ -534,7 +555,7 @@ renderStatic();
 
 // ---------- state ----------
 const S = {
-  hour: 1, field: "conc", units: "mass", decades: 5, puffs: true, wind: true, base: "auto", playing: false,
+  hour: 1, field: "conc", units: "mass", decades: 5, puffs: true, wind: true, sky: false, base: "auto", playing: false,
   lat: M.lat, lon: M.lon, z: 8,
   zoneMetric: M.zoneMetric || "m60", locs: M.loc.map((l) => l.value), track: true, env: false,
   dlocs: M.depLoc ? M.depLoc.map((l) => l.value) : [1e-6, 1e-5, 1e-4],
@@ -547,8 +568,10 @@ try { const s = Object(JSON.parse(localStorage.getItem("puffmap.prefs") || "{}")
 const RAMPS = {
   conc: { light: ["#fde3d4", "#f9b896", "#f28c5c", "#eb6834", "#c94e1f", "#9c3913", "#6e270b"],
           dark:  ["#5a200a", "#8a3412", "#bd4a1d", "#d95926", "#f0814f", "#f7ad85", "#fdd9c4"] },
-  dep:  { light: ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"],
-          dark:  ["#0d366b", "#184f95", "#256abf", "#3987e5", "#6da7ec", "#9ec5f4", "#cde2fb"] },
+  // brown, a color the radar scale of the weather layer doesn't use (its light rain is blue
+  // to violet, so a blue or purple deposition ramp could be mistaken for rain)
+  dep:  { light: ["#f1e4d3", "#dfc4a2", "#c9a173", "#ad7f4c", "#8b5f31", "#68431f", "#452b12"],
+          dark:  ["#452b12", "#68431f", "#8b5f31", "#ad7f4c", "#c9a173", "#dfc4a2", "#f1e4d3"] },
 };
 RAMPS.peak = RAMPS.conc; RAMPS.snap = RAMPS.conc;
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
@@ -814,6 +837,163 @@ function drawOverlay() {
   ctx.drawImage(warp, xw, yn, xe - xw, ys - yn);
   ctx.restore();
 }
+// Forecast sky cover and precipitation from the weather model, at the wind points (a coarse
+// grid), blended smoothly between points and drawn under the lead layer so the lead stays on top.
+// Styled like a weather map: clouds white (gray on light basemaps, where white wouldn't show),
+// precipitation as radar reflectivity.
+//
+// The forecast gives a rain rate R (mm/h, the hour's total), not reflectivity. It is turned into
+// the reflectivity a radar would see with Z = 300 R^1.4, "the primary default Z-R relationship
+// for the WSR-88D radar network" (Fournier 1999), so dBZ = 10 log10(300) + 14 log10(R): 1 mm/h
+// is 24.8 dBZ. Snow is shown as if it were rain. The colors, one per 5 dBZ step, are sampled
+// from the middle of each step of the reflectivity scale in NOAA (2025), "Radar images:
+// Reflectivity"; 65 dBZ and up stay that scale's 65-70 pink (its 70+ purple would look like
+// lead deposition). The legend marks rain intensity as the AMS Glossary of Meteorology defines
+// it (AMS 2026, "Rain"): light to 0.25 cm (0.10 in) an hour, moderate to 0.76 cm (0.30 in),
+// heavy above.
+const SKY_DBZ = [   // [lowest dBZ of the step, color] (NOAA 2025)
+  [5, [48, 48, 141]], [10, [80, 80, 186]], [15, [112, 112, 231]], [20, [93, 233, 93]],
+  [25, [66, 182, 66]], [30, [37, 132, 37]], [35, [10, 82, 10]], [40, [255, 222, 81]],
+  [45, [255, 147, 26]], [50, [231, 0, 0]], [55, [173, 0, 0]], [60, [117, 0, 0]], [65, [219, 153, 219]],
+];
+const SKY_DBZ_MIN = 10;     // left clear below this: 0.09 mm/h, under the forecast's 0.1 mm step
+const SKY_AMS = [2.5, 7.6]; // mm/h: light | moderate | heavy (AMS 2026; see above)
+const SKY_PAD = 2;          // empty grid points added around the data, so the layer fades out
+const skyDbz = (mm) => (mm > 0 ? 10 * Math.log10(300) + 14 * Math.log10(mm) : -Infinity);
+function skyRainColor(dbz) {
+  let c = null;
+  for (const [d, col] of SKY_DBZ) if (dbz >= d) c = col;
+  return c;
+}
+const sky = { cloud: document.createElement("canvas"), rain: document.createElement("canvas"), key: "" };
+const SKY_MODEL_NAMES = { ncep_hrrr_conus: "HRRR", gfs_seamless: "GFS" };
+// The layer's points and values this hour: the finer weather grid (meta.skyGrid, display
+// only) when the map has one, else the lead model's own weather points (the wind points).
+function skySource(h) {
+  const step = (v) => (v.length > 1 ? v[1] - v[0] : 1);
+  const SG = M.skyGrid;
+  if (SG && h.skyGrid) {
+    const nx = SG.lons.length;
+    return { lats: SG.lats, lons: SG.lons, dlat: step(SG.lats), dlon: step(SG.lons), fine: true,
+      each: (f) => h.skyGrid.c.forEach((c, k) => f(Math.floor(k / nx), k % nx, c, h.skyGrid.p[k])) };
+  }
+  if (!h.sky) return null;
+  const lats = [...new Set(h.wind.map((w) => w[0]))].sort((a, b) => a - b);
+  const lons = [...new Set(h.wind.map((w) => w[1]))].sort((a, b) => a - b);
+  return { lats, lons, dlat: step(lats), dlon: step(lons), fine: false,
+    each: (f) => h.wind.forEach(([la, lo], k) => f(lats.indexOf(la), lons.indexOf(lo), h.sky[k][0], h.sky[k][1])) };
+}
+// white clouds on dark and satellite maps, gray-blue on the light ones
+const skyWhite = () => ["dark", "imagery"].includes(baseStyle()) || (baseStyle() === "none" && isDark());
+function drawSky(h) {
+  const G = skySource(h);
+  if (!G) return;
+  const nx = G.lons.length, ny = G.lats.length, white = skyWhite();
+  const px = G.fine ? 12 : 32;   // drawn pixels per grid spacing
+  const key = S.hour + "|" + white + "|" + SYS;
+  if (key !== sky.key) {
+    sky.key = key;
+    // values on the grid with a border of zeros SKY_PAD points wide; row 0 is north
+    const gx = nx + 2 * SKY_PAD, gy = ny + 2 * SKY_PAD, cl = new Float32Array(gx * gy), pr = new Float32Array(gx * gy);
+    G.each((j, i, c, p) => {
+      const o = (ny - 1 - j + SKY_PAD) * gx + i + SKY_PAD;
+      cl[o] = Math.min(100, Math.max(0, c)) / 100; pr[o] = Math.max(0, p);
+    });
+    // Blend between points here (not in the browser's image scaling) so the rain color comes
+    // from the blended rate, the way a radar scale reads. Cubic (Catmull-Rom) interpolation
+    // passes through every point's value and curves between them (straight-line blending on a
+    // coarse grid draws boxes); it is clamped to the four surrounding points, so the layer
+    // never shows rain heavier or lighter than the forecast around it.
+    const pw = (gx - 1) * px, ph = (gy - 1) * px;
+    for (const c of [sky.cloud, sky.rain]) { c.width = pw; c.height = ph; }
+    const cImg = sky.cloud.getContext("2d").createImageData(pw, ph), rImg = sky.rain.getContext("2d").createImageData(pw, ph);
+    const cc = white ? [255, 255, 255] : [112, 124, 140], ca = white ? 0.62 : 0.42;
+    const cr = (t) => [((-t + 2) * t - 1) * t / 2, ((3 * t - 5) * t * t + 2) / 2, ((-3 * t + 4) * t + 1) * t / 2, (t - 1) * t * t / 2];
+    const node = (A, j, i) => A[Math.min(gy - 1, Math.max(0, j)) * gx + Math.min(gx - 1, Math.max(0, i))];
+    const cubic = (A, fx, fy) => {
+      const i = Math.min(gx - 2, Math.floor(fx)), j = Math.min(gy - 2, Math.floor(fy));
+      const wxs = cr(fx - i), wys = cr(fy - j);
+      let v = 0;
+      for (let b = 0; b < 4; b++) for (let a = 0; a < 4; a++) v += wys[b] * wxs[a] * node(A, j - 1 + b, i - 1 + a);
+      const q = [node(A, j, i), node(A, j, i + 1), node(A, j + 1, i), node(A, j + 1, i + 1)];
+      return Math.min(Math.max(...q), Math.max(Math.min(...q), v));
+    };
+    // Image rows are spaced as the map spaces latitude (Web Mercator), so stretching the image
+    // between its corners puts every row at the right latitude. Its edges are the outer
+    // padding points.
+    const latN = G.lats[ny - 1] + SKY_PAD * G.dlat, latS = G.lats[0] - SKY_PAD * G.dlat;
+    const yN = wy(latN, 0), yS = wy(latS, 0);
+    // The finer grid covers only a box: fade it out over its outer points (meta.skyGrid.fade),
+    // so where its data ends reads as a fade rather than the edge of a box.
+    const nf = G.fine ? M.skyGrid.fade ?? 2 : 0;
+    const fade = (fx, fy) => {
+      if (!G.fine) return 1;
+      const d = Math.min(fx - SKY_PAD, gx - 1 - SKY_PAD - fx, fy - SKY_PAD, gy - 1 - SKY_PAD - fy);
+      const t = Math.min(1, Math.max(0, (d + 0.5) / (nf + 0.5)));
+      return t * t * (3 - 2 * t);
+    };
+    for (let y = 0; y < ph; y++) {
+      const fy = (latN - ylat(yN + ((y + 0.5) / ph) * (yS - yN), 0)) / G.dlat;   // grid rows from the top
+      for (let x = 0; x < pw; x++) {
+        const fx = (x + 0.5) / px;
+        const q = (y * pw + x) * 4, f = fade(fx, fy), c = f * cubic(cl, fx, fy), p = cubic(pr, fx, fy);
+        cImg.data[q] = cc[0]; cImg.data[q + 1] = cc[1]; cImg.data[q + 2] = cc[2]; cImg.data[q + 3] = Math.round(255 * ca * c);
+        const z = skyDbz(p), rc = skyRainColor(Math.max(z, SKY_DBZ_MIN));
+        const ra = Math.min(1, Math.max(0, z - (SKY_DBZ_MIN - 1)));   // edge eased over 1 dBZ
+        if (ra > 0) { rImg.data[q] = rc[0]; rImg.data[q + 1] = rc[1]; rImg.data[q + 2] = rc[2]; rImg.data[q + 3] = Math.round(175 * ra * f); }
+      }
+    }
+    sky.cloud.getContext("2d").putImageData(cImg, 0, 0);
+    sky.rain.getContext("2d").putImageData(rImg, 0, 0);
+    $("legskycloud").style.background = `rgba(${cc},${ca})`;
+    // the bar: one band per 5 dBZ step from SKY_DBZ_MIN to 70 (the top steps are rare)
+    const lo = SKY_DBZ_MIN, hi = 70, at = (d) => ((d - lo) / (hi - lo)) * 100;
+    const steps = SKY_DBZ.filter(([d]) => d >= lo && d < hi);
+    $("legskybar").style.background = "linear-gradient(90deg," + steps.map(([d, c]) =>
+      `rgb(${c}) ${at(d)}% ${at(Math.min(hi, d + 5))}%`).join(",") + ")";
+    $("legskyticks").innerHTML = [10, 20, 30, 40, 50, 60, 70].map((d) =>
+      `<span style="left:${at(d)}%">${d}</span>`).join("");
+    const rate = (d) => 10 ** ((d - 10 * Math.log10(300)) / 14);   // mm/h at d dBZ
+    const rTxt = (mm) => (US() ? fmt(mm / 25.4, 1) : fmt(mm, 2));
+    $("legskyrate").innerHTML = [20, 30, 40, 50].map((d) =>
+      `<span style="left:${at(d)}%">${rTxt(rate(d))}</span>`).join("") +
+      `<span style="left:${at(60)}%">${US() ? "in/h" : "mm/h"}</span>`;
+    const [mod, heavy] = SKY_AMS.map((mm) => at(skyDbz(mm)));
+    // rain intensity (AMS 2026), one labeled band each (moderate is narrow: 30 to 37 dBZ)
+    const band = (a, b, t, title) => `<span style="left:${a}%;width:${b - a}%" title="${title}">${t}</span>`;
+    $("legskyams").innerHTML = band(0, mod, "light rain (AMS)", "AMS Glossary: light, up to 2.5 mm/h (0.10 in/h)") +
+      band(mod, heavy, "mod.", "AMS Glossary: moderate, 2.6 to 7.6 mm/h (0.11 to 0.30 in/h)") +
+      band(heavy, 100, "heavy", "AMS Glossary: heavy, over 7.6 mm/h (0.30 in/h)");
+    const km = Math.round(G.dlat * 111.2), apart = US() ? Math.round(km / 1.609) + " mi" : km + " km";
+    // the legend keeps one line; the explanation is in the side panel's "Weather layer"
+    $("legskynote").textContent = "Forecast, not radar or satellite. More under \u201cWeather layer\u201d.";
+    const zr = "Rain or snow is shown as radar reflectivity: the forecast's rain for the hour, " +
+      "converted with Z = 300R^1.4, the National Weather Service's default for its radars " +
+      "(Fournier 1999), with snow shown as if it were rain, and colored as on NOAA's reflectivity " +
+      "scale (NOAA 2025). It is not a radar measurement, and an hour's total runs lower than a " +
+      "radar's instant peaks. Light, moderate and heavy rain are as the American Meteorological " +
+      "Society defines them (AMS 2026). Sources are listed under References on the main page.";
+    let src;
+    if (G.fine) {
+      const SG = M.skyGrid, name = SKY_MODEL_NAMES[SG.model] || SG.model;
+      const when = SG.fetched ? `, pulled ${SG.fetched.replace("T", " ").replace(/:\d\d\+00:00$/, " UTC")}` : "";
+      src = `Clouds and rain: ${name} forecast${when}, on points about ${apart} apart. ` +
+        `The lead's path uses its own forecast (${M.weather}), so the two can differ.`;
+    } else {
+      src = `Clouds and rain: the weather model (${M.weather || "forecast"}), on points about ` +
+        `${apart} apart, so it shows only the broad pattern.`;
+    }
+    $("skynote").innerHTML = `<p style="margin:0 0 6px">${esc(src)}</p><p style="margin:0">${esc(zr)}</p>`;
+  }
+  // the image's edges are the outer padding points, SKY_PAD spacings past the grid's edge
+  const [x0, y0] = toScreen(G.lats[ny - 1] + SKY_PAD * G.dlat, G.lons[0] - SKY_PAD * G.dlon);
+  const [x1, y1] = toScreen(G.lats[0] - SKY_PAD * G.dlat, G.lons[nx - 1] + SKY_PAD * G.dlon);
+  ctx.save();
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(sky.cloud, x0, y0, x1 - x0, y1 - y0);
+  ctx.drawImage(sky.rain, x0, y0, x1 - x0, y1 - y0);
+  ctx.restore();
+}
 function arrow(x, y, dx, dy, color, width) {
   const L = Math.hypot(dx, dy); if (L < 2) return;
   const ux = dx / L, uy = dy / L, hl = Math.min(7, L * 0.4);
@@ -828,9 +1008,10 @@ function draw() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.fillStyle = getComputedStyle(document.body).getPropertyValue("--map-bg"); ctx.fillRect(0, 0, W, H);
   drawTiles();
+  const h = HRS[S.hour - 1];
+  if (S.sky) drawSky(h);
   drawOverlay();
   const ink = isDark() ? "rgba(240,239,234," : "rgba(29,29,27,";
-  const h = HRS[S.hour - 1];
   if (S.wind) for (const [la, lo, u, v] of h.wind) {
     const [x, y] = toScreen(la, lo);
     if (x < -20 || y < -20 || x > W + 20 || y > H + 20) continue;
@@ -1099,6 +1280,8 @@ $("units").onchange = (e) => { S.units = e.target.value; overlayKey = ""; syncLo
 $("decades").oninput = (e) => { S.decades = +e.target.value; render(); };
 $("showPuffs").onchange = (e) => { S.puffs = e.target.checked; schedule(); };
 $("showWind").onchange = (e) => { S.wind = e.target.checked; schedule(); };
+$("showSky").onchange = (e) => { S.sky = e.target.checked; $("legsky").hidden = $("skysec").hidden = !S.sky; schedule(); };
+if (!HRS.length || (!HRS[0].sky && !HRS[0].skyGrid)) $("skywrap").hidden = true;   // maps built before the weather layer
 $("showTrack").onchange = (e) => { S.track = e.target.checked; schedule(); };
 $("basemap").value = S.base;
 const savePrefs = () => { try { localStorage.setItem("puffmap.prefs", JSON.stringify({ base: S.base, sys: SYS })); } catch (err) {} };

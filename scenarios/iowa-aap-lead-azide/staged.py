@@ -119,6 +119,7 @@ def build() -> None:
     py = site.find_python()
     pulled = site.retrieved_at(CACHE) if CACHE.exists() else None
     as_of = ("--as-of", pulled.isoformat()) if pulled else ()
+    sky = site.sky_grid_args()
     for day in DAYS:
         for case, release_case, name in site.CASES:
             for t in TIMES:
@@ -138,6 +139,7 @@ def build() -> None:
                     *("--release-case", release_case),
                     *model_args(),
                     *as_of,
+                    *sky,
                     *("--home-url", site.SITE_URL),
                     *("--legend-note", note),
                     *("-o", str(MAPS / map_name(day, case, t))),

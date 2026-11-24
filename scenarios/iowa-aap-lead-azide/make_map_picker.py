@@ -413,6 +413,14 @@ def weather_for_day(day: str, pulled: dt.datetime | None) -> str:
     return weather_for(dt.datetime.fromisoformat(f"{day}T{DEFAULT}-06:00"), ref)
 
 
+def sky_grid_args() -> list[str]:
+    """``--sky-grid`` with the saved finer weather grid (sky_grid.py), or nothing if none."""
+    import sky_grid  # noqa: PLC0415
+
+    path = sky_grid.export()
+    return ["--sky-grid", str(path)] if path else []
+
+
 def build() -> None:
     """Run the model for every day, case and time, one after another (Open-Meteo limits)."""
     MAPS.mkdir(parents=True, exist_ok=True)
@@ -426,6 +434,7 @@ def build() -> None:
     forecast = f", forecast from {pulled_label(pulled)}" if pulled else ""
     args = list(MODEL_ARGS)
     w = args.index("--weather-model") + 1
+    sky = sky_grid_args()
     for day in days:
         args[w] = weather_for_day(day, pulled)  # one order per day (see weather_for_day)
         for case, release_case, name in CASES:
@@ -439,6 +448,7 @@ def build() -> None:
                     *("--release-case", release_case),
                     *args,
                     *as_of,
+                    *sky,
                     *("--home-url", SITE_URL),
                     *("--legend-note", f"{name} case, blast {blast_label(t, day)}{forecast}"),
                     *("-o", str(MAPS / map_name(case, t, day))),

@@ -94,7 +94,8 @@ jobs:
           text = html.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", page[i:j]))).strip()
           print(f"Forecasts pulled {cst:%b %-d, %Y, %-I:%M %p} CST by the scheduled refresh.\n")
           print(f"> {text}\n")
-          print("Changes: `met_cache/map_met_all.json` (the new pull) and `tests/data/` "
+          print("Changes: `met_cache/map_met_all.json` (the new pull), `met_cache/sky_grid.json` "
+                "(the maps' weather layer, display only) and `tests/data/` "
                 "(golden numbers regenerated for it). The full test suite passed.\n")
           print("**Before merging**, check the news: the court hold, the Iowa HHS time and "
                 "\"the Army hasn't announced a time for Wednesday\" (`forecast_summary.py`). "
@@ -108,7 +109,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -c "$BRANCH"
-          git add scenarios/*/met_cache/map_met_all.json tests/data/
+          git add scenarios/*/met_cache/map_met_all.json scenarios/*/met_cache/sky_grid.json tests/data/
           git commit -q -F - <<MSG
           $title
 

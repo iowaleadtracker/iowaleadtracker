@@ -182,13 +182,17 @@ def test_source_code_is_linked(rendered: tuple[str, list, str]) -> None:
 
 
 def test_court_pause_note_in_about_dialog() -> None:
-    """The About dialog reports the Eighth Circuit pause, with a link to the report."""
+    """The About dialog reports the Eighth Circuit case, with links to the reports."""
     page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
     start = page.index('<dialog id="note"')  # the "About this map" dialog
     about = page[start : page.index("</dialog>", start)]
     assert "<b>Court case.</b> $court_pause" in about
     assert "$court_sources" in about
     assert f'href="{fs.COURT_URL}"' in fs.COURT_SOURCES_HTML
+    assert f'href="{fs.RULING_URL}"' in fs.COURT_SOURCES_HTML
+    assert fs.RULING_URL.startswith("https://www.kcrg.com/")  # the AP report
+    assert f'href="{fs.SAND_URL}"' in fs.COURT_SOURCES_HTML
+    assert fs.SAND_URL.startswith("https://www.iowapublicradio.org/")
     assert f'href="{fs.FILING_URL}"' in fs.COURT_SOURCES_HTML
     assert fs.COURT_URL.startswith("https://www.iowapublicradio.org/")
     assert "until it rules on a request" in fs.COURT_PAUSE
@@ -258,7 +262,7 @@ def test_court_hold_leads_the_summary_and_faq(rendered: tuple[str, list, str]) -
     assert fs.COURT_URL in summary
     when = dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
     # Newest first: the president's Nov. 23 order, then the Army's Wednesday date.
-    assert when.startswith(f"{fs.TRUMP_HOLD} (Source: {fs.TRUMP_SOURCE_TEXT}.) ")
+    assert when.startswith(f"{fs.TRUMP_HOLD} (Sources: {fs.TRUMP_SOURCE_TEXT}.) ")
     assert (
         "The Army had said Wednesday, Nov. 25, 2026; it hasn\u2019t given a time. It had "
         "planned Monday, Nov. 23. On Nov. 22, the government told the court, which had put "
@@ -267,8 +271,10 @@ def test_court_hold_leads_the_summary_and_faq(rendered: tuple[str, list, str]) -
     assert fs.WHY_WEDNESDAY in when
     assert fs.ARMY_WED_URL in when
     assert fs.COURT_PAUSE in when
+    # the court lifted its hold on Nov. 23: nothing may say the permit is still on hold
+    assert "on hold by court order" not in llms
     assert "the court lifted its hold on the permit on Nov. 23" in llms
-    assert f"- Presidential hold: {fs.TRUMP_HOLD} Source: {fs.TRUMP_SOURCE_TEXT}" in llms
+    assert f"- Presidential hold: {fs.TRUMP_HOLD} Sources: {fs.TRUMP_SOURCE_TEXT}" in llms
     assert fs.COURT_PAUSE in llms
 
 
@@ -470,7 +476,7 @@ def test_about_box_cites_the_tuesday_filing() -> None:
     start = page.index('<dialog id="note"')
     about = " ".join(page[start : page.index("</dialog>", start)].split())
     assert (
-        "<b>When.</b> $trump_hold Source: $trump_source. $why_wednesday Source: "
+        "<b>When.</b> $trump_hold Sources: $trump_source. $why_wednesday Source: "
         "$wednesday_source.</p>"
     ) in about
     assert "<p><b>$time_head</b> $time_note</p>" in about
@@ -666,6 +672,7 @@ def test_wednesday_leads(rendered_wednesday_lead: tuple[str, list, str]) -> None
     assert fs.COURT_SOURCES_HTML.startswith(f'<a href="{fs.RULING_URL}"')
     assert "Sand" not in fs.COURT_HOLD
     assert "cleared the way for the detonation (see Court case)" in fs.TRUMP_HOLD
+    assert f'href="{fs.SAND_URL}"' in fs.COURT_SOURCES_HTML
     when = summary[summary.index("When will the detonation happen?") :]
     assert when.index(fs.WHY_WEDNESDAY) < when.index(fs.WHY_TUESDAY) < when.index(fs.WHY_MONDAY)
     why = [
@@ -739,6 +746,20 @@ def test_one_model_order_per_day(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     monkeypatch.setattr(site.subprocess, "run", fake_run)
     site.build()
     assert orders == {site.WEATHER}  # one order for the whole day: noon is over 18 h out
+
+
+def test_president_and_governor_elect_after_the_ruling() -> None:
+    """The Nov. 23 ruling and Sand's reply, quoted as Iowa Public Radio reported them."""
+    assert (
+        "\u201cthe Administration should make this decision based on the information they have "
+        "from the people they brought in to do the job months ago and have been on the ground "
+        "in Middletown for weeks.\u201d"
+    ) in fs.TRUMP_HOLD
+    assert "didn\u2019t directly say whether he approved" in fs.TRUMP_HOLD
+    for url in (fs.TRUMP_URL, fs.RULING_URL, fs.SAND_URL):
+        assert url in fs.TRUMP_SOURCE_TEXT
+    assert (fs.SAND_CITE, fs.SAND_URL) in fs.CITED_SOURCES
+    assert (fs.RULING_CITE, fs.RULING_URL) in fs.CITED_SOURCES
 
 
 def test_mentions_in_about_box() -> None:
