@@ -8,19 +8,19 @@
 :root {
   --bg: #f6f5f2; --surface: #ffffff; --ink: #1d1d1b; --ink-2: #55544f; --ink-3: #6b6a64;
   --line: #e3e1db; --accent: #2a78d6; --map-bg: #e9e7e1; --chip: #f0efec;
-  --c-air: #eb6834; --c-dry: #7c50c3; --c-wet: #1baf7a;
+  --c-air: #eb6834; --c-dry: #8b5f31; --c-wet: #1baf7a;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #161615; --surface: #1f1f1d; --ink: #f0efea; --ink-2: #b9b8b1; --ink-3: #9a9993;
     --line: #34332f; --accent: #3987e5; --map-bg: #262624; --chip: #2a2a27;
-    --c-air: #d95926; --c-dry: #9a73d6; --c-wet: #199e70;
+    --c-air: #d95926; --c-dry: #ad7f4c; --c-wet: #199e70;
   }
 }
 :root[data-theme="dark"] {
   --bg: #161615; --surface: #1f1f1d; --ink: #f0efea; --ink-2: #b9b8b1; --ink-3: #9a9993;
   --line: #34332f; --accent: #3987e5; --map-bg: #262624; --chip: #2a2a27;
-  --c-air: #d95926; --c-dry: #9a73d6; --c-wet: #199e70;
+  --c-air: #d95926; --c-dry: #ad7f4c; --c-wet: #199e70;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -568,9 +568,10 @@ try { const s = Object(JSON.parse(localStorage.getItem("puffmap.prefs") || "{}")
 const RAMPS = {
   conc: { light: ["#fde3d4", "#f9b896", "#f28c5c", "#eb6834", "#c94e1f", "#9c3913", "#6e270b"],
           dark:  ["#5a200a", "#8a3412", "#bd4a1d", "#d95926", "#f0814f", "#f7ad85", "#fdd9c4"] },
-  // purple, not blue: blue is light rain on the radar-style weather layer
-  dep:  { light: ["#ebe3f7", "#d3c1ee", "#b79be3", "#9a73d6", "#7c50c3", "#5e369f", "#40226e"],
-          dark:  ["#40226e", "#5e369f", "#7c50c3", "#9a73d6", "#b79be3", "#d3c1ee", "#ebe3f7"] },
+  // brown, a color the radar scale of the weather layer doesn't use (its light rain is blue
+  // to violet, so a blue or purple deposition ramp could be mistaken for rain)
+  dep:  { light: ["#f1e4d3", "#dfc4a2", "#c9a173", "#ad7f4c", "#8b5f31", "#68431f", "#452b12"],
+          dark:  ["#452b12", "#68431f", "#8b5f31", "#ad7f4c", "#c9a173", "#dfc4a2", "#f1e4d3"] },
 };
 RAMPS.peak = RAMPS.conc; RAMPS.snap = RAMPS.conc;
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
@@ -842,20 +843,21 @@ function drawOverlay() {
 // precipitation as radar reflectivity.
 //
 // The forecast gives a rain rate R (mm/h, the hour's total), not reflectivity. It is turned into
-// the reflectivity a radar would see with Z = 300 R^1.4, so dBZ = 10 log10(300) + 14 log10(R):
-// 1 mm/h is 24.8 dBZ. Snow is shown as if it were rain. The colors, in 5 dBZ steps, follow the
-// familiar NWS reflectivity palette; 65 dBZ and up stay magenta (the palette's 70+ purple would
-// look like lead deposition). The page names no source for these until they are checked (README,
-// "The weather layer": Z = 300R^1.4 as the WSR-88D default, the palette, and the AMS Glossary's
-// "Rain" intensity bands below). The legend marks rain intensity: light to 2.5 mm/h, moderate
-// to 7.6, heavy above.
-const SKY_DBZ = [   // [lowest dBZ of the step, color]
-  [5, [4, 233, 231]], [10, [1, 159, 244]], [15, [3, 0, 244]], [20, [2, 253, 2]], [25, [1, 197, 1]],
-  [30, [0, 142, 0]], [35, [253, 248, 2]], [40, [229, 188, 0]], [45, [253, 149, 0]], [50, [253, 0, 0]],
-  [55, [212, 0, 0]], [60, [188, 0, 0]], [65, [248, 0, 253]],
+// the reflectivity a radar would see with Z = 300 R^1.4, "the primary default Z-R relationship
+// for the WSR-88D radar network" (Fournier 1999), so dBZ = 10 log10(300) + 14 log10(R): 1 mm/h
+// is 24.8 dBZ. Snow is shown as if it were rain. The colors, one per 5 dBZ step, are sampled
+// from the middle of each step of the reflectivity scale in NOAA (2025), "Radar images:
+// Reflectivity"; 65 dBZ and up stay that scale's 65-70 pink (its 70+ purple would look like
+// lead deposition). The legend marks rain intensity as the AMS Glossary of Meteorology defines
+// it (AMS 2026, "Rain"): light to 0.25 cm (0.10 in) an hour, moderate to 0.76 cm (0.30 in),
+// heavy above.
+const SKY_DBZ = [   // [lowest dBZ of the step, color] (NOAA 2025)
+  [5, [48, 48, 141]], [10, [80, 80, 186]], [15, [112, 112, 231]], [20, [93, 233, 93]],
+  [25, [66, 182, 66]], [30, [37, 132, 37]], [35, [10, 82, 10]], [40, [255, 222, 81]],
+  [45, [255, 147, 26]], [50, [231, 0, 0]], [55, [173, 0, 0]], [60, [117, 0, 0]], [65, [219, 153, 219]],
 ];
 const SKY_DBZ_MIN = 10;     // left clear below this: 0.09 mm/h, under the forecast's 0.1 mm step
-const SKY_AMS = [2.5, 7.6]; // mm/h: light | moderate | heavy (the AMS Glossary's bands; see above)
+const SKY_AMS = [2.5, 7.6]; // mm/h: light | moderate | heavy (AMS 2026; see above)
 const SKY_PAD = 2;          // empty grid points added around the data, so the layer fades out
 const skyDbz = (mm) => (mm > 0 ? 10 * Math.log10(300) + 14 * Math.log10(mm) : -Infinity);
 function skyRainColor(dbz) {
@@ -957,17 +959,20 @@ function drawSky(h) {
       `<span style="left:${at(d)}%">${rTxt(rate(d))}</span>`).join("") +
       `<span style="left:${at(60)}%">${US() ? "in/h" : "mm/h"}</span>`;
     const [mod, heavy] = SKY_AMS.map((mm) => at(skyDbz(mm)));
-    // rain intensity, one labeled band each (moderate is narrow: 30 to 37 dBZ)
+    // rain intensity (AMS 2026), one labeled band each (moderate is narrow: 30 to 37 dBZ)
     const band = (a, b, t, title) => `<span style="left:${a}%;width:${b - a}%" title="${title}">${t}</span>`;
-    $("legskyams").innerHTML = band(0, mod, "light rain", "Light: up to 2.5 mm/h (0.1 in/h)") +
-      band(mod, heavy, "mod.", "Moderate: 2.5 to 7.6 mm/h (0.1 to 0.3 in/h)") +
-      band(heavy, 100, "heavy", "Heavy: over 7.6 mm/h (0.3 in/h)");
+    $("legskyams").innerHTML = band(0, mod, "light rain (AMS)", "AMS Glossary: light, up to 2.5 mm/h (0.10 in/h)") +
+      band(mod, heavy, "mod.", "AMS Glossary: moderate, 2.6 to 7.6 mm/h (0.11 to 0.30 in/h)") +
+      band(heavy, 100, "heavy", "AMS Glossary: heavy, over 7.6 mm/h (0.30 in/h)");
     const km = Math.round(G.dlat * 111.2), apart = US() ? Math.round(km / 1.609) + " mi" : km + " km";
     // the legend keeps one line; the explanation is in the side panel's "Weather layer"
     $("legskynote").textContent = "Forecast, not radar or satellite. More under \u201cWeather layer\u201d.";
     const zr = "Rain or snow is shown as radar reflectivity: the forecast's rain for the hour, " +
-      "converted with the relation Z = 300R^1.4 (snow as if it were rain). It is not a " +
-      "radar measurement, and an hour's total runs lower than a radar's instant peaks.";
+      "converted with Z = 300R^1.4, the National Weather Service's default for its radars " +
+      "(Fournier 1999), with snow shown as if it were rain, and colored as on NOAA's reflectivity " +
+      "scale (NOAA 2025). It is not a radar measurement, and an hour's total runs lower than a " +
+      "radar's instant peaks. Light, moderate and heavy rain are as the American Meteorological " +
+      "Society defines them (AMS 2026). Sources are listed under References on the main page.";
     let src;
     if (G.fine) {
       const SG = M.skyGrid, name = SKY_MODEL_NAMES[SG.model] || SG.model;

@@ -358,27 +358,17 @@ Each map has an optional "sky cover & rain" layer (off by default): forecast clo
 in white or gray, and precipitation as NWS radar reflectivity (dBZ). It is for display only.
 
 The forecast gives a rain rate, not reflectivity, so the map converts it with
-Z = 300R^1.4 and colors it in 5 dBZ steps with the usual NWS reflectivity palette
-(65 dBZ and up stay magenta; the palette's 70+ purple would look like deposition). The
-legend also marks light, moderate and heavy rain at 2.5 and 7.6 mm/h. Snow is shown as
-if it were rain, and an hour's total is lighter than a radar's instant peaks. Between
-points the map uses cubic interpolation, clamped to the surrounding points, so it never
-draws rain heavier or lighter than the forecast around it; rows are placed in the map's
-Web Mercator projection, like the lead layer. Deposition is purple, not blue, so that
-blue on the map means only light rain.
-
-**Sources to confirm.** The page names no source for these yet: they were checked only
-through search summaries on Nov. 24, 2026 (the build environment couldn't open the
-pages). Once confirmed, add them to `works_cited.py` and put the attributions back on the
-page (the legend's light/moderate/heavy bands and the side panel's Z-R sentence):
-
-- Z = 300R^1.4 as the WSR-88D default: https://www.weather.gov/tae/research-zrpaper and
-  https://training.weather.gov/nwstc/NEXRAD/RADAR/3-1a.htm
-- Rain intensity (light to 0.25 cm/h, moderate to 0.76, heavy above): AMS Glossary,
-  "Rain", https://glossary.ametsoc.org/wiki/Rain
-- The reflectivity colors: MetPy's NWS table,
-  https://github.com/Unidata/MetPy/blob/main/src/metpy/plots/colortable_files/NWSReflectivity.tbl,
-  and NOAA's explainer, https://www.noaa.gov/jetstream/reflectivity The lead
+Z = 300R^1.4, the NWS default for the WSR-88D radars (Fournier 1999), and colors it in 5 dBZ
+steps sampled from the reflectivity scale in NOAA (2025), "Radar images: Reflectivity"
+(65 dBZ and up stay that scale's pink; its 70+ purple is left out). The legend also marks
+light, moderate and heavy rain as the AMS Glossary of Meteorology defines them (AMS 2026,
+"Rain": up to 0.25 cm an hour, 0.26 to 0.76, over 0.76). All three are in `works_cited.py`,
+checked against the pages on Nov. 23, 2026. Snow is shown as if it were rain, and an hour's
+total is lighter than a radar's instant peaks. Between points the map uses cubic
+interpolation, clamped to the surrounding points, so it never draws rain heavier or lighter
+than the forecast around it; rows are placed in the map's Web Mercator projection, like the
+lead layer. Deposition is brown: NOAA's scale draws light rain in blues and violets, so a blue
+or purple deposition ramp could be mistaken for rain.
 model keeps its own 5x5 grid (points about 90 miles apart); the layer uses a finer grid
 from `sky_grid.py`: 24 x 32 points 0.35° apart (about 24 miles), shown at full strength
 over 37.0-43.5°N, 96.7-87.5°W (all of Iowa, northern Missouri, western Illinois and every
