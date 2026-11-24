@@ -538,7 +538,7 @@ $("bins").innerHTML = `<dt class="muted">diameter · density</dt><dd class="mute
 $("sizenote").textContent = (M.sizeNote ? `Sizes: ${usText(M.sizeNote)}. ` : "") + (M.releaseNote ? `Release: ${usText(M.releaseNote)}. ` : "") +
   (M.deposition ? `Deposition speed shown for a wind of ${fmtSpeed(5)}: ${usText(M.deposition)}.` : "");
 $("note").innerHTML =
-  `Gaussian puff model: Pasquill–Gifford stability, Briggs rural σ curves, ` +
+  `Gaussian puff model: ` + (M.spread ? `${esc(M.spread)}, ` : `Pasquill–Gifford stability, Briggs rural σ curves, `) +
   (M.nLev ? `winds from ${fmtLen(10)}, ${fmtLen(M.zUp)}, and ${M.nLev} pressure levels (${esc(M.levelNames.join(", "))}), ` : `winds blended from ${fmtLen(10)} to ${fmtLen(M.zUp)} then power law, `) +
   `tilted-puff settling, ` +
   (EX ? `explosion cloud height from the Church formula (H = 76·W<sup>¼</sup>, W in lb TNT of one charge), ` : "") +

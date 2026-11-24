@@ -20,13 +20,16 @@ officials.
 | Path | What it is |
 |---|---|
 | `puff_dispersal.py` | the command line: options, weather models and ensemble, and the map page |
-| `dispersal/` | the Gaussian puff model, one module per topic: units, source term, particles, deposition, dispersion, weather, the model, gridding, output |
+| `dispersal/` | the Gaussian puff model, one module per topic: units, source term, particles, deposition, dispersion, turbulence-based spread, weather, the model, gridding, output |
 | `template.html` | the interactive map page the model fills in |
 | `MODEL.md` | how the model works, every option, and its limits |
+| `TURBULENCE.md` | the two cloud-spread methods (`--spread briggs` or `turbulence`) and their comparison with HYSPLIT and measured tracer data |
 | `validate_explosion.py`, `validation_output.txt` | checks of the explosion source against published results |
+| `validation/hysplit-backtest/` | the HYSPLIT back-test behind TURBULENCE.md: setup, HYSPLIT inputs, earlier variants |
 | `scenarios/iowa-aap-lead-azide/` | the Iowa scenario: site build scripts, saved forecasts, and a README with every assumption and source |
 | `tests/` | the test suite: physics checked against published values, model properties, a golden run, and the site's safety wording |
 | `tools/compare_site.py` | proves two site builds are identical apart from build times |
+| `tools/tracer_sigma_y.py` | crosswind spread of each method against the Prairie Grass and Sagebrush tracer data |
 | `tools/site_key.py` | the key that lets a deploy reuse CI's build of the same files |
 | `tools/refresh_forecast.py` | downloads fresh forecasts, rebuilds the site and regenerates the golden test numbers |
 

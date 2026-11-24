@@ -14,6 +14,7 @@ import numpy as np
 
 from .constants import R_EARTH
 from .deposition import (
+    LAND_USE,
     deposition_velocity,
     schmidt_number,
     slinn_efficiency,
@@ -32,6 +33,9 @@ from .dispersion import (
     grow_sigma,
 )
 from .met import MetField, transport_wind
+from .turbulence import AVERAGING_DEFAULT_MIN, SIGMA_V_MIN_DEFAULT, T_AIR_DEFAULT, sigma_vw
+from .turbulence import grow as turbulent_grow
+from .turbulence import scaling as turbulence_scaling
 
 if TYPE_CHECKING:
     import argparse
@@ -325,6 +329,60 @@ def _hour_summary(
     }
 
 
+def _turbulent_growth(
+    a: argparse.Namespace,
+    met: MetField,
+    st: PuffState,
+    idx: IntArray,
+    where: tuple[FloatArray, FloatArray, FloatArray],
+    cls: IntArray,
+    blh: FloatArray,
+    dt_s: float,
+) -> tuple[FloatArray, FloatArray]:
+    """Return new sigma_y, sigma_z for the puffs ``idx`` under ``--spread turbulence``.
+
+    u*, L and w* from the weather at each puff (:func:`turbulence.scaling`), sigma_v
+    and sigma_w at its height (:func:`turbulence.sigma_vw`), then one growth step
+    (:func:`turbulence.grow`). Air temperature is ``--air-temperature-c`` when given,
+    else the weather source's 2 m temperature, else the standard atmosphere's 288.15 K.
+    """
+    th, lat, lon = where
+    u10 = np.hypot(met.sample("u", th, lat, lon), met.sample("v", th, lat, lon))
+    fixed = getattr(a, "air_temperature_c", None)
+    if fixed is not None:
+        t_air: FloatArray | float = fixed + 273.15
+    elif "t2" in met.f:
+        t_air = met.sample("t2", th, lat, lon)
+    else:
+        t_air = T_AIR_DEFAULT
+    u_star, obukhov, w_star = turbulence_scaling(
+        u10,
+        met.sample("sw", th, lat, lon),
+        met.sample("cloud", th, lat, lon),
+        blh,
+        LAND_USE[getattr(a, "land_use", "grass")][0],
+        t_air,
+    )
+    sv, sw = sigma_vw(
+        u_star,
+        obukhov,
+        w_star,
+        st.z[idx],
+        blh,
+        cls,
+        getattr(a, "sigma_v_min", SIGMA_V_MIN_DEFAULT),
+    )
+    return turbulent_grow(
+        st.sy[idx],
+        st.sz[idx],
+        sv,
+        sw,
+        obukhov > 0,
+        dt_s,
+        getattr(a, "spread_averaging", AVERAGING_DEFAULT_MIN),
+    )
+
+
 def run_model(  # noqa: PLR0915 - one time step, kept in one place on purpose
     a: argparse.Namespace,
     met: MetField,
@@ -377,6 +435,7 @@ def run_model(  # noqa: PLR0915 - one time step, kept in one place on purpose
     coslat0 = math.cos(math.radians(lat0))
     spray = _spray_zone(a, bins, pm_all, rho_of)
 
+    spread_turbulence = getattr(a, "spread", "briggs") == "turbulence"
     records: list[Record] = []
     hourly: list[Json] = []
     for step in range(n_steps):
@@ -396,8 +455,13 @@ def run_model(  # noqa: PLR0915 - one time step, kept in one place on purpose
             zt = np.clip(np.maximum(st.z[idx], 0.5 * np.minimum(st.sz[idx], blh)), 10.0, 3000.0)
             u, v = transport_wind(met, th, lat, lon, zt, cls, blh)
             ds = np.maximum(np.hypot(u, v), 0.5) * dt_s
-            st.sy[idx] = grow_sigma(st.sy[idx], cls, ds, SY_C, SY_K, SY_E)
-            st.sz[idx] = grow_sigma(st.sz[idx], cls, ds, SZ_C, SZ_K, SZ_E)
+            if spread_turbulence:
+                st.sy[idx], st.sz[idx] = _turbulent_growth(
+                    a, met, st, idx, (th, lat, lon), cls, blh, dt_s
+                )
+            else:
+                st.sy[idx] = grow_sigma(st.sy[idx], cls, ds, SY_C, SY_K, SY_E)
+                st.sz[idx] = grow_sigma(st.sz[idx], cls, ds, SZ_C, SZ_K, SZ_E)
             st.z[idx] = np.maximum(st.z[idx] - vs_all[idx] * dt_s, 0.0)
             lid = np.where(st.z[idx] <= blh, blh, np.inf)
             gz = ground_factor(st.z[idx], st.sz[idx], lid)

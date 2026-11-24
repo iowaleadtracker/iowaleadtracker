@@ -91,7 +91,9 @@ The home page has a blast-time dropdown (9:00 a.m. to 1:00 p.m., every hour; ope
 noon), a
 "Lead in the air" dropdown (Low, Middle, High, EPA permit), and a U.S./metric switch. It loads
 one map at a time, so the first visit stays small. The settings for the model runs (place,
-date, mass, weather models) are at the top of `make_map_picker.py`.
+date, mass, weather models, and since Nov. 24 the turbulence-based cloud spread,
+`--spread turbulence`; see `TURBULENCE.md` in the repository root) are at the top of
+`make_map_picker.py`.
 
 ```bash
 python3 make_map_picker.py --build --publish --deploy

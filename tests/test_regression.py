@@ -44,6 +44,7 @@ def site_argv() -> list[str]:
         *("--time", blast),
         *("--release-case", "permit-100"),
         *args,
+        *site.temperature_args(),
     ]
 
 

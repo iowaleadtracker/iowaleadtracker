@@ -12,6 +12,7 @@ pytest                 # everything, including full model runs (about 10 s)
 | `test_particles.py` | slip correction and settling speed against published tables |
 | `test_deposition.py` | the shape of the dry-deposition and drop-collection curves |
 | `test_dispersion.py` | Briggs coefficients, puff growth, ground reflection, the stability table |
+| `test_turbulence.py` | `--spread turbulence`: published formulas, minimums, growth, mass conservation, and σy against the Prairie Grass and Sagebrush tracer data in `data/tracer/` |
 | `test_model.py` | whole-model properties: mass conserved, linear in mass released, plume direction, analytic comparison |
 | `test_regression.py` | golden numbers for one published map |
 | `test_output.py` | packed fields and safe embedding in the HTML |

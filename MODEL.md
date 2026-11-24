@@ -166,6 +166,24 @@ toggle shows the highest value any direction gives, and draws the other paths. T
 view is the area that could be affected, not the area that will be affected at once.
 With several weather models, each model is turned through the same offsets.
 
+### Cloud spread
+
+How fast puffs widen and deepen. Details, every formula and the full comparison with
+HYSPLIT and two tracer experiments: [`TURBULENCE.md`](TURBULENCE.md).
+
+| Option | Default | Meaning |
+|---|---|---|
+| `--spread {briggs,turbulence}` | `briggs` | `briggs`: the original Briggs rural curves by Pasquill stability class. `turbulence`: growth from the turbulence at each puff (u\*, L, w\* by AERMOD's methods; σv, σw by CALPUFF's similarity formulas; Draxler time functions, linear beyond 550 m) |
+| `--sigma-v-min` | 0.2 | with `turbulence`: minimum crosswind turbulence σv, m/s |
+| `--spread-averaging` | 10 | with `turbulence`: averaging time, minutes, for crosswind growth (σv × (min/60)^0.2) |
+| `--air-temperature-c` | – | with `turbulence`: fixed air temperature instead of downloading it |
+
+In the checks so far the turbulence method matches measured spread better (Sagebrush
+0.78× measured against 0.55× for Briggs) and comes within 0.9–2.4× of HYSPLIT's zone
+distances on four past days, where the Briggs curves are up to 5× farther. The published
+maps use `turbulence` since Nov. 24, 2026 (`make_map_picker.py`, `MODEL_ARGS`); the
+command line's default is still `briggs`.
+
 ### Water spray at the source
 
 `--spray-flow L/MIN` adds a wetted zone around the source. It is a square with the
@@ -270,7 +288,9 @@ historical runs fall back to a power-law profile above 100 m.
 - **Stability**: Pasquill–Gifford class (A–F) from wind speed, solar radiation and cloud
   cover (Turner method).
 - **Growth**: Briggs rural σy and σz curves, using the virtual-distance method so a puff
-  keeps growing correctly when stability changes from hour to hour.
+  keeps growing correctly when stability changes from hour to hour. With `--spread
+  turbulence`, growth from σv and σw at the puff instead (Draxler time functions, the
+  same virtual-time stepping, linear beyond 550 m); see [`TURBULENCE.md`](TURBULENCE.md).
 - **Vertical**: tilted puff (the centre sinks at the settling velocity), with image
   reflections at the ground and at the mixing height, becoming well mixed once
   σz > 1.6 × mixing height.
@@ -341,6 +361,15 @@ This is a screening tool, not a regulatory or emergency-response model:
   about an hour. A single instantaneous puff spreads more slowly at first, so near the
   source the real cloud may be narrower, with higher peaks over a smaller area, than the
   model shows. The difference shrinks downwind and over an hour;
+- with the default Briggs spread, against HYSPLIT on four archived days the cloud's
+  daytime path and first hour agree, but after the first hour the model runs about
+  2–5× high in daytime neutral air (class D) because the Briggs crosswind spread grows
+  too slowly over hours, and in stable evening air its peak air is about half of
+  HYSPLIT's near-ground value; measured spread in Project Sagebrush was about 2× the
+  curves'. `--spread turbulence` addresses this ([`TURBULENCE.md`](TURBULENCE.md));
+- neither spread method represents the wide, abrupt wind-direction swings of calm, stable
+  nights (winds below about 1.5 m/s), which spread plumes across 50–150° of arc at
+  Sagebrush; the site's ±5° direction view is far narrower;
 - settling is counted twice: the puff centre sinks at the settling velocity, and the
   deposition velocity at the ground also includes it. This can remove somewhat too much
   of the largest particles (10 µm, about 3 cm/s) near the source; for breathable sizes

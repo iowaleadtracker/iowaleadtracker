@@ -33,6 +33,8 @@ def doi(d: str) -> str:
 
 #: Where the model, saved forecasts, assumptions and tests are published.
 SOURCE_URL = "https://github.com/iowaleadtracker/iowaleadtracker"
+# The spread-method cross-check (HYSPLIT and tracer data) linked from the methodology table.
+TURBULENCE_URL = SOURCE_URL + "/blob/main/TURBULENCE.md"
 #: The site's role inbox (no personal name; see the README's writing rules).
 CONTACT_EMAIL = "contact@iowaleadtracker.com"
 #: The site's Instagram account, for updates.
@@ -92,6 +94,9 @@ REFERENCES = [
         "Aerostat-based sampling of emissions from open burning and open detonation of military "
         "ordnance. <i>J. Hazard. Mater.</i>, <b>284</b>, 108&ndash;120."
     ),
+    "Barad, M. L., Ed., 1958: Project Prairie Grass, a field program in diffusion. Geophys. "
+    "Res. Pap. 59, AFCRC-TR-58-235, Air Force Cambridge Research Center; data as distributed "
+    "by J. S. Irwin, " + _a("https://harmo.org/jsirwin/Tracer_Data.html") + ".",
     "Barton, T., and R. Opsahl, 2026: Court lifts administrative stay, allowing lead azide "
     "detonation to move forward. Iowa Public Radio, 22 November 2026, updated 23 November 2026, "
     "accessed 23 November 2026, "
@@ -167,6 +172,11 @@ REFERENCES = [
         "https://www.epa.gov/air-emissions-factors-and-quantification/ap-42-fifth-edition-volume-i-chapter-15-ordnance"
     )
     + ".",
+    "Finn, D., K. L. Clawson, R. M. Eckman, H. Liu, E. S. Russell, Z. Gao, and S. Brooks, "
+    "2016: Project Sagebrush: Revisiting the value of the horizontal plume spread parameter "
+    "&sigma;<sub>y</sub>. <i>J. Appl. Meteor. Climatol.</i>, <b>55</b>, 1305&ndash;1322, "
+    + doi("10.1175/JAMC-D-15-0283.1")
+    + ".",
     "Fournier, J. D., 1999: Reflectivity-rainfall rate relationships in operational meteorology. "
     "National Weather Service Forecast Office, Tallahassee, FL, accessed 23 November 2026, "
     + _a("https://www.weather.gov/tae/research-zrpaper")
@@ -210,6 +220,12 @@ REFERENCES = [
     (
         "Schiller, L., and A. Naumann, 1933: &Uuml;ber die grundlegenden Berechnungen bei der "
         "Schwerkraftaufbereitung. <i>Z. Ver. Dtsch. Ing.</i>, <b>77</b>, 318&ndash;320."
+    ),
+    (
+        "Scire, J. S., D. G. Strimaitis, and R. J. Yamartino, 2000: <i>A User&rsquo;s Guide for "
+        "the CALPUFF Dispersion Model (Version 5)</i>. Earth Tech, Inc., "
+        + _a("https://calpuff.org/calpuff/download/CALPUFF_UsersGuide.pdf")
+        + "."
     ),
     (
         "Seinfeld, J. H., and S. N. Pandis, 2016: <i>Atmospheric Chemistry and Physics: From Air "
@@ -408,9 +424,36 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
             "Open-Meteo (Zippenfenig 2023); 5 &times; 5 grid of points around the plant",
         ),
         (
-            "Stability and spread",
-            "Pasquill&ndash;Gifford classes from wind, sunlight, and cloud; Briggs rural curves",
-            "Pasquill (1961); Gifford (1961); Turner (1970); Briggs (1973)",
+            "Cloud spread",
+            (
+                "Grows with the turbulence at each puff, worked out from the forecast wind, "
+                "sunshine, cloud, temperature and mixing height (the turbulence option of the "
+                "CALPUFF model). Crosswind growth is set to a 10-minute basis, which keeps the "
+                "cloud somewhat narrower and the levels along its path higher than a 1-hour "
+                "basis would. Until Nov. 24: stability-class curves (Briggs rural)"
+            ),
+            (
+                "Scire et al. (2000); stability classes, still used for minimum vertical "
+                "turbulence: Pasquill (1961); Gifford (1961); Turner (1970); earlier curves: "
+                "Briggs (1973)"
+            ),
+        ),
+        (
+            "Spread cross-check",
+            (
+                "Checked against measured spread in two tracer experiments and against "
+                "NOAA&rsquo;s HYSPLIT model on four past days. It gives about 0.8 times the "
+                "measured crosswind spread, on purpose, and puts the edges of the levels at "
+                "0.9&ndash;2.4 times HYSPLIT&rsquo;s distances; the earlier curves gave about half "
+                "the spread measured in the more recent test and up to 5 times HYSPLIT&rsquo;s "
+                "distances. Real levels "
+                "can still be higher or lower than shown. Right next to the plant, including "
+                "Middletown, a few degrees of wind decide the levels, which can be several "
+                "times higher or lower than shown. In calm evening and night air, plumes can "
+                "swing across a far wider arc than the map&rsquo;s &plusmn;5&deg; direction "
+                "view. Details: " + _a(TURBULENCE_URL, "TURBULENCE.md")
+            ),
+            "Barad (1958); Stein et al. (2015); Finn et al. (2016)",
         ),
         (
             "Evening mixing layer",
@@ -502,9 +545,53 @@ def method_intro(pct: dict[str, str]) -> str:
         "assume for its official plume maps and which the map shows first as the worst case, "
         f"and {pct['high']} (high), {pct['mid']} (middle) and {pct['low']} (low), based on "
         "Department of Energy and Army\u2013EPA research. The Army hasn\u2019t said what share it "
-        "expects; that is the most important number to check. Every setting and its source is "
-        "in the key-assumptions table below."
+        "expects; that is the most important number to check. The cloud spreads at a rate set "
+        "by the forecast\u2019s turbulence, with the formulas of the CALPUFF model (Scire et al. "
+        "2000); since Nov. 24 this replaces older curves that kept the cloud too narrow over "
+        "hours (see the change log below). Every setting and its source is in the "
+        "key-assumptions table."
     )
+
+
+#: What changed in the maps and their method, newest first (Central time dates). Add an
+#: entry for every change to the model, its settings or its sources.
+CHANGES_HEAD = "Change log"
+CHANGES = [
+    (
+        "Nov. 24",
+        "The cloud now spreads with the forecast&rsquo;s turbulence instead of fixed "
+        "stability-class curves. The new method matched measured spread in two tracer "
+        "experiments and NOAA&rsquo;s HYSPLIT model better. The cloud is wider: the highest "
+        "levels mostly reach less far, and the lowest air level covers a larger area. "
+        "Details: " + _a(TURBULENCE_URL, "TURBULENCE.md"),
+    ),
+    (
+        "Nov. 24",
+        (
+            "Blasts modeled every hour from 9 a.m. to 1 p.m., after the Army said &ldquo;Wednesday "
+            "morning&rdquo;; Thursday maps removed."
+        ),
+    ),
+    (
+        "Nov. 23",
+        (
+            "Dry deposition over cropland uses late-autumn values (Zhang et al. 2001); the "
+            "weather-model spread also runs each forecast with a revised scheme (Emerson et al. "
+            "2020). Source added for the 20% middle case (DOE 1994)."
+        ),
+    ),
+    (
+        "Nov. 22",
+        "Maps for Wednesday, Nov. 25, the Army&rsquo;s new date, with four forecast models.",
+    ),
+    ("Nov. 20", "First published."),
+]
+
+
+def changes_html() -> str:
+    """Return the change log as an HTML list."""
+    items = "".join(f"<li><b>{when}:</b> {what}</li>" for when, what in CHANGES)
+    return f'<ul class="changes">{items}</ul>'
 
 
 def render(ctx: dict[str, Any], site_url: str, built_txt: str) -> str:
@@ -526,6 +613,8 @@ def render(ctx: dict[str, Any], site_url: str, built_txt: str) -> str:
     today = dt.datetime.now(SITE_TZ).date()
     return f"""
   <p><b>{METHOD_HEAD}</b> {method_intro(ctx["pct"])}</p>
+  <h3>{CHANGES_HEAD}</h3>
+  {changes_html()}
   <h3>References</h3>
   <p class="meta">Sources for the model, data, and assumptions.</p>
   <ul class="refs">{refs}</ul>

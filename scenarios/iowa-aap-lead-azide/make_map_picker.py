@@ -104,6 +104,9 @@ MODEL_ARGS = [
     *("--land-use", "crops"),
     # The spread also runs each weather model with Emerson et al. (2020) deposition.
     "--deposition-spread",
+    # Cloud spread from the forecast's turbulence (TURBULENCE.md in the repository root),
+    # since Nov. 24, 2026; before that, Briggs rural curves by Pasquill-Gifford class.
+    *("--spread", "turbulence"),
     *("--hours", "8"),
     *("--dt", "60"),
     *("--grid", "360"),
@@ -286,6 +289,26 @@ def day_label(day: str) -> str:
     return f"{d.strftime('%A')}, {month} {d.day}"
 
 
+# The turbulence-based spread uses the forecast air temperature. Saved forecasts pulled
+# before the maps switched to it (Nov. 24, 2026) have none; for those the maps use 2 C, the
+# forecast at the plant over Wednesday's blast window (0-3 C, Open-Meteo, pulled Nov. 24).
+# Its effect is small (TURBULENCE.md, "Sensitivity"); the next refresh downloads it.
+FALLBACK_AIR_TEMPERATURE_C = "2"
+
+
+def temperature_args(cache: Path | None = None) -> list[str]:
+    """Return ``--air-temperature-c`` if a saved forecast file has no air temperatures.
+
+    A missing file (a refresh about to download) needs none: the download includes them.
+    """
+    path = cache or MET_CACHE
+    try:
+        has = "temperature_2m" in path.read_text(encoding="utf-8")
+    except OSError:
+        return []
+    return [] if has else ["--air-temperature-c", FALLBACK_AIR_TEMPERATURE_C]
+
+
 def cache_has_day(day: str, cache: Path | None = None) -> bool:
     """Say whether the saved forecasts (default: MET_CACHE) hold blasts on ``day``."""
     try:
@@ -439,7 +462,7 @@ def build() -> None:
     pulled = retrieved_at() if MET_CACHE.exists() else None
     as_of = ("--as-of", pulled.isoformat()) if pulled else ()
     forecast = f", forecast from {pulled_label(pulled)}" if pulled else ""
-    args = list(MODEL_ARGS)
+    args = list(MODEL_ARGS) + temperature_args()
     w = args.index("--weather-model") + 1
     sky = sky_grid_args()
     for day in days:
