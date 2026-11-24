@@ -104,8 +104,10 @@ python3 make_map_picker.py --build --publish --deploy
 - `--build` runs the model for the 12 main maps (3 times x 4 cases) and the staged maps. With
   the forecasts saved it runs up to 4 at a time with downloads off, and skips any blast
   time whose forecast isn't saved yet (a time added since the last refresh) until the next
-  refresh downloads it, so a deploy never downloads; without them (a refresh) it runs one
-  after another. With `met_cache/map_met_all.json` present, each run gets
+  refresh downloads it, so a deploy never downloads. Without them (a refresh), the first map
+  of each blast hour runs alone and downloads that hour's forecasts (8:30, then 9:00, which
+  9:30 shares), one at a time; the rest then run up to 4 at a time from what those saved.
+  With `met_cache/map_met_all.json` present, each run gets
   `--as-of` set to when those forecasts were pulled, so a rebuild on any later date or
   machine replays the same weather offline and makes the same maps.
 - `--publish` copies the site files to the folder named by `publish_dir` in
@@ -381,7 +383,8 @@ time costs a few hundred.
   about 770 per model. It skips days that are over, asks HRRR only for days within 48
   hours, and reuses each model's saved grid (HRRR for 6 hours, GFS for 12), so with the
   3-hourly refresh it costs at most about 4,600 a day, while both models are needed. Its
-  requests are 25 seconds apart, for the per-minute limit. A failed download keeps the
+  requests are 25 seconds apart, for the per-minute limit (2 seconds with a commercial key
+  in `OPEN_METEO_API_KEY`). A failed download keeps the
   saved grid and never stops the forecast refresh.
 
 ### The weather layer
