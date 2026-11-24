@@ -341,6 +341,11 @@ This is a screening tool, not a regulatory or emergency-response model:
   about an hour. A single instantaneous puff spreads more slowly at first, so near the
   source the real cloud may be narrower, with higher peaks over a smaller area, than the
   model shows. The difference shrinks downwind and over an hour;
+- against HYSPLIT on four archived days (`validation/hysplit-backtest/`), the cloud's
+  daytime path and first hour agree, but after the first hour the model runs about
+  2–5× high in daytime neutral air (class D) because the Briggs crosswind spread grows
+  too slowly over hours, and in stable evening air its peak air is about half of
+  HYSPLIT's near-ground value;
 - settling is counted twice: the puff centre sinks at the settling velocity, and the
   deposition velocity at the ground also includes it. This can remove somewhat too much
   of the largest particles (10 µm, about 3 cm/s) near the source; for breathable sizes
