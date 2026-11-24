@@ -835,8 +835,9 @@ def test_methodology_and_references_dialog() -> None:
 
 def test_change_log_follows_the_method_note() -> None:
     """A dated change log sits right after the method note, newest first, with the spread switch."""
-    ctx = {
-        "pct": {"low": "7%", "mid": "20%", "high": "55%", "permit": "100%"},
+    pct = {"low": "7%", "mid": "20%", "high": "55%", "permit": "100%"}
+    ctx: dict[str, Any] = {
+        "pct": pct,
         "n_models": "two",
         "got_txt": "now",
         "shown_model": "GFS",
@@ -844,13 +845,13 @@ def test_change_log_follows_the_method_note() -> None:
     }
     body = works_cited.render(ctx, "https://example.org/", "now")
     head = f"<h3>{works_cited.CHANGES_HEAD}</h3>"
-    assert body.index(works_cited.method_intro(ctx["pct"])) < body.index(head)
+    assert body.index(works_cited.method_intro(pct)) < body.index(head)
     assert body.index(head) < body.index("<h3>References</h3>")
     days = [int(when.split()[-1]) for when, _ in works_cited.CHANGES]
     assert days == sorted(days, reverse=True)
     assert "turbulence" in works_cited.CHANGES[0][1]
     assert works_cited.TURBULENCE_URL in works_cited.CHANGES[0][1]
-    assert "change log" in works_cited.method_intro(ctx["pct"])
+    assert "change log" in works_cited.method_intro(pct)
 
 
 def test_site_maps_use_the_turbulence_spread() -> None:
