@@ -1,4 +1,4 @@
-"""Golden numbers for one published map: the EPA permit case, noon blast.
+"""Golden numbers for one published map: the EPA permit case at the default blast time.
 
 Runs the site's exact model options on the saved forecasts (met_cache/), so it needs
 no network, and compares field totals and maxima with tests/data/. A change here means
@@ -23,7 +23,9 @@ import pytest
 from . import conftest
 from .conftest import run_puff
 
-GOLDEN = Path(__file__).with_name("data") / "golden_permit_1200.json"
+# The map the page opens on (site.DEFAULT): its forecast is always in the saved file, which a
+# refresh downloads only for the blast times the site builds.
+GOLDEN = Path(__file__).with_name("data") / f"golden_permit_{site.DEFAULT.replace(':', '')}.json"
 FIELDS = ("conc", "peak", "dep", "m60", "env_conc", "env_dep")
 # Field totals and maxima agree to about 1e-6 between machines, not to the last bit: numpy
 # picks different vectorized math (exp, erf) for different CPUs, and a last-digit difference
@@ -32,8 +34,8 @@ FIELD_REL = 1e-5
 
 
 def site_argv() -> list[str]:
-    """Return the site's options for the noon permit map, in the model order its build picks."""
-    blast = f"{site.DATE}T12:00-06:00"
+    """Return the site's options for the default permit map, in the model order its build picks."""
+    blast = f"{site.DATE}T{site.DEFAULT}-06:00"
     args = list(site.MODEL_ARGS)
     args[args.index("--weather-model") + 1] = site.weather_for_day(
         site.DATE, site.retrieved_at() or conftest.FORECAST_PULLED
@@ -65,7 +67,7 @@ def fingerprint(out: dict[str, Any]) -> dict[str, Any]:
 
 @pytest.mark.slow
 @pytest.mark.usefixtures("frozen_clock")
-def test_permit_noon_matches_golden() -> None:
+def test_permit_default_time_matches_golden() -> None:
     _, out = run_puff(site_argv())
     got = fingerprint(out)
     want = json.loads(GOLDEN.read_text(encoding="utf-8"))
