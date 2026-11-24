@@ -34,19 +34,32 @@ truth, and its results here are not official NOAA or government material.
   are 1.2–1.8× HYSPLIT's, but peak hourly air at hours 2–3 is about half of HYSPLIT's:
   HYSPLIT keeps the lead in a thin, concentrated layer near the ground. This matters for
   maps that run into the evening.
-- **Widening the cloud everywhere overcorrects in stable air.** A Heffter-style crosswind
-  growth plus doubled vertical growth brought the daytime cases to 1.0–2.0× HYSPLIT but
-  cut stable-evening peak air to a tenth of HYSPLIT's. Applying it only in classes A–D
-  keeps every daytime result at or above HYSPLIT and leaves stable air as it is now.
+- **Widening the cloud at a fixed rate overcorrects in stable air.** A Heffter-style
+  crosswind growth (0.5 m/s), with or without doubled vertical growth, brought the daytime
+  cases to 1.0–2.0× HYSPLIT but cut stable-evening peak air to a tenth of HYSPLIT's.
+  Applying it only in classes A–D keeps every daytime result at or above HYSPLIT and
+  leaves stable air as it is now.
+- **A turbulence-based spread tracks HYSPLIT on all four cases** (see "Turbulence-based
+  prototype"): growth set by the crosswind and vertical turbulence (σv, σw), estimated
+  from the weather by the published AERMOD/CALPUFF methods, instead of stability classes.
+  Distances came within 0.7–1.6× of HYSPLIT on every case, including the stable evening,
+  and first-hour peaks within about 25%. Later daytime peaks ran 0.4–0.7× HYSPLIT's, so it
+  is no longer always on the cautious side.
+- **Field data say stable-night plumes are narrow filaments that swing widely.** Project
+  Sagebrush Phase 2 found night plumes covering 50–150° of arc, as wide as by day, but
+  made of narrow filaments with concentrations one to two orders of magnitude above
+  daytime ones (see "Literature"). One map cannot show both; a narrow cloud plus a wide
+  direction-uncertainty view at night would.
 - **The deposition scheme moves the ground zones a lot but not the air.** Emerson et al.
   (2020) instead of Zhang et al. (2001) changed the ground zones by up to about 50% and
   deposited about a third more lead, but did not change the ratios to HYSPLIT. HYSPLIT's
   own particle deposition scheme deposited about 4.5× more lead than HYSPLIT with our
   deposition speeds (Monday only).
 
-Not yet done: a proper daytime mixing scheme in place of the doubled vertical growth, a
-look at why stable-air peaks run low, more days (including the blast day once its HRRR
-weather is archived), and the repository's validation checks with any change in place.
+Not yet done: a direction-uncertainty view sized by the turbulence and wind speed at night,
+tests against measured tracer data (Prairie Grass, Sagebrush) rather than only HYSPLIT,
+more days (including the blast day once its HRRR weather is archived), and the
+repository's validation checks and tests with any change in place.
 
 ## Method
 
@@ -183,6 +196,103 @@ days and the current results on the stable evening, which was class F throughout
 With Emerson speeds in both models the ratios are within about 0.1–0.5 of these, except
 the windy day's current ≥40 µg/ft² ratio (4.3×, clipped by the map edge).
 
+### Heffter crosswind growth alone
+
+Run because CALPUFF switches every puff to Heffter's linear growth once it is 550 m wide,
+whatever the stability. Ours ÷ HYSPLIT (Zhang): overcast 2.2 / 2.7 / 1.9 / 1.7×, sunny
+1.7 / 1.0 / 1.9 / 1.6×, windy 1.7 / 1.8 / 1.9 / 1.3×, stable evening 0.6 / 0.7 / 0.9 /
+**0.1×** (air ≥ PAC-1 / ground ≥100 / ground ≥40 / peak air h3). The fixed 0.5 m/s growth
+rate, not the doubled vertical growth, is what fails in stable air.
+
+## Literature
+
+How established models and field experiments handle crosswind spread. Formulas are as
+printed in the cited documents (read Nov. 24, 2026).
+
+**Models.**
+
+| Model | Crosswind spread | Crosswind turbulence σv | Minimum σv | Long range / meander |
+|---|---|---|---|---|
+| This model | Briggs rural curves by stability class, σy = c x (1 + 0.0001 x)^−½ (class D c = 0.08) | not used | – | – |
+| CALPUFF `MDISP=2` | σy = σv t fy, Draxler fy = [1 + 0.9 (t/1000 s)^½]^−1 (Eqs. 2-39, 2-65) | similarity: daytime σv = [4u\*² e^(−1.8z/h) + 0.35w\*²]^½; stable σv = u\*[1.6Cs z/L + 1.8 e^(−0.9z/h)]/(1 + z/L), Cs = (1 − z/h)^¾ (Eqs. 2-52 to 2-64) | 0.5 m/s, all classes | Heffter (σy ∝ t) once σy reaches 550 m (SYTDEP) |
+| CALPUFF `MDISP=3` (regulatory default) | Pasquill–Gifford tables; σy × (t/60 min)^0.2 for averaging time | – | – | same switch |
+| AERMOD (EPA-454/B-26-003, July 2026) | σy = σv x / [u (1 + 78X)^0.3], X = σv x/(u zi), for a near-surface release (Eqs. 77–78) | σv² = 3.6u\*² + 0.35w\*² (Eqs. 38–41) | 0.2 m/s | coherent and random (meandering) plumes weighted by σr²/σh², time scale 24 h (Eqs. 71–73) |
+| HYSPLIT (ARL-224) | particles: Langevin, horizontal Lagrangian time scale 10,800 s, so spread grows about linearly with time for hours; puffs: dσh/dt = σu (Eqs. 56–58, 80) | stable v′² = 4.5u\*²(1 − z/zi)^1.5, unstable v′² = 0.36w\*² (Kantha and Clayson; Eqs. 61–72) | – | horizontal deformation diffusivity (Eq. 51) |
+| SCIPUFF / HPAC | second-order closure; also predicts concentration variance | boundary-layer profiles | not found | separate mesoscale "large-scale variability" inputs |
+
+u\*, L and w\* come from routine data by AERMET's methods: net radiation from cloud cover
+and sun (Holtslag and van Ulden), H = 0.9Rn/(1 + 1/Bo), Monin–Obukhov iteration by day;
+θ\* = 0.09(1 − 0.5n²) and the Venkatram u\* quadratic at night (AERMOD formulation Sec. 3).
+
+**Field evaluations.**
+
+- *Irwin (1983)*, 11 tracer sites: Draxler's turbulence-based scheme gave "the smallest
+  mean fractional error" and beat Pasquill–Gifford at Prairie Grass and Karlsruhe.
+- *Project Sagebrush Phase 1* (Finn et al. 2016; daytime continuous releases, arcs 200 to
+  3,200 m): σy "consistently high by a factor of ~2" relative to the Pasquill–Gifford,
+  Markee and Briggs curves for classes B–D beyond about 400 m, larger also than AERMOD's
+  scheme; averaging time (10–60 min) mattered little; Prairie Grass σθ "likely to be
+  unrealistically low, especially at nighttime in low wind speed conditions."
+- *Project Sagebrush Phase 2* (NOAA Tech. Memo, 2016 tests; Finn et al. manuscript on
+  wind-direction changes): night tests with 1.5 m releases and arcs at 100–400 m, winds
+  about 1 m/s, classes E–F. Plumes "often subtended 100–150 degrees of arc" (IOP 5) and
+  "50–100 degrees" (IOP 7), "much larger than that suggested by the measured σθ";
+  "comparable to daytime". But night concentrations peaked one to two orders of magnitude
+  above daytime ones, the tracer staying in one place for more than 10 minutes, then
+  shifting tens to over 100 degrees within 10 minutes. Large direction shifts were
+  "largely restricted to near surface wind speeds less than 1.5 m s-1". Concentration
+  "is best represented by a probability distribution, and one with fat tails."
+- *EPA CALPUFF tracer evaluation* (Paumier and Brode 1998; Savannah River, Great Plains,
+  INEL): turbulence-based and Pasquill–Gifford options both within a factor of 2 at
+  about 100 km with no clear winner; at 600 km σy was 2.5–3.5× too large, mostly from an
+  unresolved night-time low-level jet; Pasquill–Gifford's vertical growth produced
+  spurious secondary maxima.
+
+## Turbulence-based prototype
+
+Scratch only, not in the repository. Each step, every puff's growth is set by turbulence
+at its height instead of by stability class:
+
+1. u\*, L and w\* from the 10 m wind, measured shortwave radiation, cloud cover and mixing
+   height, by AERMET's methods (albedo 0.2, Bowen ratio 1.0, 280 K assumed; roughness
+   0.02 m for crops).
+2. σv and σw from CALPUFF's `MDISP=2` formulas, with CALPUFF's σw minimums by class and a
+   σv minimum of 0.2 m/s (AERMOD) or 0.5 m/s (CALPUFF).
+3. Growth by Draxler's travel-time functions (fy as above; fz = [1 + 0.9 (t/500)^½]^−1 by
+   day, [1 + 0.945 (t/100)^0.806]^−1 when stable), advanced by the virtual-time method;
+   once σy passes 550 m, linear growth at σv (CALPUFF's switch, at the turbulence rate
+   instead of Heffter's fixed one).
+
+Typical values: overcast noon u\* 0.35 m/s, L −53 m, w\* 1.1 m/s, σv 0.9 m/s; clear night
+u\* 0.06 m/s, L 5 m, σv at the 0.2 m/s floor.
+
+| Case | Run | Peak air h2 / h3 / h5 | Air ≥ PAC-1 | Ground ≥100 / ≥40 µg/ft² | Lead deposited |
+|---|---|---|---|---|---|
+| Overcast | Turbulence, σv ≥ 0.2 | 21 / 8 / 3 | 12 mi | 8.3 / 15 mi | 687 lb |
+| Overcast | **HYSPLIT** | 21 / 13 / 9 | 12 mi | 5.9 / 14 mi | 595 lb |
+| Sunny | Turbulence, σv ≥ 0.2 | 13 / 5 / 2 | 10 mi | 6.5 / 12 mi | 658 lb |
+| Sunny | **HYSPLIT** | 15 / 8 / 9 | 8.2 mi | 5.3 / 11 mi | 677 lb |
+| Windy | Turbulence, σv ≥ 0.2 | 7 / 3 / 0 | 9.9 mi | 8.5 / 14 mi | 734 lb |
+| Windy | **HYSPLIT** | 15 / 8 / 1 | 14 mi | 11 / 16 mi | 507 lb |
+| Stable evening | Turbulence, σv ≥ 0.2 | 594 / 309 / 84 | 48 mi | 38 / 40 mi | 1,123 lb |
+| Stable evening | Turbulence, σv ≥ 0.5 | 162 / 48 / 15 | 27 mi | 25 / 35 mi | 1,124 lb |
+| Stable evening | **HYSPLIT** | 554 / 495 / 97 | 45 mi | 23 / 38 mi | 1,662 lb |
+
+The daytime cases do not depend on the σv minimum (σv is 0.9–1.2 m/s). First-hour peaks
+were 752 / 963 / 543 / 1,458 µg/m³ against HYSPLIT's 1,000 / 801 / 636 / 1,742.
+
+Ours ÷ HYSPLIT (air ≥ PAC-1 / ground ≥100 / ground ≥40 / peak air h3), σv ≥ 0.2: overcast
+1.1 / 1.4 / 1.1 / 0.6×, sunny 1.2 / 1.2 / 1.1 / 0.7×, windy 0.7 / 0.8 / 0.9 / 0.4×, stable
+evening 1.0 / 1.6 / 1.1 / 0.6×.
+
+**Reading it against the field data.** In daytime the prototype is close to HYSPLIT, whose
+horizontal spread also grows about linearly with time. At night the two σv minimums bracket
+what Sagebrush Phase 2 measured: 0.2 m/s gives a narrow, concentrated filament like the
+observed night peaks; 0.5 m/s spreads the lead over a wider area like the observed arcs.
+A narrow cloud for concentrations, plus a direction-uncertainty view that widens at night
+and in winds below about 1.5 m/s, would represent both. The site's fixed ±5° view is far
+narrower than the 50–150° night arcs measured at Sagebrush.
+
 ## Related check: wind-grid resolution
 
 The model samples winds on a 5×5 grid (about 150 km apart) around the plant. Rerunning
@@ -209,6 +319,27 @@ weather without NOAA's permission. These runs used archived weather. HYSPLIT its
 NOAA's weather files are not in this repository; only our inputs and the numbers above.
 
 ## References
+
+- Draxler, R. R., 1976: Determination of atmospheric diffusion parameters. *Atmos.
+  Environ.*, **10**, 99–105. (Functions as printed in Scire et al. 2000.)
+- Draxler, R. R., and G. D. Hess, 1997: Description of the HYSPLIT_4 modeling system.
+  NOAA Tech. Memo. ERL ARL-224 (revised), https://repository.library.noaa.gov/view/noaa/31133.
+- EPA, 2026: AERMOD model formulation. EPA-454/B-26-003,
+  https://gaftp.epa.gov/aqmg/SCRAM/models/preferred/aermod/aermod_mfd.pdf.
+- Finn, D., and Coauthors, 2016: Project Sagebrush: Revisiting the value of the horizontal
+  plume spread parameter σy. *J. Appl. Meteor. Climatol.*, **55**, 1305–1322,
+  https://repository.library.noaa.gov/view/noaa/52272.
+- Finn, D., R. M. Eckman, Z. Gao, and H. Liu: Mechanisms for wind direction changes in the
+  very stable boundary layer. Manuscript, https://repository.library.noaa.gov/view/noaa/20853.
+- Irwin, J. S., 1983: Estimating plume dispersion—A comparison of several sigma schemes.
+  *J. Climate Appl. Meteor.*, **22**, 92–114. (Abstract only.)
+- NOAA ARL, Project Sagebrush Phase 2 (technical memorandum),
+  https://repository.library.noaa.gov/view/noaa/15646.
+- Paumier, J. O., and R. W. Brode, 1998: Comparison of CALPUFF modeling results to two
+  tracer field experiments. EPA-454/R-98-009,
+  https://gaftp.epa.gov/aqmg/SCRAM/models/other/calpuff/tracer.pdf.
+- Scire, J. S., D. G. Strimaitis, and R. J. Yamartino, 2000: A user's guide for the CALPUFF
+  dispersion model (version 5). Earth Tech, https://calpuff.org/calpuff/download/CALPUFF_UsersGuide.pdf.
 
 - Emerson, E. W., and Coauthors, 2020: Revisiting particle dry deposition and its role in
   radiative effect estimates. *Proc. Natl. Acad. Sci. USA*, **117**, 26076–26082,
