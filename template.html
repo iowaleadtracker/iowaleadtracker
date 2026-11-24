@@ -190,6 +190,10 @@ body.embedded > header { display: none; }
     <dl id="budget"></dl>
     <h2>Peak on map</h2>
     <dl id="peak"></dl>
+    <section id="skysec" hidden>
+      <h2>Weather layer</h2>
+      <div class="note" id="skynote" style="margin-top:0"></div>
+    </section>
     <section id="zonesec" hidden>
       <h2>Levels of concern, release to end of this hour</h2>
       <div class="zonectl">
@@ -951,17 +955,22 @@ function drawSky(h) {
       band(mod, heavy, "mod.", "AMS moderate: 2.5 to 7.6 mm/h (0.1 to 0.3 in/h)") +
       band(heavy, 100, "heavy", "AMS: over 7.6 mm/h (0.3 in/h)");
     const km = Math.round(G.dlat * 111.2), apart = US() ? Math.round(km / 1.609) + " mi" : km + " km";
-    const zr = "Reflectivity is the forecast's hourly rain converted with the NWS radar default " +
-      "Z = 300R^1.4 (snow as if rain), not a radar measurement. ";
+    // the legend keeps one line; the explanation is in the side panel's "Weather layer"
+    $("legskynote").textContent = "Forecast, not radar or satellite. More under \u201cWeather layer\u201d.";
+    const zr = "Rain or snow is shown as radar reflectivity: the forecast's rain for the hour, " +
+      "converted with the NWS radar default Z = 300R^1.4 (snow as if it were rain). It is not a " +
+      "radar measurement, and an hour's total runs lower than a radar's instant peaks.";
+    let src;
     if (G.fine) {
       const SG = M.skyGrid, name = SKY_MODEL_NAMES[SG.model] || SG.model;
       const when = SG.fetched ? `, pulled ${SG.fetched.replace("T", " ").replace(/:\d\d\+00:00$/, " UTC")}` : "";
-      $("legskynote").textContent = zr + `${name} forecast${when}, on points about ${apart} apart. ` +
+      src = `Clouds and rain: ${name} forecast${when}, on points about ${apart} apart. ` +
         `The lead's path uses its own forecast (${M.weather}), so the two can differ.`;
     } else {
-      $("legskynote").textContent = zr + `From the weather model (${M.weather || "forecast"}); ` +
-        `its points are about ${apart} apart, so it shows only the broad pattern.`;
+      src = `Clouds and rain: the weather model (${M.weather || "forecast"}), on points about ` +
+        `${apart} apart, so it shows only the broad pattern.`;
     }
+    $("skynote").innerHTML = `<p style="margin:0 0 6px">${esc(src)}</p><p style="margin:0">${esc(zr)}</p>`;
   }
   // the image's pixel centers are px apart in grid units; its corners sit half a pixel out
   // from the border points, which are SKY_PAD spacings past the outer grid points
@@ -1260,7 +1269,7 @@ $("units").onchange = (e) => { S.units = e.target.value; overlayKey = ""; syncLo
 $("decades").oninput = (e) => { S.decades = +e.target.value; render(); };
 $("showPuffs").onchange = (e) => { S.puffs = e.target.checked; schedule(); };
 $("showWind").onchange = (e) => { S.wind = e.target.checked; schedule(); };
-$("showSky").onchange = (e) => { S.sky = e.target.checked; $("legsky").hidden = !S.sky; schedule(); };
+$("showSky").onchange = (e) => { S.sky = e.target.checked; $("legsky").hidden = $("skysec").hidden = !S.sky; schedule(); };
 if (!HRS[0].sky && !HRS[0].skyGrid) $("skywrap").hidden = true;   // maps built before the weather layer
 $("showTrack").onchange = (e) => { S.track = e.target.checked; schedule(); };
 $("basemap").value = S.base;
