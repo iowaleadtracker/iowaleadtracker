@@ -64,8 +64,12 @@ PAST_DAYS = [("2026-11-23", "mon"), ("2026-11-24", "tue")]
 LEAD_DAYS = ["2026-11-25"]
 LEAD_DAY = LEAD_DAYS[0]
 LAT, LON = 40.825518, -91.266502
-TIMES = ["11:00", "11:15", "11:30", "11:45", "12:00", "12:15", "12:30"]
-DEFAULT = "12:00"  # the Nov. 20 detonation had been set for about noon (Iowa HHS)
+# Hourly from 9 a.m. to 1 p.m. (forecast_summary.WINDOW): the Army Secretary said on Nov. 23
+# the blasts will be "Wednesday morning", and Iowa HHS had given about noon for Nov. 23.
+# Each start hour sizes its own wind grid, so each costs one Open-Meteo grid download per
+# weather model and day (README "Open-Meteo limits"); quarter hours within an hour are free.
+TIMES = ["09:00", "10:00", "11:00", "12:00", "13:00"]
+DEFAULT = "10:00"  # mid-morning: the Army said "Wednesday morning" (no clock time)
 NOON_HOUR = 12
 # (id used in file names and the URL, --release-case, label). See README "Release cases".
 CASES = [

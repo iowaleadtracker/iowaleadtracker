@@ -147,7 +147,18 @@ WEDNESDAY_SOURCE_TEXT = f"{ARMY_WED_CITE}, {ARMY_WED_URL}"
 # President Trump's Truth Social post of Monday, Nov. 23, 2026, as quoted by KCRG (published
 # 12:29 p.m. CST, updated 12:36 p.m.; read in full on the page Nov. 23, 2026). KCRG: "The Army
 # had no immediate comment when asked about the president's social media post." It gave no
-# new date; the Army had planned Wednesday.
+# new date; the Army had planned Wednesday. The Army Secretary's post that evening did.
+# The Acting Secretary of the Army's post on X (@SecArmy, pinned; posted the evening of
+# Nov. 23, 2026, after the 8th Circuit's order; text checked from the maintainer's
+# screenshot, taken about 11 p.m. CST when the post was 2 hours old). No permalink was
+# available, so this links the account, where the post is pinned. It gives no clock time.
+SECARMY_URL = "https://x.com/SecArmy"
+SECARMY_CITE = "Acting Secretary of the Army on X, Nov. 23, 2026"
+SECARMY_MORNING = (
+    "On the evening of Nov. 23, the Acting Secretary of the Army said the Army will proceed "
+    "with \u201can extensively mitigated, carefully controlled detonation, which will occur "
+    "this Wednesday morning, as previously scheduled, based on forecast wind conditions.\u201d"
+)
 TRUMP_URL = "https://www.kcrg.com/2026/11/23/president-trump-orders-military-pause-iowa-detonation/"
 TRUMP_CITE = "KCRG, Nov. 23, 2026"
 TRUMP_HOLD = (
@@ -160,7 +171,7 @@ TRUMP_HOLD = (
     "make this decision based on the information they have from the people they brought in "
     "to do the job months ago and have been on the ground in Middletown for weeks.\u201d The "
     "Army had no immediate comment on the ruling or the president\u2019s post, the Associated "
-    "Press reported, and it hasn\u2019t announced a new date."
+    "Press reported. " + SECARMY_MORNING
 )
 PERMIT_URL = (
     "https://www.epa.gov/system/files/documents/2026-11/"
@@ -216,8 +227,9 @@ COURT_HOLD = (
     "Army to detonate the lead azide, the Associated Press reported. It lifted its hold on "
     "the EPA\u2019s emergency permit, finding that the Iowa Environmental Council and the "
     "Sierra Club\u2019s Iowa chapter hadn\u2019t proven that the EPA and the Army had not "
-    "adequately considered other options, Iowa Public Radio reported. The Army hadn\u2019t "
-    "commented on the ruling or announced a new date. "
+    "adequately considered other options, Iowa Public Radio reported. That evening, the "
+    "Acting Secretary of the Army said the detonation will be Wednesday morning, as "
+    "previously scheduled. "
     "Late on Nov. 22, the Army said the blasts are now scheduled for Wednesday, "
     "Nov. 25. Earlier that day, the government asked the 8th U.S. Circuit Court of Appeals "
     "to lift its hold on the EPA\u2019s emergency permit for the blasts and said the Army had "
@@ -233,8 +245,12 @@ COURT_HOLD = (
 
 # The planned day (the Army's Nov. 22 announcement), which the summary leads with by
 # default (facts()["day"] can name another), and the earlier day Iowa HHS gave "approximately
-# noon" for, which the 11 a.m. to 12:30 p.m. window comes from ("No time yet." says so).
+# noon" for. The window (WINDOW) now spans the Army's "Wednesday morning" and that noon.
 PLANNED_DAY = "Wednesday, Nov. 25"
+#: The blast times the maps model, in words; must match make_map_picker.TIMES and
+#: staged.TIMES (tests/test_site.py checks).
+WINDOW = "9 a.m. to 1 p.m."
+WINDOW_HOURLY = "every hour from " + WINDOW
 HHS_DAY = "Monday, Nov. 23"
 
 
@@ -252,8 +268,8 @@ def window_note(day: str) -> str:
         return ""
     weekday = day.split(",", maxsplit=1)[0]
     return (
-        f"No time has been given for {weekday}, so these maps use the same 11 a.m. to "
-        "12:30 p.m. window."
+        f"No time has been given for {weekday}, so these maps use the same {WINDOW} "
+        "window."
     )
 
 
@@ -289,18 +305,21 @@ KCCI_CITE = "KCCI, Nov. 22, 2026"
 TRUMP_SOURCE_HTML = (
     f'<a href="{TRUMP_URL}" rel="noopener">{TRUMP_CITE}</a>; '
     f'<a href="{RULING_URL}" rel="noopener">{RULING_CITE}</a>; '
-    f'<a href="{SAND_URL}" rel="noopener">{SAND_CITE}</a>'
+    f'<a href="{SAND_URL}" rel="noopener">{SAND_CITE}</a>; '
+    f'<a href="{SECARMY_URL}" rel="noopener">{SECARMY_CITE}</a>'
 )
 TRUMP_SOURCE_TEXT = (
-    f"{TRUMP_CITE}, {TRUMP_URL}; {RULING_CITE}, {RULING_URL}; {SAND_CITE}, {SAND_URL}"
+    f"{TRUMP_CITE}, {TRUMP_URL}; {RULING_CITE}, {RULING_URL}; {SAND_CITE}, {SAND_URL}; "
+    f"{SECARMY_CITE}, {SECARMY_URL}"
 )
 # Newest first, like the paragraph.
 COURT_SOURCES_TEXT = (
-    f"{RULING_CITE}, {RULING_URL}; {SAND_CITE}, {SAND_URL}; {WEDNESDAY_SOURCE_TEXT}; "
+    f"{SECARMY_CITE}, {SECARMY_URL}; {RULING_CITE}, {RULING_URL}; {SAND_CITE}, {SAND_URL}; {WEDNESDAY_SOURCE_TEXT}; "
     f"{RESPONSE_CITE}, {RESPONSE_URL}; "
     f"{FILING_CITE}, {FILING_URL}; {COURT_CITE}, {COURT_URL}"
 )
 COURT_SOURCES_HTML = (
+    f'<a href="{SECARMY_URL}" rel="noopener">{SECARMY_CITE}</a>; '
     f'<a href="{RULING_URL}" rel="noopener">{RULING_CITE}</a>; '
     f'<a href="{SAND_URL}" rel="noopener">{SAND_CITE}</a>; '
     f"{WEDNESDAY_SOURCE_HTML}; "
@@ -314,6 +333,7 @@ TUESDAY_SOURCES_TEXT = (
 # Sources cited in plain text as "Citation, URL". The visible FAQ shows each as a link
 # on the citation (make_map_picker.linkify); JSON-LD and llms.txt keep the full address.
 CITED_SOURCES = (
+    (SECARMY_CITE, SECARMY_URL),
     (RULING_CITE, RULING_URL),
     (SAND_CITE, SAND_URL),
     (TRUMP_CITE, TRUMP_URL),
@@ -345,6 +365,7 @@ HHS_LINK = f'<a href="{HHS_URL}" rel="noopener">Iowa HHS fact sheet</a>'
 # Sources named in parentheses without their address, as "(Iowa HHS fact sheet)". The page
 # links each name (time_note_html, and make_map_picker.linkify for the FAQ).
 NAMED_SOURCES = (
+    ("Acting Secretary of the Army on X", SECARMY_URL),
     ("Iowa HHS fact sheet", HHS_URL),
     ("Nov. 22 court filing", RESPONSE_URL),
 )
@@ -610,7 +631,8 @@ def time_note(built_txt: str) -> str:
     """Say the Army hasn't given a time, what's modeled, and where the window comes from."""
     return (
         f"As of this update ({built_txt}), the Army hasn\u2019t announced a time for "
-        "Wednesday. These maps model blasts from 11 a.m. to 12:30 p.m., around the "
+        "Wednesday; it has said only \u201cWednesday morning\u201d (Acting Secretary of the "
+        f"Army on X). These maps model blasts {WINDOW_HOURLY}, covering the morning and the "
         "\u201capproximately noon\u201d that Iowa HHS\u2019s fact sheet gave for the earlier "
         "Monday, Nov. 23 date (Iowa HHS fact sheet). The permit has the Army update its "
         "estimate of where lead dust could go at least 48 hours before the blasts and hourly "
@@ -619,7 +641,7 @@ def time_note(built_txt: str) -> str:
 
 
 def time_note_html(built_txt: str) -> str:
-    """Return time_note() with its two sources linked."""
+    """Return time_note() with its sources linked."""
     out = time_note(built_txt)
     for name, url in NAMED_SOURCES:
         out = out.replace(f"({name})", f'(<a href="{url}" rel="noopener">{name}</a>)')
@@ -919,7 +941,7 @@ def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) ->
 the window follow almost the same path. {t.forecast_line}</p>
   <h3>How far lead on the ground could reach{on}</h3>
   <p>Farthest distance from the plant where lead on the ground reaches each EPA dust-lead action
-    level by the end of the 8-hour run, for any blast time from 11 a.m. to 12:30 p.m. The
+    level by the end of the 8-hour run, for any blast time from {WINDOW} The
     levels are 5 \u00b5g/ft\u00b2 (floors), 40 \u00b5g/ft\u00b2 (window sills), and \
 100 \u00b5g/ft\u00b2
     (window troughs). They are for indoor dust, so outdoor lead is only a rough comparison. The
@@ -1046,13 +1068,14 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             "## Key facts",
             "",
             (
-                "- Blast: no new date announced. President Trump ordered a hold on Nov. 23 (see "
-                "Presidential hold); the Army had scheduled Wednesday, Nov. 25, 2026 (Army, "
-                "Nov. 22), after "
+                "- Blast: Wednesday morning, Nov. 25, 2026, no exact time (Acting Secretary of "
+                "the Army on X, Nov. 23, after the court ruling; President Trump had ordered a "
+                "hold earlier that day, see Presidential hold); the Army had scheduled "
+                "Wednesday on Nov. 22 (Army, Nov. 22), after "
                 "Monday, Nov. 23 and Tuesday, Nov. 24 (Nov. 22 court filing); the court lifted its "
                 "hold on the permit on Nov. 23 (see Court case), Iowa Army Ammunition "
                 f"Plant, Middletown, Iowa ({ctx['lat']:.4f}, {ctx['lon']:.4f}). Blast times "
-                "modeled: 11 a.m. to 12:30 p.m. CST on " + ", ".join(modeled) + "."
+                f"modeled: {WINDOW_HOURLY} CST, on " + ", ".join(modeled) + "."
             ),
             (
                 f"- Court case: {court_pause([m['day'] for m in more], lead)} "

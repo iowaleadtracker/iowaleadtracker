@@ -483,8 +483,20 @@ def test_about_box_cites_the_tuesday_filing() -> None:
     assert "<b>$earlier_head</b> $why_tuesday Sources: $tuesday_sources. $why_monday" in about
     assert fs.TIME_HEAD == "No time yet."
     assert fs.time_note("X").startswith(
-        "As of this update (X), the Army hasn\u2019t announced a time for Wednesday."
+        "As of this update (X), the Army hasn\u2019t announced a time for Wednesday; it has "
+        "said only \u201cWednesday morning\u201d (Acting Secretary of the Army on X)."
     )
+
+
+def test_window_words_match_the_blast_times() -> None:
+    """The page's "9 a.m. to 1 p.m." matches the times both sites build, hourly."""
+    for times in (site.TIMES, staged.TIMES):
+        assert [site.label(t) for t in (times[0], times[-1])] == ["9:00 a.m.", "1:00 p.m."]
+        assert fs.WINDOW == "9 a.m. to 1 p.m."
+        assert all(t.endswith(":00") for t in times)
+        assert [int(t[:2]) for t in times] == list(range(9, 14))
+    assert site.DEFAULT in site.TIMES
+    assert staged.DEFAULT_TIME in staged.TIMES
 
 
 @pytest.mark.slow
@@ -535,7 +547,7 @@ def test_read_maps_days_and_model_counts(tmp_path: Path, monkeypatch: pytest.Mon
     for c, _, _ in site.CASES:
         for t in site.TIMES:
             (tmp_path / site.map_name(c, t)).write_text(_fake_map(four), encoding="utf-8")
-            if t != "12:30":  # Thursday is missing one time
+            if t != "13:00":  # Thursday is missing one time
                 (tmp_path / site.map_name(c, t, thu)).write_text(
                     _fake_map(four[:3]), encoding="utf-8"
                 )
@@ -543,7 +555,7 @@ def test_read_maps_days_and_model_counts(tmp_path: Path, monkeypatch: pytest.Mon
     assert list(maps.days) == ["2026-11-25"]  # partly built Thursday left out
     assert site.lead_day(maps) == site.DATE == site.LEAD_DAY  # opens on Wednesday
     for c, _, _ in site.CASES:
-        (tmp_path / site.map_name(c, "12:30", thu)).write_text(
+        (tmp_path / site.map_name(c, "13:00", thu)).write_text(
             _fake_map(four[:3]), encoding="utf-8"
         )
     maps = site.read_maps()
@@ -730,8 +742,8 @@ def test_one_model_order_per_day(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     monkeypatch.setattr(site, "MAPS", tmp_path / "maps")
     monkeypatch.setattr(site.staged, "CACHE", tmp_path / "none.json")
     monkeypatch.setattr(site, "days_to_build", lambda: ["2026-11-25"])
-    # 5:40 p.m. CST Tuesday: 11:00 Wednesday is 17.3 h away, noon 18.3 h (rounded: 17 h, 19 h)
-    pulled = dt.datetime.fromisoformat("2026-11-24T17:40-06:00")
+    # 3:40 p.m. CST Tuesday: 9:00 Wednesday is 17.3 h away, 10:00 (the default) 18.3 h
+    pulled = dt.datetime.fromisoformat("2026-11-24T15:40-06:00")
     monkeypatch.setattr(site, "retrieved_at", lambda *_a, **_k: pulled)
     orders = set()
 
@@ -745,7 +757,7 @@ def test_one_model_order_per_day(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 
     monkeypatch.setattr(site.subprocess, "run", fake_run)
     site.build()
-    assert orders == {site.WEATHER}  # one order for the whole day: noon is over 18 h out
+    assert orders == {site.WEATHER}  # one order for the whole day: 10 a.m. is over 18 h out
 
 
 def test_president_and_governor_elect_after_the_ruling() -> None:
