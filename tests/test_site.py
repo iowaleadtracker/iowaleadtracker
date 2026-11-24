@@ -688,7 +688,9 @@ def test_wednesday_leads(rendered_wednesday_lead: tuple[str, list, str]) -> None
     )
     assert fs.COURT_HOLD.index("cleared the way") < fs.COURT_HOLD.index("Late on Nov. 22")
     assert fs.COURT_HOLD.index("Tuesday, Nov. 24") < fs.COURT_HOLD.index("Late on Nov. 19")
-    assert fs.COURT_SOURCES_HTML.startswith(f'<a href="{fs.RULING_URL}"')
+    # newest first: the Army Secretary's post that evening, then the ruling
+    assert fs.COURT_SOURCES_HTML.startswith(f'<a href="{fs.SECARMY_URL}"')
+    assert fs.COURT_SOURCES_HTML.index(fs.SECARMY_URL) < fs.COURT_SOURCES_HTML.index(fs.RULING_URL)
     assert "Sand" not in fs.COURT_HOLD
     assert "cleared the way for the detonation (see Court case)" in fs.TRUMP_HOLD
     assert f'href="{fs.SAND_URL}"' in fs.COURT_SOURCES_HTML
