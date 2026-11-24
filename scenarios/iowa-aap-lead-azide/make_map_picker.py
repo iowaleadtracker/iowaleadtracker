@@ -460,7 +460,8 @@ def sky_grid_args() -> list[str]:
 CACHE_ONLY_ENV = "PUFF_MET_CACHE_ONLY"
 NOT_SAVED_EXIT = 3
 # Model runs at once when every forecast is saved: nothing is downloaded, so Open-Meteo's
-# limits don't apply. A build that downloads (a refresh) runs them one after another.
+# limits don't apply. A build that downloads (a refresh) downloads one run at a time and
+# runs the rest at once from what those saved (run_maps).
 PARALLEL_RUNS = max(1, min(4, os.cpu_count() or 1))
 # One math-library thread per run when they run at once: numpy's OpenBLAS otherwise starts a
 # thread per core in every run, and four runs fighting over the cores took about ten times
@@ -477,16 +478,49 @@ class Run:
     out: Path
 
 
+def start_hour(r: Run) -> str:
+    """Return the run's blast day and hour (``2026-11-25T09``), or its label without ``--time``.
+
+    Each start hour sizes its own wind grid, so runs in the same hour (any case, and 9:00
+    and 9:30) use the same downloads.
+    """
+    return r.cmd[r.cmd.index("--time") + 1][:13] if "--time" in r.cmd else r.which
+
+
 def run_maps(runs: list[Run], *, saved: bool) -> list[str]:
     """Run the model for each map; return the labels skipped for want of a saved forecast.
 
     With ``saved`` (the forecasts are in their saved file), downloads are off and up to
     PARALLEL_RUNS run at once. A run whose forecast isn't saved, such as a blast time added
     since the last refresh, is skipped and its old map removed, so the page leaves that time
-    out until the next refresh downloads it; a deploy never downloads. Without ``saved`` (a
-    refresh, or the first download) the runs go one after another and download as needed.
+    out until the next refresh downloads it; a deploy never downloads.
+
+    Without ``saved`` (a refresh, or the first download), the first run of each start hour
+    (``start_hour``) goes one at a time and downloads what it needs. The rest then run at
+    once from what those saved, with downloads off; one that still needs a download (none
+    should) runs again afterwards and downloads it, so a refresh never skips a map. Only
+    one run downloads at a time, so no two save to the forecast file at once.
     """
-    env = {**os.environ, CACHE_ONLY_ENV: "1", **ONE_THREAD} if saved else None
+    if saved:
+        missing = _run(runs, parallel=True)
+        for r in missing:
+            r.out.unlink(missing_ok=True)
+        return [r.which for r in missing]
+    hours = dict.fromkeys(map(start_hour, runs))
+    fetch = [next(r for r in runs if start_hour(r) == h) for h in hours]
+    _run(fetch, parallel=False)
+    rest = [r for r in runs if r not in fetch]
+    _run(_run(rest, parallel=True), parallel=False)
+    return []
+
+
+def _run(runs: list[Run], *, parallel: bool) -> list[Run]:
+    """Run ``runs``: at once with downloads off, or one at a time downloading as needed.
+
+    Return the runs that stopped for want of a saved forecast (only with downloads off).
+    Any other failure stops the build.
+    """
+    env = {**os.environ, CACHE_ONLY_ENV: "1", **ONE_THREAD} if parallel else None
 
     def one(r: Run) -> tuple[Run, subprocess.CompletedProcess[str]]:
         # Arguments are built here from constants; no shell is involved.
@@ -495,28 +529,27 @@ def run_maps(runs: list[Run], *, saved: bool) -> list[str]:
         )
         return r, done
 
-    skipped = []
+    missing = []
 
     def report(r: Run, done: subprocess.CompletedProcess[str]) -> None:
         print(f"building {r.which}", flush=True)
         for line in done.stdout.splitlines() + done.stderr.splitlines():
             if any(marker in line for marker in BUILD_LOG_MARKERS):
                 print("  " + line, flush=True)
-        if saved and done.returncode == NOT_SAVED_EXIT:
-            r.out.unlink(missing_ok=True)
-            skipped.append(r.which)
-            print("  skipped: forecast not saved yet; the next refresh downloads it", flush=True)
+        if parallel and done.returncode == NOT_SAVED_EXIT:
+            missing.append(r)
+            print("  forecast not saved", flush=True)
         elif done.returncode:
             raise SystemExit(f"model run failed for {r.which}:\n{done.stderr[-2000:]}")
 
-    if saved:
+    if parallel:
         with ThreadPoolExecutor(PARALLEL_RUNS) as pool:
             for r, done in pool.map(one, runs):  # in order, so the log reads as before
                 report(r, done)
     else:  # downloading: one at a time, and a failure stops the rest
         for r in runs:
             report(*one(r))
-    return skipped
+    return missing
 
 
 def build() -> None:

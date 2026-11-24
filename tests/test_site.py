@@ -934,6 +934,48 @@ def test_run_maps_skips_times_without_saved_forecasts(
     assert seen == [None]
 
 
+def test_refresh_downloads_one_run_per_hour_then_runs_the_rest_at_once(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A refresh downloads one run per start hour at a time, then runs the rest at once.
+
+    The rest have downloads off; one that still needs a download runs again and gets it.
+    """
+    ran: list[tuple[str, bool]] = []
+
+    class Done:
+        def __init__(self, code: int) -> None:
+            self.returncode = code
+            self.stdout = self.stderr = ""
+
+    def fake_run(cmd: list[str], **kw: Any) -> Done:
+        cache_only = bool(kw.get("env") and kw["env"].get(site.CACHE_ONLY_ENV))
+        ran.append((cmd[-1], cache_only))
+        # the high case needs something the low case didn't download
+        return Done(site.NOT_SAVED_EXIT if cache_only and cmd[-1] == "high-0930" else 0)
+
+    monkeypatch.setattr(site.subprocess, "run", fake_run)
+    runs = [
+        site.Run(
+            f"{case} {t}",
+            ["--time", f"2026-11-25T{t}-06:00", f"{case}-{t.replace(':', '')}"],
+            tmp_path / f"{case}.html",
+        )
+        for t in ("08:30", "09:00", "09:30")
+        for case in ("low", "high")
+    ]
+    assert site.run_maps(runs, saved=False) == []
+    # 8:30 and 9:00 are two start hours (9:30 shares 9:00's), downloaded one at a time
+    assert ran[:2] == [("low-0830", False), ("low-0900", False)]
+    assert sorted(ran[2:6]) == [
+        ("high-0830", True),
+        ("high-0900", True),
+        ("high-0930", True),
+        ("low-0930", True),
+    ]
+    assert ran[6:] == [("high-0930", False)]  # downloaded after the others, not skipped
+
+
 def test_cache_only_runs_never_download(monkeypatch: pytest.MonkeyPatch) -> None:
     """With the switch set, a request that isn't saved stops the run instead of downloading."""
     monkeypatch.setenv(met.CACHE_ONLY_ENV, "1")
