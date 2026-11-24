@@ -425,16 +425,19 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
         (
             "Spread cross-check",
             (
-                "Against NOAA&rsquo;s HYSPLIT model on four past days and measured spread in "
-                "two tracer experiments, these curves keep the cloud too narrow after the first "
-                "hour. So the map may show the highest levels reaching too far downwind and the "
-                "lowest levels covering too small an area. Right next to the plant, including "
-                "Middletown, a few degrees of wind decide the levels, which can be several times "
-                "higher or lower than shown. A turbulence-based method that matched the "
-                "measurements better is in the code as an option; the maps still use the "
-                "curves. Details: " + _a(TURBULENCE_URL, "TURBULENCE.md")
+                "Against NOAA&rsquo;s HYSPLIT model on four past days, these curves keep the "
+                "cloud too narrow over hours in daytime, and a modern short-range tracer test "
+                "measured about twice their spread. Depending on the hour, the highest levels "
+                "may reach farther or less far than shown, the lowest levels may cover a wider "
+                "area, and "
+                "in calm evening air peak levels can be up to about twice as high as shown. "
+                "Right next to the plant, including Middletown, a few degrees of wind decide "
+                "the levels, which can be several times higher or lower than shown. A "
+                "turbulence-based method that matched the measurements better is in the code as "
+                "an option; the maps still use the curves. Details: "
+                + _a(TURBULENCE_URL, "TURBULENCE.md")
             ),
-            "Stein et al. (2015); Barad (1958); Finn et al. (2016)",
+            "Barad (1958); Stein et al. (2015); Finn et al. (2016)",
         ),
         (
             "Evening mixing layer",

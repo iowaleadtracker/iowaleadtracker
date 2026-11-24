@@ -1,9 +1,12 @@
 """The turbulence-based spread (``--spread turbulence``, :mod:`dispersal.turbulence`).
 
-Unit checks of the published formulas, model-level properties, and the scheme's crosswind
-spread against measured tracer data (Prairie Grass, Barad 1958; Project Sagebrush Phase 1,
-Finn et al. 2016) from ``tests/data/tracer/``. The tracer tolerances are this repository's
-acceptance bands around the results documented in TURBULENCE.md, not published values.
+Checks of the published formulas (exact where the formula gives a closed form, otherwise
+signs and orderings), model-level properties, and the scheme's crosswind spread against
+measured tracer data (Prairie Grass, Barad 1958; Project Sagebrush Phase 1, Finn et al.
+2016) from ``tests/data/tracer/``. The tracer tolerances are this repository's acceptance
+bands around the results documented in TURBULENCE.md, not published values. The
+surface-layer scaling (:func:`scaling`) is not checked against measurements: the tracer
+checks use each test's measured u*, L and w*.
 """
 
 import math
@@ -55,6 +58,47 @@ def test_day_is_unstable_and_night_is_stable() -> None:
     assert ws[0] > 0.5
     assert ws[1] == 0.0
     assert us[1] < us[0]
+
+
+def test_stable_friction_velocity_at_the_critical_wind() -> None:
+    """At u = u_cr the stable quadratic's root vanishes: u* = C_D u_cr / 2.
+
+    Below u_cr, u* scales with u / u_cr (EPA 2026, Eqs. 12-15).
+    """
+    t, z0, th = 280.0, 0.02, 0.09  # clear night: theta* = 0.09
+    cd = 0.4 / math.log(10.0 / z0)
+    u_cr = math.sqrt(4 * 5.0 * 10.0 * 9.81 * th / (t * cd))
+    us, _, _ = scaling(np.array([u_cr, u_cr / 2]), 0.0, 0.0, 100.0, z0, t)
+    assert us[0] == pytest.approx(cd * u_cr / 2, rel=1e-6)
+    assert us[1] == pytest.approx(cd * u_cr / 4, rel=1e-6)
+
+
+def test_night_heat_loss_is_capped() -> None:
+    """theta* u* <= 0.05 m/s K (EPA 2026, Eq. 21): L = T u*^2 / (k g theta*) with the cap."""
+    t = 280.0
+    us, ell, _ = scaling(np.array([12.0]), 0.0, 0.0, 300.0, 0.02, t)
+    theta_capped = 0.05 / us[0]
+    assert 0.09 * us[0] > 0.05  # the cap is active
+    assert ell[0] == pytest.approx(t * us[0] ** 2 / (0.4 * 9.81 * theta_capped), rel=1e-9)
+
+
+def test_scalar_and_array_inputs_mix() -> None:
+    """A scalar wind with an array temperature broadcasts instead of failing."""
+    us, ell, _ = scaling(5.0, 300.0, 0.0, 800.0, 0.02, np.array([270.0, 290.0]))
+    assert us.shape == ell.shape == (2,)
+
+
+def test_entrainment_layer_is_continuous() -> None:
+    """sigma_w is continuous at 0.8 h and h (CALPUFF Eqs. 2-56, 2-58 to 2-61)."""
+    h = 800.0
+    z = np.array([0.8 * h - 1e-6, 0.8 * h + 1e-6, h - 1e-6, h + 1e-6, 1.1 * h])
+    n = len(z)
+    _, sw = sigma_vw(
+        np.full(n, 0.3), np.full(n, -50.0), np.full(n, 1.5), z, np.full(n, h), np.full(n, 1)
+    )
+    assert sw[0] == pytest.approx(sw[1], rel=1e-5)
+    assert sw[2] == pytest.approx(sw[3], rel=1e-5)
+    assert sw[4] > SIGMA_W_MIN[1]  # still turbulent in the entrainment layer above h
 
 
 def test_wind_makes_the_day_more_neutral() -> None:
@@ -121,7 +165,15 @@ def test_only_turbulence_asks_for_temperature() -> None:
 
 
 @pytest.mark.parametrize(
-    "extra", [["--sigma-v-min", "-1"], ["--spread-averaging", "0"], ["--spread", "fast"]]
+    "extra",
+    [
+        ["--spread", "turbulence", "--sigma-v-min", "-1"],
+        ["--spread", "turbulence", "--sigma-v-min", "nan"],
+        ["--spread", "turbulence", "--spread-averaging", "0"],
+        ["--spread", "turbulence", "--spread-averaging", "90"],
+        ["--spread", "fast"],
+        ["--sigma-v-min", "0.5"],  # tuning options need --spread turbulence
+    ],
 )
 def test_bad_spread_options_are_refused(extra: list[str]) -> None:
     with pytest.raises(SystemExit) as done:
@@ -148,15 +200,16 @@ def test_briggs_runs_carry_no_spread_note() -> None:
 
 @pytest.mark.slow
 def test_sagebrush_sigma_y() -> None:
-    """Sagebrush Phase 1 (169 values): default scheme 0.65-1.0x measured, >= 85% within 2x.
+    """Sagebrush Phase 1 (169 values): default scheme 0.65-0.95x measured, >= 85% within 2x.
 
-    The documented result is 0.78x and 93%; the original Briggs curves give 0.55x and 60%
+    The documented result is 0.78x and 93% (the 10-minute default is deliberately narrow;
+    the 60-minute basis gives 1.13x); the original Briggs curves give 0.55x and 60%
     (Finn et al. 2016 report the curves about 2x too narrow).
     """
     cases = tracer.load_sagebrush()
     obs = [c.sigma_y for c in cases]
     gm, fac2 = tracer.score(tracer.sigma_y_turbulence(cases), obs)
-    assert 0.65 < gm < 1.0
+    assert 0.65 < gm < 0.95
     assert fac2 >= 0.85
     gm_b, _ = tracer.score([tracer.sigma_y_briggs(c) for c in cases], obs)
     assert abs(math.log(gm)) < abs(math.log(gm_b))
@@ -164,11 +217,15 @@ def test_sagebrush_sigma_y() -> None:
 
 @pytest.mark.slow
 def test_prairie_grass_sigma_y() -> None:
-    """Prairie Grass (280 values): default scheme 0.9-1.25x measured, >= 75% within 2x.
+    """Prairie Grass (280 values): default scheme 0.65-0.95x measured, >= 80% within 2x.
 
-    The documented result is 1.07x and 82%.
+    The documented result is 0.77x and 87% with the wind moved to 10 m; the 60-minute
+    basis gives 1.07x.
     """
     cases = tracer.load_prairie_grass()
-    gm, fac2 = tracer.score(tracer.sigma_y_turbulence(cases), [c.sigma_y for c in cases])
-    assert 0.9 < gm < 1.25
-    assert fac2 >= 0.75
+    obs = [c.sigma_y for c in cases]
+    gm, fac2 = tracer.score(tracer.sigma_y_turbulence(cases), obs)
+    assert 0.65 < gm < 0.95
+    assert fac2 >= 0.80
+    gm60, _ = tracer.score(tracer.sigma_y_turbulence(cases, averaging_min=60.0), obs)
+    assert 0.9 < gm60 < 1.25

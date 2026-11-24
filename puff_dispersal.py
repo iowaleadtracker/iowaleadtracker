@@ -597,14 +597,32 @@ def _resolve_display(a: argparse.Namespace, mat: Json) -> None:
         ) or "||"
 
 
+def _check_spread(a: argparse.Namespace, p: argparse.ArgumentParser) -> None:
+    """Range checks for the cloud-spread options; the tuning options need turbulence."""
+    if not (math.isfinite(a.sigma_v_min) and a.sigma_v_min >= 0):
+        p.error("--sigma-v-min must be a number of at least 0")
+    if not (math.isfinite(a.spread_averaging) and 0 < a.spread_averaging <= 60):
+        p.error("--spread-averaging must be above 0 and at most 60 minutes")
+    if a.air_temperature_c is not None and not -60 <= a.air_temperature_c <= 60:
+        p.error("--air-temperature-c must be between -60 and 60")
+    tuned = (
+        a.sigma_v_min != SIGMA_V_MIN_DEFAULT
+        or a.spread_averaging != AVERAGING_DEFAULT_MIN
+        or a.air_temperature_c is not None
+    )
+    if a.spread == "briggs" and tuned:
+        p.error(
+            "--sigma-v-min, --spread-averaging and --air-temperature-c need --spread turbulence"
+        )
+
+
 def _resolve_run(a: argparse.Namespace, p: argparse.ArgumentParser) -> None:
     """Cloud-height factor, cache, start time and range checks."""
     if a.church_factor is None:
         a.church_factor = CONFINEMENT[a.confinement][0]
     if a.ensemble < 1 or a.shots < 1:
         p.error("--ensemble and --shots must be at least 1")
-    if a.sigma_v_min < 0 or a.spread_averaging <= 0:
-        p.error("--sigma-v-min must be at least 0 and --spread-averaging above 0")
+    _check_spread(a, p)
     if a.met_cache:
         MET_CACHE["path"], MET_CACHE["data"] = a.met_cache, None
     a.start, a.display_tz = parse_time(a.time)
@@ -1161,7 +1179,7 @@ def _meta(
                     + (
                         f"; air temperature fixed at {a.air_temperature_c:g} C)"
                         if a.air_temperature_c is not None
-                        else ")"
+                        else "; air temperature from the weather source, 15 C where missing)"
                     )
                 )
             }

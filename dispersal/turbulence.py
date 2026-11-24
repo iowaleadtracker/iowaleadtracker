@@ -14,10 +14,13 @@ step, each puff grows at a rate set by the turbulence at its height:
    grows linearly at sigma_v, the long-range switch CALPUFF makes to Heffter's (1965)
    linear growth (Scire et al. 2000, p. 2-29), here at the turbulence rate.
 
-sigma_v is a 1-hour value. ``averaging`` scales it for the crosswind growth by
-(averaging / 60 min)^0.2, CALPUFF's averaging-time rule (Scire et al. 2000, Eq. 2-72);
-the default 10 min matches the 10-minute tracer samples the scheme is checked against
-and gives a narrower, more concentrated cloud. See TURBULENCE.md.
+sigma_v is a 1-hour value. ``averaging_min`` scales it for the crosswind growth by
+(averaging / 60 min)^0.2. CALPUFF applies this averaging-time rule (Scire et al. 2000,
+Eq. 2-72) to its Pasquill-Gifford sigma_y, not to its turbulence option; it is borrowed
+here, with the default 10 min, as a deliberate lean toward a narrower, more concentrated
+cloud (about 0.75-0.8x the measured spread of the tracer data). It also scales the
+sigma_v minimum (0.2 -> 0.14 m/s at 10 min) and the linear growth beyond 550 m. See
+TURBULENCE.md.
 """
 
 from __future__ import annotations
@@ -49,10 +52,12 @@ BETA_M = 5.0  # stable-profile coefficient (EPA 2026, Eq. 12)
 THETA_STAR_0 = 0.09  # K, theta* = 0.09 (1 - 0.5 n^2) (EPA 2026, Eq. 16)
 MAX_HEAT_LOSS = 0.05  # m s-1 K, cap on theta* u* (EPA 2026, Eq. 21)
 L_NEUTRAL = -1e5  # m, start of the Monin-Obukhov iteration
-N_ITER = 8  # Monin-Obukhov iterations (converged well below 1% for these inputs)
+N_ITER = 12  # Monin-Obukhov iterations (L within 0.1% of converged down to 1 m/s in full sun)
 
 # Turbulence minimums. sigma_w by stability class A-F as CALPUFF's SWMIN defaults
-# (Scire et al. 2000, Input Group 12); sigma_v as AERMOD's (EPA 2026, Eq. 115).
+# (Scire et al. 2000, Input Group 12); sigma_v as AERMOD's near-surface lower limit
+# (EPA 2026, Eq. 115), used here at all heights (AERMOD itself uses 0.5 m/s above the
+# mixed layer).
 SIGMA_V_MIN_DEFAULT = 0.2  # m/s
 SIGMA_W_MIN = np.array([0.20, 0.12, 0.08, 0.06, 0.03, 0.016])  # m/s
 
@@ -83,7 +88,7 @@ def spread_weather(a: object) -> tuple[str, ...]:
     return () if getattr(a, "air_temperature_c", None) is not None else WEATHER_VARS
 
 
-def _psi_m(zeta: FloatArray) -> FloatArray:
+def psi_m(zeta: FloatArray) -> FloatArray:
     """Unstable momentum stability function (Businger-Dyer form used by AERMET).
 
     References
@@ -133,10 +138,13 @@ def scaling(
     ----------
     EPA (2026), AERMOD Model Formulation, Sec. 3 (Eqs. 2-16, 21).
     """
-    u = np.maximum(np.asarray(u10, float), 0.5)
-    n = np.clip(np.asarray(cloud, float) / 100.0, 0.0, 1.0)
-    t = np.broadcast_to(np.asarray(t_air, float), u.shape)
-    sw_ = np.asarray(sw, float)
+    u_in, sw_, n_in, zi, t = np.broadcast_arrays(
+        *(np.asarray(v, float) for v in (u10, sw, cloud, mixing_height, t_air))
+    )
+    u = np.maximum(u_in, 0.5)
+    n = np.clip(n_in / 100.0, 0.0, 1.0)
+    # "+ c2 n" as in Holtslag and van Ulden and AERMOD's critical-angle Eq. 5; the printed
+    # AERMOD Eq. 3 shows "- c2 n" (see TURBULENCE.md).
     rn = ((1 - ALBEDO) * sw_ + C1_RN * t**6 - SIGMA_SB * t**4 + C2_RN * n) / (1 + C3_RN)
     day = rn > 0
     ln_z = math.log(Z_REF / z0)
@@ -144,12 +152,14 @@ def scaling(
     h = H_FRACTION * np.maximum(rn, 0.0) / (1 + 1 / BOWEN)
     us = VON_KARMAN * u / ln_z
     ell = np.full_like(u, L_NEUTRAL)
+    hh = np.maximum(h, 1e-3)
     for _ in range(N_ITER):
-        ell = -RHO_CP * t * us**3 / (VON_KARMAN * G * np.maximum(h, 1e-3))
+        ell = -RHO_CP * t * us**3 / (VON_KARMAN * G * hh)
         zeta = np.clip(Z_REF / ell, -50.0, 0.0)
         zeta0 = np.clip(z0 / ell, -50.0, 0.0)
-        us = VON_KARMAN * u / (ln_z - _psi_m(zeta) + _psi_m(zeta0))
-    w_star = np.cbrt(G * np.maximum(h, 0.0) * np.asarray(mixing_height, float) / (RHO_CP * t))
+        us = VON_KARMAN * u / (ln_z - psi_m(zeta) + psi_m(zeta0))
+    ell = -RHO_CP * t * us**3 / (VON_KARMAN * G * hh)  # consistent with the final u*
+    w_star = np.cbrt(G * np.maximum(h, 0.0) * zi / (RHO_CP * t))
     # Stable: theta* method.
     th = THETA_STAR_0 * (1 - 0.5 * n**2)
     cd = VON_KARMAN / ln_z
@@ -180,9 +190,12 @@ def sigma_vw(
 ) -> tuple[FloatArray, FloatArray]:
     """Crosswind and vertical turbulence sigma_v, sigma_w (m/s) at height ``z``.
 
-    CALPUFF's similarity profiles: unstable side (L < 0) Eqs. 2-52 to 2-61, neutral and
-    stable side Eqs. 2-62 to 2-64. Above the mixing height the turbulence falls to the
-    minimums: sigma_v to ``sigma_v_min``, sigma_w to CALPUFF's value for the class.
+    CALPUFF's similarity profiles: unstable side (L < 0) Eqs. 2-52 to 2-61, including the
+    entrainment layer to 1.2 h; neutral and stable side Eqs. 2-62 to 2-64. Above the
+    boundary layer the turbulence falls to the minimums: sigma_v to ``sigma_v_min`` (this
+    model's choice: AERMOD uses 0.2 m/s near the surface but 0.5 m/s above the mixed layer,
+    which overspread stable evenings against HYSPLIT; see TURBULENCE.md), sigma_w to
+    CALPUFF's value for the class.
 
     References
     ----------
@@ -197,15 +210,19 @@ def sigma_vw(
     neg_zl = np.clip(-z / np.where(unstable, obukhov, -1e9), 0.0, None)
     sw_surface = np.sqrt(1.6 * u_star**2 * a_n**2 + 2.9 * u_star**2 * neg_zl ** (2 / 3))
     sw_mixed = np.sqrt(1.15 * u_star**2 * a_n**2 + 0.35 * w_star**2)
-    # Entrainment layer (0.8-1.2 h): CALPUFF tapers the convective term; half is the
-    # midpoint of its a_c1 (1/2 to 1) and a_c2 (1/3 to 1) ramps.
-    sw_entrain = np.sqrt(1.15 * u_star**2 * a_n**2 + 0.5 * 0.35 * w_star**2)
+    # Entrainment layer: the convective term tapers, a_c1 = 1/2 + (h - z)/(0.4 h) from 0.8 h
+    # to h (Eq. 2-59, 1 to 1/2) and a_c2 = 1/3 + (1.2 h - z)/(1.2 h) from h to 1.2 h
+    # (Eq. 2-61, 1/2 to 1/3); sigma_v keeps Eq. 2-52 there (Eq. 2-57).
+    a_c = np.where(zr <= 1.0, 0.5 + (1.0 - zr) / 0.4, 1 / 3 + (1.2 - zr) / 1.2)
+    sw_entrain = np.sqrt(1.15 * u_star**2 * a_n**2 + a_c * 0.35 * w_star**2)
     sw_u = np.where(zr <= 0.1, sw_surface, np.where(zr <= 0.8, sw_mixed, sw_entrain))
     cs = np.clip(1.0 - zr, 0.0, None) ** 0.75
     zl = np.clip(z / np.where(unstable, 1e9, obukhov), 0.0, None)
     sv_s = u_star * (1.6 * cs * zl + 1.8 * a_n) / (1 + zl)
     sw_s = 1.3 * u_star * (cs * zl + a_n) / (1 + zl)
-    above = z > h
+    # Above the boundary layer (1.2 h on the convective side, h on the stable side) the
+    # turbulence falls to the minimums.
+    above = np.where(unstable, z > 1.2 * h, z > h)
     sv = np.where(above, 0.0, np.where(unstable, sv_u, sv_s))
     sw = np.where(above, 0.0, np.where(unstable, sw_u, sw_s))
     return np.maximum(sv, sigma_v_min), np.maximum(sw, SIGMA_W_MIN[np.asarray(cls, int)])
@@ -284,7 +301,7 @@ def grow(
 
     References
     ----------
-    Draxler (1976); Scire, Strimaitis and Yamartino (2000), Eqs. 2-39 to 2-42, 2-65 to
+    Draxler (1976); Scire, Strimaitis and Yamartino (2000), Eqs. 2-39, 2-40, 2-65 to
     2-67, 2-72 and p. 2-29; Heffter (1965).
     """
     sv = sigma_v * averaging_factor(averaging_min)

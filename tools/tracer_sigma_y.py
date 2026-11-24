@@ -15,8 +15,9 @@ Data in ``tests/data/tracer/`` (see its README):
   arcs 200-3,200 m. Mixing heights are the mean radiosonde values of its Table 18.
 
 Schemes: ``briggs`` (this model's original curves; Prairie Grass classes from L and z0,
-which were not recorded), ``turbulence`` (:mod:`dispersal.turbulence`, stepped exactly as
-in the model), and AERMOD's sigma_y formula (EPA 2026, Eq. 77) for reference.
+which were not recorded), ``turbulence`` (:mod:`dispersal.turbulence`'s growth function,
+stepped as in the model, with travel time x/u from the 10 m wind as the model transports
+at 10 m or higher), and AERMOD's sigma_y formula (EPA 2026, Eq. 77) for reference.
 """
 
 from __future__ import annotations
@@ -36,6 +37,7 @@ from dispersal.turbulence import (
     AVERAGING_DEFAULT_MIN,
     SIGMA_V_MIN_DEFAULT,
     grow,
+    psi_m,
     sigma_vw,
 )
 
@@ -64,6 +66,7 @@ class Case(NamedTuple):
     zi: float
     z_release: float
     cls: int  # Pasquill class 0-5 for the Briggs curves
+    u_low: float  # m/s, lowest measured wind (1 m Prairie Grass, 10 m Sagebrush), for AERMOD
 
 
 def _golder_class(obukhov: float, z0: float) -> int:
@@ -71,8 +74,29 @@ def _golder_class(obukhov: float, z0: float) -> int:
     return int(np.argmin(np.abs(centres - 1.0 / obukhov)))
 
 
+def _wind_at(u: float, z_from: float, z_to: float, z0: float, obukhov: float) -> float:
+    """Move a wind speed between heights with the Monin-Obukhov log profile.
+
+    Unstable: Businger-Dyer psi_m (as in :func:`dispersal.turbulence.scaling`); stable:
+    psi_m = -5 z/L (EPA 2026, Eq. 12).
+    """
+
+    def prof(z: float) -> float:
+        if obukhov < 0:
+            zeta = np.array([max(z / obukhov, -50.0)])
+            zeta0 = np.array([max(z0 / obukhov, -50.0)])
+            return float(math.log(z / z0) - psi_m(zeta)[0] + psi_m(zeta0)[0])
+        return math.log(z / z0) + 5.0 * (z - z0) / obukhov
+
+    return u * prof(z_to) / prof(z_from)
+
+
 def load_prairie_grass() -> list[Case]:
-    """Prairie Grass arcs with their AERMOD surface meteorology."""
+    """Prairie Grass arcs with their AERMOD surface meteorology.
+
+    The file's wind is at 1 m; it is moved to 10 m, the lowest height the model
+    transports puffs at, so both experiments use the model's convention.
+    """
     out = []
     with (DATA / "prairie_grass_sigma_y.csv").open() as f:
         for r in csv.DictReader(f):
@@ -83,13 +107,16 @@ def load_prairie_grass() -> list[Case]:
                     r["run"],
                     float(r["x_m"]),
                     float(r["sigma_y_m"]),
-                    float(r["u_ms"]),
+                    _wind_at(
+                        float(r["u_ms"]), float(r["z_ref_m"]), 10.0, float(r["z0_m"]), obukhov
+                    ),
                     float(r["u_star_ms"]),
                     float(r["w_star_ms"]),
                     obukhov,
                     max(float(r["zic_m"]), float(r["zim_m"])),
                     0.46,
                     _golder_class(obukhov, float(r["z0_m"])),
+                    float(r["u_ms"]),
                 )
             )
     return out
@@ -124,6 +151,7 @@ def load_sagebrush() -> list[Case]:
                     zi,
                     1.5,
                     "ABCDEF".index(r["PG_sigA"]),
+                    _num(r["U10_COC_ms"]),
                 )
             )
     return out
@@ -164,10 +192,13 @@ def sigma_y_turbulence(
 
 
 def sigma_y_aermod(c: Case) -> float:
-    """Return AERMOD's sigma_y for a near-surface release (EPA 2026, Eqs. 38-41, 77-78)."""
+    """Return AERMOD's sigma_y for a near-surface release (EPA 2026, Eqs. 38-41, 77-78).
+
+    With the lowest measured wind, nearest the plume (AERMOD uses the wind at plume height).
+    """
     sv = max(math.sqrt(3.6 * c.u_star**2 + 0.35 * c.w_star**2), SIGMA_V_MIN_DEFAULT)
-    x_dimless = sv * c.x / (c.u * c.zi)
-    return float(sv * c.x / (c.u * (1 + AERMOD_ALPHA * x_dimless) ** AERMOD_P))
+    x_dimless = sv * c.x / (c.u_low * c.zi)
+    return float(sv * c.x / (c.u_low * (1 + AERMOD_ALPHA * x_dimless) ** AERMOD_P))
 
 
 def score(pred: list[float], obs: list[float]) -> tuple[float, float]:

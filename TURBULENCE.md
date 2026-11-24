@@ -33,13 +33,19 @@ Contents: [Summary](#summary) · [Using it](#using-it) · [Why change](#why-chan
   2× wider than the curves beyond 400 m (Finn et al. 2016). Against Sagebrush's 169
   measured values the curves give 0.55× the measured spread; the turbulence-based method
   gives 0.78× (93% within a factor of 2).
-- **Against NOAA's HYSPLIT on four past days**, the Briggs curves put the far zones 2–5×
-  farther out than HYSPLIT in daytime neutral air (stability class D). The turbulence-based
+- **Against NOAA's HYSPLIT on four past days**, the Briggs curves put the high-level zones
+  (air above DOE PAC-1, ground above 40 and 100 µg/ft²) 2–5× farther out than HYSPLIT in
+  daytime neutral air (stability class D); the lowest ground zone (5 µg/ft²) is about the
+  same. The turbulence-based
   method comes within 0.9–2.4× on every day, including a stable evening, while the cloud's
   path is the same.
-- **It leans high on purpose.** The default uses a 10-minute averaging basis for crosswind
-  spread (the scheme's turbulence values are 1-hour values, scaled by CALPUFF's
-  averaging-time rule), which keeps the cloud narrower and more concentrated. With it, the
+- **It leans toward higher concentrations on purpose.** The scheme's turbulence values
+  are 1-hour values; the default scales the crosswind growth to a 10-minute basis with an
+  averaging-time rule CALPUFF uses for its Pasquill–Gifford curves (not for its turbulence
+  option), which keeps the cloud about 0.7× as wide. That puts it at 0.77–0.78× the
+  measured spread in both tracer experiments, where the 1-hour basis fits them (1.07×,
+  1.13×). A narrower cloud raises concentrations along its path and lengthens the high
+  zones, but lowers them off to the sides and shortens the lowest zones. With it, the
   zone distances on the four HYSPLIT days are 0.9–2.4× HYSPLIT's (only three of 32 below
   1.0, all 0.9×), a moderate high bias where the Briggs curves are up to 5× high.
 - **On Wednesday's forecast it changes the map's shape.** For the EPA permit case at
@@ -67,7 +73,10 @@ python3 puff_dispersal.py ... --spread briggs              # original method (de
 | `--air-temperature-c` | – | fix the air temperature (°C) instead of downloading it, so saved forecasts replay |
 
 With `--spread turbulence` the model also downloads the 2 m air temperature from
-Open-Meteo (unless `--air-temperature-c` is given). Briggs runs request exactly what they
+Open-Meteo (unless `--air-temperature-c` is given; 15 °C where missing). The tuning options
+need `--spread turbulence`. With a constant wind (`--wind`) there is no sunshine or cloud
+data, so the turbulence method treats the run as an overcast night (stable), where the
+Briggs curves use class D. Briggs runs request exactly what they
 always did, so their saved forecasts and maps are unchanged. The map page's model note
 names the method used.
 
@@ -131,23 +140,29 @@ a_n = exp(−0.9 z/h) and h the mixing height:
 
 | | σv (crosswind) | σw (vertical) |
 |---|---|---|
-| Unstable, L < 0 | [4 u\*² a_n² + 0.35 w\*²]^½ | z ≤ 0.1h: [1.6 u\*² a_n² + 2.9 u\*² (−z/L)^⅔]^½; 0.1–0.8h: [1.15 u\*² a_n² + 0.35 w\*²]^½; above: convective term halved (midpoint of CALPUFF's entrainment ramps) |
+| Unstable, L < 0 (to 1.2h) | [4 u\*² a_n² + 0.35 w\*²]^½ | z ≤ 0.1h: [1.6 u\*² a_n² + 2.9 u\*² (−z/L)^⅔]^½; 0.1–0.8h: [1.15 u\*² a_n² + 0.35 w\*²]^½; entrainment layer 0.8–1.2h: [1.15 u\*² a_n² + a_c 0.35 w\*²]^½ with a_c = ½ + (h − z)/(0.4h) to h, ⅓ + (1.2h − z)/(1.2h) above (eqs. 2-58 to 2-61) |
 | Neutral or stable, L > 0 | u\* [1.6 C_s z/L + 1.8 a_n] / (1 + z/L) | 1.3 u\* [C_s z/L + a_n] / (1 + z/L), C_s = (1 − z/h)^¾ |
-| Above the mixing height | minimum | minimum |
+| Above the boundary layer (1.2h unstable, h stable) | minimum | minimum |
 
-Minimums: σv ≥ `--sigma-v-min` (0.2 m/s, AERMOD's, EPA 2026 eq. 115); σw ≥ CALPUFF's
+Minimums: σv ≥ `--sigma-v-min` (0.2 m/s, at all heights: AERMOD's near-surface lower limit,
+EPA 2026 eq. 115; AERMOD itself uses 0.5 m/s above the mixed layer, which in this model
+overspread the stable evening, see [Sensitivity](#sensitivity)); σw ≥ CALPUFF's
 defaults by class, 0.20, 0.12, 0.08, 0.06, 0.03, 0.016 m/s for A–F. Heights below 1 m are
 taken as 1 m.
 
 ### 3. Growth: σy, σz
 
 Taylor's theorem with Draxler's (1976) travel-time functions, as in CALPUFF (Scire et al.
-2000, eqs. 2-39 to 2-42, 2-65 to 2-67):
+2000, eqs. 2-39, 2-40, 2-65 to 2-67):
 
 - σy = σv′ t f_y(t), f_y = 1 / (1 + 0.9 (t / 1000 s)^½)
 - σz = σw t f_z(t), f_z = 1 / (1 + 0.9 (t / 500 s)^½) for L < 0, 1 / (1 + 0.945 (t / 100 s)^0.806) for L > 0
-- σv′ = σv × (`--spread-averaging` / 60 min)^0.2 (Scire et al. 2000, eq. 2-72). The
-  turbulence values are 1-hour values; the default 10-minute basis multiplies σv by 0.70.
+- σv′ = σv × (`--spread-averaging` / 60 min)^0.2. The turbulence values are 1-hour
+  values; the default 10-minute basis multiplies σv by 0.70, including its minimum
+  (0.2 → 0.14 m/s) and the linear growth beyond 550 m. The 0.2 exponent is CALPUFF's
+  averaging-time rule (Scire et al. 2000, eq. 2-72), which CALPUFF applies to its
+  Pasquill–Gifford σy, not to its turbulence option; it is borrowed here as a deliberate
+  choice (see [Choices](#choices-made-and-why)).
 
 Weather changes from step to step, so each puff advances from its present size by the
 virtual-time method: find the travel time at which the curve for the current σv (or σw)
@@ -167,8 +182,8 @@ the residual layer, settling, deposition, washout, the gridding) is unchanged.
 
 | Choice | Value | Why |
 |---|---|---|
-| σv minimum | 0.2 m/s | AERMOD's. CALPUFF's 0.5 m/s overspread the stable evening versus HYSPLIT (peak air 0.2×). Sagebrush suggests real night meander is larger still (see [Stable nights](#stable-nights-and-meander)); a minimum can't represent that well either way. |
-| Averaging basis | 10 min | A deliberate lean toward higher concentrations. Matches the 10-minute samples of both tracer experiments; best fit to Prairie Grass (1.07×); on the narrow side of Sagebrush (0.78×); keeps the four HYSPLIT days' distances at or above HYSPLIT's. The 1-hour basis fits Sagebrush best (1.13×) but falls below HYSPLIT on the windy day (0.7×). |
+| σv minimum | 0.2 m/s (0.14 after the 10-minute factor) | AERMOD's near-surface lower limit, applied at all heights. CALPUFF's 0.5 m/s overspread the stable evening versus HYSPLIT (peak air 0.2×). Sagebrush suggests real night meander is larger still (see [Stable nights](#stable-nights-and-meander)); a minimum can't represent that well either way. |
+| Averaging basis | 10 min | A deliberate lean toward higher concentrations, chosen by the maintainer: it keeps the zone distances on the four HYSPLIT days at about or above HYSPLIT's. It is 0.77–0.78× the measured spread of both tracer experiments, which the 1-hour basis fits (1.07×, 1.13×); the 1-hour basis falls below HYSPLIT on the windy day. Not CALPUFF's practice for its turbulence option, and the map's hourly means and the 60-minute PAC-1 are 1-hour quantities, so `--spread-averaging 60` is the physically consistent alternative. |
 | Long-range switch | 550 m, at σv′ | CALPUFF's switch point; turbulence rate rather than Heffter's fixed rate so calm nights stay narrow. |
 | Albedo, Bowen ratio | 0.2, 1.0 | Assumed for late-autumn cropland; not tuned. |
 
@@ -181,18 +196,20 @@ From the documents themselves (read Nov. 24, 2026):
 | This model, `--spread briggs` | Briggs rural curves by class: σy = c x (1 + 0.0001x)^−½ (class D c = 0.08) | – | – | – |
 | This model, `--spread turbulence` | σv′ t f_y(t), linear at σv′ beyond 550 m | CALPUFF similarity | 0.2 m/s | – (±5° direction view on the site) |
 | CALPUFF `MDISP=2` (Scire et al. 2000) | σv t f_y(t), Draxler (eqs. 2-39, 2-65) | similarity (eqs. 2-52 to 2-64) | 0.5 m/s, all classes | Heffter (σy ∝ t) once σy reaches 550 m |
-| CALPUFF `MDISP=3`, its regulatory default | Pasquill–Gifford tables; × (t/60 min)^0.2 | – | – | same switch |
+| CALPUFF `MDISP=3`, its regulatory default | Pasquill–Gifford tables; × (τ_ave/60 min)^0.2 for the averaging time of the predicted concentrations | – | – | same switch |
 | AERMOD (EPA 2026) | σv x / [u (1 + 78X)^0.3], X = σv x/(u z_i) (eqs. 77–78) | σv² = 3.6u\*² + 0.35w\*² (eqs. 38–41) | 0.2 m/s (eq. 115) | coherent and random plumes weighted by σr²/σh², time scale 24 h (eqs. 71–73) |
 | HYSPLIT (Draxler and Hess 1997) | particles: Langevin, horizontal Lagrangian time scale 10,800 s, so spread grows about linearly for hours; puffs: dσh/dt = σu (eqs. 56–58, 80) | stable v′² = 4.5u\*²(1 − z/z_i)^1.5; unstable v′² = 0.36w\*² (eqs. 61–72) | – | horizontal deformation diffusivity (eq. 51) |
 | SCIPUFF / HPAC (one of the models EPA's permit names) | second-order closure; also predicts concentration variance | boundary-layer profiles | not in the summary we could read | separate mesoscale "large-scale variability" inputs |
 
 Field evaluations:
 
-- **Irwin (1983)**, 11 tracer sites: Draxler's turbulence-based scheme gave "the smallest
-  mean fractional error" and beat Pasquill–Gifford at Prairie Grass and Karlsruhe.
+- **Irwin (1983)**, 11 tracer sites: Draxler's turbulence-based scheme, with on-site
+  measured σv and σw (not similarity estimates like ours), gave "the smallest mean
+  fractional error" and beat Pasquill–Gifford at Prairie Grass and Karlsruhe.
 - **EPA's CALPUFF tracer evaluation** (Paumier and Brode 1998; Savannah River, Great
   Plains, INEL): the turbulence and Pasquill–Gifford options were both within a factor of
-  2 at about 100 km with no clear winner; at 600 km σy was 2.5–3.5× too large, mostly from
+  2 at about 100 km with no clear winner, both underestimating lateral spread at Great
+  Plains' 100 km arc (central maxima 2–2.5× too high); at 600 km σy was 2.5–3.5× too large, mostly from
   an unresolved night-time low-level jet; Pasquill–Gifford's vertical growth produced
   spurious secondary maxima.
 - **Project Sagebrush Phase 1** (Finn et al. 2016): see above and the next section.
@@ -208,6 +225,9 @@ sources: [`tests/data/tracer/`](tests/data/tracer/README.md); tables from
 
 - **Project Prairie Grass** (Barad 1958): 10-minute releases at 0.46 m, arcs 50–800 m;
   σy from J. S. Irwin's analysis, weather from the AERMOD files of the ASTM D6589 archive.
+  The archive's wind is at 1 m; it is moved to 10 m with the Monin–Obukhov profile, since
+  the model transports puffs with the wind at 10 m or higher (Sagebrush's is already
+  10 m). AERMOD's formula gets the lowest measured wind, nearer its plume height.
   Prairie Grass classes were not recorded, so Briggs uses classes from L and z0 (after
   Golder 1972).
 - **Project Sagebrush Phase 1** (Finn et al. 2015, 2016): continuous releases at 1.5 m,
@@ -385,8 +405,10 @@ Reading these:
 - **Turbulence (default) runs 0.9–2.4×** on every distance on every day: a moderate high
   bias. Peak air after the first hour is close to HYSPLIT's on the overcast and sunny days
   (1.0–1.2× at hour 3) and lower on the windy day (0.6×) and the stable evening (0.7–0.8×).
-- **The ≥5 µg/ft² zone is about the same in every method** (0.9–1.5×): low-level reach is
-  set mostly by transport.
+- **The ≥5 µg/ft² zone is about the same in every method** here, but this test says
+  little about it: the 5-hour runs end before the zone does, and on the windy day the cloud
+  leaves the 120 km test map by hour 5 (every method gives 90 miles). On Wednesday's 8-hour
+  maps it is the zone that changes most.
 - **The deposition scheme** (Zhang or Emerson) changes the ground zones by up to about 50%
   but not the comparison with HYSPLIT.
 
@@ -463,7 +485,7 @@ What changes:
 - **The high levels mostly pull in.** For the EPA permit case at noon, air above DOE
   PAC-1 ends at 10 miles instead of 19 and ground above 100 µg/ft² at 7 instead of 12, and,
   by smaller margins, at 9 a.m. and 1 p.m. At 10 and 11 a.m. the two are similar, and the
-  turbulence map's high zones reach slightly farther (ground ≥100 µg/ft² at 11 a.m.: 7.6
+  turbulence map's high zones reach farther (ground ≥100 µg/ft² at 11 a.m.: 7.6
   miles against 3.4). The long, narrow streak of ground deposition to the southwest
   shortens at every hour: the 5 µg/ft² zone ends at 51–58 miles instead of 106–127.
 - **The lowest air level covers more area in the larger cases**: about 2.5× the area above

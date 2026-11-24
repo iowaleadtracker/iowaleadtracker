@@ -20,7 +20,7 @@ officials.
 | Path | What it is |
 |---|---|
 | `puff_dispersal.py` | the command line: options, weather models and ensemble, and the map page |
-| `dispersal/` | the Gaussian puff model, one module per topic: units, source term, particles, deposition, dispersion, weather, the model, gridding, output |
+| `dispersal/` | the Gaussian puff model, one module per topic: units, source term, particles, deposition, dispersion, turbulence-based spread, weather, the model, gridding, output |
 | `template.html` | the interactive map page the model fills in |
 | `MODEL.md` | how the model works, every option, and its limits |
 | `TURBULENCE.md` | the two cloud-spread methods (`--spread briggs` or `turbulence`) and their comparison with HYSPLIT and measured tracer data |
