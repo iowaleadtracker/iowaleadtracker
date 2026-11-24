@@ -243,19 +243,19 @@ Each cell: geometric mean of predicted ÷ measured / share within a factor of 2.
 
 | Group | n | Briggs (original) | Turbulence, 10-min (default) | Turbulence, 60-min | AERMOD |
 |---|---|---|---|---|---|
-| All | 280 | 0.78 / 75% | 1.07 / 82% | 1.51 / 72% | 0.97 / 83% |
-| 50 m | 56 | 0.60 / 73% | 1.00 / 89% | 1.37 / 88% | 1.01 / 91% |
-| 100 m | 56 | 0.69 / 79% | 1.02 / 86% | 1.43 / 80% | 1.02 / 89% |
-| 200 m | 56 | 0.77 / 73% | 1.06 / 82% | 1.49 / 73% | 0.97 / 84% |
-| 400 m | 56 | 0.88 / 75% | 1.11 / 79% | 1.59 / 62% | 0.94 / 79% |
-| 800 m | 56 | 1.03 / 75% | 1.20 / 75% | 1.71 / 57% | 0.92 / 73% |
+| All | 280 | 0.78 / 75% | 0.77 / 87% | 1.07 / 87% | 0.97 / 83% |
+| 50 m | 56 | 0.60 / 73% | 0.73 / 89% | 0.98 / 93% | 1.01 / 91% |
+| 100 m | 56 | 0.69 / 79% | 0.73 / 88% | 1.01 / 91% | 1.02 / 89% |
+| 200 m | 56 | 0.77 / 73% | 0.74 / 88% | 1.05 / 89% | 0.97 / 84% |
+| 400 m | 56 | 0.88 / 75% | 0.79 / 86% | 1.11 / 86% | 0.94 / 79% |
+| 800 m | 56 | 1.03 / 75% | 0.85 / 86% | 1.21 / 75% | 0.92 / 73% |
 
 **Prairie Grass by stability:**
 
 | Group | n | Briggs (original) | Turbulence, 10-min (default) | Turbulence, 60-min | AERMOD |
 |---|---|---|---|---|---|
-| Unstable | 165 | 0.65 / 76% | 0.94 / 90% | 1.33 / 88% | 0.90 / 87% |
-| Stable | 115 | 1.01 / 74% | 1.29 / 70% | 1.81 / 49% | 1.08 / 77% |
+| Unstable | 165 | 0.65 / 76% | 0.73 / 89% | 1.03 / 95% | 0.90 / 87% |
+| Stable | 115 | 1.01 / 74% | 0.81 / 84% | 1.12 / 76% | 1.08 / 77% |
 
 **Sagebrush Phase 1** (169 values), by arc distance:
 
@@ -286,12 +286,12 @@ Reading these:
 - **AERMOD fits Prairie Grass best (0.97×)** and falls short at Sagebrush's longer
   distances (0.39× at 3,200 m), consistent with Finn et al.'s remark that its constants
   come from the classical studies.
-- **The turbulence method is the most consistent across both**: 1.07× Prairie Grass and
-  0.78× Sagebrush with the default 10-minute basis; 1.51× and 1.13× with the 1-hour basis.
-  Sagebrush found averaging time mattered little (10–60 min), which favours the 1-hour
-  basis there; the default leans narrow on purpose.
-- At Prairie Grass in stable air the turbulence method runs wider (1.29×) than in unstable
-  air (0.94×).
+- **The turbulence method is the most consistent across both**: 0.77× Prairie Grass and
+  0.78× Sagebrush with the default 10-minute basis (87% and 93% within a factor of 2);
+  1.07× and 1.13× with the 1-hour basis. Sagebrush found averaging time mattered little
+  (10–60 min), which favours the 1-hour basis there; the default leans narrow on purpose.
+- At Prairie Grass the turbulence method is about as close in stable air (0.81×) as in
+  unstable air (0.73×), where the Briggs curves swing from 1.01× to 0.65×.
 
 ## Check 2: NOAA HYSPLIT on four past days
 
@@ -416,7 +416,7 @@ Reading these:
 
 | Setting | Effect (from the tables above unless noted) |
 |---|---|
-| Averaging basis 60 min instead of 10 | Cloud 1.4× wider: distances fall about 30%; Sagebrush 1.13×, Prairie Grass 1.51×; windy-day distances 0.7–0.9× HYSPLIT |
+| Averaging basis 60 min instead of 10 | Cloud 1.4× wider: distances fall about 30%; Sagebrush 1.13×, Prairie Grass 1.07×; windy-day distances 0.7–0.9× HYSPLIT |
 | σv minimum 0.5 m/s instead of 0.2 | No change in daytime (σv is 0.9–1.2 m/s); stable evening peak air at hour 3 falls from 0.8× to 0.2× HYSPLIT |
 | Real 2 m temperature vs a fixed 280 K | No ratio changed by more than 0.2 on the four days (earlier prototype runs) |
 | Heffter's fixed 0.5 m/s growth instead of growth at σv′ | Daytime similar; stable evening peak air 0.1× HYSPLIT (earlier prototype runs, [`validation/hysplit-backtest/`](validation/hysplit-backtest/README.md)) |
@@ -460,7 +460,7 @@ EPA permit case at each blast time the site offers (farthest distance):
 | Blast | Method | Ground ≥100 | Ground ≥40 | Ground ≥5 | Air ≥ PAC-1 |
 |---|---|---|---|---|---|
 | 09:00 | Briggs | 17 mi | 20 mi | 106 mi | 21 mi |
-| 09:00 | Turbulence | 13 mi | 20 mi | 58 mi | 20 mi |
+| 09:00 | Turbulence | 13 mi | 20 mi | 58 mi | 19 mi |
 | 10:00 | Briggs | 8.1 mi | 12 mi | 113 mi | 12 mi |
 | 10:00 | Turbulence | 8.6 mi | 15 mi | 57 mi | 13 mi |
 | 11:00 | Briggs | 3.4 mi | 17 mi | 125 mi | 7.1 mi |
