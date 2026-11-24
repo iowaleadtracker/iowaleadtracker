@@ -281,8 +281,8 @@ REFERENCES = [
     (
         "U.S. Army, 2026: Public advisory: Potential exposure to toxic lead dust. &ldquo;Mitigated "
         "0.26&rdquo; deposition and dispersion maps for a detonation at 0900 CST, 25 November "
-        "2026. U.S. Army Sustainment Command, issued 24 November 2026 (two-page PDF, file "
-        "pdf_78382; online copy not checked)."
+        "2026. U.S. Army Sustainment Command, issued 24 November 2026, linked from McFate "
+        "(2026b), " + _a("https://d34w7g4gy10iej.cloudfront.net/pubs/pdf_78382.pdf") + "."
     ),
     "U.S. Army, 2026: Public and media advisory regarding the detonation of lead azide at Iowa "
     "Army Ammunition Plant in Middletown, Iowa. U.S. Army Sustainment Command, 18 November 2026, "
@@ -518,8 +518,9 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
                 "itself, gases, and the Army&rsquo;s soil soaking and water misters"
             ),
             (
-                "Model limits. The Army hasn&rsquo;t published its mister setup. Runs of the "
-                "model&rsquo;s "
+                "Model limits. The Army&rsquo;s 0.26 estimate covers its sand barriers, water "
+                "wall, gel blocks, foam and misters (U.S. Army 2026, Nov. 24 maps); here, runs of "
+                "the model&rsquo;s "
                 "spray option with guessed setups (528&ndash;26,000 gal/min) caught 0.1&ndash;19% "
                 "of the "
                 "lead (U.S. Army 2026; Slinn 1984; Seinfeld and Pandis 2016)"
@@ -577,6 +578,15 @@ def method_intro(pct: dict[str, str]) -> str:
 #: entry for every change to the model, its settings or its sources.
 CHANGES_HEAD = "Change log"
 CHANGES = [
+    (
+        "Nov. 24",
+        (
+            "FEMA&rsquo;s evacuation zone and helpline are in the page header. Text that said "
+            "the Army hadn&rsquo;t disclosed how much lead gets airborne now gives the "
+            "Army&rsquo;s estimate, an emission factor of 0.26 with its barriers, water wall, "
+            "gel blocks, foam and misters (McFate 2026b; U.S. Army 2026, Nov. 24 maps)."
+        ),
+    ),
     (
         "Nov. 24",
         (

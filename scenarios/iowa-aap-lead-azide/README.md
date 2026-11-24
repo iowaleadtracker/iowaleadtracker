@@ -500,8 +500,9 @@ Lead azide, Pb(N3)2, is 71.1% lead by weight, so 9,700 lb holds about 6,900 lb o
 ### The Army's "Mitigated 0.26" maps (the middle case)
 
 The Army's two-page public advisory issued Nov. 24, 2026 (PDF metadata: Army Sustainment
-Command, created Nov. 24, 15:05 UTC; stamped "a/o 240848NOV26"; file `pdf_78382`, online
-copy not checked from here) has a deposition map and an air map, each titled "Mitigated 0.26".
+Command, created Nov. 24, 15:05 UTC; stamped "a/o 240848NOV26"; https://d34w7g4gy10iej.cloudfront.net/pubs/pdf_78382.pdf,
+linked from the Army's Nov. 24 public safety advisory, https://www.army.mil/article/297039, as
+the latest version of its maps) has a deposition map and an air map, each titled "Mitigated 0.26".
 Both say: "This model reflects taking deliberate steps (i.e., in a bunker with additional
 countermeasures) to reduce, contain and control the spread of hazardous dust or particles
 after a detonation has occurred." Detonation 25 Nov 2026, 0900 CST. Ground lines 100 and
@@ -510,6 +511,10 @@ after a detonation has occurred." Detonation 25 Nov 2026, 0900 CST. Ground lines
 - **Emission factor 0.26:** the same measure as the 1.00 EPA's permit (Appendix B) requires
   for the Army's unmitigated maps, where 1.00 means all of the lead airborne. So 0.26 is 26%
   of the lead airborne. (The maps print the number as "Mitigated 0.26".)
+- **Mitigation the 0.26 covers** (Nov. 24 advisory): detonation inside earth-covered concrete
+  magazines; sand barriers about two stories high; a "water wall" and gel blocks; aqueous foam
+  barriers; soil above and around the magazines saturated by misters before and during the
+  blast. The model can't represent these, so the case applies the Army's 0.26 directly.
 - **Particle sizes** are not given; the case keeps the site's all-respirable fume sizes, so it
   is not a reproduction of the Army's HPAC/SHARC/NARAC run.
 
