@@ -353,7 +353,18 @@ time costs a few hundred.
 ### The weather layer
 
 Each map has an optional "sky cover & rain" layer (off by default): forecast cloud cover
-in white or gray, and precipitation colored as on radar. It is for display only. The lead
+in white or gray, and precipitation as NWS radar reflectivity (dBZ). It is for display only.
+
+The forecast gives a rain rate, not reflectivity, so the map converts it with the WSR-88D
+default Z = 300R^1.4 (NWS, https://www.weather.gov/tae/research-zrpaper) and colors it
+in 5 dBZ steps with the usual NWS reflectivity palette (as in MetPy's `NWSReflectivity`
+table). The legend also marks the AMS Glossary's rain intensity ("Rain": light up to
+2.5 mm/h, moderate to 7.6, heavy above). Snow is shown as if it were rain, and an hour's
+total is lighter than a radar's instant peaks. Not yet checked against the pages
+themselves: the Z-R and AMS figures were confirmed from search results on Nov. 24, 2026,
+and the palette from memory (the build environment couldn't open weather.gov); confirm
+them before adding them to `works_cited.py`. Deposition is purple, not blue, so that blue
+on the map means only light rain. The lead
 model keeps its own 5x5 grid (points about 90 miles apart); the layer uses a finer grid
 from `sky_grid.py`: 24 x 32 points 0.35° apart (about 24 miles), shown at full strength
 over 37.0-43.5°N, 96.7-87.5°W (all of Iowa, northern Missouri, western Illinois and every
