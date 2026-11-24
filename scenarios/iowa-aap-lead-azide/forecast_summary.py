@@ -632,7 +632,7 @@ def time_note(built_txt: str) -> str:
     return (
         f"As of this update ({built_txt}), the Army hasn\u2019t announced a time for "
         "Wednesday; it has said only \u201cWednesday morning\u201d (Acting Secretary of the "
-        f"Army on X). These maps model blasts {WINDOW_HOURLY}, covering the morning and the "
+        f"Army on X). These maps model blasts {WINDOW_HOURLY}, from that morning through the "
         "\u201capproximately noon\u201d that Iowa HHS\u2019s fact sheet gave for the earlier "
         "Monday, Nov. 23 date (Iowa HHS fact sheet). The permit has the Army update its "
         "estimate of where lead dust could go at least 48 hours before the blasts and hourly "
@@ -937,8 +937,8 @@ def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) ->
     {WHY_MONDAY} Source: <a href="{ARMY_URL}" rel="noopener">{ARMY_CITE}</a>.</p>
   {f'<p class="caveat">{ctx["pending_note"]}</p>' if ctx.get("pending_note") else ""}
   <h3>Where the cloud goes{on}</h3>
-  <p>{note + " " if note else ""}{wind_sentence(f)} {path_sentence(f)} Other blast times in \
-the window follow almost the same path. {t.forecast_line}</p>
+  <p>{note + " " if note else ""}{wind_sentence(f)} {path_sentence(f)} The path can shift with \
+the blast time; use the blast-time menu to compare. {t.forecast_line}</p>
   <h3>How far lead on the ground could reach{on}</h3>
   <p>Farthest distance from the plant where lead on the ground reaches each EPA dust-lead action
     level by the end of the 8-hour run, for any blast time from {WINDOW} The
@@ -1001,7 +1001,7 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
         (
             "When is the lead azide blast at the Iowa Army Ammunition Plant?",
             f"{TRUMP_HOLD} (Sources: {TRUMP_SOURCE_TEXT}.) "
-            "The Army had said Wednesday, Nov. 25, 2026; it hasn\u2019t given a time. It had "
+            "The Army says Wednesday morning, Nov. 25, 2026; it hasn\u2019t given a time. It had "
             "planned Monday, Nov. 23. On Nov. 22, the government told the court, which had put "
             "the permit on hold, that the Army had postponed it to Tuesday, Nov. 24. "
             f"{court_pause([m['day'] for m in more], lead)} (Sources: {COURT_SOURCES_TEXT}.) "
@@ -1084,7 +1084,8 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             *([f"- Note: {ctx['pending_note']}"] if ctx.get("pending_note") else []),
             f"- Presidential hold: {TRUMP_HOLD} Sources: {TRUMP_SOURCE_TEXT}",
             f"- Why Wednesday: {WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_TEXT}",
-            f"- Time: {time_note(ctx['built_txt'])} Sources: {HHS_URL}; {RESPONSE_URL}",
+            f"- Time: {time_note(ctx['built_txt'])} Sources: {SECARMY_URL}; {HHS_URL}; "
+            f"{RESPONSE_URL}",
             f"- Earlier date, Tuesday: {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_TEXT}",
             f"- Earlier date, Monday: {WHY_MONDAY} Source: {ARMY_CITE}, {ARMY_URL}",
             f"- Water misting: {MISTING} Source: Army public advisory, {ADVISORY_URL}",

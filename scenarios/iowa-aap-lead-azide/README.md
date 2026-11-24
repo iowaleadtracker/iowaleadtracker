@@ -349,12 +349,16 @@ time costs a few hundred.
   users and ran out several times.
 - Each blast hour costs its own grid downloads: the model sizes the 5 x 5 wind grid from
   the winds over that run, so every start hour is a separate request of about 65 (25
-  points x 26 variables) per weather model and day; times within the same hour share it.
+  points x 2.6, for 26 variables counted per 10) per weather model and day; times within the same hour share it.
   With hourly times from 9 a.m. to 1 p.m., the main refresh costs about 2,000-2,600 per
   run (2 days, 3-4 models, 5 hours; about 800 with the earlier 11 a.m.-12:30 p.m. window)
   and the staged refresh about 2,000 (3 days, 2 models; about 1,200 before). Each run
-  stays under the hourly limit (5,000); a run that is refused fails and keeps the saved
-  forecasts, so the site never breaks.
+  stays under the hourly limit (5,000). Over a day, the 3-hourly main refresh, the
+  6-hourly staged refresh and the weather grid add up to about 30,000, three times the
+  daily limit, so this only works because GitHub's runners don't usually share one
+  address (they did hit the limit on Nov. 22 with hourly runs). A run that is refused
+  fails and keeps the saved forecasts, so the site never breaks; if that happens, space
+  out the schedules.
 - Move or delete `met_cache/map_met_all.json` to download fresh forecasts (see below).
 - The weather layer's grid (`sky_grid.py --fetch`) counts as one request per point:
   about 770 per model. It skips days that are over, asks HRRR only for days within 48

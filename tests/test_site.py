@@ -264,7 +264,7 @@ def test_court_hold_leads_the_summary_and_faq(rendered: tuple[str, list, str]) -
     # Newest first: the president's Nov. 23 order, then the Army's Wednesday date.
     assert when.startswith(f"{fs.TRUMP_HOLD} (Sources: {fs.TRUMP_SOURCE_TEXT}.) ")
     assert (
-        "The Army had said Wednesday, Nov. 25, 2026; it hasn\u2019t given a time. It had "
+        "The Army says Wednesday morning, Nov. 25, 2026; it hasn\u2019t given a time. It had "
         "planned Monday, Nov. 23. On Nov. 22, the government told the court, which had put "
         "the permit on hold, that the Army had postponed it to Tuesday, Nov. 24."
     ) in when

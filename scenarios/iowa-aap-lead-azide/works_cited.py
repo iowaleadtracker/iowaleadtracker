@@ -246,6 +246,13 @@ REFERENCES = [
     "Facebook, 22 November 2026, accessed 23 November 2026, "
     + _a("https://www.facebook.com/story.php?story_fbid=1611961230959211&id=100064360494281")
     + ".",
+    # No permalink was available: the post is pinned on the account, and its text was
+    # checked from the maintainer's screenshot (Nov. 23, about 11 p.m. CST).
+    "U.S. Army, 2026: &ldquo;&hellip;which will occur this Wednesday morning, as previously "
+    "scheduled, based on forecast wind conditions.&rdquo; Pinned post by the Acting Secretary "
+    "of the Army (@SecArmy) on X, 23 November 2026, accessed 23 November 2026, "
+    + _a("https://x.com/SecArmy")
+    + ".",
     "U.S. Army, 2026: Public and media advisory regarding the detonation of lead azide at Iowa "
     "Army Ammunition Plant in Middletown, Iowa. U.S. Army Sustainment Command, 18 November 2026, "
     + _a("https://d34w7g4gy10iej.cloudfront.net/pubs/pdf_78366.pdf")
