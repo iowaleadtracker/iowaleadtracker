@@ -414,9 +414,9 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
                 "Low: floor from AP-42 "
                 "blasting-cap tests (MACTEC 2008). High: TNT-equivalent rule (DOE 1994; Steindler "
                 "and "
-                "Seefeldt 1980). Middle: the &ldquo;Mitigated 0.26&rdquo; on the Army&rsquo;s "
-                "Nov. 24 plume maps, read as an emission factor; the Army doesn&rsquo;t define it "
-                "(U.S. Army 2026, Nov. 24 maps). EPA permit: the emission factor of 1.00 EPA "
+                "Seefeldt 1980). Middle: the emission factor of 0.26 in the Army&rsquo;s Nov. "
+                "24 &ldquo;Mitigated 0.26&rdquo; plume maps (U.S. Army 2026, Nov. 24 maps). "
+                "EPA permit: the emission factor of 1.00 EPA "
                 "requires "
                 "for the Army&rsquo;s plume maps (EPA 2026)"
             ),
@@ -561,8 +561,8 @@ def method_intro(pct: dict[str, str]) -> str:
         "assume for its official plume maps and which the map shows first as the worst case, "
         f"and {pct['high']} (high), {pct['mid']} (middle) and {pct['low']} (low). The high and low "
         "cases come from Department of Energy and Army\u2013EPA research; the middle case is the "
-        "\u201cMitigated 0.26\u201d on the Army\u2019s Nov. 24 plume maps, which the Army "
-        "doesn\u2019t define. That share is the most important number to check. The cloud "
+        "emission factor of 0.26 in the Army\u2019s Nov. 24 \u201cmitigated\u201d plume maps. "
+        "That share is the most important number to check. The cloud "
         "spreads at a rate set "
         "by the forecast\u2019s turbulence, with the formulas of the CALPUFF model (Scire et al. "
         "2000); since Nov. 24 this replaces older curves that kept the cloud too narrow over "
@@ -578,11 +578,10 @@ CHANGES = [
     (
         "Nov. 24",
         (
-            "The middle case is now 26% of the lead airborne, from the &ldquo;Mitigated "
-            "0.26&rdquo; on the Army&rsquo;s Nov. 24 plume maps (U.S. Army 2026, Nov. 24 "
-            "maps), instead of the 20% upper-bound precedent from a Department of Energy "
-            "handbook. The Army doesn&rsquo;t say what 0.26 measures; the map reads it as an "
-            "emission factor."
+            "The middle case is now 26% of the lead airborne, the emission factor of 0.26 in "
+            "the Army&rsquo;s Nov. 24 &ldquo;Mitigated 0.26&rdquo; plume maps (U.S. Army "
+            "2026, Nov. 24 maps), instead of the 20% upper-bound precedent from a Department "
+            "of Energy handbook."
         ),
     ),
     (

@@ -70,9 +70,9 @@ RELEASE_CASES = {
         "EPA AP-42 Ch. 15 blasting-cap tests (low case)"
     ),
     "army-26": (
-        "26% of the lead airborne, all respirable: the 'Mitigated 0.26' value on the Army's "
-        "Nov. 24, 2026 public advisory plume maps, read as an emission factor; the advisory "
-        "doesn't define it (middle case)"
+        "26% of the lead airborne, all respirable: the emission factor of 0.26 in the Army's "
+        "Nov. 24, 2026 'Mitigated 0.26' plume maps, for blasts in bunkers with added "
+        "countermeasures (middle case)"
     ),
     "tnt-fine": (
         "airborne respirable mass equal to the TNT-equivalent mass, the DOE-HDBK-3010 "

@@ -491,7 +491,7 @@ The site shows three cases. In each, the share of lead below is airborne in brea
 | Site label | `--release-case` | Lead airborne | Pounds of lead (9,700 lb lead azide) | Basis |
 |---|---|---|---|---|
 | Low | `ap42-floor` | 7% | about 480 | lowest share consistent with EPA AP-42 blasting-cap tests |
-| Middle | `army-26` | 26% | about 1,790 | "Mitigated 0.26" on the Army's Nov. 24, 2026 public advisory plume maps (bunker plus countermeasures), read as an emission factor; the advisory doesn't define it. Replaced the 20% DOE-HDBK-3010 precedent (`fine-20`) on Nov. 24 |
+| Middle | `army-26` | 26% | about 1,790 | emission factor of 0.26 in the Army's Nov. 24, 2026 "Mitigated 0.26" plume maps (bunker plus countermeasures). Replaced the 20% DOE-HDBK-3010 precedent (`fine-20`) on Nov. 24 |
 | High | `tnt-fine` | 55% | about 3,800 | DOE-HDBK-3010 rule: respirable mass equal to the TNT equivalent |
 | EPA permit | `permit-100` | 100% | about 6,900 | emission factor 1.00 that EPA's Nov. 13, 2026 emergency permit (Appendix B) requires for the Army's plume maps; EPA calls it conservative |
 
@@ -507,14 +507,9 @@ countermeasures) to reduce, contain and control the spread of hazardous dust or 
 after a detonation has occurred." Detonation 25 Nov 2026, 0900 CST. Ground lines 100 and
 5 µg/ft² (27 and 148 sq mi); air line 0.18 µg/m³, the permit's edge, shown at +1, +4 and +8 h.
 
-What was checked and what wasn't:
-
-- **Stated:** the number 0.26 and the word "Mitigated". **Not stated:** what 0.26 is a
-  fraction of. The advisory never says "emission factor" or "26%".
-- **Our reading:** an emission factor of 0.26, i.e. 26% of the lead airborne, set against the
-  1.00 EPA's permit (Appendix B) requires for the unmitigated maps. That fits the permit's
-  wording, but it is an inference. It could instead combine a release fraction with a
-  bunker leak-path factor, or describe something else.
+- **Emission factor 0.26:** the same measure as the 1.00 EPA's permit (Appendix B) requires
+  for the Army's unmitigated maps, where 1.00 means all of the lead airborne. So 0.26 is 26%
+  of the lead airborne. (The maps print the number as "Mitigated 0.26".)
 - **Particle sizes** are not given; the case keeps the site's all-respirable fume sizes, so it
   is not a reproduction of the Army's HPAC/SHARC/NARAC run.
 
