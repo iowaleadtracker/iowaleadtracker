@@ -460,14 +460,17 @@ published; right: turbulence):
 
 What changes:
 
-- **The high levels pull in.** For the EPA permit case, air above DOE PAC-1 ends within
-  10–20 miles instead of 7–21, depending on the hour, and at noon 10 miles instead of 19;
-  ground above 100 µg/ft² within 7–13 miles instead of 3–17. The long, narrow streak of
-  ground deposition to the southwest shortens most: the 5 µg/ft² zone ends at 51–58 miles
-  instead of 106–127.
-- **The lowest air level spreads wider**: about 2.5× the area above 0.15 µg/m³ for the EPA
-  permit case at noon, adding Kahoka to the towns inside it. Spreading the same lead wider
-  puts more places above the low levels while fewer stay above the high ones.
+- **The high levels mostly pull in.** For the EPA permit case at noon, air above DOE
+  PAC-1 ends at 10 miles instead of 19 and ground above 100 µg/ft² at 7 instead of 12, and,
+  by smaller margins, at 9 a.m. and 1 p.m. At 10 and 11 a.m. the two are similar, and the
+  turbulence map's high zones reach slightly farther (ground ≥100 µg/ft² at 11 a.m.: 7.6
+  miles against 3.4). The long, narrow streak of ground deposition to the southwest
+  shortens at every hour: the 5 µg/ft² zone ends at 51–58 miles instead of 106–127.
+- **The lowest air level covers more area in the larger cases**: about 2.5× the area above
+  0.15 µg/m³ for the EPA permit case at noon (adding Kahoka to the towns inside it), 2.3×
+  for the high case and 1.9× for the middle case. Spreading the same lead wider puts more
+  places above the low levels while fewer stay above the high ones. In the low (7%) case
+  the lead runs out sooner and that area shrinks (598 against 875 sq mi).
 - **Next to the plant the two methods differ in either direction.** Middletown is about half
   a mile from the plant, so a few degrees of wind decide what it gets. Lead on the ground
   there, EPA permit case: 11 a.m. 798 (Briggs) vs 1,076 µg/ft² (turbulence); noon 252 vs
