@@ -119,10 +119,15 @@ def test_replay_takes_the_same_fallback_as_the_download(
     monkeypatch.setattr(met, "_data_problem", lambda *_a, **_k: None)
     monkeypatch.setitem(met.MET_CACHE, "path", str(tmp_path / "met.json"))
     start = dt.datetime(2026, 11, 25, 15, tzinfo=dt.timezone.utc)
-    args = ([41.5], [-91.2], start, start + dt.timedelta(hours=8))
-    kw = {"levels": [925, 850], "model": "gfs_seamless", "now": start}
-    downloaded = met.fetch_open_meteo(*args, **kw)
+    end = start + dt.timedelta(hours=8)
+
+    def fetch() -> tuple[str, list[Any], int | None, list[int]]:
+        return met.fetch_open_meteo(
+            [41.5], [-91.2], start, end, levels=[925, 850], model="gfs_seamless", now=start
+        )
+
+    downloaded = fetch()
     assert downloaded[3] == []  # fell back to no pressure levels
     monkeypatch.setattr("urllib.request.urlopen", lambda *_a, **_k: pytest.fail("downloaded"))
     monkeypatch.setenv(met.CACHE_ONLY_ENV, "1")
-    assert met.fetch_open_meteo(*args, **kw) == downloaded
+    assert fetch() == downloaded
