@@ -884,6 +884,15 @@ def _hours_output(
                     for j, la in enumerate(met.lat_nodes)
                     for i, lo in enumerate(met.lon_nodes)
                 ],
+                # forecast sky cover (%) and precipitation (mm/h) at the same points as "wind"
+                "sky": [
+                    [
+                        round(float(met.f["cloud"][ti, j, i])),
+                        round(float(met.f["precip"][ti, j, i]), 2),
+                    ]
+                    for j in range(len(met.lat_nodes))
+                    for i in range(len(met.lon_nodes))
+                ],
                 **{
                     k: hrow[k]
                     for k in ("puffs", "airborne", "dry", "wet", "spray", "released", "centroid")
