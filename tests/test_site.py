@@ -927,6 +927,7 @@ def test_run_maps_skips_times_without_saved_forecasts(
     assert site.run_maps(runs, saved=True) == ["permit 08:30"]
     assert not old.exists()  # the page then leaves 8:30 out (complete_times)
     assert all(env and env[site.CACHE_ONLY_ENV] == "1" for env in seen)
+    assert all(env and env["OPENBLAS_NUM_THREADS"] == "1" for env in seen)  # no oversubscription
     seen.clear()
     with pytest.raises(SystemExit):  # downloading (a refresh): any failure stops the build
         site.run_maps(runs, saved=False)

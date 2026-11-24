@@ -462,6 +462,10 @@ NOT_SAVED_EXIT = 3
 # Model runs at once when every forecast is saved: nothing is downloaded, so Open-Meteo's
 # limits don't apply. A build that downloads (a refresh) runs them one after another.
 PARALLEL_RUNS = max(1, min(4, os.cpu_count() or 1))
+# One math-library thread per run when they run at once: numpy's OpenBLAS otherwise starts a
+# thread per core in every run, and four runs fighting over the cores took about ten times
+# longer than one after another (CI, Nov. 24). The maps are the same bit for bit.
+ONE_THREAD = {"OMP_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"}
 
 
 @dataclass
@@ -482,7 +486,7 @@ def run_maps(runs: list[Run], *, saved: bool) -> list[str]:
     out until the next refresh downloads it; a deploy never downloads. Without ``saved`` (a
     refresh, or the first download) the runs go one after another and download as needed.
     """
-    env = {**os.environ, CACHE_ONLY_ENV: "1"} if saved else None
+    env = {**os.environ, CACHE_ONLY_ENV: "1", **ONE_THREAD} if saved else None
 
     def one(r: Run) -> tuple[Run, subprocess.CompletedProcess[str]]:
         # Arguments are built here from constants; no shell is involved.
@@ -497,11 +501,11 @@ def run_maps(runs: list[Run], *, saved: bool) -> list[str]:
         print(f"building {r.which}", flush=True)
         for line in done.stdout.splitlines() + done.stderr.splitlines():
             if any(marker in line for marker in BUILD_LOG_MARKERS):
-                print("  " + line)
+                print("  " + line, flush=True)
         if saved and done.returncode == NOT_SAVED_EXIT:
             r.out.unlink(missing_ok=True)
             skipped.append(r.which)
-            print("  skipped: its forecast isn't saved yet; the next refresh downloads it")
+            print("  skipped: forecast not saved yet; the next refresh downloads it", flush=True)
         elif done.returncode:
             raise SystemExit(f"model run failed for {r.which}:\n{done.stderr[-2000:]}")
 
