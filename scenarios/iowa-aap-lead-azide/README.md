@@ -339,6 +339,13 @@ farthest reach in any of the five forecasts.
 
 ## Open-Meteo limits
 
+With an Open-Meteo commercial API key in the `OPEN_METEO_API_KEY` environment variable
+(in GitHub, the repository secret of that name, which both refresh workflows pass on),
+downloads go to Open-Meteo's customer servers under the subscription's limits instead of
+the free ones below. The key is never written to `met_cache/`: responses are saved under
+the free-API address, so saved forecasts match with or without it. Without the variable,
+everything uses the free API as before.
+
 Open-Meteo's free API allows about 10,000 requests a day per IP address, and counts a
 request for many locations or variables as several. A six-model run for one start
 time costs a few hundred.

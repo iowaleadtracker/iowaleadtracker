@@ -241,7 +241,8 @@ Suggested combination:
 ## Weather
 
 Hourly 10 m wind, cloud cover, shortwave radiation, precipitation and boundary-layer
-height come from [Open-Meteo](https://open-meteo.com), with no API key:
+height come from [Open-Meteo](https://open-meteo.com): the free API, or the commercial one when
+`OPEN_METEO_API_KEY` holds a key (scenario README, "Open-Meteo limits"):
 
 - dates more than about 6 days in the past: ERA5 reanalysis (archive API, back to 1940);
 - recent dates and up to about 16 days ahead: the forecast API.
