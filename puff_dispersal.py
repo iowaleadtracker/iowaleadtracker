@@ -55,10 +55,13 @@ from dispersal.deposition import (
 )
 from dispersal.grid import angular_smear, grid_fields
 from dispersal.met import (
+    CACHE_ONLY_ENV,
     MET_CACHE,
     MODEL_RESIDUAL_DEG,
+    NOT_SAVED_EXIT,
     WEATHER_ENSEMBLE,
     MetField,
+    NotSaved,
     build_met,
     rotated_met,
 )
@@ -1304,4 +1307,8 @@ def main(argv: Sequence[str] | None = None) -> str:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except NotSaved as e:
+        print(f"forecast not saved, downloads off ({CACHE_ONLY_ENV}): {e}", file=sys.stderr)
+        sys.exit(NOT_SAVED_EXIT)

@@ -249,8 +249,8 @@ COURT_HOLD = (
 PLANNED_DAY = "Wednesday, Nov. 25"
 #: The blast times the maps model, in words; must match make_map_picker.TIMES and
 #: staged.TIMES (tests/test_site.py checks).
-WINDOW = "9 a.m. to 1 p.m."
-WINDOW_HOURLY = "every hour from " + WINDOW
+WINDOW = "8:30 to 9:30 a.m."
+WINDOW_HOURLY = "at 8:30, 9:00 and 9:30 a.m."
 HHS_DAY = "Monday, Nov. 23"
 
 
@@ -663,7 +663,7 @@ def time_note(built_txt: str) -> str:
         "DisasterAssistance.gov. A FEMA emergency alert sent to phones near the plant gave the "
         "same 9 a.m. time (FEMA emergency alert, Nov. 24). The Army says it will post updated "
         f"maps at {ARMY_MAPS_URL} six hours before the detonation and every hour after that. "
-        f"These maps open on 9 a.m. and also model blasts {WINDOW_HOURLY} in case of a delay."
+        f"These maps open on 9 a.m. and model blasts {WINDOW_HOURLY}, in case the time shifts."
     )
 
 
