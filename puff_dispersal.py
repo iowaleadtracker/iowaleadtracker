@@ -77,6 +77,12 @@ from dispersal.source_term import (
     TWENTY_PERCENT_CASE,
     explosion_source,
 )
+from dispersal.turbulence import (
+    AVERAGING_DEFAULT_MIN,
+    SIGMA_V_MIN_DEFAULT,
+    SPREAD_METHODS,
+    spread_weather,
+)
 from dispersal.units import (
     parse_areal,
     parse_conc,
@@ -354,6 +360,38 @@ def _add_run_args(p: argparse.ArgumentParser) -> None:
     )
 
 
+def _add_spread_args(p: argparse.ArgumentParser) -> None:
+    """How puffs grow: the Briggs stability-class curves or the turbulence-based scheme."""
+    g = p.add_argument_group(
+        "cloud spread (how fast puffs grow sideways and vertically; see TURBULENCE.md)"
+    )
+    g.add_argument(
+        "--spread",
+        choices=SPREAD_METHODS,
+        default="briggs",
+        help="SPREAD METHOD. 'briggs' (default, the original method): Briggs (1973) rural "
+        "curves by Pasquill stability class. 'turbulence': growth from the crosswind and "
+        "vertical turbulence (u*, L, w* by AERMOD's methods; sigma_v, sigma_w by CALPUFF's "
+        "similarity formulas; Draxler time functions), checked against HYSPLIT and the "
+        "Prairie Grass and Sagebrush tracer experiments",
+    )
+    g.add_argument(
+        "--sigma-v-min",
+        type=float,
+        default=SIGMA_V_MIN_DEFAULT,
+        help="with --spread turbulence: minimum crosswind turbulence sigma_v, m/s "
+        "(0.2 = AERMOD; CALPUFF uses 0.5)",
+    )
+    g.add_argument(
+        "--spread-averaging",
+        type=float,
+        default=AVERAGING_DEFAULT_MIN,
+        help="with --spread turbulence: averaging time, minutes, for the crosswind growth; "
+        "sigma_v is scaled by (minutes/60)^0.2. 10 (default) gives a narrower, more "
+        "concentrated cloud than 60",
+    )
+
+
 def _add_removal_args(p: argparse.ArgumentParser) -> None:
     """Water spray at the source and rain."""
     g2 = p.add_argument_group("water spray at the source")
@@ -486,6 +524,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_release_args(p)
     _add_explosion_args(p)
     _add_run_args(p)
+    _add_spread_args(p)
     _add_removal_args(p)
     _add_display_args(p)
     return p
@@ -557,6 +596,8 @@ def _resolve_run(a: argparse.Namespace, p: argparse.ArgumentParser) -> None:
         a.church_factor = CONFINEMENT[a.confinement][0]
     if a.ensemble < 1 or a.shots < 1:
         p.error("--ensemble and --shots must be at least 1")
+    if a.sigma_v_min < 0 or a.spread_averaging <= 0:
+        p.error("--sigma-v-min must be at least 0 and --spread-averaging above 0")
     if a.met_cache:
         MET_CACHE["path"], MET_CACHE["data"] = a.met_cache, None
     a.start, a.display_tz = parse_time(a.time)
@@ -740,6 +781,7 @@ def _try_model(a: argparse.Namespace, m: str, log: TextIO, *, use_levels: bool) 
             use_levels,
             model=m.strip(),
             now=getattr(a, "as_of", None),
+            extra=spread_weather(a),
         )
     except (SystemExit, ValueError, KeyError) as e:
         print(f"weather model {m} skipped: {str(e).splitlines()[-1].strip()}", file=log)
@@ -773,6 +815,7 @@ def _load_weather(a: argparse.Namespace, log: TextIO) -> list[MetRun]:
             a.const_wind,
             use_lev,
             now=getattr(a, "as_of", None),
+            extra=spread_weather(a),
         )
         mets = [(None, nm, mt, el)]
     if len(mets) > 1:
@@ -1101,6 +1144,18 @@ def _meta(
         "caseRange": getattr(a, "case_range", None),
         "scavenging": a.scavenging,
         "residualLayer": bool(getattr(a, "residual_layer", True)),
+        # Only with --spread turbulence, so default (Briggs) maps keep their exact payload.
+        **(
+            {
+                "spread": (
+                    f"turbulence-based spread (AERMOD u*, L, w*; CALPUFF sigma_v, sigma_w with "
+                    f"sigma_v at least {a.sigma_v_min:g} m/s; Draxler time functions, linear "
+                    f"beyond 550 m; {a.spread_averaging:g}-minute crosswind basis)"
+                )
+            }
+            if a.spread == "turbulence"
+            else {}
+        ),
         "loc": [{"value": v, "label": n} for v, n in zip(a.loc_values, a.loc_names, strict=True)],
         "spray": (
             {

@@ -128,10 +128,20 @@ def pressure_levels_for(elev_m: float | None, n: int = 6) -> list[int]:
 
 
 def _open_meteo_url(
-    base: str, base_params: dict[str, str], z_up: int, levs: Sequence[int], *, upper: bool
+    base: str,
+    base_params: dict[str, str],
+    z_up: int,
+    levs: Sequence[int],
+    *,
+    upper: bool,
+    extra: Sequence[str] = (),
 ) -> str:
-    """Request URL for the hourly variables, optional wind aloft and pressure levels."""
-    hourly = list(HOURLY_VARS)
+    """Request URL for the hourly variables, optional wind aloft and pressure levels.
+
+    ``extra`` adds hourly variables after the standard ones (``--spread turbulence``
+    asks for ``temperature_2m``); without it the URL, and so the cache key, is unchanged.
+    """
+    hourly = list(HOURLY_VARS) + list(extra)
     if upper:
         hourly += [f"wind_speed_{z_up}m", f"wind_direction_{z_up}m"]
     for lv in levs:
@@ -185,6 +195,7 @@ def fetch_open_meteo(
     levels: Sequence[int] = (),
     model: str | None = None,
     now: dt.datetime | None = None,
+    extra: Sequence[str] = (),
 ) -> tuple[str, list[Json], int | None, list[int]]:
     """Hourly weather for the given points from Open-Meteo.
 
@@ -234,7 +245,7 @@ def fetch_open_meteo(
     errors = []
     for name, base, z_up in order:
         for upper, levs in tiers:
-            url = _open_meteo_url(base, base_params, z_up, levs, upper=upper)
+            url = _open_meteo_url(base, base_params, z_up, levs, upper=upper, extra=extra)
             try:
                 data = http_json(url)
             except Exception as e:  # noqa: BLE001 - every failure is reported, then the next try
@@ -260,7 +271,8 @@ class MetField:
     Fields are arrays (hours, ny, nx): ``u``, ``v`` (10 m wind components), ``u_up``,
     ``v_up`` (wind at ``z_up``), ``ws``, ``wd``, ``cloud``, ``sw``, ``precip``, ``stab``
     (class index), ``blh`` (mixing height, m), and for each pressure level ``k`` its
-    height above ground ``zl{k}`` and wind ``ul{k}``, ``vl{k}``.
+    height above ground ``zl{k}`` and wind ``ul{k}``, ``vl{k}``. With ``--spread
+    turbulence`` also ``t2`` (2 m air temperature, K) when the source has it.
     """
 
     def __init__(
@@ -421,13 +433,16 @@ def _fetch_wind_grid(  # noqa: PLR0913 - the request's own settings
     use_levels: bool,
     model: str | None,
     now: dt.datetime | None = None,
+    extra: Sequence[str] = (),
 ) -> tuple[_MetSource, float | None]:
     """Fetch the source point, size the wind grid from the wind there, then fetch the grid.
 
     Returns the grid data and the ground elevation at the source (m), if known.
     """
     # Stage 1: winds at the source, to size the wind grid and pick pressure levels.
-    src_name, src, z_up, _ = fetch_open_meteo([lat0], [lon0], t_first, t_last, model=model, now=now)
+    src_name, src, z_up, _ = fetch_open_meteo(
+        [lat0], [lon0], t_first, t_last, model=model, now=now, extra=extra
+    )
     if model:  # a named model must really cover the run (some stop after 18-48 h)
         _check_model_covers(src, t_first, hours, model)
     levels = pressure_levels_for(src[0].get("elevation")) if use_levels else []
@@ -448,7 +463,14 @@ def _fetch_wind_grid(  # noqa: PLR0913 - the request's own settings
         lon_nodes = np.linspace(lon0 - dlon, lon0 + dlon, grid_n)
         LA, LO = np.meshgrid(lat_nodes, lon_nodes, indexing="ij")
         name, data, z_up, levels = fetch_open_meteo(
-            LA.ravel(), ((LO.ravel() + 180) % 360) - 180, t_first, t_last, levels, model, now
+            LA.ravel(),
+            ((LO.ravel() + 180) % 360) - 180,
+            t_first,
+            t_last,
+            levels,
+            model,
+            now,
+            extra,
         )
         if name != src_name:
             print(f"note: grid used {name}, source used {src_name}", file=sys.stderr)
@@ -457,7 +479,7 @@ def _fetch_wind_grid(  # noqa: PLR0913 - the request's own settings
         data = src
         if levels:
             name, data, z_up, levels = fetch_open_meteo(
-                [lat0], [lon0], t_first, t_last, levels, model, now
+                [lat0], [lon0], t_first, t_last, levels, model, now, extra
             )
     return _MetSource(name, data, z_up, levels, lat_nodes, lon_nodes), src[0].get("elevation")
 
@@ -520,6 +542,7 @@ def build_met(  # noqa: PLR0913 - mirrors the command-line options
     model: str | None = None,
     *,
     now: dt.datetime | None = None,
+    extra: Sequence[str] = (),
 ) -> tuple[str, MetField, float | None]:
     """Hourly weather for the run as a :class:`MetField`.
 
@@ -540,7 +563,16 @@ def build_met(  # noqa: PLR0913 - mirrors the command-line options
         return "constant wind (user supplied)", met, None
 
     src, elev = _fetch_wind_grid(
-        lat0, lon0, t_first, t_last, hours, grid_n, use_levels=use_levels, model=model, now=now
+        lat0,
+        lon0,
+        t_first,
+        t_last,
+        hours,
+        grid_n,
+        use_levels=use_levels,
+        model=model,
+        now=now,
+        extra=extra,
     )
     data, name, z_up = src.data, src.name, src.z_up
     ny, nx = len(src.lat_nodes), len(src.lon_nodes)
@@ -549,6 +581,9 @@ def build_met(  # noqa: PLR0913 - mirrors the command-line options
     cloud = _stack(data, "cloud_cover", 50.0, ny, nx)
     sw = _stack(data, "shortwave_radiation", 0.0, ny, nx)
     precip = _stack(data, "precipitation", 0.0, ny, nx)
+    extra_fields: dict[str, MetArray] = {}
+    if all("temperature_2m" in d["hourly"] for d in data):
+        extra_fields["t2"] = _stack(data, "temperature_2m", 15.0, ny, nx) + 273.15
     stab = stability_class(ws, sw, cloud)
     blh_default = DEFAULT_BLH[stab]
     blh = _stack(data, "boundary_layer_height", np.nan, ny, nx)
@@ -577,6 +612,7 @@ def build_met(  # noqa: PLR0913 - mirrors the command-line options
         "precip": precip,
         "stab": stab,
         "blh": blh,
+        **extra_fields,
     }
     level_fields, used = _pressure_level_fields(
         data, src.levels, (ny, nx), (np.full(u.shape, float(z_up)), u_up, v_up)

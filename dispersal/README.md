@@ -12,6 +12,7 @@ works and its limits are in [`MODEL.md`](../MODEL.md); this file is about the co
 | `particles` | diameter, slip correction, settling velocity | `test_particles` |
 | `deposition` | dry deposition (Zhang et al. 2001), drop collection (Slinn 1984) | `test_deposition` |
 | `dispersion` | stability classes, Briggs sigma curves, puff growth, ground reflection, `erf` | `test_dispersion` |
+| `turbulence` | `--spread turbulence`: u*, L, w* (AERMET), sigma_v and sigma_w (CALPUFF), Draxler puff growth | `test_turbulence` |
 | `met` | Open-Meteo download and cache, the met field, transport winds | `test_model` |
 | `model` | the puff model (`run_model`) | `test_model`, `test_regression` |
 | `grid` | puff records to hourly map fields, ensemble smear | `test_model`, `test_regression` |
@@ -20,7 +21,7 @@ works and its limits are in [`MODEL.md`](../MODEL.md); this file is about the co
 ## Rules
 
 - **Imports point down.** `constants` and `types` import nothing from the package;
-  `particles`, `units`, `source_term`, `dispersion` and `output` sit on them; then
+  `particles`, `units`, `source_term`, `dispersion`, `turbulence` and `output` sit on them; then
   `deposition`, `met` and `grid`; `model` is on top. Nothing here imports
   `puff_dispersal.py`, which is only the command line and the run driver.
 - **Physics gets a source.** A function that implements a published method names it in
