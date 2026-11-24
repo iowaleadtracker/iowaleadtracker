@@ -1,9 +1,9 @@
 """Staged Wednesday to Friday maps: same model, other days, GFS and ECMWF only.
 
 A set of maps at a hard-to-guess address on the main site, for people who have the link:
-blasts on Wednesday, Nov. 25, Thursday, Nov. 26 and Friday, Nov. 27, 2026, every hour
-from 9 a.m. to 1 p.m., for all four release cases, with only the GFS and ECMWF
-forecasts (GFS shown, ECMWF in the weather-model spread).
+blasts on Wednesday, Nov. 25, Thursday, Nov. 26 and Friday, Nov. 27, 2026, at 8:30,
+9:00 and 9:30 a.m. and then hourly to 1 p.m., for all four release cases, with only the
+GFS and ECMWF forecasts (GFS shown, ECMWF in the weather-model spread).
 
 These maps are not private. Nothing on the site links here, the pages are noindex, and the
 folder is left out of the sitemap, robots.txt and llms.txt. The GitHub Pages mirror
@@ -28,7 +28,6 @@ import html
 import json
 import re
 import shutil
-import subprocess
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -42,7 +41,7 @@ CACHE = HERE / "met_cache" / "staged_forecasts.json"
 TZ = ZoneInfo("America/Chicago")
 #: Wednesday (the Army's announced date, Nov. 22) through Friday.
 DAYS = ["2026-11-25", "2026-11-26", "2026-11-27"]
-TIMES = ["09:00", "10:00", "11:00", "12:00", "13:00"]  # forecast_summary.WINDOW
+TIMES = ["08:30", "09:00", "09:30", "10:00", "11:00", "12:00", "13:00"]  # site.TIMES
 DEFAULT_DAY = DAYS[0]
 DEFAULT_TIME = "09:00"  # make_map_picker.DEFAULT
 #: The first model is shown; the other makes up the weather-model spread.
@@ -114,55 +113,60 @@ def model_args() -> list[str]:
 
 
 def build() -> None:
-    """Run the model for every day, case and time (downloads only if CACHE is missing)."""
+    """Run the model for every day, case and time (downloads only if CACHE is missing).
+
+    With CACHE saved, the runs go in parallel and skip times it lacks
+    (make_map_picker.run_maps); the first download runs them one after another.
+    """
     import make_map_picker as site  # noqa: PLC0415
 
     MAPS.mkdir(parents=True, exist_ok=True)
     py = site.find_python()
-    pulled = site.retrieved_at(CACHE) if CACHE.exists() else None
-    as_of = ("--as-of", pulled.isoformat()) if pulled else ()
     sky = site.sky_grid_args()
+    saved = CACHE.exists()
     temperature = site.temperature_args(CACHE)  # before any download fills CACHE
-    for day in DAYS:
-        for case, release_case, name in site.CASES:
-            for t in TIMES:
-                # The forecast time is known only after the first download fills CACHE.
-                pulled = site.retrieved_at(CACHE) if CACHE.exists() else None
-                forecast = f", forecast from {site.pulled_label(pulled)}" if pulled else ""
-                note = (
-                    f"{name} case, blast {day_label(day)}, {site.label(t)} CST{forecast}, "
-                    "GFS and ECMWF only"
-                )
-                cmd = [
-                    py,
-                    str(site.TOOL / "puff_dispersal.py"),
-                    *("--lat", str(site.LAT)),
-                    *("--lon", str(site.LON)),
-                    *("--time", f"{day}T{t}-06:00"),
-                    *("--release-case", release_case),
-                    *model_args(),
-                    *temperature,
-                    *as_of,
-                    *sky,
-                    *("--home-url", site.SITE_URL),
-                    *("--legend-note", note),
-                    *("-o", str(MAPS / map_name(day, case, t))),
-                ]
-                print(f"building staged {day} {case} {t}", flush=True)
-                # Arguments are built here from constants; no shell is involved.
-                r = subprocess.run(  # noqa: S603
-                    cmd, cwd=site.TOOL, capture_output=True, text=True, check=False
-                )
-                for line in r.stdout.splitlines() + r.stderr.splitlines():
-                    if any(marker in line for marker in site.BUILD_LOG_MARKERS):
-                        print("  " + line)
-                if r.returncode:
-                    raise SystemExit(
-                        f"model run failed for staged {day} {case} {t}:\n{r.stderr[-2000:]}"
-                    )
-                if not as_of and CACHE.exists():  # replay the same pull for the rest
-                    first = site.retrieved_at(CACHE)
-                    as_of = ("--as-of", first.isoformat()) if first else ()
+    jobs = [
+        (day, case, release_case, name, t)
+        for day in DAYS
+        for case, release_case, name in site.CASES
+        for t in TIMES
+    ]
+
+    def run(job: tuple[str, str, str, str, str]) -> site.Run:
+        day, case, release_case, name, t = job
+        # The forecast time is known only after the first download fills CACHE.
+        pulled = site.retrieved_at(CACHE) if CACHE.exists() else None
+        as_of = ("--as-of", pulled.isoformat()) if pulled else ()
+        forecast = f", forecast from {site.pulled_label(pulled)}" if pulled else ""
+        note = (
+            f"{name} case, blast {day_label(day)}, {site.label(t)} CST{forecast}, "
+            "GFS and ECMWF only"
+        )
+        out = MAPS / map_name(day, case, t)
+        cmd = [
+            py,
+            str(site.TOOL / "puff_dispersal.py"),
+            *("--lat", str(site.LAT)),
+            *("--lon", str(site.LON)),
+            *("--time", f"{day}T{t}-06:00"),
+            *("--release-case", release_case),
+            *model_args(),
+            *temperature,
+            *as_of,
+            *sky,
+            *("--home-url", site.SITE_URL),
+            *("--legend-note", note),
+            *("-o", str(out)),
+        ]
+        return site.Run(f"staged {day} {case} {t}", cmd, out)
+
+    if saved:
+        skipped = site.run_maps([run(j) for j in jobs], saved=True)
+        if skipped:
+            print(f"skipped {len(skipped)} staged maps without saved forecasts")
+    else:  # one at a time: each run's --as-of comes from the download before it
+        for j in jobs:
+            site.run_maps([run(j)], saved=False)
 
 
 def complete_times(day: str) -> list[str]:
@@ -221,7 +225,7 @@ def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
 <header>
   <h1>{site.SITE_NAME}: Wednesday to Friday runs</h1>
   <p class="warn" role="note"><b>{UNOFFICIAL} {NOT_SAFE}</b> Follow official instructions.</p>
-  <p class="about">These maps model blasts on {day_list}, every hour from {fs.WINDOW}, with
+  <p class="about">These maps model blasts on {day_list}, {fs.WINDOW_HOURLY}, with
     {MODELS_TEXT}. {when} Forecasts this far ahead change more and are less certain than
     the main site&rsquo;s. Weather forecast from {html.escape(got_txt)}. Last updated
     {html.escape(built_txt)}. Main site, summary and sources:

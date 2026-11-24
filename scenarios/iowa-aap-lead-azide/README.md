@@ -7,7 +7,7 @@ detonation at Iowa Army Ammunition Plant (40.825518° N, 91.266502° W).
 Monday, Nov. 23, "until the latest possible moment prior to a forecasted temperature drop,"
 which "would risk further destabilization of the material." Source: Army Sustainment Command,
 "Postponed: Lead Azide Detonation," https://www.army.mil/article/296926. The article gives no
-time, so the maps cover 9 a.m. to 1 p.m., hourly. (On Nov. 23 the Acting Secretary of the
+time, so the maps covered 9 a.m. to 1 p.m., hourly. (On Nov. 23 the Acting Secretary of the
 Army said on X that the detonation will be "Wednesday morning," still with no clock time.
 On Nov. 24 a FEMA emergency alert sent to phones near the plant set it for "Wed, Nov 25 at
 9 AM"; the maps now open on 9 a.m.)
@@ -89,8 +89,8 @@ everywhere any model puts lead.
 
 ## The site (iowaleadtracker.com)
 
-The home page has a blast-time dropdown (9:00 a.m. to 1:00 p.m., every hour; opens on
-9 a.m., FEMA's announced time), a
+The home page has a blast-time dropdown (8:30, 9:00 and 9:30 a.m., then hourly to
+1:00 p.m.; opens on 9 a.m., FEMA's announced time), a
 "Lead in the air" dropdown (Low, Middle, High, EPA permit), and a U.S./metric switch. It loads
 one map at a time, so the first visit stays small. The settings for the model runs (place,
 date, mass, weather models, and since Nov. 24 the turbulence-based cloud spread,
@@ -101,8 +101,11 @@ date, mass, weather models, and since Nov. 24 the turbulence-based cloud spread,
 python3 make_map_picker.py --build --publish --deploy
 ```
 
-- `--build` runs the model for all 28 maps, one after another (about 3 minutes once the
-  forecasts are cached). With `met_cache/map_met_all.json` present, each run gets
+- `--build` runs the model for the 28 main maps (7 times x 4 cases) and the staged maps. With
+  the forecasts saved it runs up to 4 at a time with downloads off, and skips any blast
+  time whose forecast isn't saved yet (a time added since the last refresh) until the next
+  refresh downloads it, so a deploy never downloads; without them (a refresh) it runs one
+  after another. With `met_cache/map_met_all.json` present, each run gets
   `--as-of` set to when those forecasts were pulled, so a rebuild on any later date or
   machine replays the same weather offline and makes the same maps.
 - `--publish` copies the site files to the folder named by `publish_dir` in
@@ -354,10 +357,12 @@ time costs a few hundred.
 - Each blast hour costs its own grid downloads: the model sizes the 5 x 5 wind grid from
   the winds over that run, so every start hour is a separate request of about 65 (25
   points x 2.6, for 26 variables counted per 10) per weather model and day; times within the same hour share it.
-  With hourly times from 9 a.m. to 1 p.m., the main refresh costs about 1,000-1,300 per
-  run (Wednesday only, 3-4 models, 5 hours; about 800 with the earlier 11 a.m.-12:30 p.m.
+  With 8:30 a.m. added (6 start hours from 8 a.m. to 1 p.m.; 9:30 shares 9:00's), the main
+  refresh costs about 1,200-1,600 per run; with hourly times from 9 a.m. to 1 p.m. it was
+  about 1,000-1,300 (Wednesday only, 3-4 models, 5 hours; about 800 with the earlier 11 a.m.-12:30 p.m.
   window and Thursday)
-  and the staged refresh about 2,000 (3 days, 2 models; about 1,200 before). Each run
+  and the staged refresh about 2,400 with 8:30 (3 days, 2 models; 2,000 with 5 hours,
+  about 1,200 before). Each run
   stays under the hourly limit (5,000). Over a day, the 3-hourly main refresh, the
   6-hourly staged refresh and the weather grid add up to about 22,000, twice the
   daily limit, so this only works because GitHub's runners don't usually share one
@@ -449,7 +454,7 @@ its own saved forecasts, so its Wednesday numbers differ from the main site's.
 ### Staged Wednesday-Friday maps
 
 `staged.py` builds a separate set of maps for blasts on Wednesday, Nov. 25, Thursday,
-Nov. 26 and Friday, Nov. 27, every hour from 9 a.m. to 1 p.m., all four cases, with only GFS and ECMWF
+Nov. 26 and Friday, Nov. 27, at 8:30, 9:00 and 9:30 a.m. and then hourly to 1 p.m., all four cases, with only GFS and ECMWF
 (GFS shown, ECMWF as the weather-model spread). They sit in their own folder on the main
 site (`staged.DIR_NAME`), which nothing links to; the pages and the folder are noindex,
 and the sitemap, robots.txt, `llms.txt` and the GitHub Pages mirror leave them out.

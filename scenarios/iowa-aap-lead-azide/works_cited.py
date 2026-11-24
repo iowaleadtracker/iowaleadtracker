@@ -567,7 +567,8 @@ CHANGES = [
         "Nov. 24",
         (
             "Maps open on a 9 a.m. blast, the time in FEMA&rsquo;s Nov. 24 emergency alert "
-            "(FEMA 2026); the later hours stay in case of a delay."
+            "(FEMA 2026), with 8:30 and 9:30 a.m. added; the later hours stay in case of a "
+            "delay."
         ),
     ),
     (

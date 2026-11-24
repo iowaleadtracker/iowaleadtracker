@@ -496,12 +496,12 @@ def test_about_box_cites_the_tuesday_filing() -> None:
 
 
 def test_window_words_match_the_blast_times() -> None:
-    """The page's "9 a.m. to 1 p.m." matches the times both sites build, hourly."""
+    """The page's blast-time words match the times both sites build."""
     for times in (site.TIMES, staged.TIMES):
-        assert [site.label(t) for t in (times[0], times[-1])] == ["9:00 a.m.", "1:00 p.m."]
-        assert fs.WINDOW == "9 a.m. to 1 p.m."
-        assert all(t.endswith(":00") for t in times)
-        assert [int(t[:2]) for t in times] == list(range(9, 14))
+        assert [site.label(t) for t in (times[0], times[-1])] == ["8:30 a.m.", "1:00 p.m."]
+        assert fs.WINDOW == "8:30 a.m. to 1 p.m."
+        assert fs.WINDOW_HOURLY == "at 8:30, 9:00 and 9:30 a.m., then every hour to 1 p.m."
+        assert times == ["08:30", "09:00", "09:30", "10:00", "11:00", "12:00", "13:00"]
     assert site.DEFAULT in site.TIMES
     assert staged.DEFAULT_TIME in staged.TIMES
 
@@ -884,3 +884,49 @@ def test_time_note_quotes_fema_alert() -> None:
     assert "MAY BE EVACUATED" in fs.FEMA_ALERT
     assert site.DEFAULT == staged.DEFAULT_TIME == "09:00"
     assert any(r.startswith("FEMA, 2026:") for r in works_cited.REFERENCES)
+
+
+def test_build_switch_matches_the_model() -> None:
+    """The build's cache-only switch and exit status are the model's."""
+    assert site.CACHE_ONLY_ENV == met.CACHE_ONLY_ENV
+    assert site.NOT_SAVED_EXIT == met.NOT_SAVED_EXIT
+    assert not issubclass(met.NotSaved, Exception)  # the per-model fallbacks can't catch it
+
+
+def test_run_maps_skips_times_without_saved_forecasts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """With saved forecasts, downloads are off; a time not saved is skipped, its old map gone."""
+    seen: list[dict[str, str] | None] = []
+
+    class Done:
+        def __init__(self, code: int) -> None:
+            self.returncode = code
+            self.stdout = self.stderr = ""
+
+    def fake_run(cmd: list[str], **kw: Any) -> Done:
+        seen.append(kw.get("env"))
+        return Done(site.NOT_SAVED_EXIT if "08:30" in cmd else 0)
+
+    monkeypatch.setattr(site.subprocess, "run", fake_run)
+    old = tmp_path / "permit-0830.html"
+    old.write_text("stale", encoding="utf-8")
+    runs = [
+        site.Run("permit 08:30", ["08:30"], old),
+        site.Run("permit 09:00", ["09:00"], tmp_path / "permit-0900.html"),
+    ]
+    assert site.run_maps(runs, saved=True) == ["permit 08:30"]
+    assert not old.exists()  # the page then leaves 8:30 out (complete_times)
+    assert all(env and env[site.CACHE_ONLY_ENV] == "1" for env in seen)
+    seen.clear()
+    with pytest.raises(SystemExit):  # downloading (a refresh): any failure stops the build
+        site.run_maps(runs, saved=False)
+    assert seen == [None]
+
+
+def test_cache_only_runs_never_download(monkeypatch: pytest.MonkeyPatch) -> None:
+    """With the switch set, a request that isn't saved stops the run instead of downloading."""
+    monkeypatch.setenv(met.CACHE_ONLY_ENV, "1")
+    monkeypatch.setitem(met.MET_CACHE, "path", None)
+    with pytest.raises(met.NotSaved):
+        met.http_json("https://api.open-meteo.com/v1/forecast?latitude=0")

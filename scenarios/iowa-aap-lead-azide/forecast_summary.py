@@ -249,8 +249,8 @@ COURT_HOLD = (
 PLANNED_DAY = "Wednesday, Nov. 25"
 #: The blast times the maps model, in words; must match make_map_picker.TIMES and
 #: staged.TIMES (tests/test_site.py checks).
-WINDOW = "9 a.m. to 1 p.m."
-WINDOW_HOURLY = "every hour from " + WINDOW
+WINDOW = "8:30 a.m. to 1 p.m."
+WINDOW_HOURLY = "at 8:30, 9:00 and 9:30 a.m., then every hour to 1 p.m."
 HHS_DAY = "Monday, Nov. 23"
 
 
@@ -643,7 +643,7 @@ def time_note(built_txt: str) -> str:
         "plant on Nov. 24 sets the detonation for 9 a.m. Wednesday, Nov. 25 (FEMA emergency "
         "alert, Nov. 24); the Army had said \u201cWednesday morning\u201d (Acting Secretary "
         f"of the Army on X). The alert reads: {FEMA_ALERT} Weather can still delay the "
-        f"blasts. These maps open on 9 a.m. and also model blasts {WINDOW_HOURLY}, through the "
+        f"blasts. These maps open on 9 a.m. and model blasts {WINDOW_HOURLY}, through the "
         "\u201capproximately noon\u201d that Iowa HHS\u2019s fact sheet gave for the earlier "
         "Monday, Nov. 23 date (Iowa HHS fact sheet). The permit has the Army update its "
         "estimate of where lead dust could go at least 48 hours before the blasts and hourly "

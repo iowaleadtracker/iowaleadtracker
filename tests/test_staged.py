@@ -37,9 +37,9 @@ def built(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 
 def test_settings() -> None:
-    """Wednesday to Friday, every hour from 9 a.m. to 1 p.m., GFS and ECMWF only."""
+    """Wednesday to Friday, 8:30, 9:00 and 9:30 a.m. then hourly to 1 p.m., GFS and ECMWF."""
     assert staged.DAYS == ["2026-11-25", "2026-11-26", "2026-11-27"]
-    assert staged.TIMES == ["09:00", "10:00", "11:00", "12:00", "13:00"]
+    assert staged.TIMES == ["08:30", "09:00", "09:30", "10:00", "11:00", "12:00", "13:00"]
     assert staged.WEATHER == "gfs_seamless,ecmwf_ifs025"
     assert staged.day_label("2026-11-25") == "Wednesday, Nov. 25, 2026"
     assert staged.day_label("2026-11-27") == "Friday, Nov. 27, 2026"
@@ -68,7 +68,7 @@ def test_model_args_change_only_weather_and_file() -> None:
 
 def test_picker_page(built: Path) -> None:
     n = staged.write_pages()
-    assert n == 3 * 5 * len(site.CASES) == 60
+    assert n == 3 * 7 * len(site.CASES) == 84
     page = (built / "index.html").read_text(encoding="utf-8")
     assert '<meta name="robots" content="noindex, nofollow">' in page
     assert "This is an unofficial estimate, not from the Army or any government agency." in page
@@ -92,7 +92,7 @@ def test_picker_page(built: Path) -> None:
     m = re.search(r"const FILES = (\{.*?\});", page)
     assert m
     files = json.loads(m.group(1))
-    assert len(files) == 60
+    assert len(files) == 84
     assert files["2026-11-25-permit-1200"] == "maps/2026-11-25-permit-1200.html"
     assert '<option value="13:00">1:00 p.m.</option>' in page
     for mp in (built / "maps").glob("*.html"):  # each map stays out of search too

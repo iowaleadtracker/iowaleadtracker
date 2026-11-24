@@ -29,6 +29,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
 from string import Template
@@ -67,12 +68,14 @@ PAST_DAYS = [("2026-11-23", "mon"), ("2026-11-24", "tue"), ("2026-11-26", "thu")
 LEAD_DAYS = ["2026-11-25"]
 LEAD_DAY = LEAD_DAYS[0]
 LAT, LON = 40.825518, -91.266502
-# Hourly from 9 a.m. to 1 p.m. (forecast_summary.WINDOW): the Army Secretary said on Nov. 23
-# the blasts will be "Wednesday morning", and Iowa HHS had given about noon for Nov. 23. On
-# Nov. 24 a FEMA emergency alert set the time at 9 a.m.; the later hours stay for a delay.
+# 8:30 to 1 p.m. (forecast_summary.WINDOW_HOURLY): on Nov. 24 a FEMA emergency alert set the
+# time at 9 a.m., so half an hour either side of it, then hourly to the "approximately noon"
+# Iowa HHS had given for Nov. 23, in case of a delay (maintainer's choice, Nov. 24).
 # Each start hour sizes its own wind grid, so each costs one Open-Meteo grid download per
-# weather model and day (README "Open-Meteo limits"); quarter hours within an hour are free.
-TIMES = ["09:00", "10:00", "11:00", "12:00", "13:00"]
+# weather model and day (README "Open-Meteo limits"); other minutes within an hour are free
+# (9:30 uses 9:00's). A time whose forecast isn't saved yet is skipped until the next refresh
+# (run_maps), so adding one never makes a deploy download.
+TIMES = ["08:30", "09:00", "09:30", "10:00", "11:00", "12:00", "13:00"]
 DEFAULT = "09:00"  # FEMA's Nov. 24 emergency alert: "Wed, Nov 25 at 9 AM"
 NOON_HOUR = 12
 # (id used in file names and the URL, --release-case, label). See README "Release cases".
@@ -452,8 +455,60 @@ def sky_grid_args() -> list[str]:
     return ["--sky-grid", str(path)] if path else []
 
 
+# The model's switch for "every forecast is saved: don't download" and its exit status when
+# one isn't (dispersal.met.CACHE_ONLY_ENV and NOT_SAVED_EXIT; tests/test_site.py checks).
+CACHE_ONLY_ENV = "PUFF_MET_CACHE_ONLY"
+NOT_SAVED_EXIT = 3
+# Model runs at once when every forecast is saved: nothing is downloaded, so Open-Meteo's
+# limits don't apply. A build that downloads (a refresh) runs them one after another.
+PARALLEL_RUNS = max(1, min(4, os.cpu_count() or 1))
+
+
+@dataclass
+class Run:
+    """One model run: a label for the log, its command, and the map it writes."""
+
+    which: str
+    cmd: list[str]
+    out: Path
+
+
+def run_maps(runs: list[Run], *, saved: bool) -> list[str]:
+    """Run the model for each map; return the labels skipped for want of a saved forecast.
+
+    With ``saved`` (the forecasts are in their saved file), downloads are off and up to
+    PARALLEL_RUNS run at once. A run whose forecast isn't saved, such as a blast time added
+    since the last refresh, is skipped and its old map removed, so the page leaves that time
+    out until the next refresh downloads it; a deploy never downloads. Without ``saved`` (a
+    refresh, or the first download) the runs go one after another and download as needed.
+    """
+    env = {**os.environ, CACHE_ONLY_ENV: "1"} if saved else None
+
+    def one(r: Run) -> tuple[Run, subprocess.CompletedProcess[str]]:
+        # Arguments are built here from constants; no shell is involved.
+        done = subprocess.run(  # noqa: S603
+            r.cmd, cwd=TOOL, capture_output=True, text=True, check=False, env=env
+        )
+        return r, done
+
+    skipped = []
+    with ThreadPoolExecutor(PARALLEL_RUNS if saved else 1) as pool:
+        for r, done in pool.map(one, runs):  # in order, so the log reads as before
+            print(f"building {r.which}", flush=True)
+            for line in done.stdout.splitlines() + done.stderr.splitlines():
+                if any(marker in line for marker in BUILD_LOG_MARKERS):
+                    print("  " + line)
+            if saved and done.returncode == NOT_SAVED_EXIT:
+                r.out.unlink(missing_ok=True)
+                skipped.append(r.which)
+                print("  skipped: its forecast isn't saved yet; the next refresh downloads it")
+            elif done.returncode:
+                raise SystemExit(f"model run failed for {r.which}:\n{done.stderr[-2000:]}")
+    return skipped
+
+
 def build() -> None:
-    """Run the model for every day, case and time, one after another (Open-Meteo limits)."""
+    """Run the model for every day, case and time (see run_maps)."""
     MAPS.mkdir(parents=True, exist_ok=True)
     py = find_python()
     days = days_to_build()
@@ -466,10 +521,12 @@ def build() -> None:
     args = list(MODEL_ARGS) + temperature_args()
     w = args.index("--weather-model") + 1
     sky = sky_grid_args()
+    runs = []
     for day in days:
         args[w] = weather_for_day(day, pulled)  # one order per day (see weather_for_day)
         for case, release_case, name in CASES:
             for t in TIMES:
+                out = MAPS / map_name(case, t, day)
                 cmd = [
                     py,
                     str(TOOL / "puff_dispersal.py"),
@@ -482,19 +539,13 @@ def build() -> None:
                     *sky,
                     *("--home-url", SITE_URL),
                     *("--legend-note", f"{name} case, blast {blast_label(t, day)}{forecast}"),
-                    *("-o", str(MAPS / map_name(case, t, day))),
+                    *("-o", str(out)),
                 ]
                 which = f"{case} {t}" if day == DATE else f"{day} {case} {t}"
-                print(f"building {which}", flush=True)
-                # Arguments are built here from constants; no shell is involved.
-                r = subprocess.run(  # noqa: S603
-                    cmd, cwd=TOOL, capture_output=True, text=True, check=False
-                )
-                for line in r.stdout.splitlines() + r.stderr.splitlines():
-                    if any(marker in line for marker in BUILD_LOG_MARKERS):
-                        print("  " + line)
-                if r.returncode:
-                    raise SystemExit(f"model run failed for {which}:\n{r.stderr[-2000:]}")
+                runs.append(Run(which, cmd, out))
+    skipped = run_maps(runs, saved=MET_CACHE.exists())
+    if skipped:
+        print(f"skipped {len(skipped)} maps without saved forecasts: {', '.join(skipped)}")
     if staged.CACHE.exists():  # the staged Wednesday-Friday maps, from their own file
         staged.build()
 

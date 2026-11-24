@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import math
+import os
 import sys
 import time
 import urllib.error
@@ -62,6 +63,21 @@ MET_CACHE: dict[str, Any] = {"path": None, "data": None}
 _RETRY_STATUS = (429, 500, 502, 503, 504)
 
 
+#: Set (to any value) by the site build when every forecast should already be saved: a request
+#: that isn't in the saved file then stops the run with :class:`NotSaved` instead of downloading.
+CACHE_ONLY_ENV = "PUFF_MET_CACHE_ONLY"
+#: The command line's exit status for :class:`NotSaved`.
+NOT_SAVED_EXIT = 3
+
+
+class NotSaved(BaseException):
+    """A forecast the run needs isn't saved and downloads are off (``CACHE_ONLY_ENV``).
+
+    A BaseException, so the per-model fallbacks (``except Exception``) can't swallow it and
+    quietly build a map from fewer weather models.
+    """
+
+
 def _cache_lookup(url: str) -> Any:  # noqa: ANN401 - Open-Meteo JSON (object or list)
     """Return the cached response for ``url``, loading the cache file on first use."""
     if not MET_CACHE["path"]:
@@ -97,6 +113,8 @@ def http_json(url: str, timeout: float = 60, tries: int = 4) -> Any:  # noqa: AN
     cached = _cache_lookup(url)
     if cached is not None:
         return cached
+    if os.environ.get(CACHE_ONLY_ENV):
+        raise NotSaved(url)
     if not url.startswith("https://"):
         raise ValueError(f"refusing non-HTTPS URL {url!r}")
     req = urllib.request.Request(url, headers={"User-Agent": "puff-dispersal/1.0"})  # noqa: S310 - HTTPS checked above
