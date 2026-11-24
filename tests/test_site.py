@@ -255,16 +255,18 @@ def test_faq_links_are_live() -> None:
 
 
 @pytest.mark.slow
-def test_court_hold_leads_the_summary_and_faq(rendered: tuple[str, list, str]) -> None:
-    """The court hold comes before any statement that the blast is Monday."""
+def test_key_facts_lead_the_summary_and_faq(rendered: tuple[str, list, str]) -> None:
+    """The time and official advice come first; how the date was set comes after."""
     summary, faq, llms = rendered
-    assert summary.index("Court case") < summary.index("When will the detonation happen?")
+    assert summary.index("When will the detonation happen?") < summary.index("Where the cloud")
+    assert summary.index("Where the cloud") < summary.index("How the date was set")
+    assert summary.index("How the date was set") < summary.index("Court case")
     assert fs.COURT_URL in summary
     when = dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
-    # Newest first: the president's Nov. 23 order, then the Army's Wednesday date.
-    assert when.startswith(f"{fs.TRUMP_HOLD} (Sources: {fs.TRUMP_SOURCE_TEXT}.) ")
+    assert when.startswith("As of this update (")
+    assert when.index("about 9 a.m. CST Wednesday") < when.index(fs.TRUMP_HOLD)
+    assert fs.ADVISORY_NOV24_URL in when
     assert (
-        "FEMA says 9 a.m. Wednesday, Nov. 25, 2026; the Army had said Wednesday morning. "
         "The Army had "
         "planned Monday, Nov. 23. On Nov. 22, the government told the court, which had put "
         "the permit on hold, that the Army had postponed it to Tuesday, Nov. 24."
@@ -443,10 +445,8 @@ def test_court_paragraph_names_the_days_modeled() -> None:
         "In a court filing on Nov. 22, 2026, the government said the Army postponed the "
         "controlled detonation again, to Tuesday, Nov. 24, and intends to act that day."
     )
-    assert "at least 48 hours before the blasts and hourly from six hours before" in (
-        fs.time_note("X")
-    )
-    assert f'<a href="{fs.RESPONSE_URL}" rel="noopener">Nov. 22 court filing</a>' in (
+    assert "six hours before the detonation and every hour after that" in fs.time_note("X")
+    assert f'<a href="{fs.ADVISORY_NOV24_URL}" rel="noopener">{fs.ADVISORY_NOV24_CITE}</a>' in (
         fs.time_note_html("X")
     )
     # no longer "unclear" which day: the Nov. 22 filing says Tuesday
@@ -476,22 +476,25 @@ def test_two_days_court_paragraph(rendered_two_days: tuple[str, list, str]) -> N
     assert both in llms
 
 
-def test_about_box_cites_the_tuesday_filing() -> None:
-    """The About box's "When." paragraph: Wednesday, Tuesday, then Monday, each sourced."""
+def test_about_box_leads_with_when() -> None:
+    """The About box opens with the time and official advice; the timeline comes last."""
     page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
     start = page.index('<dialog id="note"')
     about = " ".join(page[start : page.index("</dialog>", start)].split())
-    assert (
-        "<b>When.</b> $trump_hold Sources: $trump_source. $why_wednesday Source: "
-        "$wednesday_source.</p>"
-    ) in about
-    assert "<p><b>$time_head</b> $time_note</p>" in about
+    first = about.index("<p>", about.index("About this map</h2>"))
+    assert about[first:].startswith("<p><b>$time_head</b> $time_note</p>")
+    history = (
+        "<b>How the date was set.</b> $trump_hold Sources: $trump_source. $why_wednesday "
+        "Source: $wednesday_source.</p>"
+    )
+    assert about.index("Don&rsquo;t use this map") < about.index(history)
+    assert about.index(history) < about.index("<b>Court case.</b>")
     assert "<b>$earlier_head</b> $why_tuesday Sources: $tuesday_sources. $why_monday" in about
-    assert fs.TIME_HEAD == "Set for 9 a.m."
+    assert fs.TIME_HEAD == "When."
     assert fs.time_note("X").startswith(
-        "As of this update (X), a FEMA emergency alert sent to phones near the plant on "
-        "Nov. 24 sets the detonation for 9 a.m. Wednesday, Nov. 25 (FEMA emergency alert, "
-        "Nov. 24)"
+        "As of this update (X), the Army plans the controlled detonation for about 9 a.m. CST "
+        "Wednesday, Nov. 25, and says it will give a more precise time after evaluating "
+        "changing weather (Army public safety advisory, Nov. 24)."
     )
 
 
@@ -700,9 +703,14 @@ def test_wednesday_leads(rendered_wednesday_lead: tuple[str, list, str]) -> None
     assert when.index(fs.WHY_WEDNESDAY) < when.index(fs.WHY_TUESDAY) < when.index(fs.WHY_MONDAY)
     why = [
         llms.index(k)
-        for k in ("- Why Wednesday:", "- Time:", "- Earlier date, Tuesday:", "- Earlier date, Mon")
+        for k in (
+            "- Time and official advice:",
+            "- Why Wednesday:",
+            "- Earlier date, Tuesday:",
+            "- Earlier date, Mon",
+        )
     ]
-    assert why == sorted(why)
+    assert why == sorted(why)  # the key facts first, then how the date was set
     assert "<p><b>Earlier dates.</b> " in summary
     assert "on Monday, Nov. 23, Tuesday, Nov. 24, Wednesday, Nov. 25." in llms
     assert "What would the map show for Tuesday, Nov. 24, an earlier planned date?" in dict(faq)
@@ -876,11 +884,12 @@ def test_saved_forecasts_without_temperature_get_the_fallback(tmp_path: Path) ->
     assert site.temperature_args(tmp_path / "missing.json") == []  # a refresh downloads it
 
 
-def test_time_note_quotes_fema_alert() -> None:
-    """The announced 9 a.m. time comes with the official alert's own instructions, verbatim."""
+def test_time_note_gives_the_official_advice() -> None:
+    """The 9 a.m. time comes with the Army's and FEMA's own advice, attributed and linked."""
     note = fs.time_note("X")
-    assert fs.FEMA_ALERT in note
-    assert "1-800-621-3362" in fs.FEMA_ALERT
-    assert "MAY BE EVACUATED" in fs.FEMA_ALERT
+    for part in ("5-mile cone extending southwest", "shelter in place", "1-800-621-3362"):
+        assert part in note
+    assert fs.ADVISORY_NOV24_URL in fs.time_note_html("X")
+    assert any(r.startswith("McFate, L., 2026b:") for r in works_cited.REFERENCES)
     assert site.DEFAULT == staged.DEFAULT_TIME == "09:00"
     assert any(r.startswith("FEMA, 2026:") for r in works_cited.REFERENCES)
