@@ -241,12 +241,12 @@ REFERENCES = [
         "Turner, D. B., 1970: <i>Workbook of Atmospheric Dispersion Estimates</i>. Rev. ed. Public "
         "Health Service Publ. 999-AP-26, National Air Pollution Control Administration."
     ),
-    # No permalink was available: the post is pinned on the account, and its text was
-    # checked from the maintainer's screenshot (Nov. 23, about 11 p.m. CST).
+    # Text checked from the maintainer's screenshot (Nov. 23, about 11 p.m. CST); the
+    # permalink is from the maintainer.
     "U.S. Army, 2026: &ldquo;&hellip;which will occur this Wednesday morning, as previously "
-    "scheduled, based on forecast wind conditions.&rdquo; Pinned post by the Acting Secretary "
+    "scheduled, based on forecast wind conditions.&rdquo; Post by the Acting Secretary "
     "of the Army (@SecArmy) on X, 23 November 2026, accessed 23 November 2026, "
-    + _a("https://x.com/SecArmy")
+    + _a("https://x.com/SecArmy/status/2125060405605154940")
     + ".",
     "U.S. Army, 2026: &ldquo;The controlled detonation at Iowa Army Ammunition Plant is now "
     "scheduled on Wednesday, November 25, 2026&hellip;&rdquo; Post by the U.S. Army on "

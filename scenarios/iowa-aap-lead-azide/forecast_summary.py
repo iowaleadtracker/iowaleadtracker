@@ -150,9 +150,9 @@ WEDNESDAY_SOURCE_TEXT = f"{ARMY_WED_CITE}, {ARMY_WED_URL}"
 # new date; the Army had planned Wednesday. The Army Secretary's post that evening did.
 # The Acting Secretary of the Army's post on X (@SecArmy, pinned; posted the evening of
 # Nov. 23, 2026, after the 8th Circuit's order; text checked from the maintainer's
-# screenshot, taken about 11 p.m. CST when the post was 2 hours old). No permalink was
-# available, so this links the account, where the post is pinned. It gives no clock time.
-SECARMY_URL = "https://x.com/SecArmy"
+# screenshot, taken about 11 p.m. CST when the post was 2 hours old). The post's permalink,
+# from the maintainer, without its tracking parameter. It gives no clock time.
+SECARMY_URL = "https://x.com/SecArmy/status/2125060405605154940"
 SECARMY_CITE = "Acting Secretary of the Army on X, Nov. 23, 2026"
 SECARMY_MORNING = (
     "On the evening of Nov. 23, the Acting Secretary of the Army said the Army will proceed "
