@@ -957,6 +957,7 @@ def _sky_grid_output(a: argparse.Namespace) -> tuple[Json | None, list[Json]]:
             "fetched": s.get("fetched"),
             "lats": sky["lats"],
             "lons": sky["lons"],
+            "fade": sky.get("fade", 3),  # grid points over which the map fades the layer out
         }
         hours = [
             {

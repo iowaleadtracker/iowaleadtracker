@@ -185,6 +185,7 @@ def test_sky_grid_output_takes_the_hour_after_each_middle(tmp_path: Path) -> Non
     meta, hours = puff._sky_grid_output(model_args(f))
     assert meta is not None
     assert meta["model"] == "gfs_seamless"
+    assert meta["fade"] == 3  # not in the file: the default
     assert [h["c"][0] for h in hours] == [2, 3, 4]  # rows 19, 20 and 21 UTC
 
 

@@ -346,21 +346,26 @@ time costs a few hundred.
   users and ran out several times.
 - Move or delete `met_cache/map_met_all.json` to download fresh forecasts (see below).
 - The weather layer's grid (`sky_grid.py --fetch`) counts as one request per point:
-  about 475 for HRRR, and as many again when GFS is needed, on each refresh.
+  about 770 per model. It asks HRRR only for days within 48 hours, and keeps a saved
+  grid under 6 hours old when no day needs HRRR, so most 3-hourly refreshes either reuse
+  it or download one model.
 
 ### The weather layer
 
 Each map has an optional "sky cover & rain" layer (off by default): forecast cloud cover
 in white or gray, and precipitation colored as on radar. It is for display only. The lead
 model keeps its own 5x5 grid (points about 90 miles apart); the layer uses a finer grid
-from `sky_grid.py`: 19 x 25 points 0.3° apart (about 21 miles) around the plant, from one
-model per map. HRRR is used when its run covers the map's hours (it reaches 18 to 48
-hours ahead, depending on the run); otherwise GFS. The legend names the model and when
+from `sky_grid.py`: 24 x 32 points 0.35° apart (about 24 miles), shown at full strength
+over 37.0-43.5°N, 96.7-87.5°W (all of Iowa, northern Missouri, western Illinois and every
+map's area) and fading out over two more points on each side. One model per map: HRRR
+when its run covers the map's hours (it reaches 18 to 48 hours ahead, depending on the
+run, so it is only asked for days within 48 hours); otherwise GFS. The legend names the model and when
 it was pulled, and says that the lead's path uses its own forecast.
 
 `met_cache/sky_grid.json` holds the download. The site build only reads it (a deploy
 never downloads), and without it the maps fall back to the lead model's coarse points.
-`sky_grid.py --fetch` downloads it again; `sky_grid.py` says what is saved.
+`sky_grid.py --fetch` downloads it again (or keeps it, as above; `--force` always
+downloads); `sky_grid.py` says what is saved.
 
 ## Refreshing on the day
 
