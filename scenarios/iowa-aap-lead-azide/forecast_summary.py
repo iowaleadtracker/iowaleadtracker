@@ -750,7 +750,8 @@ def _air_text(f: Facts, model: str, n_models: str, *, html: bool) -> str:
         "level for lead, for a one-hour exposure, is 32 \u00b5g/m\u00b3. The model has the "
         "one-hour average above it out to about "
         + listed("pac1_km")
-        + f" with the {model or 'main'} forecast. Across all {n_models} forecasts it reaches "
+        + f" with the {model or 'main'} forecast. Across all {n_models} forecasts, with "
+        "either of two dry-deposition schemes, it reaches "
         "up to " + listed("pac1_env_km") + "."
     )
 
@@ -896,9 +897,9 @@ the window follow almost the same path. {t.forecast_line}</p>
     (window troughs). They are for indoor dust, so outdoor lead is only a rough comparison. The
     first number uses the {t.model or "main"} forecast shown on the map. The smaller number \
 below it is
-    the farthest any of the {ctx["n_models"]} weather forecasts reaches, which is what the map \
-shows
-    with &ldquo;weather-model spread&rdquo; turned on.</p>
+    the farthest any of the {ctx["n_models"]} weather forecasts reaches, with either of two
+    dry-deposition schemes (Zhang et al. 2001 and its revision by Emerson et al. 2020), which is
+    what the map shows with &ldquo;weather-model spread&rdquo; turned on.</p>
   <div class="tablewrap"><table>
     {DEP_TABLE_HEAD}
     <tbody>{"".join(t.rows_html)}</tbody></table></div>

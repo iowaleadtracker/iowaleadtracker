@@ -123,6 +123,9 @@ REFERENCES = [
     "Dowell, D. C., and Coauthors, 2022: The High-Resolution Rapid Refresh (HRRR): An hourly "
     "updating convection-allowing forecast model. Part I: Motivation and system description. "
     "<i>Wea. Forecasting</i>, <b>37</b>, 1371&ndash;1395, " + doi("10.1175/WAF-D-21-0151.1") + ".",
+    "Emerson, E. W., and Coauthors, 2020: Revisiting particle dry deposition and its role in "
+    "radiative effect estimates. <i>Proc. Natl. Acad. Sci. USA</i>, <b>117</b>, "
+    "26&thinsp;076&ndash;26&thinsp;082, " + doi("10.1073/pnas.2014761117") + ".",
     (
         "EPA, 1978: National ambient air quality standards for lead. <i>Fed. Regist.</i>, "
         "<b>43</b>, "
@@ -408,12 +411,16 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
         (
             "Deposition",
             (
-                "Size-resolved dry deposition over harvested cropland (late autumn); rain "
-                "washout 10<sup>&minus;4</sup> "
+                "Size-resolved dry deposition over harvested cropland (late autumn); the "
+                "weather-model spread also runs each forecast with a revised scheme, which "
+                "over cropland deposits particles under about 0.5 &micro;m more slowly and "
+                "larger ones faster; rain washout "
+                "10<sup>&minus;4</sup> "
                 "s<sup>&minus;1</sup> per mm/h"
             ),
             (
                 "Zhang et al. (2001), crops and mixed farming, late autumn after frost; "
+                "Emerson et al. (2020), SI Table S1; "
                 "Slinn (1984); Seinfeld and Pandis (2016)"
             ),
         ),
