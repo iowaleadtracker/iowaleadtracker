@@ -1335,7 +1335,8 @@ $("zmetric").onchange = (e) => { S.zoneMetric = e.target.value; syncLocInputs();
 if (!FIELDS.snap) document.querySelector('#fieldseg button[data-v="snap"]').hidden = true;   // older data
 if (M.ensemble) {
   $("envwrap").hidden = false;
-  $("envlabel").textContent = ENS.models ? `weather-model spread (${ENS.models.length} models)` : `wind uncertainty ±${ENS.spread}°`;
+  $("envlabel").textContent = (ENS.models ? `weather-model spread (${ENS.models.length} models)` : `wind uncertainty ±${ENS.spread}°`)
+    + (ENS.deposition ? ` and ${ENS.deposition.length} deposition schemes` : "");
   $("showEnv").onchange = (e) => { S.env = e.target.checked; render(); };
 }
 if (SYS === "us" && S.units === "ugm3") S.units = "ugft2";

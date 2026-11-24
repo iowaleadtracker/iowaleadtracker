@@ -154,12 +154,13 @@ TRUMP_HOLD = (
     "On Monday, Nov. 23, President Trump said on Truth Social that he has \u201cordered the "
     "Military not to do so until such time as the Eighth Circuit agrees that we can go "
     "forward,\u201d and that the decision is \u201cfully subject to the incoming Governor "
-    "Elect, Rob Sand, agreeing to the operation.\u201d The Army had no immediate comment, "
-    "KCRG reported. The 8th Circuit lifted its hold on the permit that day (see the court "
-    "case). Sand didn\u2019t directly say whether he approved, Iowa Public Radio reported; he "
-    "said \u201cthe Administration should make this decision based on the information they "
-    "have from the people they brought in to do the job months ago and have been on the "
-    "ground in Middletown for weeks.\u201d The Army hasn\u2019t announced a new date."
+    "Elect, Rob Sand, agreeing to the operation.\u201d Later that day, the 8th Circuit "
+    "cleared the way for the detonation (see Court case). Sand didn\u2019t directly say "
+    "whether he approved, Iowa Public Radio reported; he said \u201cthe Administration should "
+    "make this decision based on the information they have from the people they brought in "
+    "to do the job months ago and have been on the ground in Middletown for weeks.\u201d The "
+    "Army had no immediate comment on the ruling or the president\u2019s post, the Associated "
+    "Press reported, and it hasn\u2019t announced a new date."
 )
 PERMIT_URL = (
     "https://www.epa.gov/system/files/documents/2026-11/"
@@ -186,28 +187,39 @@ COURT_URL = (
     "court-injunction-army-planned-lead-azide-detonation"
 )
 COURT_CITE = "Iowa Public Radio, Nov. 20, 2026"
-# The court's Nov. 23 order lifting that hold, and Gov.-elect Rob Sand's Nov. 23 post, as
-# reported by Iowa Public Radio (published Nov. 22, 2026, 9:11 p.m. CST, "updated Monday
-# afternoon"; read in full from the maintainer's copy, saved Nov. 23, 9:16 p.m.). "In a Monday
-# order, judges lifted the stay"; "The ruling also found the Iowa Environmental Council and
-# Sierra Club hadn't proven that the EPA and Army had not adequately considered other options";
-# "Sand did not directly say whether he approved of the detonation".
+# The 8th Circuit's ruling of Monday, Nov. 23, 2026, as reported by the Associated Press on
+# KCRG (published 5:04 p.m. CST; read in full on the page Nov. 23): "A federal appeals court
+# on Monday cleared the way for the U.S. Army to detonate several tons of degraded
+# bomb-making material at an Iowa ammunition plant." "The Army had no immediate comment
+# about the court ruling or the president's social media post."
 RULING_URL = (
+    "https://www.kcrg.com/2026/11/23/"
+    "federal-appeals-court-clears-way-us-army-detonate-degraded-bomb-making-material-iowa/"
+)
+RULING_CITE = "Associated Press on KCRG, Nov. 23, 2026"
+# The same ruling, and Gov.-elect Rob Sand's Nov. 23 post, as reported by Iowa Public Radio
+# (published Nov. 22, 2026, 9:11 p.m. CST, "updated Monday afternoon"; read in full from the
+# maintainer's copy, saved Nov. 23, 9:16 p.m.). "In a Monday order, judges lifted the stay";
+# "The ruling also found the Iowa Environmental Council and Sierra Club hadn't proven that the
+# EPA and Army had not adequately considered other options"; "Sand did not directly say
+# whether he approved of the detonation".
+SAND_URL = (
     "https://www.iowapublicradio.org/ipr-news/2026-11-23/"
     "court-lifts-stay-block-iowa-lead-detonation"
 )
-RULING_CITE = "Iowa Public Radio, Nov. 23, 2026"
+SAND_CITE = "Iowa Public Radio, Nov. 23, 2026"
 # The hold and the government's latest filing. The last sentence names the days the maps
 # model, so it's built by court_pause() from the days actually built.
 # Newest first (maintainer's choice, Nov. 22, 2026).
 COURT_HOLD = (
-    "On Monday, Nov. 23, the 8th U.S. Circuit Court of Appeals lifted its hold on the "
-    "EPA\u2019s emergency permit for the blasts, allowing the Army to move forward; it found "
-    "the Iowa Environmental Council and the Sierra Club\u2019s Iowa chapter hadn\u2019t "
-    "proven that the EPA and the Army had not adequately considered other options, Iowa "
-    "Public Radio reported. "
-    "Late on Nov. 22, 2026, the Army said the blasts are now scheduled for Wednesday, "
-    "Nov. 25. Earlier that day, the government asked the court "
+    "On Monday, Nov. 23, 2026, the 8th U.S. Circuit Court of Appeals cleared the way for the "
+    "Army to detonate the lead azide, the Associated Press reported. It lifted its hold on "
+    "the EPA\u2019s emergency permit, finding that the Iowa Environmental Council and the "
+    "Sierra Club\u2019s Iowa chapter hadn\u2019t proven that the EPA and the Army had not "
+    "adequately considered other options, Iowa Public Radio reported. The Army hadn\u2019t "
+    "commented on the ruling or announced a new date. "
+    "Late on Nov. 22, the Army said the blasts are now scheduled for Wednesday, "
+    "Nov. 25. Earlier that day, the government asked the 8th U.S. Circuit Court of Appeals "
     "to lift its hold on the EPA\u2019s emergency permit for the blasts and said the Army had "
     "postponed them to Tuesday, Nov. 24; the court hadn\u2019t ruled as of that filing. In a "
     "court filing on Nov. 21, the government said the Army intends to use an emergency "
@@ -273,18 +285,24 @@ RESPONSE_CITE = "Government response, 8th Cir. No. 26-3374, Nov. 22, 2026"
 KCCI_URL = "https://www.kcci.com/article/lead-azide-bomb-detonation-iowa-tuesday/74499570"
 KCCI_CITE = "KCCI, Nov. 22, 2026"
 # The president's post (KCRG) and Sand's reply (Iowa Public Radio).
+# The president's post (KCRG), the ruling and the Army's silence (AP), Sand's reply (IPR).
 TRUMP_SOURCE_HTML = (
     f'<a href="{TRUMP_URL}" rel="noopener">{TRUMP_CITE}</a>; '
-    f'<a href="{RULING_URL}" rel="noopener">{RULING_CITE}</a>'
+    f'<a href="{RULING_URL}" rel="noopener">{RULING_CITE}</a>; '
+    f'<a href="{SAND_URL}" rel="noopener">{SAND_CITE}</a>'
 )
-TRUMP_SOURCE_TEXT = f"{TRUMP_CITE}, {TRUMP_URL}; {RULING_CITE}, {RULING_URL}"
+TRUMP_SOURCE_TEXT = (
+    f"{TRUMP_CITE}, {TRUMP_URL}; {RULING_CITE}, {RULING_URL}; {SAND_CITE}, {SAND_URL}"
+)
 # Newest first, like the paragraph.
 COURT_SOURCES_TEXT = (
-    f"{RULING_CITE}, {RULING_URL}; {WEDNESDAY_SOURCE_TEXT}; {RESPONSE_CITE}, {RESPONSE_URL}; "
+    f"{RULING_CITE}, {RULING_URL}; {SAND_CITE}, {SAND_URL}; {WEDNESDAY_SOURCE_TEXT}; "
+    f"{RESPONSE_CITE}, {RESPONSE_URL}; "
     f"{FILING_CITE}, {FILING_URL}; {COURT_CITE}, {COURT_URL}"
 )
 COURT_SOURCES_HTML = (
     f'<a href="{RULING_URL}" rel="noopener">{RULING_CITE}</a>; '
+    f'<a href="{SAND_URL}" rel="noopener">{SAND_CITE}</a>; '
     f"{WEDNESDAY_SOURCE_HTML}; "
     f'<a href="{RESPONSE_URL}" rel="noopener">{RESPONSE_CITE}</a>; '
     f'<a href="{FILING_URL}" rel="noopener">{FILING_CITE}</a>; '
@@ -297,6 +315,7 @@ TUESDAY_SOURCES_TEXT = (
 # on the citation (make_map_picker.linkify); JSON-LD and llms.txt keep the full address.
 CITED_SOURCES = (
     (RULING_CITE, RULING_URL),
+    (SAND_CITE, SAND_URL),
     (TRUMP_CITE, TRUMP_URL),
     (ARMY_WED_CITE, ARMY_WED_URL),
     (RESPONSE_CITE, RESPONSE_URL),
@@ -759,7 +778,8 @@ def _air_text(f: Facts, model: str, n_models: str, *, html: bool) -> str:
         "level for lead, for a one-hour exposure, is 32 \u00b5g/m\u00b3. The model has the "
         "one-hour average above it out to about "
         + listed("pac1_km")
-        + f" with the {model or 'main'} forecast. Across all {n_models} forecasts it reaches "
+        + f" with the {model or 'main'} forecast. Across all {n_models} forecasts, with "
+        "either of two dry-deposition schemes, it reaches "
         "up to " + listed("pac1_env_km") + "."
     )
 
@@ -905,9 +925,9 @@ the window follow almost the same path. {t.forecast_line}</p>
     (window troughs). They are for indoor dust, so outdoor lead is only a rough comparison. The
     first number uses the {t.model or "main"} forecast shown on the map. The smaller number \
 below it is
-    the farthest any of the {ctx["n_models"]} weather forecasts reaches, which is what the map \
-shows
-    with &ldquo;weather-model spread&rdquo; turned on.</p>
+    the farthest any of the {ctx["n_models"]} weather forecasts reaches, with either of two
+    dry-deposition schemes (Zhang et al. 2001 and its revision by Emerson et al. 2020), which is
+    what the map shows with &ldquo;weather-model spread&rdquo; turned on.</p>
   <div class="tablewrap"><table>
     {DEP_TABLE_HEAD}
     <tbody>{"".join(t.rows_html)}</tbody></table></div>
@@ -1026,10 +1046,11 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             "## Key facts",
             "",
             (
-                "- Blast: on hold by President Trump\u2019s order (Nov. 23; see Presidential "
-                "hold); the Army had scheduled Wednesday, Nov. 25, 2026 (Army, Nov. 22), after "
-                "Monday, Nov. 23 and Tuesday, Nov. 24 (Nov. 22 court filing); the court lifted "
-                "its hold on the permit on Nov. 23 (see Court case), Iowa Army Ammunition "
+                "- Blast: no new date announced. President Trump ordered a hold on Nov. 23 (see "
+                "Presidential hold); the Army had scheduled Wednesday, Nov. 25, 2026 (Army, "
+                "Nov. 22), after "
+                "Monday, Nov. 23 and Tuesday, Nov. 24 (Nov. 22 court filing); the court lifted its "
+                "hold on the permit on Nov. 23 (see Court case), Iowa Army Ammunition "
                 f"Plant, Middletown, Iowa ({ctx['lat']:.4f}, {ctx['lon']:.4f}). Blast times "
                 "modeled: 11 a.m. to 12:30 p.m. CST on " + ", ".join(modeled) + "."
             ),

@@ -19,20 +19,40 @@ if TYPE_CHECKING:
 
 
 # Zhang et al. (2001) dry-deposition parameters by land use: roughness length z0 (m),
-# collector radius A (m; None = smooth surface), alpha, gamma. Values as recalled from the
-# paper's land-use table; check them against the original before relying on a category.
+# collector radius A (m; None = smooth surface), alpha, gamma. From the paper's Table 3
+# (p. 553), seasonal category 3, "late autumn after frost, no snow" (its Table 2), for a
+# late-November blast; checked against the paper on Nov. 23, 2026. Land-use categories:
+# grass 6, crops 7 ("crops, mixed farming"), forest 5 ("mixed broadleaf and needleleaf
+# trees"), urban 15, desert 8, water 13/14. For water the paper gives z0 as a function of
+# wind speed; a fixed calm-sea value stands in.
 LAND_USE: dict[str, tuple[float, float | None, float, float]] = {
-    "grass": (0.03, 2e-3, 1.2, 0.54),
-    "crops": (0.10, 2e-3, 1.2, 0.54),
-    "forest": (1.0, 5e-3, 0.8, 0.56),
+    "grass": (0.05, 5e-3, 1.2, 0.54),
+    "crops": (0.02, 5e-3, 1.2, 0.54),
+    "forest": (1.15, 5e-3, 0.8, 0.56),
     "urban": (1.0, 10e-3, 1.5, 0.56),
-    "desert": (0.01, None, 50.0, 0.54),
+    "desert": (0.04, None, 50.0, 0.54),
     "water": (0.0002, None, 100.0, 0.50),
 }
 
+# Emerson et al. (2020), SI Appendix Table S1, "Revised": the same resistance framework and
+# land-use table as Zhang et al. (2001), with six collection-efficiency coefficients refit
+# to size-resolved flux measurements over forest, grassland and water. Brownian
+# C_B Sc^-gamma; interception C_In (d/A)^nu; impaction C_Im (St/(alpha + St))^beta. It
+# moves the deposition minimum from about 1-2 um down to about 0.05 um: the smallest particles
+# deposit more slowly than with Zhang, and particles from about 0.5-1 um up faster.
+EMERSON_C_B = 0.2
+EMERSON_GAMMA = 2.0 / 3.0
+EMERSON_C_IN = 2.5
+EMERSON_NU = 0.8
+EMERSON_C_IM = 0.4
+EMERSON_BETA = 1.7
+#: Dry-deposition schemes: the first is the default, the second its observational revision.
+DEPOSITION_SCHEMES = ("zhang", "emerson")
+DEPOSITION_CITES = {"zhang": "Zhang et al. (2001)", "emerson": "Emerson et al. (2020)"}
 
-def zhang_surface_terms(d_p: FloatArray, rho_p: FloatArray | float, T: float = T_REF) -> FloatArray:
-    """Schmidt number of each particle, the per-particle constant of the Zhang scheme.
+
+def schmidt_number(d_p: FloatArray, rho_p: FloatArray | float, T: float = T_REF) -> FloatArray:
+    """Schmidt number of each particle, the per-particle constant of both deposition schemes.
 
     ``Sc = nu / D_B`` with the Stokes-Einstein Brownian diffusivity
     ``D_B = k T Cc / (3 pi mu d_p)``. ``rho_p`` is accepted for a uniform signature.
@@ -48,12 +68,13 @@ def zhang_surface_terms(d_p: FloatArray, rho_p: FloatArray | float, T: float = T
     return out
 
 
-def zhang_deposition_velocity(
+def deposition_velocity(
     d_p: FloatArray,
     v_g: FloatArray,
     schmidt: FloatArray,
     u10: FloatArray,
     land_use: str,
+    scheme: str = "zhang",
 ) -> FloatArray:
     """Size-resolved dry deposition velocity (m/s).
 
@@ -70,22 +91,31 @@ def zhang_deposition_velocity(
         10 m wind speed, m/s (floored at 0.5).
     land_use
         Key of :data:`LAND_USE` (roughness length and collector parameters).
+    scheme
+        ``"zhang"`` (Zhang et al. 2001) or ``"emerson"`` (the revised collection
+        efficiencies of Emerson et al. 2020, SI Table S1).
 
     References
     ----------
-    Zhang, Gong, Padro and Barrie (2001).
+    Zhang, Gong, Padro and Barrie (2001); Emerson et al. (2020).
     """
     z0, A, alpha, gamma = LAND_USE[land_use]
+    if scheme not in DEPOSITION_SCHEMES:
+        raise ValueError(f"unknown deposition scheme {scheme!r}")
+    emerson = scheme == "emerson"
     ustar = np.maximum(VON_KARMAN * np.maximum(u10, 0.5) / math.log(10.0 / z0), 0.01)
     r_a = math.log(10.0 / z0) / (VON_KARMAN * ustar)
-    e_b = schmidt ** (-gamma)
+    e_b = EMERSON_C_B * schmidt ** (-EMERSON_GAMMA) if emerson else schmidt ** (-gamma)
     if A is None:  # smooth surface
         st = v_g * ustar**2 / (G * MU_AIR / RHO_AIR)
         e_in: FloatArray | float = 0.0
     else:
         st = v_g * ustar / (G * A)
-        e_in = 0.5 * (d_p / A) ** 2
-    e_im = (st / (alpha + st)) ** 2
+        e_in = EMERSON_C_IN * (d_p / A) ** EMERSON_NU if emerson else 0.5 * (d_p / A) ** 2
+    if emerson:
+        e_im = EMERSON_C_IM * (st / (alpha + st)) ** EMERSON_BETA
+    else:
+        e_im = (st / (alpha + st)) ** 2
     r1 = np.exp(-np.sqrt(st))  # fraction that sticks
     r_s = 1.0 / (3.0 * ustar * np.maximum((e_b + e_im + e_in) * r1, 1e-12))
     out: FloatArray = v_g + 1.0 / (r_a + r_s)

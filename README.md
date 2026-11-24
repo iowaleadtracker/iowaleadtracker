@@ -93,6 +93,12 @@ Open an issue. Corrections to the inputs, physics, or sources are especially wel
 you measure lead after the detonation, a comparison with the model is welcome too, good or
 bad.
 
+## Mentions of the Iowa Lead Tracker
+
+- Detroit Free Press, Nov. 23, 2026, "Army's munition explosion plans delayed. How it
+  could change the risks":
+  <https://www.freep.com/story/news/local/michigan/2026/11/23/army-lead-azide-munitions-michigan-explosion/92924794007/>
+
 ## License
 
 - Code: MIT (see `LICENSE`).

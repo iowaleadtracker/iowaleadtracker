@@ -60,7 +60,8 @@ WHEN_HTML = (
     "scheduled for Wednesday, Nov. 25. On Monday, Nov. 23, "
     '<a href="{trump}">President Trump said</a> he has ordered the military not to proceed '
     "until the Eighth Circuit agrees and Governor-elect Rob Sand agrees to the operation. "
-    "The Army hasn&rsquo;t announced a new date or a time, and Thursday and Friday "
+    'Later that day, <a href="{ruling}">the 8th Circuit cleared the way</a> for the '
+    "detonation. The Army hasn&rsquo;t announced a new date or a time, and Thursday and Friday "
     "haven&rsquo;t been announced."
 )
 
@@ -199,6 +200,7 @@ def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
         url=html.escape(fs.RESPONSE_URL),
         army=html.escape(fs.ARMY_WED_URL),
         trump=html.escape(fs.TRUMP_URL),
+        ruling=html.escape(fs.RULING_URL),
     )
     return f"""<!doctype html>
 <html lang="en">
