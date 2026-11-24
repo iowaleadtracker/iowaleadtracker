@@ -1,8 +1,8 @@
 """Staged Wednesday to Friday maps: same model, other days, GFS and ECMWF only.
 
 A set of maps at a hard-to-guess address on the main site, for people who have the link:
-blasts on Wednesday, Nov. 25, Thursday, Nov. 26 and Friday, Nov. 27, 2026, from 11 a.m.
-to 1 p.m. every 30 minutes, for all four release cases, with only the GFS and ECMWF
+blasts on Wednesday, Nov. 25, Thursday, Nov. 26 and Friday, Nov. 27, 2026, every hour
+from 9 a.m. to 1 p.m., for all four release cases, with only the GFS and ECMWF
 forecasts (GFS shown, ECMWF in the weather-model spread).
 
 These maps are not private. Nothing on the site links here, the pages are noindex, and the
@@ -42,7 +42,7 @@ CACHE = HERE / "met_cache" / "staged_forecasts.json"
 TZ = ZoneInfo("America/Chicago")
 #: Wednesday (the Army's announced date, Nov. 22) through Friday.
 DAYS = ["2026-11-25", "2026-11-26", "2026-11-27"]
-TIMES = ["11:00", "11:30", "12:00", "12:30", "13:00"]
+TIMES = ["09:00", "10:00", "11:00", "12:00", "13:00"]  # forecast_summary.WINDOW
 DEFAULT_DAY = DAYS[0]
 DEFAULT_TIME = "12:00"
 #: The first model is shown; the other makes up the weather-model spread.
@@ -61,8 +61,9 @@ WHEN_HTML = (
     '<a href="{trump}">President Trump said</a> he has ordered the military not to proceed '
     "until the Eighth Circuit agrees and Governor-elect Rob Sand agrees to the operation. "
     'Later that day, <a href="{ruling}">the 8th Circuit cleared the way</a> for the '
-    "detonation. The Army hasn&rsquo;t announced a new date or a time, and Thursday and Friday "
-    "haven&rsquo;t been announced."
+    'detonation. That evening, <a href="{secarmy}">the Acting Secretary of the Army said</a> '
+    "the detonation will be Wednesday morning, as previously scheduled. The Army hasn&rsquo;t "
+    "announced a time, and Thursday and Friday haven&rsquo;t been announced."
 )
 
 
@@ -201,6 +202,7 @@ def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
         army=html.escape(fs.ARMY_WED_URL),
         trump=html.escape(fs.TRUMP_URL),
         ruling=html.escape(fs.RULING_URL),
+        secarmy=html.escape(fs.SECARMY_URL),
     )
     return f"""<!doctype html>
 <html lang="en">
@@ -216,7 +218,7 @@ def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
 <header>
   <h1>{site.SITE_NAME}: Wednesday to Friday runs</h1>
   <p class="warn" role="note"><b>{UNOFFICIAL} {NOT_SAFE}</b> Follow official instructions.</p>
-  <p class="about">These maps model blasts on {day_list}, from 11 a.m. to 1 p.m., with
+  <p class="about">These maps model blasts on {day_list}, every hour from {fs.WINDOW}, with
     {MODELS_TEXT}. {when} Forecasts this far ahead change more and are less certain than
     the main site&rsquo;s. Weather forecast from {html.escape(got_txt)}. Last updated
     {html.escape(built_txt)}. Main site, summary and sources:

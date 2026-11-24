@@ -264,7 +264,7 @@ def test_court_hold_leads_the_summary_and_faq(rendered: tuple[str, list, str]) -
     # Newest first: the president's Nov. 23 order, then the Army's Wednesday date.
     assert when.startswith(f"{fs.TRUMP_HOLD} (Sources: {fs.TRUMP_SOURCE_TEXT}.) ")
     assert (
-        "The Army had said Wednesday, Nov. 25, 2026; it hasn\u2019t given a time. It had "
+        "The Army says Wednesday morning, Nov. 25, 2026; it hasn\u2019t given a time. It had "
         "planned Monday, Nov. 23. On Nov. 22, the government told the court, which had put "
         "the permit on hold, that the Army had postponed it to Tuesday, Nov. 24."
     ) in when
@@ -368,10 +368,10 @@ def test_missing_addresses_get_a_real_page() -> None:
 
 
 def test_days_and_map_names() -> None:
-    """Wednesday's maps have plain names; Thursday's are prefixed with its date."""
-    assert [d for d, _ in site.DAYS] == ["2026-11-25", "2026-11-26"] == [site.DATE, "2026-11-26"]
-    assert {"2026-11-26"} == site.MENU_ONLY_DAYS  # Thursday: only in the Day menu
-    assert [d for d, _ in site.PAST_DAYS] == ["2026-11-23", "2026-11-24"]
+    """Only Wednesday (plain names); another day's maps would be prefixed with its date."""
+    assert [d for d, _ in site.DAYS] == ["2026-11-25"] == [site.DATE]
+    assert set() == site.MENU_ONLY_DAYS  # Thursday was menu-only until Nov. 24
+    assert [d for d, _ in site.PAST_DAYS] == ["2026-11-23", "2026-11-24", "2026-11-26"]
     assert site.day_label("2026-11-25") == "Wednesday, Nov. 25"
     assert site.map_name("permit", "12:00") == "permit-1200.html"
     assert site.map_name("permit", "12:00", "2026-11-26") == "2026-11-26-permit-1200.html"
@@ -389,13 +389,18 @@ def test_days_to_build(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """A deploy builds only the days its saved forecasts cover; a refresh builds them all."""
     cache = tmp_path / "map_met_all.json"
     monkeypatch.setattr(site, "MET_CACHE", cache)
-    assert site.days_to_build() == ["2026-11-25", "2026-11-26"]  # downloading
+    assert site.days_to_build() == ["2026-11-25"]  # downloading
     cache.write_text('{"x?start_date=2026-11-25&end_date=2026-11-26": 1}', encoding="utf-8")
     assert site.days_to_build() == ["2026-11-25"]
     cache.write_text(
         '{"a?start_date=2026-11-25&x": 1, "b?start_date=2026-11-26&x": 1}', encoding="utf-8"
     )
+    assert site.days_to_build() == ["2026-11-25"]  # saved Thursday forecasts are ignored
+    # With a second day configured, it is built only when the saved forecasts cover it.
+    monkeypatch.setattr(site, "DAYS", [("2026-11-25", "wed"), ("2026-11-26", "thu")])
     assert site.days_to_build() == ["2026-11-25", "2026-11-26"]
+    cache.write_text('{"x?start_date=2026-11-25&end_date=2026-11-26": 1}', encoding="utf-8")
+    assert site.days_to_build() == ["2026-11-25"]
 
 
 def test_page_has_a_day_menu() -> None:
@@ -483,8 +488,20 @@ def test_about_box_cites_the_tuesday_filing() -> None:
     assert "<b>$earlier_head</b> $why_tuesday Sources: $tuesday_sources. $why_monday" in about
     assert fs.TIME_HEAD == "No time yet."
     assert fs.time_note("X").startswith(
-        "As of this update (X), the Army hasn\u2019t announced a time for Wednesday."
+        "As of this update (X), the Army hasn\u2019t announced a time for Wednesday; it has "
+        "said only \u201cWednesday morning\u201d (Acting Secretary of the Army on X)."
     )
+
+
+def test_window_words_match_the_blast_times() -> None:
+    """The page's "9 a.m. to 1 p.m." matches the times both sites build, hourly."""
+    for times in (site.TIMES, staged.TIMES):
+        assert [site.label(t) for t in (times[0], times[-1])] == ["9:00 a.m.", "1:00 p.m."]
+        assert fs.WINDOW == "9 a.m. to 1 p.m."
+        assert all(t.endswith(":00") for t in times)
+        assert [int(t[:2]) for t in times] == list(range(9, 14))
+    assert site.DEFAULT in site.TIMES
+    assert staged.DEFAULT_TIME in staged.TIMES
 
 
 @pytest.mark.slow
@@ -530,12 +547,14 @@ def _fake_map(models: list[str]) -> str:
 def test_read_maps_days_and_model_counts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """A day missing any blast time is left out; each day counts its own models."""
     monkeypatch.setattr(site, "MAPS", tmp_path)
+    # The multi-day machinery, with Thursday configured as it was until Nov. 24.
+    monkeypatch.setattr(site, "DAYS", [("2026-11-25", "wed"), ("2026-11-26", "thu")])
     four = site.WEATHER.split(",")
     thu = "2026-11-26"
     for c, _, _ in site.CASES:
         for t in site.TIMES:
             (tmp_path / site.map_name(c, t)).write_text(_fake_map(four), encoding="utf-8")
-            if t != "12:30":  # Thursday is missing one time
+            if t != "13:00":  # Thursday is missing one time
                 (tmp_path / site.map_name(c, t, thu)).write_text(
                     _fake_map(four[:3]), encoding="utf-8"
                 )
@@ -543,7 +562,7 @@ def test_read_maps_days_and_model_counts(tmp_path: Path, monkeypatch: pytest.Mon
     assert list(maps.days) == ["2026-11-25"]  # partly built Thursday left out
     assert site.lead_day(maps) == site.DATE == site.LEAD_DAY  # opens on Wednesday
     for c, _, _ in site.CASES:
-        (tmp_path / site.map_name(c, "12:30", thu)).write_text(
+        (tmp_path / site.map_name(c, "13:00", thu)).write_text(
             _fake_map(four[:3]), encoding="utf-8"
         )
     maps = site.read_maps()
@@ -669,7 +688,9 @@ def test_wednesday_leads(rendered_wednesday_lead: tuple[str, list, str]) -> None
     )
     assert fs.COURT_HOLD.index("cleared the way") < fs.COURT_HOLD.index("Late on Nov. 22")
     assert fs.COURT_HOLD.index("Tuesday, Nov. 24") < fs.COURT_HOLD.index("Late on Nov. 19")
-    assert fs.COURT_SOURCES_HTML.startswith(f'<a href="{fs.RULING_URL}"')
+    # newest first: the Army Secretary's post that evening, then the ruling
+    assert fs.COURT_SOURCES_HTML.startswith(f'<a href="{fs.SECARMY_URL}"')
+    assert fs.COURT_SOURCES_HTML.index(fs.SECARMY_URL) < fs.COURT_SOURCES_HTML.index(fs.RULING_URL)
     assert "Sand" not in fs.COURT_HOLD
     assert "cleared the way for the detonation (see Court case)" in fs.TRUMP_HOLD
     assert f'href="{fs.SAND_URL}"' in fs.COURT_SOURCES_HTML
@@ -697,8 +718,21 @@ def _maps_for(days: list[str]) -> site.Maps:
     )
 
 
-def test_day_values_wednesday_with_thursday_in_the_menu_only() -> None:
+def test_day_values_wednesday_only() -> None:
+    """Only Wednesday: no Day menu; an old Thursday link says it isn't in this update."""
+    v = site.day_values(_maps_for(["2026-11-25"]), "2026-11-25")
+    assert v["day_hidden"] == " hidden"
+    assert v["header_days"] == "Wednesday, Nov. 25"
+    assert json.loads(v["day_codes"]) == {"2026-11-25": "wed"}
+    assert json.loads(v["all_days"])["thu"] == "Thursday, Nov. 26"
+
+
+def test_day_values_wednesday_with_thursday_in_the_menu_only(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Wednesday leads; Thursday is a Day menu option but not in the header."""
+    monkeypatch.setattr(site, "DAYS", [("2026-11-25", "wed"), ("2026-11-26", "thu")])
+    monkeypatch.setattr(site, "MENU_ONLY_DAYS", {"2026-11-26"})
     maps = _maps_for(["2026-11-25", "2026-11-26"])
     lead = site.lead_day(maps)
     v = site.day_values(maps, lead)

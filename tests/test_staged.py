@@ -37,9 +37,9 @@ def built(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 
 
 def test_settings() -> None:
-    """Wednesday to Friday, 11 a.m. to 1 p.m. every 30 minutes, GFS and ECMWF only."""
+    """Wednesday to Friday, every hour from 9 a.m. to 1 p.m., GFS and ECMWF only."""
     assert staged.DAYS == ["2026-11-25", "2026-11-26", "2026-11-27"]
-    assert staged.TIMES == ["11:00", "11:30", "12:00", "12:30", "13:00"]
+    assert staged.TIMES == ["09:00", "10:00", "11:00", "12:00", "13:00"]
     assert staged.WEATHER == "gfs_seamless,ecmwf_ifs025"
     assert staged.day_label("2026-11-25") == "Wednesday, Nov. 25, 2026"
     assert staged.day_label("2026-11-27") == "Friday, Nov. 27, 2026"
@@ -83,7 +83,8 @@ def test_picker_page(built: Path) -> None:
     assert "it is now scheduled for Wednesday, Nov. 25. On Monday, Nov. 23," in page
     assert f'<a href="{forecast_summary.TRUMP_URL}">President Trump said</a>' in page
     assert "until the Eighth Circuit agrees and Governor-elect Rob Sand agrees" in page
-    assert "The Army hasn&rsquo;t announced a new date or a time" in page
+    assert "the detonation will be Wednesday morning" in page
+    assert "The Army hasn&rsquo;t announced a time" in page.replace("\n", " ")
     assert "Thursday and Friday haven&rsquo;t been announced." in page
     assert f'<a href="{html.escape(forecast_summary.ARMY_WED_URL)}">the Army said</a>' in page
     assert f'<a href="{forecast_summary.RESPONSE_URL}">court filing on Nov. 22</a>' in page
