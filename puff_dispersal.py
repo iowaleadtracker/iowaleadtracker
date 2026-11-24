@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import json
 import math
 import sys
 from pathlib import Path
@@ -252,6 +253,14 @@ def _add_run_args(p: argparse.ArgumentParser) -> None:
         type=int,
         default=5,
         help="NxN Open-Meteo points for the wind field (1 = source only)",
+    )
+    p.add_argument(
+        "--sky-grid",
+        type=Path,
+        default=None,
+        help="JSON file of forecast cloud cover and precipitation on a finer grid, "
+        "shown on the map only (see scenarios/iowa-aap-lead-azide/sky_grid.py); "
+        "the first series that covers the run is used",
     )
     p.add_argument(
         "--no-residual-layer",
@@ -919,6 +928,47 @@ def _hours_output(
     return hours_out
 
 
+def _sky_grid_output(a: argparse.Namespace) -> tuple[Json | None, list[Json]]:
+    """Return the --sky-grid layer for the page: its description, and each hour's values.
+
+    Each map hour (from the start, plus h to h + 1 hours) takes the forecast stamped at
+    the top of the hour after its middle: Open-Meteo stamps precipitation at the end of
+    the hour it fell in. Returns (None, []) without a file, or if no series has every
+    value for the run's hours.
+    """
+    if not a.sky_grid:
+        return None, []
+    with Path(a.sky_grid).open(encoding="utf-8") as f:
+        sky = json.load(f)
+    want = []
+    for h in range(a.hours):
+        mid = a.start + dt.timedelta(hours=h + 0.5)
+        top = mid.replace(minute=0, second=0, microsecond=0) + dt.timedelta(hours=1)
+        want.append(top.astimezone(dt.timezone.utc).strftime("%Y-%m-%dT%H:%MZ"))
+    for s in sky["series"]:
+        index = {t: i for i, t in enumerate(s["times"])}
+        if not all(t in index for t in want):
+            continue
+        rows = [index[t] for t in want]
+        if any(v is None for i in rows for k in ("cloud", "precip") for v in s[k][i]):
+            continue
+        meta = {
+            "model": s["model"],
+            "fetched": s.get("fetched"),
+            "lats": sky["lats"],
+            "lons": sky["lons"],
+        }
+        hours = [
+            {
+                "c": [round(v) for v in s["cloud"][i]],
+                "p": [round(v, 2) for v in s["precip"][i]],
+            }
+            for i in rows
+        ]
+        return meta, hours
+    return None, []
+
+
 def _bins_output(a: argparse.Namespace, bins: Sequence[Bin]) -> list[Json]:
     """Each size bin's diameter, settling and deposition velocity (5 m/s wind) for display."""
     bins_out = []
@@ -1073,6 +1123,9 @@ def simulate(a: argparse.Namespace, log: TextIO = sys.stderr) -> Json:
 
     coslat0 = math.cos(math.radians(a.lat))
     hours_out = _hours_output(a, met, hourly, F)
+    sky_meta, sky_hours = _sky_grid_output(a)
+    for h, sh in zip(hours_out, sky_hours, strict=False):
+        h["skyGrid"] = sh
     bins_out = _bins_output(a, bins)
     payload: Json = {
         "meta": _meta(a, met, src_name, elev, bins_out, ensemble),
@@ -1089,6 +1142,13 @@ def simulate(a: argparse.Namespace, log: TextIO = sys.stderr) -> Json:
         "hours": hours_out,
     }
     payload["meta"]["hysplit"] = hysplit_files(a, bins_out, payload["grid"])
+    if sky_meta:
+        payload["meta"]["skyGrid"] = sky_meta
+        print(
+            f"weather layer: {sky_meta['model']} on {len(sky_meta['lats'])}x"
+            f"{len(sky_meta['lons'])} points",
+            file=log,
+        )
     # raw arrays for validation scripts (not written to HTML)
     payload["_arrays"] = dict(F, xe=xe, ye=ye, dx=dx)
     return payload

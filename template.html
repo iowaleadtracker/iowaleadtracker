@@ -836,7 +836,6 @@ const SKY_RAIN = [   // [mm/h, color]; colors blend between stops
   [0.1, [152, 228, 140]], [0.5, [78, 196, 78]], [2, [24, 150, 50]], [5, [16, 104, 36]], [10, [240, 214, 52]],
 ];
 const SKY_RAIN_MIN = 0.1;   // mm/h; lighter than this is left clear, as on radar
-const SKY_PX = 32;          // drawn pixels per grid spacing
 const SKY_PAD = 2;          // empty grid points added around the data, so the layer fades out
 function skyRainColor(mm) {
   if (mm < SKY_RAIN_MIN) return null;
@@ -850,52 +849,73 @@ function skyRainColor(mm) {
   return SKY_RAIN[SKY_RAIN.length - 1][1];
 }
 const sky = { cloud: document.createElement("canvas"), rain: document.createElement("canvas"), key: "" };
-function skyGrid(h) {
+const SKY_MODEL_NAMES = { ncep_hrrr_conus: "HRRR", gfs_seamless: "GFS" };
+// The layer's points and values this hour: the finer weather grid (meta.skyGrid, display
+// only) when the map has one, else the lead model's own weather points (the wind points).
+function skySource(h) {
+  const step = (v) => (v.length > 1 ? v[1] - v[0] : 1);
+  const SG = M.skyGrid;
+  if (SG && h.skyGrid) {
+    const nx = SG.lons.length;
+    return { lats: SG.lats, lons: SG.lons, dlat: step(SG.lats), dlon: step(SG.lons), fine: true,
+      each: (f) => h.skyGrid.c.forEach((c, k) => f(Math.floor(k / nx), k % nx, c, h.skyGrid.p[k])) };
+  }
+  if (!h.sky) return null;
   const lats = [...new Set(h.wind.map((w) => w[0]))].sort((a, b) => a - b);
   const lons = [...new Set(h.wind.map((w) => w[1]))].sort((a, b) => a - b);
-  return { lats, lons, dlat: lats.length > 1 ? lats[1] - lats[0] : 1, dlon: lons.length > 1 ? lons[1] - lons[0] : 1 };
+  return { lats, lons, dlat: step(lats), dlon: step(lons), fine: false,
+    each: (f) => h.wind.forEach(([la, lo], k) => f(lats.indexOf(la), lons.indexOf(lo), h.sky[k][0], h.sky[k][1])) };
 }
 // white clouds on dark and satellite maps, gray-blue on the light ones
 const skyWhite = () => ["dark", "imagery"].includes(baseStyle()) || (baseStyle() === "none" && isDark());
 function drawSky(h) {
-  if (!h.sky) return;
-  const G = skyGrid(h), nx = G.lons.length, ny = G.lats.length, white = skyWhite();
+  const G = skySource(h);
+  if (!G) return;
+  const nx = G.lons.length, ny = G.lats.length, white = skyWhite();
+  const px = G.fine ? 12 : 32;   // drawn pixels per grid spacing
   const key = S.hour + "|" + white + "|" + SYS;
   if (key !== sky.key) {
     sky.key = key;
     // values on the grid with a border of zeros SKY_PAD points wide; row 0 is north
     const gx = nx + 2 * SKY_PAD, gy = ny + 2 * SKY_PAD, cl = new Float32Array(gx * gy), pr = new Float32Array(gx * gy);
-    h.wind.forEach(([la, lo], k) => {
-      const o = (ny - 1 - G.lats.indexOf(la) + SKY_PAD) * gx + G.lons.indexOf(lo) + SKY_PAD;
-      cl[o] = Math.min(100, Math.max(0, h.sky[k][0])) / 100; pr[o] = Math.max(0, h.sky[k][1]);
+    G.each((j, i, c, p) => {
+      const o = (ny - 1 - j + SKY_PAD) * gx + i + SKY_PAD;
+      cl[o] = Math.min(100, Math.max(0, c)) / 100; pr[o] = Math.max(0, p);
     });
     // Blend between points here (not in the browser's image scaling) so the rain color comes
     // from the blended rate, the way a radar scale reads. A Gaussian-weighted average of the
-    // points (sigma 0.6 spacings) gives rounded shapes; straight-line blending on a grid this
-    // coarse draws boxes.
-    const pw = (gx - 1) * SKY_PX, ph = (gy - 1) * SKY_PX, k2 = 1 / (2 * 0.6 * 0.6);
-    const wx = new Float32Array(pw * gx), wy = new Float32Array(ph * gy);
-    for (let x = 0; x < pw; x++) for (let i = 0; i < gx; i++) wx[x * gx + i] = Math.exp(-(((x + 0.5) / SKY_PX - i) ** 2) * k2);
-    for (let y = 0; y < ph; y++) for (let j = 0; j < gy; j++) wy[y * gy + j] = Math.exp(-(((y + 0.5) / SKY_PX - j) ** 2) * k2);
+    // nearby points (sigma 0.6 spacings, out to 3) gives rounded shapes; straight-line
+    // blending on a coarse grid draws boxes.
+    const pw = (gx - 1) * px, ph = (gy - 1) * px, k2 = 1 / (2 * 0.6 * 0.6), R = 3;
     for (const c of [sky.cloud, sky.rain]) { c.width = pw; c.height = ph; }
     const cImg = sky.cloud.getContext("2d").createImageData(pw, ph), rImg = sky.rain.getContext("2d").createImageData(pw, ph);
     const cc = white ? [255, 255, 255] : [112, 124, 140], ca = white ? 0.62 : 0.42;
+    const wgt = (d) => Math.exp(-d * d * k2);
+    // The finer grid covers only a box around the plant: fade it out over its outer few
+    // points, so where its data ends reads as a fade rather than the edge of a box.
+    const fade = (fx, fy) => {
+      if (!G.fine) return 1;
+      const d = Math.min(fx - SKY_PAD, gx - 1 - SKY_PAD - fx, fy - SKY_PAD, gy - 1 - SKY_PAD - fy);
+      const t = Math.min(1, Math.max(0, (d + 0.5) / 3.5));
+      return t * t * (3 - 2 * t);
+    };
     for (let y = 0; y < ph; y++) {
+      const fy = (y + 0.5) / px, j0 = Math.max(0, Math.ceil(fy - R)), j1 = Math.min(gy - 1, Math.floor(fy + R));
       for (let x = 0; x < pw; x++) {
+        const fx = (x + 0.5) / px, i0 = Math.max(0, Math.ceil(fx - R)), i1 = Math.min(gx - 1, Math.floor(fx + R));
         let sw = 0, sc = 0, sp = 0;
-        for (let j = 0; j < gy; j++) {
-          const a = wy[y * gy + j];
-          if (a < 1e-4) continue;
-          for (let i = 0; i < gx; i++) {
-            const w = a * wx[x * gx + i], o = j * gx + i;
+        for (let j = j0; j <= j1; j++) {
+          const a = wgt(fy - j);
+          for (let i = i0; i <= i1; i++) {
+            const w = a * wgt(fx - i), o = j * gx + i;
             sw += w; sc += w * cl[o]; sp += w * pr[o];
           }
         }
-        const q = (y * pw + x) * 4, c = sc / sw, p = sp / sw;
+        const q = (y * pw + x) * 4, f = fade(fx, fy), c = f * sc / sw, p = sp / sw;
         cImg.data[q] = cc[0]; cImg.data[q + 1] = cc[1]; cImg.data[q + 2] = cc[2]; cImg.data[q + 3] = Math.round(255 * ca * c);
         const rc = skyRainColor(Math.max(p, SKY_RAIN_MIN));   // edge eased over 0.07-0.1 mm/h
         const ra = Math.min(1, Math.max(0, (p - 0.07) / (SKY_RAIN_MIN - 0.07)));
-        if (ra > 0) { rImg.data[q] = rc[0]; rImg.data[q + 1] = rc[1]; rImg.data[q + 2] = rc[2]; rImg.data[q + 3] = Math.round(175 * ra); }
+        if (ra > 0) { rImg.data[q] = rc[0]; rImg.data[q + 1] = rc[1]; rImg.data[q + 2] = rc[2]; rImg.data[q + 3] = Math.round(175 * ra * f); }
       }
     }
     sky.cloud.getContext("2d").putImageData(cImg, 0, 0);
@@ -906,13 +926,20 @@ function drawSky(h) {
     $("legskyticks").innerHTML = [0.1, 1, 5, 10].map((m, k) =>
       `<span style="left:${Math.log10(m / 0.1) * 50}%">${tickText[k]}</span>`).join("");
     $("legskyunit").textContent = US() ? "in/h" : "mm/h";
-    const km = Math.round(G.dlat * 111.2);
-    $("legskynote").textContent = `From the weather model (${M.weather || "forecast"}), not radar or satellite. ` +
-      `Its points are about ${US() ? Math.round(km / 1.609) + " mi" : km + " km"} apart, so it shows only the broad pattern.`;
+    const km = Math.round(G.dlat * 111.2), apart = US() ? Math.round(km / 1.609) + " mi" : km + " km";
+    if (G.fine) {
+      const SG = M.skyGrid, name = SKY_MODEL_NAMES[SG.model] || SG.model;
+      const when = SG.fetched ? `, pulled ${SG.fetched.replace("T", " ").replace(/:\d\d\+00:00$/, " UTC")}` : "";
+      $("legskynote").textContent = `${name} forecast${when}, on points about ${apart} apart; not radar or satellite. ` +
+        `The lead's path uses its own forecast (${M.weather}), so the two can differ.`;
+    } else {
+      $("legskynote").textContent = `From the weather model (${M.weather || "forecast"}), not radar or satellite. ` +
+        `Its points are about ${apart} apart, so it shows only the broad pattern.`;
+    }
   }
-  // the image's pixel centers are SKY_PX apart in grid units; its corners sit half a pixel out
+  // the image's pixel centers are px apart in grid units; its corners sit half a pixel out
   // from the border points, which are SKY_PAD spacings past the outer grid points
-  const e = SKY_PAD + 0.5 / SKY_PX;
+  const e = SKY_PAD + 0.5 / px;
   const [x0, y0] = toScreen(G.lats[ny - 1] + e * G.dlat, G.lons[0] - e * G.dlon);
   const [x1, y1] = toScreen(G.lats[0] - e * G.dlat, G.lons[nx - 1] + e * G.dlon);
   ctx.save();
@@ -1208,7 +1235,7 @@ $("decades").oninput = (e) => { S.decades = +e.target.value; render(); };
 $("showPuffs").onchange = (e) => { S.puffs = e.target.checked; schedule(); };
 $("showWind").onchange = (e) => { S.wind = e.target.checked; schedule(); };
 $("showSky").onchange = (e) => { S.sky = e.target.checked; $("legsky").hidden = !S.sky; schedule(); };
-if (!HRS[0].sky) $("skywrap").hidden = true;   // maps built before the weather layer
+if (!HRS[0].sky && !HRS[0].skyGrid) $("skywrap").hidden = true;   // maps built before the weather layer
 $("showTrack").onchange = (e) => { S.track = e.target.checked; schedule(); };
 $("basemap").value = S.base;
 const savePrefs = () => { try { localStorage.setItem("puffmap.prefs", JSON.stringify({ base: S.base, sys: SYS })); } catch (err) {} };

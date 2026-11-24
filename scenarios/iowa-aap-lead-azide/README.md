@@ -24,6 +24,7 @@ not official guidance.
 | `mirror.py` | turns the built site into the GitHub Pages mirror |
 | `index_template.html` | the landing page's HTML, CSS and script, filled in by `make_map_picker.py` |
 | `met_cache/map_met_all.json` | saved Open-Meteo forecasts for Monday at the new site (download times in `__fetched__`; the page shows when) |
+| `sky_grid.py`, `met_cache/sky_grid.json` | the maps' "sky cover & rain" layer: forecast cloud cover and precipitation on a finer grid, display only (see "The weather layer" below) |
 | `make_icons.py` | builds the site icons and profile images |
 | `outputs/site/` | the site. The repo holds only the hand-made files (`og.png`, icons, `brand/`); `make_map_picker.py --build` writes the page and the maps |
 
@@ -344,6 +345,22 @@ time costs a few hundred.
   another network. The cloud sandbox this was built in shares its address with other
   users and ran out several times.
 - Move or delete `met_cache/map_met_all.json` to download fresh forecasts (see below).
+- The weather layer's grid (`sky_grid.py --fetch`) counts as one request per point:
+  about 475 for HRRR, and as many again when GFS is needed, on each refresh.
+
+### The weather layer
+
+Each map has an optional "sky cover & rain" layer (off by default): forecast cloud cover
+in white or gray, and precipitation colored as on radar. It is for display only. The lead
+model keeps its own 5x5 grid (points about 90 miles apart); the layer uses a finer grid
+from `sky_grid.py`: 19 x 25 points 0.3° apart (about 21 miles) around the plant, from one
+model per map. HRRR is used when its run covers the map's hours (it reaches 18 to 48
+hours ahead, depending on the run); otherwise GFS. The legend names the model and when
+it was pulled, and says that the lead's path uses its own forecast.
+
+`met_cache/sky_grid.json` holds the download. The site build only reads it (a deploy
+never downloads), and without it the maps fall back to the lead model's coarse points.
+`sky_grid.py --fetch` downloads it again; `sky_grid.py` says what is saved.
 
 ## Refreshing on the day
 
@@ -351,7 +368,8 @@ Forecasts improve as the event approaches. The page and `met_cache/map_met_all.j
 (`__fetched__`) say when the saved ones were downloaded.
 
 1. Run `python3 tools/refresh_forecast.py` from the repository root. It moves the saved
-   file into a dated `met_cache_retrieved_*` folder, downloads new forecasts, rebuilds the
+   file into a dated `met_cache_retrieved_*` folder, downloads new forecasts and the
+   weather layer's grid (`sky_grid.py --fetch`), rebuilds the
    site and regenerates the golden test numbers. It exits with status 3, keeping the
    saved file, if the forecasts haven't changed.
 2. Check the news for the dated statements and open a pull request. Merging it deploys

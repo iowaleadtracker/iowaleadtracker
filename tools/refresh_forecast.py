@@ -4,10 +4,11 @@ Steps:
 
 1. Move ``met_cache/map_met_all.json`` into ``met_cache_retrieved_<UTC time>/`` (git-ignored),
    named for when that copy was downloaded.
-2. Run ``make_map_picker.py --build``, which downloads new forecasts into ``met_cache/``
-   and rebuilds all the maps and the page.
+2. Fetch the maps' finer weather grid (``sky_grid.py --fetch``, display only), then run
+   ``make_map_picker.py --build``, which downloads new forecasts into ``met_cache/`` and
+   rebuilds all the maps and the page.
 3. If the new forecasts hold the same numbers as the old ones (only the download times
-   differ), put the old file back and exit with status 3: nothing to publish.
+   differ), put the old files back and exit with status 3: nothing to publish.
 4. Otherwise regenerate the golden regression data (``tests/data/``) from the new file.
 
 It doesn't commit, deploy or publish. Run it by hand (``python tools/refresh_forecast.py``)
@@ -35,6 +36,8 @@ ROOT = Path(__file__).resolve().parents[1]
 SCENARIO = ROOT / "scenarios" / "iowa-aap-lead-azide"
 CACHE = SCENARIO / "met_cache" / "map_met_all.json"
 STAGED_CACHE = SCENARIO / "met_cache" / "staged_forecasts.json"
+# the finer weather grid shown on the maps only (sky_grid.py); fetched with the forecasts
+SKY_CACHE = SCENARIO / "met_cache" / "sky_grid.json"
 UNCHANGED = 3
 
 
@@ -71,6 +74,23 @@ def main(argv: list[str] | None = None) -> int:
     return refresh(CACHE, ["make_map_picker.py", "--build"], golden=True)
 
 
+def keep_sky_grid(archive: Path) -> bytes | None:
+    """Copy the saved weather grid into ``archive``; return its contents (None if none)."""
+    if not SKY_CACHE.exists():
+        return None
+    old = SKY_CACHE.read_bytes()
+    (archive / SKY_CACHE.name).write_bytes(old)
+    return old
+
+
+def restore_sky_grid(old: bytes | None) -> None:
+    """Put back the weather grid that keep_sky_grid() saw (or remove a new one)."""
+    if old is None:
+        SKY_CACHE.unlink(missing_ok=True)
+    else:
+        SKY_CACHE.write_bytes(old)
+
+
 def refresh(cache: Path, build: list[str], *, golden: bool) -> int:
     """Download new forecasts into ``cache`` and rebuild; 0 when changed, 3 when not."""
     if not cache.exists():
@@ -86,17 +106,26 @@ def refresh(cache: Path, build: list[str], *, golden: bool) -> int:
     kept = archive / cache.name
     shutil.move(cache, kept)
     print(f"moved the saved forecasts to {kept.relative_to(ROOT)}", file=sys.stderr)
+    # The main refresh also fetches the maps' finer weather grid, before the build reads it.
+    sky_old = keep_sky_grid(archive) if golden else None
+
+    def restore() -> None:  # leave the repo as it was
+        shutil.copy2(kept, cache)
+        if golden:
+            restore_sky_grid(sky_old)
 
     try:
+        if golden:
+            run([sys.executable, "sky_grid.py", "--fetch"], cwd=SCENARIO)
         run([sys.executable, *build], cwd=SCENARIO)
     except subprocess.CalledProcessError:
-        shutil.copy2(kept, cache)  # leave the repo as it was
+        restore()
         raise
 
     new = json.loads(cache.read_text(encoding="utf-8"))
     if forecasts(new) == forecasts(old):
-        cache.write_text(old_text, encoding="utf-8")
-        print("the forecasts haven't changed; kept the saved file", file=sys.stderr)
+        restore()
+        print("the forecasts haven't changed; kept the saved files", file=sys.stderr)
         return UNCHANGED
 
     if golden:
