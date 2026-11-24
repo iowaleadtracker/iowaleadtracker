@@ -7,19 +7,19 @@
 <style>
 :root {
   --bg: #f6f5f2; --surface: #ffffff; --ink: #1d1d1b; --ink-2: #55544f; --ink-3: #6b6a64;
-  --line: #e3e1db; --accent: #2a78d6; --map-bg: #e9e7e1; --chip: #f0efec; --sky-veil: rgba(70,70,68,0.36);
+  --line: #e3e1db; --accent: #2a78d6; --map-bg: #e9e7e1; --chip: #f0efec;
   --c-air: #eb6834; --c-dry: #2a78d6; --c-wet: #1baf7a;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #161615; --surface: #1f1f1d; --ink: #f0efea; --ink-2: #b9b8b1; --ink-3: #9a9993;
-    --line: #34332f; --accent: #3987e5; --map-bg: #262624; --chip: #2a2a27; --sky-veil: rgba(215,215,210,0.32);
+    --line: #34332f; --accent: #3987e5; --map-bg: #262624; --chip: #2a2a27;
     --c-air: #d95926; --c-dry: #3987e5; --c-wet: #199e70;
   }
 }
 :root[data-theme="dark"] {
   --bg: #161615; --surface: #1f1f1d; --ink: #f0efea; --ink-2: #b9b8b1; --ink-3: #9a9993;
-  --line: #34332f; --accent: #3987e5; --map-bg: #262624; --chip: #2a2a27; --sky-veil: rgba(215,215,210,0.32);
+  --line: #34332f; --accent: #3987e5; --map-bg: #262624; --chip: #2a2a27;
   --c-air: #d95926; --c-dry: #3987e5; --c-wet: #199e70;
 }
 * { box-sizing: border-box; }
@@ -100,7 +100,11 @@ aside section > h2:first-child { margin-top: 18px; }
 .zsw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 6px; }
 .legnote { width: 0; min-width: 100%; font-size: 11.5px; color: var(--ink-3); margin-top: 5px; padding-top: 4px; border-top: 1px solid var(--line); white-space: normal; }
 #legsky .legnote { margin-top: 2px; }
-.sky-rain { background: repeating-linear-gradient(135deg, var(--ink-2) 0 1.5px, transparent 1.5px 5px); border: 1px solid var(--line); }
+#legskycloud { border: 1px solid var(--line); }
+.sky-rainbar { height: 8px; border-radius: 2px; margin-top: 2px; opacity: 0.85;
+  background: linear-gradient(90deg, rgb(152,228,140) 0%, rgb(78,196,78) 35%, rgb(24,150,50) 65%, rgb(16,104,36) 85%, rgb(240,214,52) 100%); }
+.legend .sky-ticks span:first-child { transform: none; }
+.legend .sky-ticks span:last-child { transform: translateX(-100%); }
 .lz { display: flex; align-items: center; font-size: 12px; color: var(--ink-2); margin: 2px 0; gap: 6px; }
 .lz b { color: var(--ink); font-weight: 600; min-width: 46px; }
 .btnrow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
@@ -162,8 +166,10 @@ body.embedded > header { display: none; }
       <div class="lz" id="legenv" hidden></div>
       <div class="lz lpath" style="margin-top:4px"><svg width="26" height="8" aria-hidden="true"><line x1="1" y1="4" x2="25" y2="4" stroke="currentColor" stroke-width="2" stroke-dasharray="5 4"/></svg>Path of the cloud's center, labeled with the local time it passes</div>
       <div id="legsky" hidden>
-        <div class="lz"><span class="zsw" style="background:var(--sky-veil)"></span>Forecast sky cover (heavier shading = more overcast)</div>
-        <div class="lz"><span class="zsw sky-rain"></span>Forecast rain or snow (denser streaks = heavier)</div>
+        <div class="lz"><span class="zsw" id="legskycloud"></span>Forecast cloud cover (more solid = more overcast)</div>
+        <div class="lz"><span>Forecast rain or snow, colored as on radar (<span id="legskyunit"></span>)</span></div>
+        <div class="sky-rainbar" aria-hidden="true"></div>
+        <div class="ticks sky-ticks" id="legskyticks"></div>
         <div class="legnote" id="legskynote"></div>
       </div>
       <div class="legnote" id="legnote" hidden></div>
@@ -823,62 +829,96 @@ function drawOverlay() {
   ctx.restore();
 }
 // Forecast sky cover and precipitation from the weather model, at the wind points (a coarse
-// grid), blended smoothly between points. Drawn under the lead layer so the lead stays on top.
-// Gray veil for sky cover and streaks for rain or snow: no hue, so neither reads as a lead level.
-const sky = { cloud: document.createElement("canvas"), rain: document.createElement("canvas"), screen: document.createElement("canvas"), key: "", pat: null, patDark: null };
+// grid), blended smoothly between points and drawn under the lead layer so the lead stays on top.
+// Styled like a weather map: clouds white (gray on light basemaps, where white wouldn't show),
+// rain on a radar-style scale of greens, then yellow for heavy rain.
+const SKY_RAIN = [   // [mm/h, color]; colors blend between stops
+  [0.1, [152, 228, 140]], [0.5, [78, 196, 78]], [2, [24, 150, 50]], [5, [16, 104, 36]], [10, [240, 214, 52]],
+];
+const SKY_RAIN_MIN = 0.1;   // mm/h; lighter than this is left clear, as on radar
+const SKY_PX = 32;          // drawn pixels per grid spacing
+const SKY_PAD = 2;          // empty grid points added around the data, so the layer fades out
+function skyRainColor(mm) {
+  if (mm < SKY_RAIN_MIN) return null;
+  for (let k = 1; k < SKY_RAIN.length; k++) {
+    const [m1, c1] = SKY_RAIN[k];
+    if (mm < m1) {
+      const [m0, c0] = SKY_RAIN[k - 1], t = Math.log(mm / m0) / Math.log(m1 / m0);
+      return c0.map((c, i) => Math.round(c + (c1[i] - c) * t));
+    }
+  }
+  return SKY_RAIN[SKY_RAIN.length - 1][1];
+}
+const sky = { cloud: document.createElement("canvas"), rain: document.createElement("canvas"), key: "" };
 function skyGrid(h) {
   const lats = [...new Set(h.wind.map((w) => w[0]))].sort((a, b) => a - b);
   const lons = [...new Set(h.wind.map((w) => w[1]))].sort((a, b) => a - b);
   return { lats, lons, dlat: lats.length > 1 ? lats[1] - lats[0] : 1, dlon: lons.length > 1 ? lons[1] - lons[0] : 1 };
 }
-function rainPattern(dark) {
-  const c = document.createElement("canvas"); c.width = c.height = 7;
-  const g = c.getContext("2d");
-  g.strokeStyle = dark ? "rgb(240,239,234)" : "rgb(29,29,27)"; g.lineWidth = 1.4; g.lineCap = "square";
-  g.beginPath(); g.moveTo(0, 0); g.lineTo(7, 7); g.moveTo(-1, 6); g.lineTo(1, 8); g.moveTo(6, -1); g.lineTo(8, 1); g.stroke();
-  return ctx.createPattern(c, "repeat");
-}
+// white clouds on dark and satellite maps, gray-blue on the light ones
+const skyWhite = () => ["dark", "imagery"].includes(baseStyle()) || (baseStyle() === "none" && isDark());
 function drawSky(h) {
   if (!h.sky) return;
-  const G = skyGrid(h), nx = G.lons.length, ny = G.lats.length, dark = isDark();
-  const key = S.hour + "|" + dark + "|" + SYS;
+  const G = skyGrid(h), nx = G.lons.length, ny = G.lats.length, white = skyWhite();
+  const key = S.hour + "|" + white + "|" + SYS;
   if (key !== sky.key) {
     sky.key = key;
-    // a transparent border one point wide, so the layer fades out past the outer points
-    for (const c of [sky.cloud, sky.rain]) { c.width = nx + 2; c.height = ny + 2; }
-    const cImg = sky.cloud.getContext("2d").createImageData(nx + 2, ny + 2), rImg = sky.rain.getContext("2d").createImageData(nx + 2, ny + 2);
-    const veil = dark ? [215, 215, 210] : [70, 70, 68];
+    // values on the grid with a border of zeros SKY_PAD points wide; row 0 is north
+    const gx = nx + 2 * SKY_PAD, gy = ny + 2 * SKY_PAD, cl = new Float32Array(gx * gy), pr = new Float32Array(gx * gy);
     h.wind.forEach(([la, lo], k) => {
-      const [cl, pr] = h.sky[k];
-      const o = ((ny - G.lats.indexOf(la)) * (nx + 2) + G.lons.indexOf(lo) + 1) * 4;   // north at the top
-      cImg.data.set([...veil, Math.round(255 * (dark ? 0.32 : 0.36) * Math.min(100, Math.max(0, cl)) / 100)], o);
-      // ~0.1 mm/h (drizzle) faint, 2.5 mm/h (moderate) and above full
-      const a = pr < 0.05 ? 0 : 0.25 + 0.75 * Math.min(1, Math.sqrt(pr / 2.5));
-      rImg.data.set([0, 0, 0, Math.round(255 * a)], o);
+      const o = (ny - 1 - G.lats.indexOf(la) + SKY_PAD) * gx + G.lons.indexOf(lo) + SKY_PAD;
+      cl[o] = Math.min(100, Math.max(0, h.sky[k][0])) / 100; pr[o] = Math.max(0, h.sky[k][1]);
     });
+    // Blend between points here (not in the browser's image scaling) so the rain color comes
+    // from the blended rate, the way a radar scale reads. A Gaussian-weighted average of the
+    // points (sigma 0.6 spacings) gives rounded shapes; straight-line blending on a grid this
+    // coarse draws boxes.
+    const pw = (gx - 1) * SKY_PX, ph = (gy - 1) * SKY_PX, k2 = 1 / (2 * 0.6 * 0.6);
+    const wx = new Float32Array(pw * gx), wy = new Float32Array(ph * gy);
+    for (let x = 0; x < pw; x++) for (let i = 0; i < gx; i++) wx[x * gx + i] = Math.exp(-(((x + 0.5) / SKY_PX - i) ** 2) * k2);
+    for (let y = 0; y < ph; y++) for (let j = 0; j < gy; j++) wy[y * gy + j] = Math.exp(-(((y + 0.5) / SKY_PX - j) ** 2) * k2);
+    for (const c of [sky.cloud, sky.rain]) { c.width = pw; c.height = ph; }
+    const cImg = sky.cloud.getContext("2d").createImageData(pw, ph), rImg = sky.rain.getContext("2d").createImageData(pw, ph);
+    const cc = white ? [255, 255, 255] : [112, 124, 140], ca = white ? 0.62 : 0.42;
+    for (let y = 0; y < ph; y++) {
+      for (let x = 0; x < pw; x++) {
+        let sw = 0, sc = 0, sp = 0;
+        for (let j = 0; j < gy; j++) {
+          const a = wy[y * gy + j];
+          if (a < 1e-4) continue;
+          for (let i = 0; i < gx; i++) {
+            const w = a * wx[x * gx + i], o = j * gx + i;
+            sw += w; sc += w * cl[o]; sp += w * pr[o];
+          }
+        }
+        const q = (y * pw + x) * 4, c = sc / sw, p = sp / sw;
+        cImg.data[q] = cc[0]; cImg.data[q + 1] = cc[1]; cImg.data[q + 2] = cc[2]; cImg.data[q + 3] = Math.round(255 * ca * c);
+        const rc = skyRainColor(Math.max(p, SKY_RAIN_MIN));   // edge eased over 0.07-0.1 mm/h
+        const ra = Math.min(1, Math.max(0, (p - 0.07) / (SKY_RAIN_MIN - 0.07)));
+        if (ra > 0) { rImg.data[q] = rc[0]; rImg.data[q + 1] = rc[1]; rImg.data[q + 2] = rc[2]; rImg.data[q + 3] = Math.round(175 * ra); }
+      }
+    }
     sky.cloud.getContext("2d").putImageData(cImg, 0, 0);
     sky.rain.getContext("2d").putImageData(rImg, 0, 0);
+    $("legskycloud").style.background = `rgba(${cc},${ca})`;
+    // the bar is on a log scale from 0.1 to 10 mm/h, its colors at the SKY_RAIN stops
+    const tickText = US() ? ["0.004", "0.04", "0.2", "0.4+"] : ["0.1", "1", "5", "10+"];
+    $("legskyticks").innerHTML = [0.1, 1, 5, 10].map((m, k) =>
+      `<span style="left:${Math.log10(m / 0.1) * 50}%">${tickText[k]}</span>`).join("");
+    $("legskyunit").textContent = US() ? "in/h" : "mm/h";
     const km = Math.round(G.dlat * 111.2);
     $("legskynote").textContent = `From the weather model (${M.weather || "forecast"}), not radar or satellite. ` +
       `Its points are about ${US() ? Math.round(km / 1.609) + " mi" : km + " km"} apart, so it shows only the broad pattern.`;
   }
-  // grid points sit at pixel centers; with the border the image spans 1.5 spacings past the outer points
-  const [x0, y0] = toScreen(G.lats[ny - 1] + 1.5 * G.dlat, G.lons[0] - 1.5 * G.dlon);
-  const [x1, y1] = toScreen(G.lats[0] - 1.5 * G.dlat, G.lons[nx - 1] + 1.5 * G.dlon);
+  // the image's pixel centers are SKY_PX apart in grid units; its corners sit half a pixel out
+  // from the border points, which are SKY_PAD spacings past the outer grid points
+  const e = SKY_PAD + 0.5 / SKY_PX;
+  const [x0, y0] = toScreen(G.lats[ny - 1] + e * G.dlat, G.lons[0] - e * G.dlon);
+  const [x1, y1] = toScreen(G.lats[0] - e * G.dlat, G.lons[nx - 1] + e * G.dlon);
   ctx.save();
   ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
   ctx.drawImage(sky.cloud, x0, y0, x1 - x0, y1 - y0);
-  // rain: the smoothed rate as a mask, filled with streaks
-  const sc = sky.screen;
-  if (sc.width !== cv.width || sc.height !== cv.height) { sc.width = cv.width; sc.height = cv.height; }
-  const g = sc.getContext("2d");
-  g.setTransform(dpr, 0, 0, dpr, 0, 0); g.globalCompositeOperation = "source-over"; g.clearRect(0, 0, W, H);
-  g.imageSmoothingEnabled = true; g.imageSmoothingQuality = "high";
-  g.drawImage(sky.rain, x0, y0, x1 - x0, y1 - y0);
-  g.globalCompositeOperation = "source-in";
-  const pat = dark ? (sky.patDark ||= rainPattern(true)) : (sky.pat ||= rainPattern(false));
-  g.globalAlpha = 0.55; g.fillStyle = pat; g.fillRect(0, 0, W, H); g.globalAlpha = 1;
-  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(sc, 0, 0);
+  ctx.drawImage(sky.rain, x0, y0, x1 - x0, y1 - y0);
   ctx.restore();
 }
 function arrow(x, y, dx, dy, color, width) {
