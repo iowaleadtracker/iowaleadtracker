@@ -53,12 +53,15 @@ MET_CACHE = HERE / "met_cache" / "map_met_all.json"
 DATE = "2026-11-25"
 # Days modeled, as (date, short code used in links). Another day is built only when the
 # saved forecasts include it (see build()), so adding one never makes a deploy download.
-DAYS = [("2026-11-25", "wed"), ("2026-11-26", "thu")]
+# Only Wednesday since Nov. 24: the Army Secretary said "Wednesday morning" (Nov. 23), and
+# Thursday cost as many Open-Meteo requests and build time as Wednesday (maintainer's
+# choice). The staged page (staged.py) still models Thursday and Friday.
+DAYS = [("2026-11-25", "wed")]
 # Days that are only an option in the Day menu: built and linkable, but left out of the
 # header, About box, summary, FAQ, References and llms.txt (maintainer's choice, Nov. 23).
-MENU_ONLY_DAYS = {"2026-11-26"}
+MENU_ONLY_DAYS: set[str] = set()  # Thursday, Nov. 26 was one until Nov. 24
 # Days no longer modeled, so an old link to one (#1200-permit-tue) can say so by name.
-PAST_DAYS = [("2026-11-23", "mon"), ("2026-11-24", "tue")]
+PAST_DAYS = [("2026-11-23", "mon"), ("2026-11-24", "tue"), ("2026-11-26", "thu")]
 # The day the page opens on and the summary leads with: the first of these that is built
 # (else DATE).
 LEAD_DAYS = ["2026-11-25"]

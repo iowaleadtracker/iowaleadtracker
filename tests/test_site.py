@@ -368,10 +368,10 @@ def test_missing_addresses_get_a_real_page() -> None:
 
 
 def test_days_and_map_names() -> None:
-    """Wednesday's maps have plain names; Thursday's are prefixed with its date."""
-    assert [d for d, _ in site.DAYS] == ["2026-11-25", "2026-11-26"] == [site.DATE, "2026-11-26"]
-    assert {"2026-11-26"} == site.MENU_ONLY_DAYS  # Thursday: only in the Day menu
-    assert [d for d, _ in site.PAST_DAYS] == ["2026-11-23", "2026-11-24"]
+    """Only Wednesday (plain names); another day's maps would be prefixed with its date."""
+    assert [d for d, _ in site.DAYS] == ["2026-11-25"] == [site.DATE]
+    assert set() == site.MENU_ONLY_DAYS  # Thursday was menu-only until Nov. 24
+    assert [d for d, _ in site.PAST_DAYS] == ["2026-11-23", "2026-11-24", "2026-11-26"]
     assert site.day_label("2026-11-25") == "Wednesday, Nov. 25"
     assert site.map_name("permit", "12:00") == "permit-1200.html"
     assert site.map_name("permit", "12:00", "2026-11-26") == "2026-11-26-permit-1200.html"
@@ -389,13 +389,18 @@ def test_days_to_build(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """A deploy builds only the days its saved forecasts cover; a refresh builds them all."""
     cache = tmp_path / "map_met_all.json"
     monkeypatch.setattr(site, "MET_CACHE", cache)
-    assert site.days_to_build() == ["2026-11-25", "2026-11-26"]  # downloading
+    assert site.days_to_build() == ["2026-11-25"]  # downloading
     cache.write_text('{"x?start_date=2026-11-25&end_date=2026-11-26": 1}', encoding="utf-8")
     assert site.days_to_build() == ["2026-11-25"]
     cache.write_text(
         '{"a?start_date=2026-11-25&x": 1, "b?start_date=2026-11-26&x": 1}', encoding="utf-8"
     )
+    assert site.days_to_build() == ["2026-11-25"]  # saved Thursday forecasts are ignored
+    # With a second day configured, it is built only when the saved forecasts cover it.
+    monkeypatch.setattr(site, "DAYS", [("2026-11-25", "wed"), ("2026-11-26", "thu")])
     assert site.days_to_build() == ["2026-11-25", "2026-11-26"]
+    cache.write_text('{"x?start_date=2026-11-25&end_date=2026-11-26": 1}', encoding="utf-8")
+    assert site.days_to_build() == ["2026-11-25"]
 
 
 def test_page_has_a_day_menu() -> None:
@@ -542,6 +547,8 @@ def _fake_map(models: list[str]) -> str:
 def test_read_maps_days_and_model_counts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """A day missing any blast time is left out; each day counts its own models."""
     monkeypatch.setattr(site, "MAPS", tmp_path)
+    # The multi-day machinery, with Thursday configured as it was until Nov. 24.
+    monkeypatch.setattr(site, "DAYS", [("2026-11-25", "wed"), ("2026-11-26", "thu")])
     four = site.WEATHER.split(",")
     thu = "2026-11-26"
     for c, _, _ in site.CASES:
@@ -709,8 +716,21 @@ def _maps_for(days: list[str]) -> site.Maps:
     )
 
 
-def test_day_values_wednesday_with_thursday_in_the_menu_only() -> None:
+def test_day_values_wednesday_only() -> None:
+    """Only Wednesday: no Day menu; an old Thursday link says it isn't in this update."""
+    v = site.day_values(_maps_for(["2026-11-25"]), "2026-11-25")
+    assert v["day_hidden"] == " hidden"
+    assert v["header_days"] == "Wednesday, Nov. 25"
+    assert json.loads(v["day_codes"]) == {"2026-11-25": "wed"}
+    assert json.loads(v["all_days"])["thu"] == "Thursday, Nov. 26"
+
+
+def test_day_values_wednesday_with_thursday_in_the_menu_only(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Wednesday leads; Thursday is a Day menu option but not in the header."""
+    monkeypatch.setattr(site, "DAYS", [("2026-11-25", "wed"), ("2026-11-26", "thu")])
+    monkeypatch.setattr(site, "MENU_ONLY_DAYS", {"2026-11-26"})
     maps = _maps_for(["2026-11-25", "2026-11-26"])
     lead = site.lead_day(maps)
     v = site.day_values(maps, lead)
