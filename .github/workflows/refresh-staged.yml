@@ -60,6 +60,9 @@ jobs:
       - name: Download forecasts and rebuild the staged maps
         id: refresh
         if: steps.when.outputs.go == 'true'
+        env:
+          # Open-Meteo commercial key (repository secret); without it, the free API.
+          OPEN_METEO_API_KEY: ${{ secrets.OPEN_METEO_API_KEY }}
         run: |
           set +e
           python tools/refresh_forecast.py --staged
