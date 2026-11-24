@@ -4,15 +4,16 @@ from __future__ import annotations
 
 import io
 import json
+import urllib.error
 import urllib.parse
 from typing import TYPE_CHECKING, Any
+
+import pytest
 
 from dispersal import met
 
 if TYPE_CHECKING:
     from pathlib import Path
-
-    import pytest
 
 FORECAST = "https://api.open-meteo.com/v1/forecast?latitude=41.5&longitude=-91.2"
 ARCHIVE = "https://archive-api.open-meteo.com/v1/archive?latitude=41.5"
@@ -72,3 +73,61 @@ def test_key_never_reaches_cache(monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     assert FORECAST in json.loads(saved)
     assert met.http_json(FORECAST) == {"ok": 1}  # replayed from the cache
     assert len(sent) == 1
+
+
+def _http_error(url: str, code: int) -> urllib.error.HTTPError:
+    return urllib.error.HTTPError(url, code, "Bad Request", {}, io.BytesIO(b"{}"))  # type: ignore[arg-type]
+
+
+def test_a_failed_request_is_replayed_as_a_failure(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A request that failed when downloaded fails the same way with downloads off.
+
+    So a replay takes the same fallback the download did, instead of stopping the run with
+    NotSaved (which the fallbacks can't catch). A request never made still stops it.
+    """
+
+    def refuse(req: Any, timeout: float) -> io.BytesIO:  # noqa: ARG001
+        raise _http_error(req.full_url, 400)
+
+    monkeypatch.setattr("urllib.request.urlopen", refuse)
+    monkeypatch.setitem(met.MET_CACHE, "path", str(tmp_path / "met.json"))
+    with pytest.raises(urllib.error.HTTPError):
+        met.http_json(FORECAST)
+    monkeypatch.setenv(met.CACHE_ONLY_ENV, "1")
+    with pytest.raises(met.SavedFailure) as e:
+        met.http_json(FORECAST)
+    assert e.value.code == 400
+    assert isinstance(e.value, Exception)  # the fallbacks' except Exception catches it
+    with pytest.raises(met.NotSaved):
+        met.http_json(FORECAST + "&other=1")
+
+
+def test_replay_takes_the_same_fallback_as_the_download(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Pressure levels refused (400) when downloaded: the replay drops them the same way."""
+    import datetime as dt  # noqa: PLC0415
+
+    def answer(req: Any, timeout: float) -> io.BytesIO:  # noqa: ARG001
+        if "hPa" in req.full_url:
+            raise _http_error(req.full_url, 400)
+        return io.BytesIO(json.dumps({"hourly": {}}).encode())
+
+    monkeypatch.setattr("urllib.request.urlopen", answer)
+    monkeypatch.setattr(met, "_data_problem", lambda *_a, **_k: None)
+    monkeypatch.setitem(met.MET_CACHE, "path", str(tmp_path / "met.json"))
+    start = dt.datetime(2026, 11, 25, 15, tzinfo=dt.timezone.utc)
+    end = start + dt.timedelta(hours=8)
+
+    def fetch() -> tuple[str, list[Any], int | None, list[int]]:
+        return met.fetch_open_meteo(
+            [41.5], [-91.2], start, end, levels=[925, 850], model="gfs_seamless", now=start
+        )
+
+    downloaded = fetch()
+    assert downloaded[3] == []  # fell back to no pressure levels
+    monkeypatch.setattr("urllib.request.urlopen", lambda *_a, **_k: pytest.fail("downloaded"))
+    monkeypatch.setenv(met.CACHE_ONLY_ENV, "1")
+    assert fetch() == downloaded

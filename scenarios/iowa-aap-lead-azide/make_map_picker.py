@@ -85,7 +85,7 @@ NOON_HOUR = 12
 # (id used in file names and the URL, --release-case, label). See README "Release cases".
 CASES = [
     ("low", "ap42-floor", "Low"),
-    ("mid", "fine-20", "Middle"),
+    ("mid", "army-26", "U.S. Army mitigated"),
     ("high", "tnt-fine", "High"),
     ("permit", "permit-100", "EPA permit"),
 ]
@@ -530,6 +530,35 @@ def run_maps(runs: list[Run], *, saved: bool, downloaded: Iterable[str] = ()) ->
     return []
 
 
+def check_skipped(runs: list[Run], skipped: list[str]) -> None:
+    """Stop the build if maps were skipped that the last refresh should have made.
+
+    Skipping is for a blast time added since the last refresh: then every map of that start
+    hour is skipped, and the next refresh downloads it. Some maps of one start hour built
+    and others skipped means the saved forecasts are incomplete, and the default time on
+    the planned day skipped would leave the page without the map it opens on; either way a
+    deploy would quietly publish fewer maps than the refresh made, so it fails instead.
+    """
+    gone = set(skipped)
+    hours: dict[str, set[bool]] = {}
+    for r in runs:
+        hours.setdefault(start_hour(r), set()).add(r.which in gone)
+    partial = sorted(h for h, kinds in hours.items() if kinds == {True, False})
+    default = [r.which for r in runs if r.which in gone and r.which.endswith(f" {DEFAULT}")]
+    default = [w for w in default if not w[:4].isdigit()]  # the planned day's labels have no date
+    problems = []
+    if partial:
+        problems.append(f"start hours with only some maps built: {', '.join(partial)}")
+    if default:
+        problems.append(f"default-time maps skipped: {', '.join(default)}")
+    if problems:
+        raise SystemExit(
+            "saved forecasts are incomplete: "
+            + "; ".join(problems)
+            + ". Refresh the forecasts (tools/refresh_forecast.py) instead of deploying."
+        )
+
+
 def _ignore(_: Run) -> None:
     """Do nothing (``_run``'s default ``on_missing``)."""
 
@@ -613,6 +642,7 @@ def build() -> None:
     skipped = run_maps(runs, saved=MET_CACHE.exists())
     if skipped:
         print(f"skipped {len(skipped)} maps without saved forecasts: {', '.join(skipped)}")
+        check_skipped(runs, skipped)
     if staged.CACHE.exists():  # the staged Wednesday-Friday maps, from their own file
         staged.build()
 
@@ -981,6 +1011,9 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "mentions_html": works_cited.MENTIONS_HTML,
         "misting": forecast_summary.MISTING,
         "advisory_url": forecast_summary.ADVISORY_URL,
+        "advisory_nov24_url": forecast_summary.ADVISORY_NOV24_URL,
+        "army_maps_pdf": forecast_summary.ARMY_MAPS_PDF,
+        "fema_header": forecast_summary.FEMA_HEADER_HTML,
         "court_pause": forecast_summary.court_pause([day_label(d) for d in told]),
         "court_url": forecast_summary.COURT_URL,
         "court_cite": forecast_summary.COURT_CITE,

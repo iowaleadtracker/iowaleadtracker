@@ -78,6 +78,25 @@ class NotSaved(BaseException):
     """
 
 
+#: Key in the cache file for requests that failed when they were downloaded: URL ->
+#: {"code": HTTP status or None, "detail": text}. With downloads off they fail the same way
+#: again (:class:`SavedFailure`), so a replay takes the same fallbacks the download did.
+FAILED_KEY = "__failed__"
+
+
+class SavedFailure(Exception):  # noqa: N818 - named for what it is, a replayed failure
+    """A request that failed when the forecasts were downloaded, replayed with downloads off.
+
+    An ordinary Exception, unlike :class:`NotSaved`: the fallbacks (fewer variables, the
+    next source, the next weather model) handle it exactly as they handled the original
+    failure. ``code`` is the HTTP status, or None.
+    """
+
+    def __init__(self, url: str, code: int | None, detail: str) -> None:
+        super().__init__(f"{detail} (failed when downloaded: {url})")
+        self.code = code
+
+
 #: Environment variable holding an Open-Meteo commercial API key. When it is set,
 #: requests go to the customer servers with the key; without it, to the free API.
 API_KEY_ENV = "OPEN_METEO_API_KEY"
@@ -123,12 +142,37 @@ def _cache_store(url: str, data: Any) -> None:  # noqa: ANN401 - Open-Meteo JSON
     if not MET_CACHE["path"] or (isinstance(data, dict) and data.get("error")):
         return
     MET_CACHE["data"][url] = data
+    MET_CACHE["data"].get(FAILED_KEY, {}).pop(url, None)
     # when each response was downloaded, so pages can say how old the forecast is
     MET_CACHE["data"].setdefault("__fetched__", {})[url] = dt.datetime.now(
         dt.timezone.utc
     ).isoformat(timespec="seconds")
     with Path(MET_CACHE["path"]).open("w", encoding="utf-8") as f:
         json.dump(MET_CACHE["data"], f)
+
+
+def _cache_failure(url: str, code: int | None, detail: str) -> None:
+    """Record in the cache file that ``url`` failed, so a replay fails the same way."""
+    if not MET_CACHE["path"]:
+        return
+    MET_CACHE["data"].setdefault(FAILED_KEY, {})[url] = {"code": code, "detail": detail}
+    with Path(MET_CACHE["path"]).open("w", encoding="utf-8") as f:
+        json.dump(MET_CACHE["data"], f)
+
+
+def _saved(url: str) -> Any:  # noqa: ANN401 - Open-Meteo JSON
+    """Return the saved response for ``url``, or None to download it.
+
+    With downloads off (``CACHE_ONLY_ENV``), a request that failed when it was downloaded
+    fails again (:class:`SavedFailure`) and one never made stops the run (:class:`NotSaved`).
+    """
+    cached = _cache_lookup(url)
+    if cached is not None or not os.environ.get(CACHE_ONLY_ENV):
+        return cached
+    failed = (MET_CACHE["data"] or {}).get(FAILED_KEY, {}).get(url)
+    if failed is not None:
+        raise SavedFailure(url, failed.get("code"), str(failed.get("detail", "")))
+    raise NotSaved(url)
 
 
 def http_json(url: str, timeout: float = 60, tries: int = 4) -> Any:  # noqa: ANN401
@@ -138,11 +182,9 @@ def http_json(url: str, timeout: float = 60, tries: int = 4) -> Any:  # noqa: AN
     rerun makes no requests. With OPEN_METEO_API_KEY set, Open-Meteo requests use the
     commercial API (see ``_request_url``); ``url`` stays the cache key either way.
     """
-    cached = _cache_lookup(url)
+    cached = _saved(url)
     if cached is not None:
         return cached
-    if os.environ.get(CACHE_ONLY_ENV):
-        raise NotSaved(url)
     if not url.startswith("https://"):
         raise ValueError(f"refusing non-HTTPS URL {url!r}")
     req = urllib.request.Request(  # noqa: S310 - HTTPS checked above
@@ -154,11 +196,17 @@ def http_json(url: str, timeout: float = 60, tries: int = 4) -> Any:  # noqa: AN
                 data = json.loads(r.read().decode())
         except urllib.error.HTTPError as e:
             if e.code not in _RETRY_STATUS or attempt == tries - 1:
+                _cache_failure(url, e.code, str(e))
                 raise
-        except OSError:  # URLError, connection resets, timeouts
+        except OSError as e:  # URLError, connection resets, timeouts
             if attempt == tries - 1:
+                _cache_failure(url, None, str(e))
                 raise
         else:
+            if isinstance(data, dict) and data.get("error"):
+                # refused in the body; not saved as a forecast, but replayed as a refusal
+                _cache_failure(url, None, str(data.get("reason", "error")))
+                return data
             _cache_store(url, data)
             return data
         time.sleep(2**attempt * 2)

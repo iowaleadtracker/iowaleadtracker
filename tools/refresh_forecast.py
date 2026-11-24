@@ -47,8 +47,8 @@ def fetched(data: dict[str, Any]) -> list[dt.datetime]:
 
 
 def forecasts(data: dict[str, Any]) -> dict[str, Any]:
-    """Return the cached responses without their download times."""
-    return {k: v for k, v in data.items() if k != "__fetched__"}
+    """Return the cached responses without their download times or recorded failures."""
+    return {k: v for k, v in data.items() if k not in ("__fetched__", "__failed__")}
 
 
 def archive_name(data: dict[str, Any]) -> str:

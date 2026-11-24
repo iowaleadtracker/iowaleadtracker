@@ -70,6 +70,9 @@
   select { font: inherit; padding: 4px 8px; border-radius: 6px; }
   header .warn { margin: 0; flex-basis: 100%; color: #fde8c8; font-size: 12.5px; line-height: 1.4; }
   header .warn b { color: #fff; }
+  header .fema { margin: 0; flex-basis: 100%; color: #f5f7fa; font-size: 12.5px; line-height: 1.4; }
+  header .fema b { color: #fff; }
+  header .fema a { color: #9fd3ff; }
   header .warn button { font: inherit; color: #9fd3ff; background: none; border: 0; padding: 0;
                          text-decoration: underline; cursor: pointer; }
   .sys { display: inline-flex; border: 1px solid #52606d; border-radius: 6px; overflow: hidden; }
@@ -121,33 +124,36 @@
     <button id="about" type="button">About this map</button> &middot;
     <button id="tosummary" type="button">What the forecast shows</button> &middot;
     <button id="cites" type="button" aria-haspopup="dialog">Methodology and References</button></p>
+  <p class="fema" role="note">$fema_header</p>
   <p class="daynote" id="daynote" role="status" hidden></p>
   <p class="daynote" id="pendingnote"$pending_hidden>$pending_note</p>
 </header>
 <dialog id="note" aria-labelledby="note-h">
   <h2 id="note-h" tabindex="-1" autofocus>About this map</h2>
   <p><b>$time_head</b> $time_note</p>
-  <p>$about_who</p>
-  <p><b>Source code.</b> The model, the saved weather forecasts, and every assumption are
-    public on <a href="$source_url" rel="noopener">GitHub</a>, free to check, run, and improve.</p>
-  <p><b>The numbers are guesses.</b> The public doesn&rsquo;t know exactly how much lead will get
-    into the air or how the Army will set up the charges. This map assumes <span class="u-us">about
+  <p><b>The numbers are estimates.</b> The Army estimates that 26% of the lead gets into the air
+    with its mitigation (an emission factor of 0.26, in its
+    <a href="$army_maps_pdf" rel="noopener">Nov. 24 &ldquo;Mitigated 0.26&rdquo; maps</a>), but no
+    one has measured a blast like this. This map assumes <span class="u-us">about
     9,700 pounds</span><span class="u-metric" hidden>about 4,400 kg (9,700 pounds)</span> of lead
     azide in 68 drums (the amount an Army spokesperson gave), which the Army plans to set off in two blasts
     inside earth-covered bunkers at about 9 a.m. Wednesday (Army, Nov. 24). The Iowa Lead Tracker lets you simulate four
-    possibilities for how much of the lead gets into the air: Low ($pct_low), Middle
+    possibilities for how much of the lead gets into the air: Low ($pct_low), U.S. Army
+    mitigated
     ($pct_mid), High ($pct_high), or EPA permit ($pct_permit). In each case, the lead in
     the air comes in pieces small enough to breathe in, and the rest stays at the plant.</p>
   <p>The low case comes from EPA and Army tests of military blasting caps, which use lead azide.
     In those tests, at least $pct_low of the lead got into the air, and almost all of the dust
     was small enough to breathe in. The high case uses a rule for explosions from a Department of
-    Energy handbook. The middle case uses 20%, which the same handbook gives as a general upper
-    bound for the metal released by a different kind of blast; it adds that other studies found
-    1% to 10%. The EPA permit case uses the 100% that EPA
+    Energy handbook. The U.S. Army mitigated case uses $pct_mid, the emission factor of 0.26 in the Army&rsquo;s Nov. 24
+    &ldquo;Mitigated 0.26&rdquo; plume maps, for blasts in bunkers with added countermeasures (EPA&rsquo;s
+    permit uses 1.00 for all of the lead). The EPA permit case uses the 100% that EPA
     requires the Army to assume in its official plume maps; EPA calls that conservative. Different
     numbers would give a very different map.</p>
-  <p><b>Water misting.</b> $misting Source:
-    <a href="$advisory_url" rel="noopener">Army public advisory, Nov. 18, 2026</a>.</p>
+  <p><b>Mitigation.</b> $misting Source:
+    <a href="$advisory_nov24_url" rel="noopener">Army public safety advisory, Nov. 24, 2026</a>.</p>
+  <p><b>Source code and author.</b> $about_who The model, the saved weather forecasts, and
+    every assumption are public on <a href="$source_url" rel="noopener">GitHub</a>, free to check, run, and improve.</p>
   <p><b>The weather is a forecast.</b> The winds come from $n_models weather forecasts, current as
     of $got_txt. If the wind changes, the cloud will go somewhere else. The shaded areas show where
     the cloud <i>could</i> go, not where it <i>will</i> go.</p>

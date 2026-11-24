@@ -181,8 +181,10 @@ PERMIT_CITE = "EPA Region 7 emergency permit for the Iowa Army Ammunition Plant,
 # Who made the map and why (About box, FAQ, llms.txt).
 ABOUT_WHO = (
     "The Iowa Lead Tracker was made by a concerned Iowan, not by the Army or any government "
-    "agency, out of frustration that the Army hasn\u2019t released the inputs, data, or model "
-    "runs behind the public safety maps for its planned lead azide detonation. The Iowa "
+    "agency, out of frustration that the Army hadn\u2019t released the inputs, data, or model "
+    "runs behind the public safety maps for its planned lead azide detonation. On Nov. 24 the "
+    "Army published its estimate (an emission factor of 0.26 for the mitigated blast), but "
+    "not the model inputs or runs behind it. The Iowa "
     "Lead Tracker is intended to show what an open model should look like. When the public "
     "relies on a forecast to stay safe, others should be able to check, test, and improve it."
 )
@@ -245,7 +247,7 @@ COURT_HOLD = (
 
 # The planned day (the Army's Nov. 22 announcement), which the summary leads with by
 # default (facts()["day"] can name another), and the earlier day Iowa HHS gave "approximately
-# noon" for. The window (WINDOW) now spans the Army's "Wednesday morning" and that noon.
+# noon" for. The window (WINDOW) is half an hour either side of the Army's and FEMA's 9 a.m.
 PLANNED_DAY = "Wednesday, Nov. 25"
 #: The blast times the maps model, in words; must match make_map_picker.TIMES and
 #: staged.TIMES (tests/test_site.py checks).
@@ -347,16 +349,21 @@ TUESDAY_SOURCES_HTML = (
     f'<a href="{FILING_URL}" rel="noopener">{FILING_CITE}</a>; '
     f'<a href="{KCCI_URL}" rel="noopener">{KCCI_CITE}</a>'
 )
-# Army mitigation (public advisory, Nov. 18, 2026) and what runs of the model's spray option
-# showed with guessed setups (README, "Water misting and soil soaking"): 0.1% at 528 gal/min
-# up to 19% at 26,000 gal/min. The Army hasn't published its mister setup.
+# Army mitigation, from the Nov. 24, 2026 public safety advisory (ADVISORY_NOV24_URL): "physical
+# barriers full of sand that are approximately two stories high, a 'water wall' and gel blocks
+# to contain particle dispersion, precise deployment of aqueous foam barriers ... Before and
+# during the controlled detonation, the soil above and surrounding the earth-covered magazines
+# will be thoroughly saturated with water by misters." Its "Mitigated 0.26" maps (ARMY_MAPS_PDF)
+# are the Army's estimate with these measures. The model's own spray runs (README, "Water
+# misting and soil soaking"): 0.1% at 528 gal/min up to 19% at 26,000 gal/min.
 MISTING = (
-    "The Army plans to soak the soil over the bunkers and run water misters. The Army hasn't "
-    "said how many misters it will use or how much water they spray. In this model, setups "
-    "guessed at from about 500 to 26,000 gallons a minute caught less than 1% to about 19% "
-    "of the airborne lead. Most of the cloud rises above the spray within seconds, and "
-    "breathable-size particles slip around water drops. Soaking and the earth cover mainly "
-    "keep lead from getting airborne at all, which points toward the lower cases."
+    "The Army says the blasts will be inside earth-covered concrete magazines, with sand "
+    "barriers about two stories high, a \u201cwater wall\u201d and gel blocks, aqueous foam "
+    "barriers, and the soil around the magazines soaked by misters before and during the "
+    "blast. The Army\u2019s estimate for this mitigated blast is an emission factor of 0.26 "
+    "(26% of the lead airborne), the U.S. Army mitigated case here. This model can\u2019t "
+    "represent the barriers, foam or gel; its own runs of water spray alone, at about 500 to "
+    "26,000 gallons a minute, caught less than 1% to about 19% of the airborne lead."
 )
 # The Army's public safety advisory of Nov. 24, 2026 (Lori McFate, Army Sustainment Command;
 # read in full from the maintainer's PDF of the page, printed Nov. 24, 9:28 a.m. CST). Quoted
@@ -373,6 +380,18 @@ MISTING = (
 ADVISORY_NOV24_URL = "https://www.army.mil/article/297039"
 ADVISORY_NOV24_CITE = "Army public safety advisory, Nov. 24"
 ARMY_MAPS_URL = "https://www.army.mil/asc#org-iowa-army-ammunition-plant"
+# The Army's Nov. 24 "Mitigated 0.26" deposition and dispersion maps, linked from the Nov. 24
+# advisory as the latest version (checked against the maintainer's copy of the PDF).
+ARMY_MAPS_PDF = "https://d34w7g4gy10iej.cloudfront.net/pubs/pdf_78382.pdf"
+ARMY_MAPS_CITE = "Army \u201cMitigated 0.26\u201d maps, Nov. 24"
+# FEMA and the Army's advice, for the page header (Army public safety advisory, Nov. 24).
+FEMA_HEADER_HTML = (
+    "<b>FEMA evacuation:</b> Middletown and a 5-mile cone southwest of the plant; outside it, "
+    "the Army advises sheltering in place with windows and doors closed. FEMA Helpline "
+    '<a href="tel:+18006213362">1-800-621-3362</a> (24/7) &middot; '
+    '<a href="https://www.disasterassistance.gov/" rel="noopener">DisasterAssistance.gov</a>'
+    f' &middot; <a href="{ADVISORY_NOV24_URL}" rel="noopener">Army advisory, Nov. 24</a>'
+)
 # FEMA's Wireless Emergency Alert ("Imminent Threat Alert") sent to phones near the plant on
 # Nov. 24, 2026, with the same 9 a.m. time; text checked from the maintainer's screenshot. It
 # has no public address, so it is named but not linked.
@@ -386,6 +405,7 @@ NAMED_SOURCES = (
     ("Acting Secretary of the Army on X", SECARMY_URL),
     ("Iowa HHS fact sheet", HHS_URL),
     ("Nov. 22 court filing", RESPONSE_URL),
+    (ARMY_MAPS_CITE, ARMY_MAPS_PDF),
 )
 # Far-reach distances swing a lot between forecast updates (see README "Why the numbers move").
 REACH_NOTE = (
@@ -401,12 +421,15 @@ ARMY_COMPARE = (
     "EPA\u2019s emergency permit requires the Army\u2019s official plume maps to assume that all "
     "of the lead gets into the air (an emission factor of 1.00). EPA calls this conservative "
     "and notes the Army expects the real release to be less. The \u201cEPA permit\u201d option "
-    "here uses the same 100%, so you can compare with the Army\u2019s maps. The permit also "
+    "here uses the same 100%. The Army\u2019s Nov. 24 \u201cMitigated 0.26\u201d maps use an "
+    "emission factor of 0.26 for the blast with its barriers, foam and misters, and show 27 "
+    "sq mi above 100 \u00b5g/ft\u00b2 and 148 sq mi above 5; the \u201cU.S. Army "
+    "mitigated\u201d option here uses the same 26%. The permit also "
     "sets the Army\u2019s ground-lead map lines at 5 and 100 \u00b5g/ft\u00b2: inside 5, people "
     "are told to stay indoors; inside 100, also to wet-clean surfaces children touch. Those "
     "are the yellow and red levels here."
 )
-CASE_WORD = {"permit": "EPA permit", "high": "high", "mid": "middle", "low": "low"}
+CASE_WORD = {"permit": "EPA permit", "high": "high", "mid": "U.S. Army mitigated", "low": "low"}
 SAFETY_ANSWER = (
     "Don't use this map to decide if you're safe. Follow instructions from the Army, your "
     "county emergency management office, and state health officials."
@@ -661,7 +684,9 @@ def time_note(built_txt: str) -> str:
         "people outside the zone to shelter in place, closing all windows and doors. "
         "Questions about the evacuation area or help: FEMA Helpline 1-800-621-3362 (24/7) or "
         "DisasterAssistance.gov. A FEMA emergency alert sent to phones near the plant gave the "
-        "same 9 a.m. time (FEMA emergency alert, Nov. 24). The Army says it will post updated "
+        "same 9 a.m. time (FEMA emergency alert, Nov. 24). The Army\u2019s latest maps estimate "
+        "where lead may be in the air and on the ground for the mitigated blast, using an "
+        f"emission factor of 0.26 ({ARMY_MAPS_CITE}). The Army says it will post updated "
         f"maps at {ARMY_MAPS_URL} six hours before the detonation and every hour after that. "
         f"These maps open on 9 a.m. and model blasts {WINDOW_HOURLY}, in case the time shifts."
     )
@@ -815,7 +840,7 @@ def _town_text(f: Facts) -> str:
 def _air_text(f: Facts, model: str, n_models: str, *, html: bool) -> str:
     """Describe the highest one-hour air lead and how far it stays above DOE PAC-1."""
     c, order = f["cases"], _order(f)
-    names = [c[k]["label"].lower() if k != "permit" else "EPA permit" for k in order]
+    names = [CASE_WORD.get(k, c[k]["label"].lower()) for k in order]
     names_txt = ", ".join(names[:-1]) + ", and " + names[-1]
     *rest, last = order
 
@@ -893,10 +918,7 @@ def _text(f: Facts, ctx: dict[str, Any]) -> _Text:
             f"about {lb(f['azide_lb'])} pounds of lead azide in 68 drums, which holds about "
             f"{lb(f['lead_total_lb'])} pounds of lead"
         ),
-        pct=", ".join(
-            f"{c[k]['label'].lower() if k != 'permit' else 'EPA permit'} {pct[k]}"
-            for k in _order(f)
-        ),
+        pct=", ".join(f"{CASE_WORD.get(k, c[k]['label'].lower())} {pct[k]}" for k in _order(f)),
         weather=_permit_weather_text(f),
         forecast_line=(
             f"Forecast pulled {ctx['got_txt']} from {ctx['n_models']} weather models; the map "
@@ -984,10 +1006,12 @@ below it is
   <h3>Lead in the air{on}</h3>
   <p>{t.air_html}</p>
   <h3>How this compares with the Army\u2019s maps</h3>
-  <p>{ARMY_COMPARE} Source: <a href="{PERMIT_URL}" rel="noopener">{PERMIT_CITE}</a>.</p>
+  <p>{ARMY_COMPARE} Sources: <a href="{PERMIT_URL}" rel="noopener">{PERMIT_CITE}</a>; \
+<a href="{ARMY_MAPS_PDF}" rel="noopener">{ARMY_MAPS_CITE}</a>.</p>
   <p>{t.weather}</p>{"".join(_day_html(m, ctx, lead) for m in more)}
   <h3>How sure is this?</h3>
-  <p>Not very. Nobody outside the Army knows how much lead will get into the air, and the wind
+  <p>Not very. The Army estimates that 26% of the lead gets into the air with its mitigation
+    (an emission factor of 0.26), but no one has measured a blast like this, and the wind
     forecast will change before the blasts. The four cases show the range. Use the map
     above to see each case and blast time. Last updated {built}.</p>
   <h3>How the date was set</h3>
@@ -1066,10 +1090,13 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
             (
                 f"{t.amount[0].upper() + t.amount[1:]}, per an Army Sustainment Command "
                 "spokesperson quoted by ABC News on Nov. 19, 2026 (EPA's permit lists 68 drums). "
-                "The share that gets airborne is unknown, so the map shows four cases: low "
+                "The Army estimates an emission factor of 0.26 (26% of the lead airborne) for "
+                "its mitigated blast. No one has measured a blast like this, so the map shows "
+                "four cases: low "
                 f"{pct['low']} (based on "
-                f"EPA AP-42 blasting-cap tests), middle {pct['mid']} (an upper bound from a "
-                "Department of Energy handbook for a different kind of blast), high "
+                f"EPA AP-42 blasting-cap tests), U.S. Army mitigated "
+                f"{pct['mid']} (the emission factor of 0.26 in the Army's Nov. 24 "
+                "\u201cmitigated\u201d plume maps), high "
                 f"{pct['high']} (a rule from the same handbook for explosions), and EPA permit "
                 f"{pct.get('permit', '100%')} (the emission factor EPA requires for the Army's "
                 "official plume maps)."
@@ -1125,7 +1152,7 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             f"- Why Wednesday: {WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_TEXT}",
             f"- Earlier date, Tuesday: {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_TEXT}",
             f"- Earlier date, Monday: {WHY_MONDAY} Source: {ARMY_CITE}, {ARMY_URL}",
-            f"- Water misting: {MISTING} Source: Army public advisory, {ADVISORY_URL}",
+            f"- Mitigation: {MISTING} Source: {ADVISORY_NOV24_CITE}, {ADVISORY_NOV24_URL}",
             (
                 f"- Assumed: {t.amount} (Army Sustainment Command spokesperson via ABC News, "
                 f"19 Nov 2026; 68 drums per EPA's emergency permit). Share airborne: {t.pct}, "

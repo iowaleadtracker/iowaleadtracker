@@ -15,7 +15,7 @@ On Nov. 24 a FEMA emergency alert sent to phones near the plant set it for "Wed,
 Inputs: about 9,700 lb of lead azide in 68 drums (Army Sustainment Command spokesperson via
 ABC News, 19 Nov 2026; 68 drums per EPA's emergency permit, which redacts the weight), two
 blasts around noon inside earth-covered magazines (Iowa HHS fact sheet; EPA permit), cloud
-height halved, and 7%, 20%, 55% or 100% of the lead airborne in breathable sizes. The 100% case
+height halved, and 7%, 26%, 55% or 100% of the lead airborne in breathable sizes. The 100% case
 matches the emission factor of 1.00 EPA's permit requires for the Army's own plume maps (see [Release cases](#release-cases-research-notes)). This is a screening model,
 not official guidance.
 
@@ -45,7 +45,7 @@ From the repo root:
 python3 puff_dispersal.py --lat 40.825518 --lon -91.266502 \
     --time 2026-11-23T12:00-06:00 \
     --material lead-azide --explosive-mass 9700lb --specific-energy 1.64 \
-    --shots 2 --confinement earth-covered --release-case fine-20 \
+    --shots 2 --confinement earth-covered --release-case army-26 \
     --hours 8 --dt 60 --grid 360 --scale-min 0.15ug --decades 4 \
     --met-cache scenarios/iowa-aap-lead-azide/met_cache/map_met_all.json \
     -o scenarios/iowa-aap-lead-azide/outputs/map_noon.html
@@ -54,7 +54,7 @@ python3 puff_dispersal.py --lat 40.825518 --lon -91.266502 \
 Useful changes:
 
 - **Start time:** `--time 2026-11-23T11:30-06:00`.
-- **How much lead is airborne:** `--release-case ap42-floor` (7%), `fine-20` (20%),
+- **How much lead is airborne:** `--release-case ap42-floor` (7%), `army-26` (26%),
   `tnt-fine` (55%) or `permit-100` (100%, the EPA permit's emission factor). See [Release cases](#release-cases-research-notes).
 - **Explosive mass:** `--explosive-mass 5ton` is U.S. tons; `5t` is metric tons.
 - **Weather models:** the default runs ECMWF, GFS, ICON, GEM, UKMO and Météo-France,
@@ -91,7 +91,7 @@ everywhere any model puts lead.
 
 The home page has a blast-time dropdown (8:30, 9:00 and 9:30 a.m.; opens on 9 a.m., the
 Army's announced time; 10 a.m. to 1 p.m. were dropped on Nov. 24 for faster updates), a
-"Lead in the air" dropdown (Low, Middle, High, EPA permit), and a U.S./metric switch. It loads
+"Lead in the air" dropdown (Low, U.S. Army mitigated, High, EPA permit), and a U.S./metric switch. It loads
 one map at a time, so the first visit stays small. The settings for the model runs (place,
 date, mass, weather models, and since Nov. 24 the turbulence-based cloud spread,
 `--spread turbulence`; see `TURBULENCE.md` in the repository root) are at the top of
@@ -494,11 +494,32 @@ The site shows three cases. In each, the share of lead below is airborne in brea
 | Site label | `--release-case` | Lead airborne | Pounds of lead (9,700 lb lead azide) | Basis |
 |---|---|---|---|---|
 | Low | `ap42-floor` | 7% | about 480 | lowest share consistent with EPA AP-42 blasting-cap tests |
-| Middle | `fine-20` | 20% | about 1,380 | DOE-HDBK-3010 precedent: 20% of the metal released as respirable particles, a general upper bound for detonations of nuclear weapon assemblies |
+| U.S. Army mitigated | `army-26` | 26% | about 1,790 | emission factor of 0.26 in the Army's Nov. 24, 2026 "Mitigated 0.26" plume maps (bunker plus countermeasures). Replaced the 20% DOE-HDBK-3010 precedent (`fine-20`) on Nov. 24 |
 | High | `tnt-fine` | 55% | about 3,800 | DOE-HDBK-3010 rule: respirable mass equal to the TNT equivalent |
 | EPA permit | `permit-100` | 100% | about 6,900 | emission factor 1.00 that EPA's Nov. 13, 2026 emergency permit (Appendix B) requires for the Army's plume maps; EPA calls it conservative |
 
 Lead azide, Pb(N3)2, is 71.1% lead by weight, so 9,700 lb holds about 6,900 lb of lead.
+
+### The Army's "Mitigated 0.26" maps (the middle case)
+
+The Army's two-page public advisory issued Nov. 24, 2026 (PDF metadata: Army Sustainment
+Command, created Nov. 24, 15:05 UTC; stamped "a/o 240848NOV26"; https://d34w7g4gy10iej.cloudfront.net/pubs/pdf_78382.pdf,
+linked from the Army's Nov. 24 public safety advisory, https://www.army.mil/article/297039, as
+the latest version of its maps) has a deposition map and an air map, each titled "Mitigated 0.26".
+Both say: "This model reflects taking deliberate steps (i.e., in a bunker with additional
+countermeasures) to reduce, contain and control the spread of hazardous dust or particles
+after a detonation has occurred." Detonation 25 Nov 2026, 0900 CST. Ground lines 100 and
+5 µg/ft² (27 and 148 sq mi); air line 0.18 µg/m³, the permit's edge, shown at +1, +4 and +8 h.
+
+- **Emission factor 0.26:** the same measure as the 1.00 EPA's permit (Appendix B) requires
+  for the Army's unmitigated maps, where 1.00 means all of the lead airborne. So 0.26 is 26%
+  of the lead airborne. (The maps print the number as "Mitigated 0.26".)
+- **Mitigation the 0.26 covers** (Nov. 24 advisory): detonation inside earth-covered concrete
+  magazines; sand barriers about two stories high; a "water wall" and gel blocks; aqueous foam
+  barriers; soil above and around the magazines saturated by misters before and during the
+  blast. The model can't represent these, so the case applies the Army's 0.26 directly.
+- **Particle sizes** are not given; the case keeps the site's all-respirable fume sizes, so it
+  is not a reproduction of the Army's HPAC/SHARC/NARAC run.
 
 ### Amount and setup: sources
 
@@ -533,7 +554,7 @@ Lead azide, Pb(N3)2, is 71.1% lead by weight, so 9,700 lb holds about 6,900 lb o
 - Poor fit: the handbook's blast data are for inert material shattered by a nearby
   charge. Here the lead azide *is* the explosive; it breaks down into lead and nitrogen
   at high temperature, and much of the lead likely condenses into fine fume.
-- **20% (the middle case):** section 4.1, footnote 2 to "Shock Effects" (p. 4-4). The
+- **20% (the middle case until Nov. 24, now replaced by the Army's 0.26):** section 4.1, footnote 2 to "Shock Effects" (p. 4-4). The
   footnote says the handbook's method does not cover high-explosive detonations of nuclear
   weapons or their assemblies, where mass ratios can be "much less than 1", and that "an
   estimate of 20% of weapon metal released as respirable particles has precedent as a

@@ -268,17 +268,25 @@ REFERENCES = [
     ),
     # Text checked from the maintainer's screenshot (Nov. 23, about 11 p.m. CST); the
     # permalink is from the maintainer.
-    "U.S. Army, 2026: &ldquo;&hellip;which will occur this Wednesday morning, as previously "
+    "U.S. Army, 2026a: &ldquo;&hellip;which will occur this Wednesday morning, as previously "
     "scheduled, based on forecast wind conditions.&rdquo; Post by the Acting Secretary "
     "of the Army (@SecArmy) on X, 23 November 2026, accessed 23 November 2026, "
     + _a("https://x.com/SecArmy/status/2125060405605154940")
     + ".",
-    "U.S. Army, 2026: &ldquo;The controlled detonation at Iowa Army Ammunition Plant is now "
+    "U.S. Army, 2026b: &ldquo;The controlled detonation at Iowa Army Ammunition Plant is now "
     "scheduled on Wednesday, November 25, 2026&hellip;&rdquo; Post by the U.S. Army on "
     "Facebook, 22 November 2026, accessed 23 November 2026, "
     + _a("https://www.facebook.com/story.php?story_fbid=1611961230959211&id=100064360494281")
     + ".",
-    "U.S. Army, 2026: Public and media advisory regarding the detonation of lead azide at Iowa "
+    (
+        "U.S. Army, 2026c: Public advisory: Potential exposure to toxic lead dust. "
+        "&ldquo;Mitigated 0.26&rdquo; deposition and dispersion maps for a detonation at "
+        "0900 CST, 25 November 2026. U.S. Army Sustainment Command, issued 24 November "
+        "2026, linked from McFate (2026b), "
+        + _a("https://d34w7g4gy10iej.cloudfront.net/pubs/pdf_78382.pdf")
+        + "."
+    ),
+    "U.S. Army, 2026d: Public and media advisory regarding the detonation of lead azide at Iowa "
     "Army Ammunition Plant in Middletown, Iowa. U.S. Army Sustainment Command, 18 November 2026, "
     + _a("https://d34w7g4gy10iej.cloudfront.net/pubs/pdf_78366.pdf")
     + ".",
@@ -401,16 +409,17 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
         (
             "Lead in the air",
             (
-                f"Low {p['low']}, middle {p['mid']}, high {p['high']}, EPA permit "
+                f"Low {p['low']}, U.S. Army mitigated {p['mid']}, high {p['high']}, EPA permit "
                 f"{p['permit']} of the lead; the rest stays at the site"
             ),
             (
                 "Low: floor from AP-42 "
                 "blasting-cap tests (MACTEC 2008). High: TNT-equivalent rule (DOE 1994; Steindler "
                 "and "
-                "Seefeldt 1980). Middle: 20% of the metal as breathable particles, the "
-                "handbook&rsquo;s upper-bound precedent for detonations of nuclear weapon "
-                "assemblies (DOE 1994, p. 4-4). EPA permit: the emission factor of 1.00 EPA "
+                "Seefeldt 1980). U.S. Army mitigated: the emission factor of 0.26 in the "
+                "Army&rsquo;s Nov. "
+                "24 &ldquo;Mitigated 0.26&rdquo; plume maps (U.S. Army 2026c). "
+                "EPA permit: the emission factor of 1.00 EPA "
                 "requires "
                 "for the Army&rsquo;s plume maps (EPA 2026)"
             ),
@@ -511,11 +520,12 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
                 "itself, gases, and the Army&rsquo;s soil soaking and water misters"
             ),
             (
-                "Model limits. The Army hasn&rsquo;t published its mister setup. Runs of the "
-                "model&rsquo;s "
+                "Model limits. The Army&rsquo;s 0.26 estimate covers its sand barriers, water "
+                "wall, gel blocks, foam and misters (U.S. Army 2026c); here, runs of "
+                "the model&rsquo;s "
                 "spray option with guessed setups (528&ndash;26,000 gal/min) caught 0.1&ndash;19% "
                 "of the "
-                "lead (U.S. Army 2026; Slinn 1984; Seinfeld and Pandis 2016)"
+                "lead (U.S. Army 2026d; Slinn 1984; Seinfeld and Pandis 2016)"
             ),
         ),
         (
@@ -553,9 +563,12 @@ def method_intro(pct: dict[str, str]) -> str:
         "lead gets airborne in a blast like this, so the map runs four cases instead of picking "
         f"one most likely number: {pct['permit']}, which EPA\u2019s permit requires the Army to "
         "assume for its official plume maps and which the map shows first as the worst case, "
-        f"and {pct['high']} (high), {pct['mid']} (middle) and {pct['low']} (low), based on "
-        "Department of Energy and Army\u2013EPA research. The Army hasn\u2019t said what share it "
-        "expects; that is the most important number to check. The cloud spreads at a rate set "
+        f"and {pct['high']} (high), {pct['mid']} (U.S. Army mitigated) and {pct['low']} (low). "
+        "The high and low cases come from Department of Energy and Army\u2013EPA research; the "
+        "U.S. Army mitigated case is the "
+        "emission factor of 0.26 in the Army\u2019s Nov. 24 \u201cmitigated\u201d plume maps. "
+        "That share is the most important number to check. The cloud "
+        "spreads at a rate set "
         "by the forecast\u2019s turbulence, with the formulas of the CALPUFF model (Scire et al. "
         "2000); since Nov. 24 this replaces older curves that kept the cloud too narrow over "
         "hours (see the change log below). Every setting and its source is in the "
@@ -567,6 +580,25 @@ def method_intro(pct: dict[str, str]) -> str:
 #: entry for every change to the model, its settings or its sources.
 CHANGES_HEAD = "Change log"
 CHANGES = [
+    (
+        "Nov. 24",
+        (
+            "FEMA&rsquo;s evacuation zone and helpline are in the page header. Text that said "
+            "the Army hadn&rsquo;t disclosed how much lead gets airborne now gives the "
+            "Army&rsquo;s estimate, an emission factor of 0.26 with its barriers, water wall, "
+            "gel blocks, foam and misters (McFate 2026b; U.S. Army 2026c)."
+        ),
+    ),
+    (
+        "Nov. 24",
+        (
+            "The middle case is now 26% of the lead airborne, labeled &ldquo;U.S. Army "
+            "mitigated&rdquo;: the emission factor of 0.26 in "
+            "the Army&rsquo;s Nov. 24 &ldquo;Mitigated 0.26&rdquo; plume maps (U.S. Army "
+            "2026, Nov. 24 maps), instead of the 20% upper-bound precedent from a Department "
+            "of Energy handbook."
+        ),
+    ),
     (
         "Nov. 24",
         (

@@ -14,18 +14,26 @@ import puff_dispersal as puff
 
 
 def response(
-    day: str, n: int, missing_after: int | None = None, n_hours: int = 48
+    day: str,
+    n: int,
+    missing_after: int | None = None,
+    n_hours: int = 48,
+    missing_before: int | None = None,
 ) -> list[dict[str, Any]]:
     """Return a fake Open-Meteo answer for ``n`` points: ``n_hours`` hours from ``day``.
 
-    Values after hour ``missing_after`` are None, as when a model's run doesn't reach them.
+    Values after hour ``missing_after`` are None, as when a model's run doesn't reach them;
+    values before hour ``missing_before`` are None, as for a run that starts late.
     """
     t0 = dt.datetime.fromisoformat(day)
     times = [(t0 + dt.timedelta(hours=k)).strftime("%Y-%m-%dT%H:%M") for k in range(n_hours)]
     out = []
     for k in range(n):
         val = [
-            None if missing_after is not None and i > missing_after else float(k % 7)
+            None
+            if (missing_after is not None and i > missing_after)
+            or (missing_before is not None and i < missing_before)
+            else float(k % 7)
             for i in range(n_hours)
         ]
         out.append({"hourly": {"time": times, "cloud_cover": val, "precipitation": val}})
@@ -113,9 +121,28 @@ def test_urls_split_the_grid_into_short_requests() -> None:
 def test_covers_needs_every_hour_of_the_day() -> None:
     day = "2026-11-25"
     assert sky_grid.covers(response(day, 3), day)
-    # the window starts at 11:00 CST (17 UTC); a run ending at 18 UTC misses most of it
+    # the window starts at 8:00 CST (14 UTC); a run ending at 18 UTC misses most of it
     assert not sky_grid.covers(response(day, 3, missing_after=18), day)
     assert not sky_grid.covers(response(day, 3), "2026-11-26")  # data ends before its window
+    # values only from 11:00 CST (17 UTC), the old window's start, miss the morning blasts
+    assert not sky_grid.covers(response(day, 3, missing_before=17), day)
+    assert sky_grid.covers(response(day, 3, missing_before=14), day)
+
+
+def test_window_covers_every_blast_time() -> None:
+    # From the hour of the earliest blast to the latest plus the 8-hour run, for the site
+    # and the staged days alike.
+    import make_map_picker as site  # noqa: PLC0415
+    import staged  # noqa: PLC0415
+
+    hours = int(site.MODEL_ARGS[site.MODEL_ARGS.index("--hours") + 1])
+    for times in (site.TIMES, staged.TIMES):
+        first = min(dt.time.fromisoformat(t) for t in times)
+        last = max(dt.time.fromisoformat(t) for t in times)
+        start = dt.datetime.combine(dt.date(2026, 11, 25), sky_grid.FIRST)
+        end = start + sky_grid.LAST
+        assert first.replace(minute=0) >= sky_grid.FIRST
+        assert dt.datetime.combine(start.date(), last) + dt.timedelta(hours=hours) <= end
 
 
 def per_model() -> int:
