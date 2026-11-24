@@ -186,7 +186,7 @@ def test_court_pause_note_in_about_dialog() -> None:
     page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
     start = page.index('<dialog id="note"')  # the "About this map" dialog
     about = page[start : page.index("</dialog>", start)]
-    assert "<b>Court pause.</b> $court_pause" in about
+    assert "<b>Court case.</b> $court_pause" in about
     assert "$court_sources" in about
     assert f'href="{fs.COURT_URL}"' in fs.COURT_SOURCES_HTML
     assert f'href="{fs.FILING_URL}"' in fs.COURT_SOURCES_HTML
@@ -254,20 +254,20 @@ def test_faq_links_are_live() -> None:
 def test_court_hold_leads_the_summary_and_faq(rendered: tuple[str, list, str]) -> None:
     """The court hold comes before any statement that the blast is Monday."""
     summary, faq, llms = rendered
-    assert summary.index("Court hold") < summary.index("When will the detonation happen?")
+    assert summary.index("Court case") < summary.index("When will the detonation happen?")
     assert fs.COURT_URL in summary
     when = dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
     # Newest first: the president's Nov. 23 order, then the Army's Wednesday date.
     assert when.startswith(f"{fs.TRUMP_HOLD} (Source: {fs.TRUMP_SOURCE_TEXT}.) ")
     assert (
         "The Army had said Wednesday, Nov. 25, 2026; it hasn\u2019t given a time. It had "
-        "planned Monday, Nov. 23. On Nov. 22, the government told the court, which has put "
+        "planned Monday, Nov. 23. On Nov. 22, the government told the court, which had put "
         "the permit on hold, that the Army had postponed it to Tuesday, Nov. 24."
     ) in when
     assert fs.WHY_WEDNESDAY in when
     assert fs.ARMY_WED_URL in when
     assert fs.COURT_PAUSE in when
-    assert "on hold by court order" in llms
+    assert "the court lifted its hold on the permit on Nov. 23" in llms
     assert f"- Presidential hold: {fs.TRUMP_HOLD} Source: {fs.TRUMP_SOURCE_TEXT}" in llms
     assert fs.COURT_PAUSE in llms
 
@@ -656,13 +656,16 @@ def test_wednesday_leads(rendered_wednesday_lead: tuple[str, list, str]) -> None
     assert "These maps model Monday, Nov. 23, Tuesday, Nov. 24, and Wednesday, Nov. 25." in summary
     assert fs.WHY_WEDNESDAY in summary
     assert fs.WEDNESDAY_SOURCE_HTML in summary
-    assert "Late on Nov. 22, 2026, the Army said the blasts are now scheduled for Wednesday" in (
-        summary
+    assert "Late on Nov. 22, the Army said the blasts are now scheduled for Wednesday" in summary
+    # newest first: the Nov. 23 ruling, then Wednesday, Tuesday and Monday
+    assert fs.COURT_HOLD.startswith(
+        "On Monday, Nov. 23, 2026, the 8th U.S. Circuit Court of Appeals cleared the way"
     )
-    # newest first: Wednesday, then Tuesday, then Monday, in the court and "When" text
-    assert fs.COURT_HOLD.startswith("Late on Nov. 22, 2026, the Army said")
+    assert fs.COURT_HOLD.index("cleared the way") < fs.COURT_HOLD.index("Late on Nov. 22")
     assert fs.COURT_HOLD.index("Tuesday, Nov. 24") < fs.COURT_HOLD.index("Late on Nov. 19")
-    assert fs.COURT_SOURCES_HTML.startswith(fs.WEDNESDAY_SOURCE_HTML)
+    assert fs.COURT_SOURCES_HTML.startswith(f'<a href="{fs.RULING_URL}"')
+    assert "Sand" not in fs.COURT_HOLD
+    assert "cleared the way for the detonation (see Court case)" in fs.TRUMP_HOLD
     when = summary[summary.index("When will the detonation happen?") :]
     assert when.index(fs.WHY_WEDNESDAY) < when.index(fs.WHY_TUESDAY) < when.index(fs.WHY_MONDAY)
     why = [
@@ -736,3 +739,40 @@ def test_one_model_order_per_day(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     monkeypatch.setattr(site.subprocess, "run", fake_run)
     site.build()
     assert orders == {site.WEATHER}  # one order for the whole day: noon is over 18 h out
+
+
+def test_mentions_in_about_box() -> None:
+    """News mentions sit in the About box after Contact and link the original outlet."""
+    page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    start = page.index('<dialog id="note"')
+    about = page[start : page.index("</dialog>", start)]
+    assert "<p><b>$mentions_head</b> $mentions_html</p>" in about
+    assert about.index("$contact_html") < about.index("$mentions_html")
+    assert works_cited.MENTIONS_HEAD == "Mentions of the Iowa Lead Tracker."
+    for outlet, date, url in works_cited.MENTIONS:
+        assert f'<a href="{url}" rel="noopener">{outlet}</a>, {date}' in works_cited.MENTIONS_HTML
+        assert "yahoo.com" not in url  # the original publisher, not a syndicated copy
+
+
+def test_methodology_and_references_dialog() -> None:
+    """The dialog is "Methodology and References" and opens with a short note on the method."""
+    page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    assert '<h2 id="cite-h" tabindex="-1" autofocus>Methodology and References</h2>' in page
+    assert 'aria-haspopup="dialog">Methodology and References</button>' in page
+    pct = {"low": "7%", "mid": "20%", "high": "55%", "permit": "100%"}
+    ctx = {
+        "pct": pct,
+        "n_models": "two",
+        "got_txt": "November 23, 2026, at 2:34 p.m. CST",
+        "shown_model": "GFS",
+        "models": [],
+    }
+    body = works_cited.render(ctx, "https://example.org/", "now")
+    assert body.lstrip().startswith(f"<p><b>{works_cited.METHOD_HEAD}</b> ")
+    note = works_cited.method_intro(pct)
+    assert note in body
+    assert body.index(note) < body.index("<h3>References</h3>") < body.index("Key assumptions")
+    assert '<a href="https://narac.llnl.gov/hotspot" rel="noopener">HotSpot</a>' in note
+    for part in ("Gaussian puff", "71.1%", "6,900 lb", "Church (1969)", "100%, which EPA"):
+        assert part in note
+    assert "55% (high), 20% (middle) and 7% (low)" in note

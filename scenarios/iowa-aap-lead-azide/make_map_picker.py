@@ -92,6 +92,9 @@ MODEL_ARGS = [
     *("--specific-energy", "1.64"),
     *("--shots", "2"),
     *("--confinement", "earth-covered"),
+    # Mostly harvested cropland around the plant in late November (Zhang et al. 2001,
+    # "crops, mixed farming", late autumn).
+    *("--land-use", "crops"),
     *("--hours", "8"),
     *("--dt", "60"),
     *("--grid", "360"),
@@ -813,6 +816,8 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "about_who": forecast_summary.ABOUT_WHO,
         "source_url": works_cited.SOURCE_URL,
         "contact_html": works_cited.CONTACT_HTML,
+        "mentions_head": works_cited.MENTIONS_HEAD,
+        "mentions_html": works_cited.MENTIONS_HTML,
         "misting": forecast_summary.MISTING,
         "advisory_url": forecast_summary.ADVISORY_URL,
         "court_pause": forecast_summary.court_pause([day_label(d) for d in told]),

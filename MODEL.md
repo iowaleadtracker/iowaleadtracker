@@ -286,8 +286,9 @@ historical runs fall back to a power-law profile above 100 m.
   size-resolved scheme of Zhang et al. (2001): settling plus transfer through the air
   and onto the surface by Brownian diffusion, impaction and interception. It depends
   on particle size and density, the 10 m wind and the surface type (`--land-use`,
-  default `grass`). The aerodynamic part assumes neutral stability, and the land-use
-  constants are as recalled from the paper and should be checked against it.
+  default `grass`; the Iowa maps use `crops`). The aerodynamic part assumes neutral
+  stability. The land-use constants are the paper's Table 3 values for late autumn after
+  frost (its seasonal category 3), checked against the paper.
   `--vd-extra` switches back to settling plus a fixed speed. Wet
   scavenging is Λ = 10⁻⁴ s⁻¹ per mm/h of rain. Both deplete the puff's mass, so mass
   is conserved: airborne + deposited = released.
@@ -328,6 +329,19 @@ This is a screening tool, not a regulatory or emergency-response model:
   assumptions, and the results are sensitive to all three;
 - there are no terrain effects, buildings, plume rise, or resuspension;
 - Pasquill–Gifford σ values are empirical fits from flat terrain;
+- puffs grow along the Briggs curves, which describe a continuous plume averaged over
+  about an hour. A single instantaneous puff spreads more slowly at first, so near the
+  source the real cloud may be narrower, with higher peaks over a smaller area, than the
+  model shows. The difference shrinks downwind and over an hour;
+- settling is counted twice: the puff centre sinks at the settling velocity, and the
+  deposition velocity at the ground also includes it. This can remove somewhat too much
+  of the largest particles (10 µm, about 3 cm/s) near the source; for breathable sizes
+  the effect is negligible;
+- later studies (Petroff and Zhang 2010; Emerson et al. 2020) found that the Zhang et al.
+  (2001) dry-deposition scheme overestimates deposition of fine particles and
+  underestimates it for coarse ones; the deposition maps carry that uncertainty. The air
+  maps are barely affected, since fine particles lose only a few percent of their mass to
+  dry deposition over an 8-hour run;
 - near-source peaks are smoothed by the grid cell size (printed when the script runs
   and shown in the page footer); use `--extent-km` for near-field numbers;
 - the explosion cloud uses an empirical rise formula. Observed clouds (e.g. Beirut 2020)

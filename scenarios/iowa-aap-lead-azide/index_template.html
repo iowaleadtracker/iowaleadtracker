@@ -118,7 +118,7 @@
     <span class="long">Follow official instructions. Weather forecast from $got_txt.</span>
     <button id="about" type="button">About this map</button> &middot;
     <button id="tosummary" type="button">What the forecast shows</button> &middot;
-    <button id="cites" type="button" aria-haspopup="dialog">References</button></p>
+    <button id="cites" type="button" aria-haspopup="dialog">Methodology and References</button></p>
   <p class="daynote" id="daynote" role="status" hidden></p>
   <p class="daynote" id="pendingnote"$pending_hidden>$pending_note</p>
 </header>
@@ -145,7 +145,7 @@
     numbers would give a very different map.</p>
   <p><b>Water misting.</b> $misting Source:
     <a href="$advisory_url" rel="noopener">Army public advisory, Nov. 18, 2026</a>.</p>
-  <p><b>Court pause.</b> $court_pause Sources:
+  <p><b>Court case.</b> $court_pause Sources:
     $court_sources.</p>
   <p><b>When.</b> $trump_hold Source: $trump_source. $why_wednesday Source:
     $wednesday_source.</p>
@@ -159,6 +159,7 @@
     A place that looks clear may not be. A place that looks affected may get no lead you could measure. For instructions, orders to
     stay inside or leave, and health questions, follow $who.</p>
   <p><b>Contact.</b> $contact_html</p>
+  <p><b>$mentions_head</b> $mentions_html</p>
   <p><b>Privacy.</b> The site counts visits with Cloudflare Web Analytics, which uses no cookies.
     Map tiles load from Esri&rsquo;s servers, which see your IP address and the part of the map you
     view. Only your browser keeps your choice of units and map style.</p>
@@ -166,7 +167,7 @@
   <form method="dialog"><button type="submit">OK</button></form>
 </dialog>
 <dialog id="cite" class="wide" aria-labelledby="cite-h">
-  <h2 id="cite-h" tabindex="-1" autofocus>References</h2>
+  <h2 id="cite-h" tabindex="-1" autofocus>Methodology and References</h2>
   $cite_html
   <form method="dialog"><button type="submit">Close</button></form>
 </dialog>

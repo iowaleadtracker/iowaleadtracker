@@ -49,10 +49,42 @@ CONTACT_TEXT = (
     f"Questions or corrections: {CONTACT_EMAIL}. Updates: Instagram @{INSTAGRAM_HANDLE}, "
     f"{INSTAGRAM_URL}. {CONTACT_LIMIT}"
 )
+#: News stories that mention the Iowa Lead Tracker, newest first: (outlet, date, URL).
+#: Link the original publisher, not a syndicated copy (the Free Press story also ran on
+#: Yahoo News). Add one only after reading what it says about the map.
+MENTIONS_HEAD = "Mentions of the Iowa Lead Tracker."
+MENTIONS = [
+    # J. Williams, "Army's munition explosion plans delayed. How it could change the risks,"
+    # updated Nov. 23, 2026, 3:40 p.m. ET; read in full Nov. 23. It says: "Initial maps
+    # showed the lead plume extending northward, however, the Iowa Lead Tracker website now
+    # shows the plume potentially moving southwest."
+    (
+        "Detroit Free Press",
+        "Nov. 23, 2026",
+        (
+            "https://www.freep.com/story/news/local/michigan/2026/11/23/"
+            "army-lead-azide-munitions-michigan-explosion/92924794007/"
+        ),
+    ),
+]
+MENTIONS_HTML = (
+    "; ".join(
+        f'<a href="{url}" rel="noopener">{outlet}</a>, {date}' for outlet, date, url in MENTIONS
+    )
+    + "."
+)
 ACCESSED = "accessed 20 November 2026"
 
 # Alphabetical by first author, then year. HTML.
 REFERENCES = [
+    "Associated Press, 2026: Federal appeals court clears way for U.S. Army to detonate "
+    "degraded bomb-making material in Iowa. Published by KCRG-TV9, 23 November 2026, accessed "
+    "23 November 2026, "
+    + _a(
+        "https://www.kcrg.com/2026/11/23/"
+        "federal-appeals-court-clears-way-us-army-detonate-degraded-bomb-making-material-iowa/"
+    )
+    + ".",
     (
         "Aurell, J., B. K. Gullett, D. Tabor, R. K. Williams, W. Mitchell, and M. R. Kemme, 2015: "
         "Aerostat-based sampling of emissions from open burning and open detonation of military "
@@ -376,10 +408,14 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
         (
             "Deposition",
             (
-                "Size-resolved dry deposition over grass; rain washout 10<sup>&minus;4</sup> "
+                "Size-resolved dry deposition over harvested cropland (late autumn); rain "
+                "washout 10<sup>&minus;4</sup> "
                 "s<sup>&minus;1</sup> per mm/h"
             ),
-            "Zhang et al. (2001); Slinn (1984); Seinfeld and Pandis (2016)",
+            (
+                "Zhang et al. (2001), crops and mixed farming, late autumn after frost; "
+                "Slinn (1984); Seinfeld and Pandis (2016)"
+            ),
         ),
         (
             "Run",
@@ -415,8 +451,35 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
     ]
 
 
+#: The short methodology note that opens the Methodology and References dialog. Every fact
+#: in it is in the key-assumptions table, with its source.
+#: The short note that opens the Methodology and References dialog. Every fact in it is in
+#: the key-assumptions table below it, with its source.
+METHOD_HEAD = "How the map works."
+
+
+def method_intro(pct: dict[str, str]) -> str:
+    """Return the methodology note, with the release cases' shares from the build."""
+    return (
+        "The map uses a Gaussian puff model, the same kind of model behind emergency-response "
+        f"software such as {_a('https://narac.llnl.gov/hotspot', 'HotSpot')} (Homann and "
+        "Aluzzi 2013). A puff fits a one-time explosion "
+        "better than a model of a steady plume from a smokestack. The model tracks only the "
+        "lead: lead azide "
+        "is 71.1% lead by weight, so about 9,700 lb of it holds about 6,900 lb of lead. How "
+        "high the cloud starts comes from Church (1969). No one has measured how much of the "
+        "lead gets airborne in a blast like this, so the map runs four cases instead of picking "
+        f"one most likely number: {pct['permit']}, which EPA\u2019s permit requires the Army to "
+        "assume for its official plume maps and which the map shows first as the worst case, "
+        f"and {pct['high']} (high), {pct['mid']} (middle) and {pct['low']} (low), based on "
+        "Department of Energy and Army\u2013EPA research. The Army hasn\u2019t said what share it "
+        "expects; that is the most important number to check. Every setting and its source is "
+        "in the key-assumptions table below."
+    )
+
+
 def render(ctx: dict[str, Any], site_url: str, built_txt: str) -> str:
-    """Return the HTML body of the References dialog.
+    """Return the HTML body of the Methodology and References dialog.
 
     Parameters
     ----------
@@ -433,6 +496,8 @@ def render(ctx: dict[str, Any], site_url: str, built_txt: str) -> str:
     )
     today = dt.datetime.now(SITE_TZ).date()
     return f"""
+  <p><b>{METHOD_HEAD}</b> {method_intro(ctx["pct"])}</p>
+  <h3>References</h3>
   <p class="meta">Sources for the model, data, and assumptions.</p>
   <ul class="refs">{refs}</ul>
   <p class="meta">{data_credits(ctx.get("models", []))}</p>
