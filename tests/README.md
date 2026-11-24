@@ -33,7 +33,7 @@ pytest                 # everything, including full model runs (about 10 s)
   published number names the source in its docstring and explains its tolerance. A value
   that can't be traced to a source is an internal-consistency check and is described that
   way. Never invent a citation.
-- **The golden file changes only on purpose.** `data/golden_permit_1200.json` pins one
+- **The golden file changes only on purpose.** `data/golden_permit_0900.json` pins one
   published map. If a change is meant to alter the maps, regenerate it with
   `python -m tests.test_regression` and say why in the commit. If it isn't, a failure
   here is a bug.
