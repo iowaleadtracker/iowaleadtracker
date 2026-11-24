@@ -6,6 +6,7 @@ import datetime as dt
 import json
 from typing import TYPE_CHECKING, Any
 
+import pytest
 import sky_grid
 
 import puff_dispersal as puff
@@ -13,82 +14,146 @@ import puff_dispersal as puff
 if TYPE_CHECKING:
     from pathlib import Path
 
-    import pytest
 
-
-def response(day: str, missing_after: int | None = None) -> list[dict[str, Any]]:
-    """Return a fake Open-Meteo answer for every grid point: two days of hours from ``day``.
+def response(
+    day: str, n: int, missing_after: int | None = None, n_hours: int = 48
+) -> list[dict[str, Any]]:
+    """Return a fake Open-Meteo answer for ``n`` points: ``n_hours`` hours from ``day``.
 
     Values after hour ``missing_after`` are None, as when a model's run doesn't reach them.
     """
-    lats, lons = sky_grid.grid()
     t0 = dt.datetime.fromisoformat(day)
-    times = [(t0 + dt.timedelta(hours=k)).strftime("%Y-%m-%dT%H:%M") for k in range(48)]
+    times = [(t0 + dt.timedelta(hours=k)).strftime("%Y-%m-%dT%H:%M") for k in range(n_hours)]
     out = []
-    for k in range(len(lats) * len(lons)):
+    for k in range(n):
         val = [
             None if missing_after is not None and i > missing_after else float(k % 7)
-            for i in range(48)
+            for i in range(n_hours)
         ]
         out.append({"hourly": {"time": times, "cloud_cover": val, "precipitation": val}})
     return out
 
 
-def test_grid_is_around_the_plant() -> None:
+def query(u: str) -> dict[str, str]:
+    return dict(p.split("=", 1) for p in u.split("?", 1)[1].split("&"))
+
+
+@pytest.fixture
+def fake_api(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> list[str]:
+    """Answer requests offline; return the list of URLs asked for.
+
+    HRRR's run ends at 18 UTC on its first day; GFS has every hour.
+    """
+    asked: list[str] = []
+
+    def answer(u: str) -> list[dict[str, Any]]:
+        asked.append(u)
+        q = query(u)
+        n = len(q["latitude"].split(","))
+        hrrr = q["models"] == "ncep_hrrr_conus"
+        days = (dt.date.fromisoformat(q["end_date"]) - dt.date.fromisoformat(q["start_date"])).days
+        return response(q["start_date"], n, 18 if hrrr else None, 24 * (days + 1))
+
+    monkeypatch.setattr(sky_grid, "http_json", answer)
+    monkeypatch.setattr(sky_grid, "CACHE", tmp_path / "sky_grid.json")
+    return asked
+
+
+NOW = dt.datetime(2026, 11, 24, 6, tzinfo=dt.timezone.utc)  # Wednesday within 48 h
+DAYS = ["2026-11-25", "2026-11-26"]
+
+
+def test_grid_covers_the_area_and_the_fade() -> None:
     lats, lons = sky_grid.grid()
-    assert (len(lats), len(lons)) == (2 * sky_grid.N_LAT + 1, 2 * sky_grid.N_LON + 1)
-    assert lats[sky_grid.N_LAT] == sky_grid.LAT
-    assert lons[sky_grid.N_LON] == sky_grid.LON
+    s, n, w, e = sky_grid.AREA
+    pad = sky_grid.FADE * sky_grid.SPACING
+    assert lats[0] <= s - pad + 1e-9
+    assert lats[-1] >= n + pad - 1e-9
+    assert lons[0] <= w - pad + 1e-9
+    assert lons[-1] >= e + pad - 1e-9
+    # Iowa, northern Missouri and western Illinois, and the plant
+    assert s <= 38.6
+    assert n >= 43.5
+    assert w <= -96.6
+    assert e >= -89.0
     assert lats == sorted(lats)
     assert lons == sorted(lons)
+    assert len(lats) * len(lons) < 800  # Open-Meteo counts every point
 
 
-def test_url_lists_points_row_by_row() -> None:
-    u = sky_grid.url("ncep_hrrr_conus", ["2026-11-25", "2026-11-26"])
-    assert u.startswith("https://")
-    assert "models=ncep_hrrr_conus" in u
-    assert "start_date=2026-11-25" in u
-    assert "end_date=2026-11-27" in u  # the last day's runs end after midnight UTC
+def test_urls_split_the_grid_into_short_requests() -> None:
     lats, lons = sky_grid.grid()
-    q = dict(p.split("=", 1) for p in u.split("?", 1)[1].split("&"))
-    la, lo = (
-        q["latitude"].split(","),
-        q["longitude"].split(","),
-    )
-    assert len(la) == len(lo) == len(lats) * len(lons)
-    assert (float(la[1]), float(lo[1])) == (lats[0], lons[1])  # west to east first
+    us = sky_grid.urls("ncep_hrrr_conus", DAYS)
+    assert all(u.startswith("https://") and len(u) < 4000 for u in us)
+    q = query(us[0])
+    assert q["models"] == "ncep_hrrr_conus"
+    assert q["start_date"] == "2026-11-25"
+    assert q["end_date"] == "2026-11-27"  # the last day's runs end after midnight UTC
+    pts = [
+        (float(a), float(b))
+        for u in us
+        for a, b in zip(
+            query(u)["latitude"].split(","), query(u)["longitude"].split(","), strict=True
+        )
+    ]
+    assert pts == [(la, lo) for la in lats for lo in lons]  # row by row from the south-west
 
 
 def test_covers_needs_every_hour_of_the_day() -> None:
     day = "2026-11-25"
-    assert sky_grid.covers(response(day), day)
+    assert sky_grid.covers(response(day, 3), day)
     # the window starts at 11:00 CST (17 UTC); a run ending at 18 UTC misses most of it
-    assert not sky_grid.covers(response(day, missing_after=18), day)
-    assert not sky_grid.covers(response(day), "2026-11-26")  # data ends before its window
+    assert not sky_grid.covers(response(day, 3, missing_after=18), day)
+    assert not sky_grid.covers(response(day, 3), "2026-11-26")  # data ends before its window
 
 
-def test_export_writes_series_in_model_order(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    days = ["2026-11-25"]
-    hrrr, gfs = sky_grid.url("ncep_hrrr_conus", days), sky_grid.url("gfs_seamless", days)
-    saved = {
-        "__fetched__": {gfs: "2026-11-24T01:00:00+00:00", hrrr: "2026-11-24T02:00:00+00:00"},
-        gfs: response("2026-11-25"),
-        hrrr: response("2026-11-25"),
-    }
-    cache = tmp_path / "sky_grid.json"
-    cache.write_text(json.dumps(saved), encoding="utf-8")
-    monkeypatch.setattr(sky_grid, "CACHE", cache)
+def test_far_out_asks_only_gfs(fake_api: list[str], tmp_path: Path) -> None:
+    far = NOW - dt.timedelta(days=5)  # both days more than 48 hours away
+    assert sky_grid.fetch(DAYS, far) == dict.fromkeys(DAYS, "gfs_seamless")
+    assert {query(u)["models"] for u in fake_api} == {"gfs_seamless"}
     out = sky_grid.export(tmp_path / "out.json")
     assert out is not None
     data = json.loads(out.read_text(encoding="utf-8"))
-    assert [s["model"] for s in data["series"]] == ["ncep_hrrr_conus", "gfs_seamless"]
+    assert [s["model"] for s in data["series"]] == ["gfs_seamless"]
+    assert data["fade"] == sky_grid.FADE
     s = data["series"][0]
-    assert s["fetched"] == "2026-11-24T02:00:00+00:00"
     assert s["times"][0] == "2026-11-25T00:00Z"
-    assert len(s["cloud"]) == 48
     assert len(s["cloud"][0]) == len(data["lats"]) * len(data["lons"])
+
+
+def test_near_asks_hrrr_then_gfs_for_what_it_misses(fake_api: list[str]) -> None:
+    chosen = sky_grid.fetch(DAYS, NOW)  # Wednesday is within 48 hours, Thursday isn't
+    hrrr = [query(u) for u in fake_api if query(u)["models"] == "ncep_hrrr_conus"]
+    assert hrrr
+    assert {q["start_date"] for q in hrrr} == {"2026-11-25"}  # only the near day
+    assert chosen == dict.fromkeys(DAYS, "gfs_seamless")  # the fake HRRR ends too soon
+    saved = sky_grid.load()
+    assert saved is not None
+    assert list(saved["__sets__"]) == ["gfs_seamless"]  # an unused answer isn't saved
+
+
+def test_a_recent_grid_is_kept(fake_api: list[str]) -> None:
+    far = NOW - dt.timedelta(days=5)
+    sky_grid.fetch(DAYS, far)
+    saved = sky_grid.load()
+    assert saved is not None
+    pulled = dt.datetime.fromisoformat(min(saved["__fetched__"].values()))
+    n = len(fake_api)
+    sky_grid.fetch(DAYS, pulled + dt.timedelta(hours=5))
+    assert len(fake_api) == n  # kept: no requests
+    sky_grid.fetch(DAYS, pulled + dt.timedelta(hours=5), force=True)
+    assert len(fake_api) == 2 * n
+    sky_grid.fetch(DAYS, pulled + dt.timedelta(hours=10.5))
+    assert len(fake_api) == 2 * n  # 5.5 hours after the forced download: kept
+    sky_grid.fetch(DAYS, pulled + dt.timedelta(hours=12))
+    assert len(fake_api) == 3 * n  # too old
+
+
+def test_a_day_within_hrrr_reach_is_downloaded_again(fake_api: list[str]) -> None:
+    sky_grid.fetch(DAYS, NOW - dt.timedelta(days=5))
+    n = len(fake_api)
+    sky_grid.fetch(DAYS, NOW)  # Wednesday is now within HRRR's reach
+    assert len(fake_api) > n
 
 
 def test_export_without_saved_grid(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
