@@ -5,6 +5,11 @@ afternoons and evenings, using archived weather. It was run on Nov. 24, 2026, to
 how far the published maps could be off and in which direction. **Nothing here changes
 the site or the model.** The model variants below were tried in a scratch copy only.
 
+**The production method and the final comparison tables are in
+[`TURBULENCE.md`](../../TURBULENCE.md)** (`--spread turbulence`, with a 10-minute
+crosswind basis). This folder keeps the back-test's setup, HYSPLIT inputs and the earlier
+prototype variants it was developed from; numbers here are from the scratch prototype.
+
 This is an unofficial comparison. HYSPLIT is a widely used reference model, not the
 truth, and its results here are not official NOAA or government material.
 
@@ -330,7 +335,7 @@ Pandis); Prairie Grass classes were not recorded.
 were read from the vector data of Fig. 212 of NOAA Tech. Memo OAR ARL-268 and matched to
 each 10-minute bag's u\*, z/L (sonics R3, R4), 10 m wind and σA class from Tables 19–23;
 mixing heights are the mean radiosonde values of Table 18; w\* from u\*, L and the mixing
-height. The extracted table is `data/sagebrush1_sigma_y_10min.csv`. Briggs uses the
+height. The extracted table is `tests/data/tracer/sagebrush1_sigma_y_10min.csv`. Briggs uses the
 report's σA class.
 
 | Group | n | Briggs | Turbulence (1 h) | Turbulence (10 min) | AERMOD |
@@ -372,7 +377,7 @@ The site's settings and its saved forecast (pulled Nov. 23, 20:34 UTC), noon bla
 | Peak hourly air | 1,031 µg/m³ | 765 µg/m³ | 206 µg/m³ | 153 µg/m³ |
 
 The far zones shrink 3–6×, but the wider cloud near the plant puts Middletown in the
-100 µg/ft² zone in both cases. See `wednesday_before_after.png`. The site was not changed.
+100 µg/ft² zone in both cases (forecast pulled Nov. 23; see TURBULENCE.md for the current one). See `wednesday_before_after.png`. The site was not changed.
 
 ## Related check: wind-grid resolution
 

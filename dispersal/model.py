@@ -343,12 +343,18 @@ def _turbulent_growth(
 
     u*, L and w* from the weather at each puff (:func:`turbulence.scaling`), sigma_v
     and sigma_w at its height (:func:`turbulence.sigma_vw`), then one growth step
-    (:func:`turbulence.grow`). Air temperature comes from the weather source when it
-    has one, else the standard atmosphere's 288.15 K.
+    (:func:`turbulence.grow`). Air temperature is ``--air-temperature-c`` when given,
+    else the weather source's 2 m temperature, else the standard atmosphere's 288.15 K.
     """
     th, lat, lon = where
     u10 = np.hypot(met.sample("u", th, lat, lon), met.sample("v", th, lat, lon))
-    t_air = met.sample("t2", th, lat, lon) if "t2" in met.f else T_AIR_DEFAULT
+    fixed = getattr(a, "air_temperature_c", None)
+    if fixed is not None:
+        t_air: FloatArray | float = fixed + 273.15
+    elif "t2" in met.f:
+        t_air = met.sample("t2", th, lat, lon)
+    else:
+        t_air = T_AIR_DEFAULT
     u_star, obukhov, w_star = turbulence_scaling(
         u10,
         met.sample("sw", th, lat, lon),

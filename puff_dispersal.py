@@ -383,6 +383,13 @@ def _add_spread_args(p: argparse.ArgumentParser) -> None:
         "(0.2 = AERMOD; CALPUFF uses 0.5)",
     )
     g.add_argument(
+        "--air-temperature-c",
+        type=float,
+        default=None,
+        help="with --spread turbulence: use this fixed air temperature (deg C) instead of "
+        "asking the weather source for it, so saved forecasts replay unchanged",
+    )
+    g.add_argument(
         "--spread-averaging",
         type=float,
         default=AVERAGING_DEFAULT_MIN,
@@ -1150,7 +1157,12 @@ def _meta(
                 "spread": (
                     f"turbulence-based spread (AERMOD u*, L, w*; CALPUFF sigma_v, sigma_w with "
                     f"sigma_v at least {a.sigma_v_min:g} m/s; Draxler time functions, linear "
-                    f"beyond 550 m; {a.spread_averaging:g}-minute crosswind basis)"
+                    f"beyond 550 m; {a.spread_averaging:g}-minute crosswind basis"
+                    + (
+                        f"; air temperature fixed at {a.air_temperature_c:g} C)"
+                        if a.air_temperature_c is not None
+                        else ")"
+                    )
                 )
             }
             if a.spread == "turbulence"

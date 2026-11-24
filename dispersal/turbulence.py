@@ -74,8 +74,13 @@ WEATHER_VARS = ("temperature_2m",)
 
 
 def spread_weather(a: object) -> tuple[str, ...]:
-    """Extra weather variables to request for the run's ``--spread`` method."""
-    return WEATHER_VARS if getattr(a, "spread", "briggs") == "turbulence" else ()
+    """Extra weather variables to request for the run's ``--spread`` method.
+
+    None for Briggs, or when ``--air-temperature-c`` fixes the temperature.
+    """
+    if getattr(a, "spread", "briggs") != "turbulence":
+        return ()
+    return () if getattr(a, "air_temperature_c", None) is not None else WEATHER_VARS
 
 
 def _psi_m(zeta: FloatArray) -> FloatArray:

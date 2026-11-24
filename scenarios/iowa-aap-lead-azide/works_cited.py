@@ -33,6 +33,8 @@ def doi(d: str) -> str:
 
 #: Where the model, saved forecasts, assumptions and tests are published.
 SOURCE_URL = "https://github.com/iowaleadtracker/iowaleadtracker"
+# The spread-method cross-check (HYSPLIT and tracer data) linked from the methodology table.
+TURBULENCE_URL = SOURCE_URL + "/blob/main/TURBULENCE.md"
 #: The site's role inbox (no personal name; see the README's writing rules).
 CONTACT_EMAIL = "contact@iowaleadtracker.com"
 #: The site's Instagram account, for updates.
@@ -92,6 +94,9 @@ REFERENCES = [
         "Aerostat-based sampling of emissions from open burning and open detonation of military "
         "ordnance. <i>J. Hazard. Mater.</i>, <b>284</b>, 108&ndash;120."
     ),
+    "Barad, M. L., Ed., 1958: Project Prairie Grass, a field program in diffusion. Geophys. "
+    "Res. Pap. 59, AFCRC-TR-58-235, Air Force Cambridge Research Center; data as distributed "
+    "by J. S. Irwin, " + _a("https://harmo.org/jsirwin/Tracer_Data.html") + ".",
     "Barton, T., and R. Opsahl, 2026: Court lifts administrative stay, allowing lead azide "
     "detonation to move forward. Iowa Public Radio, 22 November 2026, updated 23 November 2026, "
     "accessed 23 November 2026, "
@@ -166,6 +171,11 @@ REFERENCES = [
     + _a(
         "https://www.epa.gov/air-emissions-factors-and-quantification/ap-42-fifth-edition-volume-i-chapter-15-ordnance"
     )
+    + ".",
+    "Finn, D., K. L. Clawson, R. M. Eckman, H. Liu, E. S. Russell, Z. Gao, and S. Brooks, "
+    "2016: Project Sagebrush: Revisiting the value of the horizontal plume spread parameter "
+    "&sigma;<sub>y</sub>. <i>J. Appl. Meteor. Climatol.</i>, <b>55</b>, 1305&ndash;1322, "
+    + doi("10.1175/JAMC-D-15-0283.1")
     + ".",
     "Fournier, J. D., 1999: Reflectivity-rainfall rate relationships in operational meteorology. "
     "National Weather Service Forecast Office, Tallahassee, FL, accessed 23 November 2026, "
@@ -411,6 +421,20 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
             "Stability and spread",
             "Pasquill&ndash;Gifford classes from wind, sunlight, and cloud; Briggs rural curves",
             "Pasquill (1961); Gifford (1961); Turner (1970); Briggs (1973)",
+        ),
+        (
+            "Spread cross-check",
+            (
+                "Against NOAA&rsquo;s HYSPLIT model on four past days and measured spread in "
+                "two tracer experiments, these curves keep the cloud too narrow after the first "
+                "hour. So the map may show the highest levels reaching too far downwind and the "
+                "lowest levels covering too small an area. Right next to the plant, including "
+                "Middletown, a few degrees of wind decide the levels, which can be several times "
+                "higher or lower than shown. A turbulence-based method that matched the "
+                "measurements better is in the code as an option; the maps still use the "
+                "curves. Details: " + _a(TURBULENCE_URL, "TURBULENCE.md")
+            ),
+            "Stein et al. (2015); Barad (1958); Finn et al. (2016)",
         ),
         (
             "Evening mixing layer",

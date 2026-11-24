@@ -114,6 +114,10 @@ def test_only_turbulence_asks_for_temperature() -> None:
     assert spread_weather(puff.parse_args(["--lat", "40", "--lon", "0"])) == ()
     turb = puff.parse_args(["--lat", "40", "--lon", "0", "--spread", "turbulence"])
     assert spread_weather(turb) == ("temperature_2m",)
+    fixed = puff.parse_args(
+        ["--lat", "40", "--lon", "0", "--spread", "turbulence", "--air-temperature-c", "5"]
+    )
+    assert spread_weather(fixed) == ()
 
 
 @pytest.mark.parametrize(
