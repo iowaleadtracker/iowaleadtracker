@@ -166,8 +166,10 @@ def build() -> None:
         if skipped:
             print(f"skipped {len(skipped)} staged maps without saved forecasts")
     else:  # the first run downloads alone; the rest get --as-of from that pull
-        site.run_maps([run(jobs[0])], saved=False)
-        site.run_maps([run(j) for j in jobs[1:]], saved=False)
+        first = run(jobs[0])
+        site.run_maps([first], saved=False)
+        rest = [run(j) for j in jobs[1:]]
+        site.run_maps(rest, saved=False, downloaded=[site.start_hour(first)])
 
 
 def complete_times(day: str) -> list[str]:

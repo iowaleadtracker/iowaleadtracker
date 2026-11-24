@@ -7,6 +7,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import Any
 
 import forecast_summary
 import make_map_picker as site
@@ -170,3 +171,49 @@ def test_refreshes_run_through_the_last_day() -> None:
         assert f'LAST_DAY: "{last}"' in text, name
         assert "schedule:" in text, name
         assert "workflow_dispatch:" in text, name
+
+
+def test_refresh_downloads_once_then_runs_the_rest_with_its_time(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Without the saved file, the first run downloads alone; the rest replay its pull.
+
+    Every later run gets that pull's ``--as-of``, and its hour isn't downloaded again.
+    """
+    cache = tmp_path / "staged_forecasts.json"
+    monkeypatch.setattr(staged, "CACHE", cache)
+    monkeypatch.setattr(staged, "MAPS", tmp_path / "maps")
+    monkeypatch.setattr(site, "sky_grid_args", list)
+    pulled = "2026-11-24T21:00:00+00:00"
+    ran: list[tuple[list[str], bool]] = []
+
+    class Done:
+        returncode = 0
+        stdout = stderr = ""
+
+    def fake_run(cmd: list[str], **kw: Any) -> Done:
+        ran.append((cmd, site.CACHE_ONLY_ENV in kw["env"]))
+        if not cache.exists():  # the first download saves the file and its time
+            cache.write_text(json.dumps({"__fetched__": {"u": pulled}}), encoding="utf-8")
+        return Done()
+
+    monkeypatch.setattr(site.subprocess, "run", fake_run)
+    staged.build()
+
+    def arg(cmd: list[str], name: str) -> str | None:
+        return cmd[cmd.index(name) + 1] if name in cmd else None
+
+    n = len(staged.DAYS) * len(site.CASES) * len(staged.TIMES)
+    assert len(ran) == n
+    first, *rest = ran
+    assert arg(first[0], "--as-of") is None
+    assert not first[1]
+    as_of = site.retrieved_at(cache)
+    assert as_of is not None
+    assert {arg(cmd, "--as-of") for cmd, _ in rest} == {as_of.isoformat()}
+    assert all("forecast from" in (arg(cmd, "--legend-note") or "") for cmd, _ in rest)
+    # one download per other start hour (day and hour); the first run's hour isn't one
+    hours = {arg(cmd, "--time")[:13] for cmd, _ in ran}  # type: ignore[index]
+    downloading = [cmd for cmd, cache_only in rest if not cache_only]
+    assert len(downloading) == len(hours) - 1
+    assert arg(first[0], "--time")[:13] not in {arg(c, "--time")[:13] for c in downloading}  # type: ignore[index]

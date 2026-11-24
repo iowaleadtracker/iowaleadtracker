@@ -931,7 +931,50 @@ def test_run_maps_skips_times_without_saved_forecasts(
     seen.clear()
     with pytest.raises(SystemExit):  # downloading (a refresh): any failure stops the build
         site.run_maps(runs, saved=False)
-    assert seen == [None]
+    assert len(seen) == 1  # the first run failed; nothing ran after it
+    assert seen[0] is not None
+    assert site.CACHE_ONLY_ENV not in seen[0]  # it could download
+    assert seen[0]["OPENBLAS_NUM_THREADS"] == "1"  # every run is made the same way
+
+
+class _Done:
+    def __init__(self, code: int = 0) -> None:
+        self.returncode = code
+        self.stdout = ""
+        self.stderr = f"exit {code}" if code else ""
+
+
+def _runs(tmp_path: Path, times: list[str], cases: list[str]) -> list[site.Run]:
+    """Return runs for ``times`` (``2026-11-25T09:00``) x ``cases``, each with its own map."""
+    return [
+        site.Run(
+            f"{case} {t}",
+            ["--time", f"{t}-06:00", f"{case}-{t}"],
+            tmp_path / f"{case}-{t.replace(':', '')}.html",
+        )
+        for t in times
+        for case in cases
+    ]
+
+
+def _fake_model(
+    monkeypatch: pytest.MonkeyPatch, codes: dict[str, int] | None = None
+) -> list[tuple[str, bool]]:
+    """Patch the model runs; return the (run, downloads off) list they fill in.
+
+    ``codes`` gives a run's exit status when downloads are off (else 0).
+    """
+    ran: list[tuple[str, bool]] = []
+
+    def fake_run(cmd: list[str], **kw: Any) -> _Done:
+        env = kw["env"]
+        assert env["OPENBLAS_NUM_THREADS"] == "1"  # every run, downloading or not
+        cache_only = site.CACHE_ONLY_ENV in env
+        ran.append((cmd[-1], cache_only))
+        return _Done((codes or {}).get(cmd[-1], 0) if cache_only else 0)
+
+    monkeypatch.setattr(site.subprocess, "run", fake_run)
+    return ran
 
 
 def test_refresh_downloads_one_run_per_hour_then_runs_the_rest_at_once(
@@ -941,39 +984,91 @@ def test_refresh_downloads_one_run_per_hour_then_runs_the_rest_at_once(
 
     The rest have downloads off; one that still needs a download runs again and gets it.
     """
-    ran: list[tuple[str, bool]] = []
-
-    class Done:
-        def __init__(self, code: int) -> None:
-            self.returncode = code
-            self.stdout = self.stderr = ""
-
-    def fake_run(cmd: list[str], **kw: Any) -> Done:
-        cache_only = bool(kw.get("env") and kw["env"].get(site.CACHE_ONLY_ENV))
-        ran.append((cmd[-1], cache_only))
-        # the high case needs something the low case didn't download
-        return Done(site.NOT_SAVED_EXIT if cache_only and cmd[-1] == "high-0930" else 0)
-
-    monkeypatch.setattr(site.subprocess, "run", fake_run)
-    runs = [
-        site.Run(
-            f"{case} {t}",
-            ["--time", f"2026-11-25T{t}-06:00", f"{case}-{t.replace(':', '')}"],
-            tmp_path / f"{case}.html",
-        )
-        for t in ("08:30", "09:00", "09:30")
-        for case in ("low", "high")
-    ]
+    # the high case at 9:30 needs something the low case didn't download
+    ran = _fake_model(monkeypatch, {"high-2026-11-25T09:30": site.NOT_SAVED_EXIT})
+    times = ["2026-11-25T08:30", "2026-11-25T09:00", "2026-11-25T09:30"]
+    runs = _runs(tmp_path, times, ["low", "high"])
+    for r in runs:
+        r.out.write_text("old map", encoding="utf-8")
     assert site.run_maps(runs, saved=False) == []
     # 8:30 and 9:00 are two start hours (9:30 shares 9:00's), downloaded one at a time
-    assert ran[:2] == [("low-0830", False), ("low-0900", False)]
+    assert ran[:2] == [("low-2026-11-25T08:30", False), ("low-2026-11-25T09:00", False)]
     assert sorted(ran[2:6]) == [
-        ("high-0830", True),
-        ("high-0900", True),
-        ("high-0930", True),
-        ("low-0930", True),
+        ("high-2026-11-25T08:30", True),
+        ("high-2026-11-25T09:00", True),
+        ("high-2026-11-25T09:30", True),
+        ("low-2026-11-25T09:30", True),
     ]
-    assert ran[6:] == [("high-0930", False)]  # downloaded after the others, not skipped
+    assert ran[6:] == [("high-2026-11-25T09:30", False)]  # downloaded after, not skipped
+    assert all(r.out.exists() for r in runs)  # a refresh removes no map
+
+
+def test_refresh_keeps_the_same_hour_on_two_days_apart(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """9:00 on Wednesday and on Thursday are different forecasts: each downloads its own."""
+    ran = _fake_model(monkeypatch)
+    times = ["2026-11-25T09:00", "2026-11-26T09:00"]
+    site.run_maps(_runs(tmp_path, times, ["low", "high"]), saved=False)
+    assert ran[:2] == [("low-2026-11-25T09:00", False), ("low-2026-11-26T09:00", False)]
+    assert all(cache_only for _, cache_only in ran[2:])
+
+
+def test_refresh_skips_hours_already_downloaded(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """With ``downloaded``, no run for that hour goes alone: they all run at once."""
+    ran = _fake_model(monkeypatch)
+    times = ["2026-11-25T08:30", "2026-11-25T09:00"]
+    site.run_maps(
+        _runs(tmp_path, times, ["low", "high"]), saved=False, downloaded=["2026-11-25T08"]
+    )
+    assert ran[0] == ("low-2026-11-25T09:00", False)  # only 9:00 downloads
+    assert sorted(ran[1:]) == [
+        ("high-2026-11-25T08:30", True),
+        ("high-2026-11-25T09:00", True),
+        ("low-2026-11-25T08:30", True),
+    ]
+
+
+def test_refresh_stops_on_a_failure_among_the_runs_at_once(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A run that fails for any other reason stops the refresh; nothing downloads after it."""
+    ran = _fake_model(monkeypatch, {"high-2026-11-25T09:00": 1})
+    runs = _runs(tmp_path, ["2026-11-25T09:00"], ["low", "mid", "high"])
+    with pytest.raises(SystemExit, match="model run failed for high 2026-11-25T09:00"):
+        site.run_maps(runs, saved=False)
+    assert all(cache_only for _, cache_only in ran[1:])  # no rerun with downloads
+
+
+def test_runs_without_a_time_each_download(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A run without ``--time`` is its own group, so each one downloads, one at a time."""
+    ran = _fake_model(monkeypatch)
+    runs = [site.Run(n, [n], tmp_path / f"{n}.html") for n in ("a", "b")]
+    assert site.start_hour(runs[0]) == "a"
+    site.run_maps(runs, saved=False)
+    assert ran == [("a", False), ("b", False)]
+
+
+def test_skipped_maps_go_as_each_run_reports(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A map without a saved forecast is removed as soon as its run reports.
+
+    So a later failure doesn't leave it behind.
+    """
+    _fake_model(
+        monkeypatch,
+        {"low-2026-11-25T08:30": site.NOT_SAVED_EXIT, "high-2026-11-25T09:00": 1},
+    )
+    monkeypatch.setattr(site, "PARALLEL_RUNS", 1)  # report in order: 8:30 before the failure
+    runs = _runs(tmp_path, ["2026-11-25T08:30", "2026-11-25T09:00"], ["low", "high"])
+    for r in runs:
+        r.out.write_text("old map", encoding="utf-8")
+    with pytest.raises(SystemExit):
+        site.run_maps(runs, saved=True)
+    assert not runs[0].out.exists()
 
 
 def test_cache_only_runs_never_download(monkeypatch: pytest.MonkeyPatch) -> None:
