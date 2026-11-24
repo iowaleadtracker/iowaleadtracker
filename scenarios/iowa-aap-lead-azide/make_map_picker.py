@@ -53,18 +53,25 @@ MET_CACHE = HERE / "met_cache" / "map_met_all.json"
 DATE = "2026-11-25"
 # Days modeled, as (date, short code used in links). Another day is built only when the
 # saved forecasts include it (see build()), so adding one never makes a deploy download.
-DAYS = [("2026-11-25", "wed"), ("2026-11-26", "thu")]
+# Only Wednesday since Nov. 24: the Army Secretary said "Wednesday morning" (Nov. 23), and
+# Thursday cost as many Open-Meteo requests and build time as Wednesday (maintainer's
+# choice). The staged page (staged.py) still models Thursday and Friday.
+DAYS = [("2026-11-25", "wed")]
 # Days that are only an option in the Day menu: built and linkable, but left out of the
 # header, About box, summary, FAQ, References and llms.txt (maintainer's choice, Nov. 23).
-MENU_ONLY_DAYS = {"2026-11-26"}
+MENU_ONLY_DAYS: set[str] = set()  # Thursday, Nov. 26 was one until Nov. 24
 # Days no longer modeled, so an old link to one (#1200-permit-tue) can say so by name.
-PAST_DAYS = [("2026-11-23", "mon"), ("2026-11-24", "tue")]
+PAST_DAYS = [("2026-11-23", "mon"), ("2026-11-24", "tue"), ("2026-11-26", "thu")]
 # The day the page opens on and the summary leads with: the first of these that is built
 # (else DATE).
 LEAD_DAYS = ["2026-11-25"]
 LEAD_DAY = LEAD_DAYS[0]
 LAT, LON = 40.825518, -91.266502
-TIMES = ["11:00", "11:15", "11:30", "11:45", "12:00", "12:15", "12:30"]
+# Hourly from 9 a.m. to 1 p.m. (forecast_summary.WINDOW): the Army Secretary said on Nov. 23
+# the blasts will be "Wednesday morning", and Iowa HHS had given about noon for Nov. 23.
+# Each start hour sizes its own wind grid, so each costs one Open-Meteo grid download per
+# weather model and day (README "Open-Meteo limits"); quarter hours within an hour are free.
+TIMES = ["09:00", "10:00", "11:00", "12:00", "13:00"]
 DEFAULT = "12:00"  # the Nov. 20 detonation had been set for about noon (Iowa HHS)
 NOON_HOUR = 12
 # (id used in file names and the URL, --release-case, label). See README "Release cases".

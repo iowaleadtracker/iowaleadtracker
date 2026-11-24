@@ -241,6 +241,13 @@ REFERENCES = [
         "Turner, D. B., 1970: <i>Workbook of Atmospheric Dispersion Estimates</i>. Rev. ed. Public "
         "Health Service Publ. 999-AP-26, National Air Pollution Control Administration."
     ),
+    # Text checked from the maintainer's screenshot (Nov. 23, about 11 p.m. CST); the
+    # permalink is from the maintainer.
+    "U.S. Army, 2026: &ldquo;&hellip;which will occur this Wednesday morning, as previously "
+    "scheduled, based on forecast wind conditions.&rdquo; Post by the Acting Secretary "
+    "of the Army (@SecArmy) on X, 23 November 2026, accessed 23 November 2026, "
+    + _a("https://x.com/SecArmy/status/2125060405605154940")
+    + ".",
     "U.S. Army, 2026: &ldquo;The controlled detonation at Iowa Army Ammunition Plant is now "
     "scheduled on Wednesday, November 25, 2026&hellip;&rdquo; Post by the U.S. Army on "
     "Facebook, 22 November 2026, accessed 23 November 2026, "
@@ -336,8 +343,8 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
         (
             "Charges",
             (
-                "Two equal blasts inside earth-covered magazines, modeled from 11 a.m. to "
-                "12:30 p.m. (no time has been given for Wednesday)"
+                "Two equal blasts inside earth-covered magazines, modeled every hour from 9 a.m. "
+                "to 1 p.m. (the Army has said only Wednesday morning, with no time)"
             ),
             (
                 "Two detonations at about noon on the earlier Monday date (Iowa HHS 2026); drums "

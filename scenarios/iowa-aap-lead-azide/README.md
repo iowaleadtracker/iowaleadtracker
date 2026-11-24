@@ -7,7 +7,8 @@ detonation at Iowa Army Ammunition Plant (40.825518° N, 91.266502° W).
 Monday, Nov. 23, "until the latest possible moment prior to a forecasted temperature drop,"
 which "would risk further destabilization of the material." Source: Army Sustainment Command,
 "Postponed: Lead Azide Detonation," https://www.army.mil/article/296926. The article gives no
-time, so the maps cover 11 a.m. to 12:30 p.m.
+time, so the maps cover 9 a.m. to 1 p.m., hourly. (On Nov. 23 the Acting Secretary of the
+Army said on X that the detonation will be "Wednesday morning," still with no clock time.)
 
 Inputs: about 9,700 lb of lead azide in 68 drums (Army Sustainment Command spokesperson via
 ABC News, 19 Nov 2026; 68 drums per EPA's emergency permit, which redacts the weight), two
@@ -86,7 +87,8 @@ everywhere any model puts lead.
 
 ## The site (iowaleadtracker.com)
 
-The home page has a blast-time dropdown (11:00 a.m. to 12:30 p.m., every 15 minutes), a
+The home page has a blast-time dropdown (9:00 a.m. to 1:00 p.m., every hour; opens on
+noon), a
 "Lead in the air" dropdown (Low, Middle, High, EPA permit), and a U.S./metric switch. It loads
 one map at a time, so the first visit stays small. The settings for the model runs (place,
 date, mass, weather models) are at the top of `make_map_picker.py`.
@@ -345,6 +347,19 @@ time costs a few hundred.
 - If you see "Daily API request limit exceeded", wait for the daily reset or run from
   another network. The cloud sandbox this was built in shares its address with other
   users and ran out several times.
+- Each blast hour costs its own grid downloads: the model sizes the 5 x 5 wind grid from
+  the winds over that run, so every start hour is a separate request of about 65 (25
+  points x 2.6, for 26 variables counted per 10) per weather model and day; times within the same hour share it.
+  With hourly times from 9 a.m. to 1 p.m., the main refresh costs about 1,000-1,300 per
+  run (Wednesday only, 3-4 models, 5 hours; about 800 with the earlier 11 a.m.-12:30 p.m.
+  window and Thursday)
+  and the staged refresh about 2,000 (3 days, 2 models; about 1,200 before). Each run
+  stays under the hourly limit (5,000). Over a day, the 3-hourly main refresh, the
+  6-hourly staged refresh and the weather grid add up to about 22,000, twice the
+  daily limit, so this only works because GitHub's runners don't usually share one
+  address (they did hit the limit on Nov. 22 with hourly runs). A run that is refused
+  fails and keeps the saved forecasts, so the site never breaks; if that happens, space
+  out the schedules.
 - Move or delete `met_cache/map_met_all.json` to download fresh forecasts (see below).
 - The weather layer's grid (`sky_grid.py --fetch`) counts as one request per point:
   about 770 per model. It skips days that are over, asks HRRR only for days within 48
@@ -404,15 +419,17 @@ never deploys; merging the pull request does.
 
 ### More than one day
 
-`DAYS` in `make_map_picker.py` lists the days the main site models: Wednesday, Nov. 25 (the
-date the Army announced late on Nov. 22) and Thursday, Nov. 26, with the same blast times.
+`DAYS` in `make_map_picker.py` lists the days the main site models. Since Nov. 24 that is only
+Wednesday, Nov. 25 (the Army announced it late on Nov. 22 and said "Wednesday morning" on
+Nov. 23). Thursday, Nov. 26 was a menu-only day until then; it was dropped to halve the
+refresh's Open-Meteo requests and build time (the staged page still models it).
 `DATE` (Wednesday) is always built, its maps have no date in their names, and the page
 opens on it. Links carry the day (`#1200-permit-thu`); links without one open Wednesday.
-Monday and Tuesday, the earlier planned dates, are no longer modeled (`PAST_DAYS` only lets
-an old `-mon` or `-tue` link say so by name), and their old maps are deleted on the next
-build.
+Monday and Tuesday, the earlier planned dates, and Thursday are no longer modeled
+(`PAST_DAYS` only lets an old `-mon`, `-tue` or `-thu` link say so by name), and their old
+maps are deleted on the next build. With one day the "Day" menu is hidden.
 
-`MENU_ONLY_DAYS` (Thursday) are built and in the "Day" menu, but the header, About box,
+`MENU_ONLY_DAYS` (none now; Thursday until Nov. 24) are built and in the "Day" menu, but the header, About box,
 summary, FAQ, References and `llms.txt` describe only Wednesday. A day that isn't menu-only
 would get its own section after the lead day ("If the blasts are on …"), saying its blast
 times are borrowed.
@@ -428,7 +445,7 @@ its own saved forecasts, so its Wednesday numbers differ from the main site's.
 ### Staged Wednesday-Friday maps
 
 `staged.py` builds a separate set of maps for blasts on Wednesday, Nov. 25, Thursday,
-Nov. 26 and Friday, Nov. 27, 11 a.m. to 1 p.m. every 30 minutes, all four cases, with only GFS and ECMWF
+Nov. 26 and Friday, Nov. 27, every hour from 9 a.m. to 1 p.m., all four cases, with only GFS and ECMWF
 (GFS shown, ECMWF as the weather-model spread). They sit in their own folder on the main
 site (`staged.DIR_NAME`), which nothing links to; the pages and the folder are noindex,
 and the sitemap, robots.txt, `llms.txt` and the GitHub Pages mirror leave them out.
