@@ -267,10 +267,7 @@ def window_note(day: str) -> str:
     if day in (PLANNED_DAY, HHS_DAY):
         return ""
     weekday = day.split(",", maxsplit=1)[0]
-    return (
-        f"No time has been given for {weekday}, so these maps use the same {WINDOW} "
-        "window."
-    )
+    return f"No time has been given for {weekday}, so these maps use the same {WINDOW} window."
 
 
 SAME_WINDOW = window_note("Thursday, Nov. 26")
@@ -314,7 +311,8 @@ TRUMP_SOURCE_TEXT = (
 )
 # Newest first, like the paragraph.
 COURT_SOURCES_TEXT = (
-    f"{SECARMY_CITE}, {SECARMY_URL}; {RULING_CITE}, {RULING_URL}; {SAND_CITE}, {SAND_URL}; {WEDNESDAY_SOURCE_TEXT}; "
+    f"{SECARMY_CITE}, {SECARMY_URL}; {RULING_CITE}, {RULING_URL}; {SAND_CITE}, {SAND_URL}; "
+    f"{WEDNESDAY_SOURCE_TEXT}; "
     f"{RESPONSE_CITE}, {RESPONSE_URL}; "
     f"{FILING_CITE}, {FILING_URL}; {COURT_CITE}, {COURT_URL}"
 )
@@ -1084,8 +1082,10 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             *([f"- Note: {ctx['pending_note']}"] if ctx.get("pending_note") else []),
             f"- Presidential hold: {TRUMP_HOLD} Sources: {TRUMP_SOURCE_TEXT}",
             f"- Why Wednesday: {WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_TEXT}",
-            f"- Time: {time_note(ctx['built_txt'])} Sources: {SECARMY_URL}; {HHS_URL}; "
-            f"{RESPONSE_URL}",
+            (
+                f"- Time: {time_note(ctx['built_txt'])} Sources: {SECARMY_URL}; {HHS_URL}; "
+                f"{RESPONSE_URL}"
+            ),
             f"- Earlier date, Tuesday: {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_TEXT}",
             f"- Earlier date, Monday: {WHY_MONDAY} Source: {ARMY_CITE}, {ARMY_URL}",
             f"- Water misting: {MISTING} Source: Army public advisory, {ADVISORY_URL}",
