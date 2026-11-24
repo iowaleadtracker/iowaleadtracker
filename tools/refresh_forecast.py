@@ -114,9 +114,13 @@ def refresh(cache: Path, build: list[str], *, golden: bool) -> int:
         if golden:
             restore_sky_grid(sky_old)
 
-    try:
-        if golden:
+    if golden:  # the weather layer is display only: never let it stop the refresh
+        try:
             run([sys.executable, "sky_grid.py", "--fetch"], cwd=SCENARIO)
+        except subprocess.CalledProcessError:
+            print("the weather layer's grid wasn't updated; keeping the saved one", file=sys.stderr)
+            restore_sky_grid(sky_old)
+    try:
         run([sys.executable, *build], cwd=SCENARIO)
     except subprocess.CalledProcessError:
         restore()

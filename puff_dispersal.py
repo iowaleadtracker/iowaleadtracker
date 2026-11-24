@@ -870,6 +870,7 @@ def _hours_output(
             ]
         )
         ti = int(min(max(round(th - 0.5), 0), met.nt - 1))
+        tk = int(min(max(math.floor(th) + 1, 0), met.nt - 1))  # see "sky" below
         hrow = hourly[h]
         hours_out.append(
             {
@@ -894,10 +895,12 @@ def _hours_output(
                     for i, lo in enumerate(met.lon_nodes)
                 ],
                 # forecast sky cover (%) and precipitation (mm/h) at the same points as "wind"
+                # stamped at the top of the hour after this hour's middle, as for
+                # --sky-grid: Open-Meteo stamps precipitation at the end of its hour
                 "sky": [
                     [
-                        round(float(met.f["cloud"][ti, j, i])),
-                        round(float(met.f["precip"][ti, j, i]), 2),
+                        round(float(met.f["cloud"][tk, j, i])),
+                        round(float(met.f["precip"][tk, j, i]), 2),
                     ]
                     for j in range(len(met.lat_nodes))
                     for i in range(len(met.lon_nodes))
@@ -957,7 +960,7 @@ def _sky_grid_output(a: argparse.Namespace) -> tuple[Json | None, list[Json]]:
             "fetched": s.get("fetched"),
             "lats": sky["lats"],
             "lons": sky["lons"],
-            "fade": sky.get("fade", 3),  # grid points over which the map fades the layer out
+            "fade": sky.get("fade", 2),  # grid points over which the map fades the layer out
         }
         hours = [
             {

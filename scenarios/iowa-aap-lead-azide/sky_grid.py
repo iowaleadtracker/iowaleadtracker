@@ -12,15 +12,18 @@ maps end within HRRR_HOURS; further out GFS draws the layer.
     python3 sky_grid.py --fetch [--force]   # download into met_cache/sky_grid.json
     python3 sky_grid.py                     # say what is saved
 
---fetch keeps the saved grid while it is under MAX_AGE old and no day needs HRRR (GFS
-runs every 6 hours, so a newer download would usually hold the same run); --force
-downloads anyway. The site build only reads the saved file (export()); it never
-downloads. A forecast refresh (tools/refresh_forecast.py) runs --fetch with the lead
-model's forecasts.
+--fetch only asks for days not yet over, and reuses each model's saved grid while it is
+younger than MAX_AGE (HRRR 6 hours, GFS 12); --force downloads anyway. It never fails
+the caller over a download problem: a failed download keeps the saved grid, and a new
+grid that covers fewer days than the saved one is not written. The site build only reads
+the saved file (export()); it never downloads. A forecast refresh
+(tools/refresh_forecast.py) runs --fetch with the lead model's forecasts.
 
-Open-Meteo counts each point as a request: a download costs about 770 per model, against
-a free limit of about 10,000 a day that the 3-hourly refresh already uses part of
-(README "Open-Meteo limits").
+Open-Meteo counts each point as a request: a download costs about 770 per model. With the
+3-hourly refresh that is at most about 4,600 a day while both models are needed (HRRR 4
+times, GFS twice), against a free limit of about 10,000 a day that the lead forecasts
+also use (README "Open-Meteo limits"). Requests are PAUSE seconds apart, for the
+per-minute limit.
 """
 
 from __future__ import annotations
@@ -29,6 +32,7 @@ import datetime as dt
 import json
 import math
 import sys
+import time
 import urllib.parse
 from pathlib import Path
 from typing import Any
@@ -51,7 +55,10 @@ ROWS_PER_REQUEST = 6  # rows of points per request, to keep each web address sho
 #: Tried in this order; the first that covers a map's whole run is shown on it.
 MODELS = ("ncep_hrrr_conus", "gfs_seamless")
 HRRR_HOURS = 48  # HRRR is asked only for days whose maps end within this many hours
-MAX_AGE = dt.timedelta(hours=6)  # keep a saved grid this long when no day needs HRRR
+#: How long a model's saved grid is reused before it is downloaded again. GFS runs every
+#: 6 hours and HRRR every hour, but each download costs about 770 requests (see above).
+MAX_AGE = {"ncep_hrrr_conus": dt.timedelta(hours=6), "gfs_seamless": dt.timedelta(hours=12)}
+PAUSE = 25.0  # seconds between requests: Open-Meteo also limits requests per minute
 VARS = ("cloud_cover", "precipitation")
 #: The hours every map can need, in Central standard time: the earliest blast (11:00)
 #: to the latest (13:00) plus the 8-hour run and an hour to spare.
@@ -109,41 +116,87 @@ def covers(points: list[dict[str, Any]], day: str) -> bool:
     return all(p["hourly"][v][i] is not None for p in points for v in VARS for i in keep)
 
 
+def live_days(days: list[str], now: dt.datetime) -> list[str]:
+    """Return the days whose maps haven't all ended by ``now``."""
+    return [d for d in days if window(d)[1] >= now]
+
+
 def hrrr_days(days: list[str], now: dt.datetime) -> list[str]:
-    """Return the days whose maps end within HRRR_HOURS of ``now``."""
-    return [d for d in days if window(d)[1] <= now + dt.timedelta(hours=HRRR_HOURS)]
+    """Return the days, not yet over, whose maps end within HRRR_HOURS of ``now``."""
+    soon = now + dt.timedelta(hours=HRRR_HOURS)
+    return [d for d in live_days(days, now) if window(d)[1] <= soon]
 
 
 def load() -> dict[str, Any] | None:
-    """Return the saved grid file, or None."""
-    return json.loads(CACHE.read_text(encoding="utf-8")) if CACHE.exists() else None
-
-
-def still_good(saved: dict[str, Any] | None, days: list[str], now: dt.datetime) -> bool:
-    """Return True if the saved grid can stand: same points, every day, recent, no HRRR."""
-    if not saved or hrrr_days(days, now):
-        return False
+    """Return the saved grid file if it is for the current grid, else None."""
+    if not CACHE.exists():
+        return None
+    saved = json.loads(CACHE.read_text(encoding="utf-8"))
     lats, lons = grid()
-    if saved.get("__grid__") != {"lats": lats, "lons": lons, "fade": FADE}:
-        return False
-    if not set(days) <= set(saved.get("__days__", {})):
-        return False
-    stamps = [dt.datetime.fromisoformat(v) for v in saved.get("__fetched__", {}).values()]
-    return bool(stamps) and now - min(stamps) < MAX_AGE
+    return saved if saved.get("__grid__") == {"lats": lats, "lons": lons, "fade": FADE} else None
+
+
+def saved_set(saved: dict[str, Any] | None, model: str) -> list[tuple[str, Any]] | None:
+    """Return a model's saved requests and answers, or None."""
+    parts = (saved or {}).get("__sets__", {}).get(model)
+    return [(u, saved[u]) for u in parts] if parts and saved else None
+
+
+def download(model: str, todo: list[str]) -> list[tuple[str, Any]] | None:
+    """Download a model's grid for ``todo``; None (and a message) if any request fails."""
+    got = []
+    for k, u in enumerate(urls(model, todo)):
+        if k:
+            time.sleep(PAUSE)
+        try:
+            resp = http_json(u)
+        except Exception as e:  # noqa: BLE001 - any failure: keep what is saved
+            print(f"{model}: download failed ({e})", file=sys.stderr)
+            return None
+        if isinstance(resp, dict):  # an error body (one point would be a dict too)
+            print(f"{model}: {resp.get('reason', 'no data')}", file=sys.stderr)
+            return None
+        got.append((u, resp))
+    return got
+
+
+def model_grid(
+    saved: dict[str, Any] | None, model: str, todo: list[str], now: dt.datetime, *, force: bool
+) -> tuple[list[tuple[str, Any]] | None, dt.datetime]:
+    """Return a model's grid for ``todo`` and when it was pulled: saved if recent, else new.
+
+    The saved grid is kept while it covers ``todo`` and is younger than MAX_AGE (unless
+    ``force``), and whenever the download fails.
+    """
+    old = saved_set(saved, model)
+    stamp = now
+    if old and saved:
+        stamp = dt.datetime.fromisoformat(min(saved["__fetched__"][u] for u, _ in old))
+        if (
+            not force
+            and now - stamp < MAX_AGE[model]
+            and all(covers([p for _, r in old for p in r], d) for d in todo)
+        ):
+            print(f"{model}: kept the saved grid from {stamp:%Y-%m-%d %H:%M} UTC", file=sys.stderr)
+            return old, stamp  # recent enough: no requests
+    got = download(model, todo)
+    if got is None and old:
+        return old, stamp  # the download failed: keep the saved grid
+    return got, now
 
 
 def fetch(
     days: list[str], now: dt.datetime | None = None, *, force: bool = False
 ) -> dict[str, str]:
-    """Download the grid for ``days`` into CACHE; return the model chosen for each day.
+    """Update CACHE for the ``days`` not yet over; return the model drawing each day.
 
-    Keeps the saved grid instead when still_good() says so, unless ``force``.
+    Never raises for a download problem, and never replaces the saved grid with one that
+    covers fewer days. Each model's saved grid is reused while it is younger than
+    MAX_AGE (unless ``force``) or when its download fails.
     """
     now = now or dt.datetime.now(dt.timezone.utc)
     saved = load()
-    if not force and still_good(saved, days, now):
-        print("kept the saved weather grid (recent, and no day needs HRRR)", file=sys.stderr)
-        return dict(saved["__days__"])  # type: ignore[index]
+    days = live_days(days, now)
     lats, lons = grid()
     data: dict[str, Any] = {
         "__fetched__": {},
@@ -157,28 +210,25 @@ def fetch(
             todo = hrrr_days(todo, now)
         if not todo:
             continue
-        got = []
-        for u in urls(model, todo):
-            resp = http_json(u)
-            if isinstance(resp, dict):  # an error (or a single point)
-                print(f"{model}: {resp.get('reason', 'no data')}", file=sys.stderr)
-                break
-            got.append((u, resp))
-        else:
-            points = [p for _, r in got for p in r]
-            used = [d for d in todo if covers(points, d)]
-            if not used:
-                print(f"{model} covers none of {', '.join(todo)}", file=sys.stderr)
-                continue
-            data["__days__"].update(dict.fromkeys(used, model))
-            data["__sets__"][model] = [u for u, _ in got]
-            stamp = now.isoformat(timespec="seconds")
-            for u, r in got:  # saved only when it draws a day
-                data[u] = r
-                data["__fetched__"][u] = stamp
+        got, when = model_grid(saved, model, todo, now, force=force)
+        if not got:
+            continue
+        used = [d for d in todo if covers([p for _, r in got for p in r], d)]
+        if not used:
+            print(f"{model} covers none of {', '.join(todo)}", file=sys.stderr)
+            continue
+        data["__days__"].update(dict.fromkeys(used, model))
+        data["__sets__"][model] = [u for u, _ in got]
+        for u, r in got:  # saved only when it draws a day
+            data[u] = r
+            data["__fetched__"][u] = when.isoformat(timespec="seconds")
     missing = [d for d in days if d not in data["__days__"]]
     if missing:
         print(f"no model covers {', '.join(missing)}; maps keep the coarse layer", file=sys.stderr)
+    before = [d for d in days if d in (saved or {}).get("__days__", {})]
+    if saved and len(data["__days__"]) < len(before):
+        print("the new grid covers fewer days; kept the saved one", file=sys.stderr)
+        return dict(saved["__days__"])
     CACHE.write_text(json.dumps(data), encoding="utf-8")
     return dict(data["__days__"])
 

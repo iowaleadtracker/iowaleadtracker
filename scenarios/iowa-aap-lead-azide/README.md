@@ -346,25 +346,39 @@ time costs a few hundred.
   users and ran out several times.
 - Move or delete `met_cache/map_met_all.json` to download fresh forecasts (see below).
 - The weather layer's grid (`sky_grid.py --fetch`) counts as one request per point:
-  about 770 per model. It asks HRRR only for days within 48 hours, and keeps a saved
-  grid under 6 hours old when no day needs HRRR, so most 3-hourly refreshes either reuse
-  it or download one model.
+  about 770 per model. It skips days that are over, asks HRRR only for days within 48
+  hours, and reuses each model's saved grid (HRRR for 6 hours, GFS for 12), so with the
+  3-hourly refresh it costs at most about 4,600 a day, while both models are needed. Its
+  requests are 25 seconds apart, for the per-minute limit. A failed download keeps the
+  saved grid and never stops the forecast refresh.
 
 ### The weather layer
 
 Each map has an optional "sky cover & rain" layer (off by default): forecast cloud cover
 in white or gray, and precipitation as NWS radar reflectivity (dBZ). It is for display only.
 
-The forecast gives a rain rate, not reflectivity, so the map converts it with the WSR-88D
-default Z = 300R^1.4 (NWS, https://www.weather.gov/tae/research-zrpaper) and colors it
-in 5 dBZ steps with the usual NWS reflectivity palette (as in MetPy's `NWSReflectivity`
-table). The legend also marks the AMS Glossary's rain intensity ("Rain": light up to
-2.5 mm/h, moderate to 7.6, heavy above). Snow is shown as if it were rain, and an hour's
-total is lighter than a radar's instant peaks. Not yet checked against the pages
-themselves: the Z-R and AMS figures were confirmed from search results on Nov. 24, 2026,
-and the palette from memory (the build environment couldn't open weather.gov); confirm
-them before adding them to `works_cited.py`. Deposition is purple, not blue, so that blue
-on the map means only light rain. The lead
+The forecast gives a rain rate, not reflectivity, so the map converts it with
+Z = 300R^1.4 and colors it in 5 dBZ steps with the usual NWS reflectivity palette
+(65 dBZ and up stay magenta; the palette's 70+ purple would look like deposition). The
+legend also marks light, moderate and heavy rain at 2.5 and 7.6 mm/h. Snow is shown as
+if it were rain, and an hour's total is lighter than a radar's instant peaks. Between
+points the map uses cubic interpolation, clamped to the surrounding points, so it never
+draws rain heavier or lighter than the forecast around it; rows are placed in the map's
+Web Mercator projection, like the lead layer. Deposition is purple, not blue, so that
+blue on the map means only light rain.
+
+**Sources to confirm.** The page names no source for these yet: they were checked only
+through search summaries on Nov. 24, 2026 (the build environment couldn't open the
+pages). Once confirmed, add them to `works_cited.py` and put the attributions back on the
+page (the legend's light/moderate/heavy bands and the side panel's Z-R sentence):
+
+- Z = 300R^1.4 as the WSR-88D default: https://www.weather.gov/tae/research-zrpaper and
+  https://training.weather.gov/nwstc/NEXRAD/RADAR/3-1a.htm
+- Rain intensity (light to 0.25 cm/h, moderate to 0.76, heavy above): AMS Glossary,
+  "Rain", https://glossary.ametsoc.org/wiki/Rain
+- The reflectivity colors: MetPy's NWS table,
+  https://github.com/Unidata/MetPy/blob/main/src/metpy/plots/colortable_files/NWSReflectivity.tbl,
+  and NOAA's explainer, https://www.noaa.gov/jetstream/reflectivity The lead
 model keeps its own 5x5 grid (points about 90 miles apart); the layer uses a finer grid
 from `sky_grid.py`: 24 x 32 points 0.35° apart (about 24 miles), shown at full strength
 over 37.0-43.5°N, 96.7-87.5°W (all of Iowa, northern Missouri, western Illinois and every
