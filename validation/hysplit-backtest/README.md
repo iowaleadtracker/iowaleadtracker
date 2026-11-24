@@ -56,10 +56,17 @@ truth, and its results here are not official NOAA or government material.
   own particle deposition scheme deposited about 4.5× more lead than HYSPLIT with our
   deposition speeds (Monday only).
 
+- **Measured tracer data agree.** Against Project Sagebrush Phase 1 (169 measured σy, 200
+  to 3,200 m) the current Briggs curves are about 2× too narrow (0.55×), AERMOD 0.66×, and
+  the turbulence prototype 1.11× with 99% within a factor of 2. Against Prairie Grass the
+  prototype is 1.45× (1.02× scaled to its 10-minute samples), AERMOD 0.97×, Briggs 0.78×.
+- **For Wednesday's forecast the prototype would shrink the far zones 3–6×** (100% case:
+  air above PAC-1 from 56 to 8 mi; ground ≥100 µg/ft² from 24 to 6 mi) but bring
+  Middletown, next to the plant, into the 100 µg/ft² zone.
+
 Not yet done: a direction-uncertainty view sized by the turbulence and wind speed at night,
-tests against measured tracer data (Prairie Grass, Sagebrush) rather than only HYSPLIT,
-more days (including the blast day once its HRRR weather is archived), and the
-repository's validation checks and tests with any change in place.
+the prototype as reviewed code with updated tests, more days (including the blast day once
+its HRRR weather is archived), and the real-weather validation checks.
 
 ## Method
 
@@ -293,6 +300,80 @@ A narrow cloud for concentrations, plus a direction-uncertainty view that widens
 and in winds below about 1.5 m/s, would represent both. The site's fixed ±5° view is far
 narrower than the 50–150° night arcs measured at Sagebrush.
 
+## Measured tracer data
+
+The crosswind spread σy of each scheme against measured σy, given each test's measured
+meteorology. Numbers are the geometric mean of predicted ÷ measured, then the share within
+a factor of 2. "Turbulence" is the prototype's σy = σv t fy with CALPUFF's σv (minimum
+0.2 m/s); its σv are 1-hour values, so it is also shown scaled to 10-minute samples by
+CALPUFF's averaging-time rule, × (10/60)^0.2 = 0.70. AERMOD is its Eq. 77 with
+σv² = 3.6u\*² + 0.35w\*² (minimum 0.2 m/s). Briggs is the current model, with the class as
+noted.
+
+**Project Prairie Grass** (1956; 10-minute continuous releases at 0.46 m, arcs 50–800 m;
+56 runs, 280 arc values). σy from Irwin's analysis (`PGrassOBSAnalysis.txt`) and u\*, w\*,
+L, mixing heights and wind from the AERMOD files in the ASTM D6589 archive
+(`PGRSURF.MET`), both from https://harmo.org/jsirwin/. Classes for Briggs come from L and
+z0 (class-centre 1/L = a + b log10 z0, after Golder 1972, as tabulated in Seinfeld and
+Pandis); Prairie Grass classes were not recorded.
+
+| Group | n | Briggs | Turbulence (1 h) | Turbulence (10 min) | AERMOD |
+|---|---|---|---|---|---|
+| All | 280 | 0.78 / 75% | 1.45 / 74% | 1.02 / 81% | 0.97 / 83% |
+| Unstable | 165 | 0.65 / 76% | 1.29 / 89% | 0.90 / 90% | 0.90 / 87% |
+| Stable | 115 | 1.01 / 74% | 1.72 / 53% | 1.20 / 70% | 1.08 / 77% |
+| 50 m | 56 | 0.60 / 73% | 1.23 / 93% | 0.86 / – | 1.01 / 91% |
+| 800 m | 56 | 1.03 / 75% | 1.70 / 57% | 1.19 / 75% | 0.92 / 73% |
+
+**Project Sagebrush Phase 1** (2013; continuous releases at 1.5 m, 10-minute samples, arcs
+200–3,200 m; daytime, classes A–D; 169 values). σy (second-moment, non-truncated profiles)
+were read from the vector data of Fig. 212 of NOAA Tech. Memo OAR ARL-268 and matched to
+each 10-minute bag's u\*, z/L (sonics R3, R4), 10 m wind and σA class from Tables 19–23;
+mixing heights are the mean radiosonde values of Table 18; w\* from u\*, L and the mixing
+height. The extracted table is `data/sagebrush1_sigma_y_10min.csv`. Briggs uses the
+report's σA class.
+
+| Group | n | Briggs | Turbulence (1 h) | Turbulence (10 min) | AERMOD |
+|---|---|---|---|---|---|
+| All | 169 | 0.55 / 60% | 1.11 / 99% | 0.77 / 92% | 0.66 / 81% |
+| 200 m | 21 | 0.47 / 33% | 1.17 / 100% | 0.82 / 100% | 0.89 / 100% |
+| 800 m | 42 | 0.57 / 69% | 1.13 / 100% | 0.79 / 98% | 0.68 / 93% |
+| 3,200 m | 22 | 0.50 / 45% | 0.81 / 95% | 0.57 / 77% | 0.39 / 18% |
+
+The current Briggs curves are about 2× too narrow against Sagebrush, as Finn et al. (2016)
+found; AERMOD, whose constants come from Prairie Grass, fits Prairie Grass best and falls
+short at Sagebrush's longer distances. The prototype (1-hour basis, as used in the maps) is
+1.1× Sagebrush and 1.45× Prairie Grass; Sagebrush found averaging time mattered little
+(10–60 min), so the 1-hour values are the fairer comparison there.
+
+## Other checks of the prototype
+
+- **Real temperature.** Using Open-Meteo's 2 m temperature instead of an assumed 280 K
+  changed no result above by more than 0.2 in any ratio (four HYSPLIT cases).
+- **Repository checks** (`validate_explosion.py`, `pytest`) with the prototype switched on:
+  the source term, release cases, deposition and envelope checks pass unchanged. Three
+  tests fail, as they must for a change of spread: the analytic-puff check (it compares
+  with a puff using the Briggs curves; worst deviation 55% against a 15% tolerance) and
+  the two golden regression tests (the map numbers change). These would be updated with
+  any real change. The real-weather checks (3–4) could not run in this session either way
+  (Open-Meteo's archive host is blocked here).
+
+## Wednesday before and after
+
+The site's settings and its saved forecast (pulled Nov. 23, 20:34 UTC), noon blast,
+8 hours, four weather models with the deposition spread; only the spread scheme differs.
+
+| Wednesday noon | 100%, current | 100%, prototype | 20%, current | 20%, prototype |
+|---|---|---|---|---|
+| Ground ≥100 µg/ft² | 24 mi | 5.9 mi (Middletown) | 5.5 mi | 1.8 mi (Middletown) |
+| Ground ≥40 µg/ft² | 45 mi | 9.6 mi | 14 mi | 4.0 mi |
+| Ground ≥5 µg/ft² | 112 mi | 40 mi | 56 mi | 13 mi |
+| Hourly air ≥ PAC-1 | 56 mi | 8.4 mi | 13 mi | 3.3 mi |
+| Peak hourly air | 1,031 µg/m³ | 765 µg/m³ | 206 µg/m³ | 153 µg/m³ |
+
+The far zones shrink 3–6×, but the wider cloud near the plant puts Middletown in the
+100 µg/ft² zone in both cases. See `wednesday_before_after.png`. The site was not changed.
+
 ## Related check: wind-grid resolution
 
 The model samples winds on a 5×5 grid (about 150 km apart) around the plant. Rerunning
@@ -331,6 +412,11 @@ NOAA's weather files are not in this repository; only our inputs and the numbers
   https://repository.library.noaa.gov/view/noaa/52272.
 - Finn, D., R. M. Eckman, Z. Gao, and H. Liu: Mechanisms for wind direction changes in the
   very stable boundary layer. Manuscript, https://repository.library.noaa.gov/view/noaa/20853.
+- Barad, M. L., Ed., 1958: Project Prairie Grass, a field program in diffusion. Geophys.
+  Res. Pap. 59, Air Force Cambridge Research Center; data as distributed by J. S. Irwin,
+  https://harmo.org/jsirwin/Tracer_Data.html.
+- Finn, D., K. L. Clawson, and Coauthors, 2015: Project Sagebrush Phase 1. NOAA Tech.
+  Memo. OAR ARL-268, doi:10.7289/V5VX0DHV, https://repository.library.noaa.gov/view/noaa/11188.
 - Irwin, J. S., 1983: Estimating plume dispersion—A comparison of several sigma schemes.
   *J. Climate Appl. Meteor.*, **22**, 92–114. (Abstract only.)
 - NOAA ARL, Project Sagebrush Phase 2 (technical memorandum),
