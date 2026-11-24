@@ -44,7 +44,7 @@ TZ = ZoneInfo("America/Chicago")
 DAYS = ["2026-11-25", "2026-11-26", "2026-11-27"]
 TIMES = ["09:00", "10:00", "11:00", "12:00", "13:00"]  # forecast_summary.WINDOW
 DEFAULT_DAY = DAYS[0]
-DEFAULT_TIME = "10:00"  # the Army said "Wednesday morning" (Nov. 23)
+DEFAULT_TIME = "12:00"
 #: The first model is shown; the other makes up the weather-model spread.
 WEATHER = "gfs_seamless,ecmwf_ifs025"
 MODELS_TEXT = "GFS and ECMWF only (GFS shown; ECMWF in the weather-model spread)"

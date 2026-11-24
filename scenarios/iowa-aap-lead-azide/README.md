@@ -88,7 +88,7 @@ everywhere any model puts lead.
 ## The site (iowaleadtracker.com)
 
 The home page has a blast-time dropdown (9:00 a.m. to 1:00 p.m., every hour; opens on
-10 a.m.), a
+noon), a
 "Lead in the air" dropdown (Low, Middle, High, EPA permit), and a U.S./metric switch. It loads
 one map at a time, so the first visit stays small. The settings for the model runs (place,
 date, mass, weather models) are at the top of `make_map_picker.py`.

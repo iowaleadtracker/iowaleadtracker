@@ -742,8 +742,8 @@ def test_one_model_order_per_day(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     monkeypatch.setattr(site, "MAPS", tmp_path / "maps")
     monkeypatch.setattr(site.staged, "CACHE", tmp_path / "none.json")
     monkeypatch.setattr(site, "days_to_build", lambda: ["2026-11-25"])
-    # 3:40 p.m. CST Tuesday: 9:00 Wednesday is 17.3 h away, 10:00 (the default) 18.3 h
-    pulled = dt.datetime.fromisoformat("2026-11-24T15:40-06:00")
+    # 5:40 p.m. CST Tuesday: 11:00 Wednesday is 17.3 h away, noon 18.3 h (rounded: 17 h, 19 h)
+    pulled = dt.datetime.fromisoformat("2026-11-24T17:40-06:00")
     monkeypatch.setattr(site, "retrieved_at", lambda *_a, **_k: pulled)
     orders = set()
 
@@ -757,7 +757,7 @@ def test_one_model_order_per_day(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 
     monkeypatch.setattr(site.subprocess, "run", fake_run)
     site.build()
-    assert orders == {site.WEATHER}  # one order for the whole day: 10 a.m. is over 18 h out
+    assert orders == {site.WEATHER}  # one order for the whole day: noon is over 18 h out
 
 
 def test_president_and_governor_elect_after_the_ruling() -> None:

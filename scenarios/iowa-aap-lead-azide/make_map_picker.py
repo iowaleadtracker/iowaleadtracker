@@ -69,7 +69,7 @@ LAT, LON = 40.825518, -91.266502
 # Each start hour sizes its own wind grid, so each costs one Open-Meteo grid download per
 # weather model and day (README "Open-Meteo limits"); quarter hours within an hour are free.
 TIMES = ["09:00", "10:00", "11:00", "12:00", "13:00"]
-DEFAULT = "10:00"  # mid-morning: the Army said "Wednesday morning" (no clock time)
+DEFAULT = "12:00"  # the Nov. 20 detonation had been set for about noon (Iowa HHS)
 NOON_HOUR = 12
 # (id used in file names and the URL, --release-case, label). See README "Release cases".
 CASES = [
