@@ -155,10 +155,12 @@ TRUMP_HOLD = (
     "Military not to do so until such time as the Eighth Circuit agrees that we can go "
     "forward,\u201d and that the decision is \u201cfully subject to the incoming Governor "
     "Elect, Rob Sand, agreeing to the operation.\u201d The Army had no immediate comment, "
-    "KCRG reported, and the Army hasn\u2019t announced a new date."
+    "KCRG reported. The 8th Circuit lifted its hold on the permit that day (see the court "
+    "case). Sand didn\u2019t directly say whether he approved, Iowa Public Radio reported; he "
+    "said \u201cthe Administration should make this decision based on the information they "
+    "have from the people they brought in to do the job months ago and have been on the "
+    "ground in Middletown for weeks.\u201d The Army hasn\u2019t announced a new date."
 )
-TRUMP_SOURCE_HTML = f'<a href="{TRUMP_URL}" rel="noopener">{TRUMP_CITE}</a>'
-TRUMP_SOURCE_TEXT = f"{TRUMP_CITE}, {TRUMP_URL}"
 PERMIT_URL = (
     "https://www.epa.gov/system/files/documents/2026-11/"
     "iaaap-emergency-permit-for-treatment-and-storage-final_redacted.pdf"
@@ -184,12 +186,28 @@ COURT_URL = (
     "court-injunction-army-planned-lead-azide-detonation"
 )
 COURT_CITE = "Iowa Public Radio, Nov. 20, 2026"
+# The court's Nov. 23 order lifting that hold, and Gov.-elect Rob Sand's Nov. 23 post, as
+# reported by Iowa Public Radio (published Nov. 22, 2026, 9:11 p.m. CST, "updated Monday
+# afternoon"; read in full from the maintainer's copy, saved Nov. 23, 9:16 p.m.). "In a Monday
+# order, judges lifted the stay"; "The ruling also found the Iowa Environmental Council and
+# Sierra Club hadn't proven that the EPA and Army had not adequately considered other options";
+# "Sand did not directly say whether he approved of the detonation".
+RULING_URL = (
+    "https://www.iowapublicradio.org/ipr-news/2026-11-23/"
+    "court-lifts-stay-block-iowa-lead-detonation"
+)
+RULING_CITE = "Iowa Public Radio, Nov. 23, 2026"
 # The hold and the government's latest filing. The last sentence names the days the maps
 # model, so it's built by court_pause() from the days actually built.
 # Newest first (maintainer's choice, Nov. 22, 2026).
 COURT_HOLD = (
+    "On Monday, Nov. 23, the 8th U.S. Circuit Court of Appeals lifted its hold on the "
+    "EPA\u2019s emergency permit for the blasts, allowing the Army to move forward; it found "
+    "the Iowa Environmental Council and the Sierra Club\u2019s Iowa chapter hadn\u2019t "
+    "proven that the EPA and the Army had not adequately considered other options, Iowa "
+    "Public Radio reported. "
     "Late on Nov. 22, 2026, the Army said the blasts are now scheduled for Wednesday, "
-    "Nov. 25. Earlier that day, the government asked the 8th U.S. Circuit Court of Appeals "
+    "Nov. 25. Earlier that day, the government asked the court "
     "to lift its hold on the EPA\u2019s emergency permit for the blasts and said the Army had "
     "postponed them to Tuesday, Nov. 24; the court hadn\u2019t ruled as of that filing. In a "
     "court filing on Nov. 21, the government said the Army intends to use an emergency "
@@ -254,12 +272,19 @@ RESPONSE_URL = (
 RESPONSE_CITE = "Government response, 8th Cir. No. 26-3374, Nov. 22, 2026"
 KCCI_URL = "https://www.kcci.com/article/lead-azide-bomb-detonation-iowa-tuesday/74499570"
 KCCI_CITE = "KCCI, Nov. 22, 2026"
+# The president's post (KCRG) and Sand's reply (Iowa Public Radio).
+TRUMP_SOURCE_HTML = (
+    f'<a href="{TRUMP_URL}" rel="noopener">{TRUMP_CITE}</a>; '
+    f'<a href="{RULING_URL}" rel="noopener">{RULING_CITE}</a>'
+)
+TRUMP_SOURCE_TEXT = f"{TRUMP_CITE}, {TRUMP_URL}; {RULING_CITE}, {RULING_URL}"
 # Newest first, like the paragraph.
 COURT_SOURCES_TEXT = (
-    f"{WEDNESDAY_SOURCE_TEXT}; {RESPONSE_CITE}, {RESPONSE_URL}; {FILING_CITE}, {FILING_URL}; "
-    f"{COURT_CITE}, {COURT_URL}"
+    f"{RULING_CITE}, {RULING_URL}; {WEDNESDAY_SOURCE_TEXT}; {RESPONSE_CITE}, {RESPONSE_URL}; "
+    f"{FILING_CITE}, {FILING_URL}; {COURT_CITE}, {COURT_URL}"
 )
 COURT_SOURCES_HTML = (
+    f'<a href="{RULING_URL}" rel="noopener">{RULING_CITE}</a>; '
     f"{WEDNESDAY_SOURCE_HTML}; "
     f'<a href="{RESPONSE_URL}" rel="noopener">{RESPONSE_CITE}</a>; '
     f'<a href="{FILING_URL}" rel="noopener">{FILING_CITE}</a>; '
@@ -271,6 +296,7 @@ TUESDAY_SOURCES_TEXT = (
 # Sources cited in plain text as "Citation, URL". The visible FAQ shows each as a link
 # on the citation (make_map_picker.linkify); JSON-LD and llms.txt keep the full address.
 CITED_SOURCES = (
+    (RULING_CITE, RULING_URL),
     (TRUMP_CITE, TRUMP_URL),
     (ARMY_WED_CITE, ARMY_WED_URL),
     (RESPONSE_CITE, RESPONSE_URL),
@@ -859,10 +885,10 @@ def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) ->
     return f"""<section id="summary" aria-labelledby="summary-h">
   <h2 id="summary-h">What the forecast shows</h2>
   <p class="caveat"><b>{CAVEAT}</b></p>
-  <h3>Court hold</h3>
+  <h3>Court case</h3>
   <p>{court_pause([m["day"] for m in more], lead)} Sources: {COURT_SOURCES_HTML}.</p>
   <h3>When will the detonation happen?</h3>
-  <p>{TRUMP_HOLD} Source: {TRUMP_SOURCE_HTML}.</p>
+  <p>{TRUMP_HOLD} Sources: {TRUMP_SOURCE_HTML}.</p>
   <p>{WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_HTML}.</p>
   <p><b>{TIME_HEAD}</b> {no_time}</p>
   <p><b>{EARLIER_HEAD}</b> {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_HTML}.
@@ -932,9 +958,9 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
         ),
         (
             "When is the lead azide blast at the Iowa Army Ammunition Plant?",
-            f"{TRUMP_HOLD} (Source: {TRUMP_SOURCE_TEXT}.) "
+            f"{TRUMP_HOLD} (Sources: {TRUMP_SOURCE_TEXT}.) "
             "The Army had said Wednesday, Nov. 25, 2026; it hasn\u2019t given a time. It had "
-            "planned Monday, Nov. 23. On Nov. 22, the government told the court, which has put "
+            "planned Monday, Nov. 23. On Nov. 22, the government told the court, which had put "
             "the permit on hold, that the Army had postponed it to Tuesday, Nov. 24. "
             f"{court_pause([m['day'] for m in more], lead)} (Sources: {COURT_SOURCES_TEXT}.) "
             f"{WHY_WEDNESDAY} (Source: {WEDNESDAY_SOURCE_TEXT}.) "
@@ -1002,17 +1028,17 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             (
                 "- Blast: on hold by President Trump\u2019s order (Nov. 23; see Presidential "
                 "hold); the Army had scheduled Wednesday, Nov. 25, 2026 (Army, Nov. 22), after "
-                "Monday, Nov. 23 and Tuesday, Nov. 24 (Nov. 22 court filing), with its permit on "
-                "hold by court order (see Court hold), Iowa Army Ammunition "
+                "Monday, Nov. 23 and Tuesday, Nov. 24 (Nov. 22 court filing); the court lifted "
+                "its hold on the permit on Nov. 23 (see Court case), Iowa Army Ammunition "
                 f"Plant, Middletown, Iowa ({ctx['lat']:.4f}, {ctx['lon']:.4f}). Blast times "
                 "modeled: 11 a.m. to 12:30 p.m. CST on " + ", ".join(modeled) + "."
             ),
             (
-                f"- Court hold: {court_pause([m['day'] for m in more], lead)} "
+                f"- Court case: {court_pause([m['day'] for m in more], lead)} "
                 f"Sources: {COURT_SOURCES_TEXT}"
             ),
             *([f"- Note: {ctx['pending_note']}"] if ctx.get("pending_note") else []),
-            f"- Presidential hold: {TRUMP_HOLD} Source: {TRUMP_SOURCE_TEXT}",
+            f"- Presidential hold: {TRUMP_HOLD} Sources: {TRUMP_SOURCE_TEXT}",
             f"- Why Wednesday: {WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_TEXT}",
             f"- Time: {time_note(ctx['built_txt'])} Sources: {HHS_URL}; {RESPONSE_URL}",
             f"- Earlier date, Tuesday: {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_TEXT}",

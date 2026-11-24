@@ -60,6 +60,13 @@ REFERENCES = [
         "Aerostat-based sampling of emissions from open burning and open detonation of military "
         "ordnance. <i>J. Hazard. Mater.</i>, <b>284</b>, 108&ndash;120."
     ),
+    "Barton, T., and R. Opsahl, 2026: Court lifts administrative stay, allowing lead azide "
+    "detonation to move forward. Iowa Public Radio, 22 November 2026, updated 23 November 2026, "
+    "accessed 23 November 2026, "
+    + _a(
+        "https://www.iowapublicradio.org/ipr-news/2026-11-23/court-lifts-stay-block-iowa-lead-detonation"
+    )
+    + ".",
     "Billingham, E., and T. Barton, 2026: What public health experts say about Friday&rsquo;s "
     "lead azide detonation. Iowa Public Radio, 19 November 2026, "
     f"{ACCESSED}, "
