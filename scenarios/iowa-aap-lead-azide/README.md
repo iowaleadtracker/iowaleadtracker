@@ -91,7 +91,7 @@ everywhere any model puts lead.
 
 The home page has a blast-time dropdown (8:30, 9:00 and 9:30 a.m.; opens on 9 a.m., the
 Army's announced time; 10 a.m. to 1 p.m. were dropped on Nov. 24 for faster updates), a
-"Lead in the air" dropdown (Low, Middle, High, EPA permit), and a U.S./metric switch. It loads
+"Lead in the air" dropdown (Low, U.S. Army mitigated, High, EPA permit), and a U.S./metric switch. It loads
 one map at a time, so the first visit stays small. The settings for the model runs (place,
 date, mass, weather models, and since Nov. 24 the turbulence-based cloud spread,
 `--spread turbulence`; see `TURBULENCE.md` in the repository root) are at the top of
@@ -491,7 +491,7 @@ The site shows three cases. In each, the share of lead below is airborne in brea
 | Site label | `--release-case` | Lead airborne | Pounds of lead (9,700 lb lead azide) | Basis |
 |---|---|---|---|---|
 | Low | `ap42-floor` | 7% | about 480 | lowest share consistent with EPA AP-42 blasting-cap tests |
-| Middle | `army-26` | 26% | about 1,790 | emission factor of 0.26 in the Army's Nov. 24, 2026 "Mitigated 0.26" plume maps (bunker plus countermeasures). Replaced the 20% DOE-HDBK-3010 precedent (`fine-20`) on Nov. 24 |
+| U.S. Army mitigated | `army-26` | 26% | about 1,790 | emission factor of 0.26 in the Army's Nov. 24, 2026 "Mitigated 0.26" plume maps (bunker plus countermeasures). Replaced the 20% DOE-HDBK-3010 precedent (`fine-20`) on Nov. 24 |
 | High | `tnt-fine` | 55% | about 3,800 | DOE-HDBK-3010 rule: respirable mass equal to the TNT equivalent |
 | EPA permit | `permit-100` | 100% | about 6,900 | emission factor 1.00 that EPA's Nov. 13, 2026 emergency permit (Appendix B) requires for the Army's plume maps; EPA calls it conservative |
 

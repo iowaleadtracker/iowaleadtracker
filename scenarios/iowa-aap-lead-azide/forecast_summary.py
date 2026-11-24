@@ -406,7 +406,7 @@ ARMY_COMPARE = (
     "are told to stay indoors; inside 100, also to wet-clean surfaces children touch. Those "
     "are the yellow and red levels here."
 )
-CASE_WORD = {"permit": "EPA permit", "high": "high", "mid": "middle", "low": "low"}
+CASE_WORD = {"permit": "EPA permit", "high": "high", "mid": "U.S. Army mitigated", "low": "low"}
 SAFETY_ANSWER = (
     "Don't use this map to decide if you're safe. Follow instructions from the Army, your "
     "county emergency management office, and state health officials."
@@ -815,7 +815,7 @@ def _town_text(f: Facts) -> str:
 def _air_text(f: Facts, model: str, n_models: str, *, html: bool) -> str:
     """Describe the highest one-hour air lead and how far it stays above DOE PAC-1."""
     c, order = f["cases"], _order(f)
-    names = [c[k]["label"].lower() if k != "permit" else "EPA permit" for k in order]
+    names = [CASE_WORD.get(k, c[k]["label"].lower()) for k in order]
     names_txt = ", ".join(names[:-1]) + ", and " + names[-1]
     *rest, last = order
 
@@ -893,10 +893,7 @@ def _text(f: Facts, ctx: dict[str, Any]) -> _Text:
             f"about {lb(f['azide_lb'])} pounds of lead azide in 68 drums, which holds about "
             f"{lb(f['lead_total_lb'])} pounds of lead"
         ),
-        pct=", ".join(
-            f"{c[k]['label'].lower() if k != 'permit' else 'EPA permit'} {pct[k]}"
-            for k in _order(f)
-        ),
+        pct=", ".join(f"{CASE_WORD.get(k, c[k]['label'].lower())} {pct[k]}" for k in _order(f)),
         weather=_permit_weather_text(f),
         forecast_line=(
             f"Forecast pulled {ctx['got_txt']} from {ctx['n_models']} weather models; the map "
@@ -1068,9 +1065,9 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
                 "spokesperson quoted by ABC News on Nov. 19, 2026 (EPA's permit lists 68 drums). "
                 "The share that gets airborne is unknown, so the map shows four cases: low "
                 f"{pct['low']} (based on "
-                f"EPA AP-42 blasting-cap tests), middle {pct['mid']} (the "
-                "emission factor of 0.26 in the Army's Nov. 24 \u201cmitigated\u201d plume "
-                "maps), high "
+                f"EPA AP-42 blasting-cap tests), U.S. Army mitigated "
+                f"{pct['mid']} (the emission factor of 0.26 in the Army's Nov. 24 "
+                "\u201cmitigated\u201d plume maps), high "
                 f"{pct['high']} (a rule from the same handbook for explosions), and EPA permit "
                 f"{pct.get('permit', '100%')} (the emission factor EPA requires for the Army's "
                 "official plume maps)."

@@ -407,14 +407,15 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
         (
             "Lead in the air",
             (
-                f"Low {p['low']}, middle {p['mid']}, high {p['high']}, EPA permit "
+                f"Low {p['low']}, U.S. Army mitigated {p['mid']}, high {p['high']}, EPA permit "
                 f"{p['permit']} of the lead; the rest stays at the site"
             ),
             (
                 "Low: floor from AP-42 "
                 "blasting-cap tests (MACTEC 2008). High: TNT-equivalent rule (DOE 1994; Steindler "
                 "and "
-                "Seefeldt 1980). Middle: the emission factor of 0.26 in the Army&rsquo;s Nov. "
+                "Seefeldt 1980). U.S. Army mitigated: the emission factor of 0.26 in the "
+                "Army&rsquo;s Nov. "
                 "24 &ldquo;Mitigated 0.26&rdquo; plume maps (U.S. Army 2026, Nov. 24 maps). "
                 "EPA permit: the emission factor of 1.00 EPA "
                 "requires "
@@ -559,8 +560,9 @@ def method_intro(pct: dict[str, str]) -> str:
         "lead gets airborne in a blast like this, so the map runs four cases instead of picking "
         f"one most likely number: {pct['permit']}, which EPA\u2019s permit requires the Army to "
         "assume for its official plume maps and which the map shows first as the worst case, "
-        f"and {pct['high']} (high), {pct['mid']} (middle) and {pct['low']} (low). The high and low "
-        "cases come from Department of Energy and Army\u2013EPA research; the middle case is the "
+        f"and {pct['high']} (high), {pct['mid']} (U.S. Army mitigated) and {pct['low']} (low). "
+        "The high and low cases come from Department of Energy and Army\u2013EPA research; the "
+        "U.S. Army mitigated case is the "
         "emission factor of 0.26 in the Army\u2019s Nov. 24 \u201cmitigated\u201d plume maps. "
         "That share is the most important number to check. The cloud "
         "spreads at a rate set "
@@ -578,7 +580,8 @@ CHANGES = [
     (
         "Nov. 24",
         (
-            "The middle case is now 26% of the lead airborne, the emission factor of 0.26 in "
+            "The middle case is now 26% of the lead airborne, labeled &ldquo;U.S. Army "
+            "mitigated&rdquo;: the emission factor of 0.26 in "
             "the Army&rsquo;s Nov. 24 &ldquo;Mitigated 0.26&rdquo; plume maps (U.S. Army "
             "2026, Nov. 24 maps), instead of the 20% upper-bound precedent from a Department "
             "of Energy handbook."

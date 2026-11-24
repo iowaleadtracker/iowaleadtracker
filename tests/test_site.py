@@ -841,7 +841,7 @@ def test_methodology_and_references_dialog() -> None:
     assert '<a href="https://narac.llnl.gov/hotspot" rel="noopener">HotSpot</a>' in note
     for part in ("Gaussian puff", "71.1%", "6,900 lb", "Church (1969)", "100%, which EPA"):
         assert part in note
-    assert "55% (high), 26% (middle) and 7% (low)" in note
+    assert "55% (high), 26% (U.S. Army mitigated) and 7% (low)" in note
 
 
 def test_change_log_follows_the_method_note() -> None:
