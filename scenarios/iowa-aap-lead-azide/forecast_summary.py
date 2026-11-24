@@ -1152,7 +1152,7 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             f"- Why Wednesday: {WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_TEXT}",
             f"- Earlier date, Tuesday: {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_TEXT}",
             f"- Earlier date, Monday: {WHY_MONDAY} Source: {ARMY_CITE}, {ARMY_URL}",
-            f"- Water misting: {MISTING} Source: Army public advisory, {ADVISORY_URL}",
+            f"- Mitigation: {MISTING} Source: {ADVISORY_NOV24_CITE}, {ADVISORY_NOV24_URL}",
             (
                 f"- Assumed: {t.amount} (Army Sustainment Command spokesperson via ABC News, "
                 f"19 Nov 2026; 68 drums per EPA's emergency permit). Share airborne: {t.pct}, "
