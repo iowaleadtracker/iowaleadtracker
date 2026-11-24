@@ -13,10 +13,14 @@ the rest of the model.
 > here are this project's runs of NOAA's public software and are not official NOAA
 > products.
 
-**Status.** The turbulence-based method is in the code as an option,
-`--spread turbulence`. The default, and the published maps on iowaleadtracker.com, still
-use the Briggs curves (`--spread briggs`). Switching the site is a separate decision for
-the maintainer; the effect on the Wednesday maps is shown below.
+**Status.** Since Nov. 24, 2026 the published maps on iowaleadtracker.com and the staged
+maps use the turbulence-based method: the site build (`make_map_picker.py`, `MODEL_ARGS`)
+passes `--spread turbulence`. The command line's default is still `--spread briggs`, so
+earlier runs and scripts reproduce unchanged; pass `--spread turbulence` to match the
+site. Saved forecasts pulled before the switch have no air temperature, so for those the
+build uses 2 °C, the forecast at the plant over Wednesday's blast window
+(`FALLBACK_AIR_TEMPERATURE_C`); refreshed forecasts include it. The site's Methodology and
+References dialog describes the change in its change log.
 
 Contents: [Summary](#summary) · [Using it](#using-it) · [Why change](#why-change) ·
 [The method](#the-method) · [How other models do it](#how-other-models-do-it) ·
@@ -429,24 +433,25 @@ The site's settings and its saved forecast (pulled Nov. 24, 05:25 UTC), replayed
 the site build does, Wednesday, Nov. 25: four weather models with the deposition spread,
 8 hours. Only the spread method differs (turbulence with a fixed 2 °C, Wednesday noon's
 forecast at the plant). Area figures are on the 8-hour map; distances are the farthest
-point from the plant. **The published maps still use Briggs.**
+point from the plant. The turbulence rows are what the site build makes from this
+forecast; the Briggs rows are what it made before Nov. 24.
 
 All four release cases at noon (farthest distance, area):
 
 | Case | Method | Ground ≥100 | Ground ≥40 | Ground ≥5 | Air ≥ PAC-1 | Air ≥1.5 µg/m³ | Air ≥0.15 µg/m³ | Peak hourly air |
 |---|---|---|---|---|---|---|---|---|
-| EPA permit (100%) | Briggs (published) | 12 mi, 14 sq mi | 20 mi, 30 sq mi | 127 mi, 483 sq mi | 19 mi, 27 sq mi | 134 mi, 973 sq mi | 137 mi, 1,510 sq mi | 915 µg/m³ |
+| EPA permit (100%) | Briggs (until Nov. 24) | 12 mi, 14 sq mi | 20 mi, 30 sq mi | 127 mi, 483 sq mi | 19 mi, 27 sq mi | 134 mi, 973 sq mi | 137 mi, 1,510 sq mi | 915 µg/m³ |
 | EPA permit (100%) | Turbulence | 7.3 mi, 6 sq mi | 13 mi, 16 sq mi | 53 mi, 323 sq mi | 10 mi, 12 sq mi | 128 mi, 1,267 sq mi | 145 mi, 3,777 sq mi | 624 µg/m³ |
-| High (55%) | Briggs (published) | 9.1 mi, 9 sq mi | 14 mi, 18 sq mi | 68 mi, 208 sq mi | 13 mi, 15 sq mi | 133 mi, 795 sq mi | 137 mi, 1,392 sq mi | 504 µg/m³ |
+| High (55%) | Briggs (until Nov. 24) | 9.1 mi, 9 sq mi | 14 mi, 18 sq mi | 68 mi, 208 sq mi | 13 mi, 15 sq mi | 133 mi, 795 sq mi | 137 mi, 1,392 sq mi | 504 µg/m³ |
 | High (55%) | Turbulence | 5.3 mi, 4 sq mi | 9.0 mi, 9 sq mi | 35 mi, 128 sq mi | 7.9 mi, 7 sq mi | 60 mi, 411 sq mi | 142 mi, 3,229 sq mi | 344 µg/m³ |
-| Middle (20%) | Briggs (published) | 5.1 mi, 3 sq mi | 8.6 mi, 8 sq mi | 30 mi, 54 sq mi | 8.1 mi, 6 sq mi | 83 mi, 246 sq mi | 135 mi, 1,168 sq mi | 183 µg/m³ |
+| Middle (20%) | Briggs (until Nov. 24) | 5.1 mi, 3 sq mi | 8.6 mi, 8 sq mi | 30 mi, 54 sq mi | 8.1 mi, 6 sq mi | 83 mi, 246 sq mi | 135 mi, 1,168 sq mi | 183 µg/m³ |
 | Middle (20%) | Turbulence | 1.9 mi, 1 sq mi | 5.3 mi, 4 sq mi | 17 mi, 30 sq mi | 3.9 mi, 2 sq mi | 32 mi, 100 sq mi | 136 mi, 2,271 sq mi | 125 µg/m³ |
-| Low (7%) | Briggs (published) | 0.6 mi, 0 sq mi | 4.6 mi, 2 sq mi | 14 mi, 18 sq mi | 2.8 mi, 1 sq mi | 28 mi, 46 sq mi | 133 mi, 875 sq mi | 64 µg/m³ |
+| Low (7%) | Briggs (until Nov. 24) | 0.6 mi, 0 sq mi | 4.6 mi, 2 sq mi | 14 mi, 18 sq mi | 2.8 mi, 1 sq mi | 28 mi, 46 sq mi | 133 mi, 875 sq mi | 64 µg/m³ |
 | Low (7%) | Turbulence | 0.0 mi, 0 sq mi | 1.9 mi, 1 sq mi | 9.0 mi, 9 sq mi | 1.3 mi, 0 sq mi | 14 mi, 20 sq mi | 77 mi, 598 sq mi | 44 µg/m³ |
 
 Towns from the site's list inside each zone, EPA permit case, noon:
 
-| Zone | Briggs (published) | Turbulence |
+| Zone | Briggs (until Nov. 24) | Turbulence |
 |---|---|---|
 | Ground ≥100 µg/ft² | Middletown | Middletown |
 | Ground ≥40 µg/ft² | Middletown, West Point | Middletown, West Point |
@@ -473,7 +478,7 @@ EPA permit case at each blast time the site offers (farthest distance):
 ![Wednesday noon, EPA permit case: Briggs and turbulence, ground and air](docs/turbulence/wednesday_permit_noon.png)
 
 Map pages, deposition view at the end of the run, EPA permit case, noon (left: Briggs as
-published; right: turbulence):
+published until Nov. 24; right: turbulence, published since):
 
 <p>
 <img src="docs/turbulence/screenshot_permit_noon_briggs.png" width="49%" alt="Map page, Briggs, deposition after 8 hours">
@@ -557,8 +562,9 @@ python3 puff_dispersal.py --lat 40.825518 --lon -91.266502 --time 2026-11-23T12:
 `--sigma-v-min 0.5` for the variants). Open-Meteo serves HRRR for recent days only, so
 these past days may no longer be available for download.
 
-Wednesday's maps: the site build's arguments (`make_map_picker.py`, `MODEL_ARGS`, with
-`--as-of` the saved forecast's pull time) plus `--spread turbulence --air-temperature-c 2`.
+Wednesday's maps: the site build's arguments (`make_map_picker.py`, `MODEL_ARGS`, which
+include `--spread turbulence`, plus `--air-temperature-c 2` for this forecast and `--as-of`
+its pull time); for the Briggs rows, `--spread briggs` instead.
 
 ## References
 

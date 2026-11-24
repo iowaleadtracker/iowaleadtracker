@@ -831,3 +831,40 @@ def test_methodology_and_references_dialog() -> None:
     for part in ("Gaussian puff", "71.1%", "6,900 lb", "Church (1969)", "100%, which EPA"):
         assert part in note
     assert "55% (high), 20% (middle) and 7% (low)" in note
+
+
+def test_change_log_follows_the_method_note() -> None:
+    """A dated change log sits right after the method note, newest first, with the spread switch."""
+    ctx = {
+        "pct": {"low": "7%", "mid": "20%", "high": "55%", "permit": "100%"},
+        "n_models": "two",
+        "got_txt": "now",
+        "shown_model": "GFS",
+        "models": [],
+    }
+    body = works_cited.render(ctx, "https://example.org/", "now")
+    head = f"<h3>{works_cited.CHANGES_HEAD}</h3>"
+    assert body.index(works_cited.method_intro(ctx["pct"])) < body.index(head)
+    assert body.index(head) < body.index("<h3>References</h3>")
+    days = [int(when.split()[-1]) for when, _ in works_cited.CHANGES]
+    assert days == sorted(days, reverse=True)
+    assert "turbulence" in works_cited.CHANGES[0][1]
+    assert works_cited.TURBULENCE_URL in works_cited.CHANGES[0][1]
+    assert "change log" in works_cited.method_intro(ctx["pct"])
+
+
+def test_site_maps_use_the_turbulence_spread() -> None:
+    """The public and staged maps pass --spread turbulence (TURBULENCE.md)."""
+    for args in (site.MODEL_ARGS, staged.model_args()):
+        assert args[args.index("--spread") + 1] == "turbulence"
+
+
+def test_saved_forecasts_without_temperature_get_the_fallback(tmp_path: Path) -> None:
+    """Old saved forecasts replay offline with a fixed temperature; new ones use their own."""
+    old = tmp_path / "old.json"
+    old.write_text('{"https://x/?hourly=wind_speed_10m": {}}', encoding="utf-8")
+    new = tmp_path / "new.json"
+    new.write_text('{"https://x/?hourly=wind_speed_10m,temperature_2m": {}}', encoding="utf-8")
+    assert site.temperature_args(old) == ["--air-temperature-c", site.FALLBACK_AIR_TEMPERATURE_C]
+    assert site.temperature_args(new) == []
+    assert site.temperature_args(tmp_path / "missing.json") == []  # a refresh downloads it

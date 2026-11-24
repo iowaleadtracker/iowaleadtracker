@@ -121,6 +121,7 @@ def build() -> None:
     pulled = site.retrieved_at(CACHE) if CACHE.exists() else None
     as_of = ("--as-of", pulled.isoformat()) if pulled else ()
     sky = site.sky_grid_args()
+    temperature = site.temperature_args(CACHE)  # before any download fills CACHE
     for day in DAYS:
         for case, release_case, name in site.CASES:
             for t in TIMES:
@@ -139,6 +140,7 @@ def build() -> None:
                     *("--time", f"{day}T{t}-06:00"),
                     *("--release-case", release_case),
                     *model_args(),
+                    *temperature,
                     *as_of,
                     *sky,
                     *("--home-url", site.SITE_URL),

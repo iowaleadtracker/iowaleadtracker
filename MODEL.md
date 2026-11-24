@@ -181,7 +181,8 @@ HYSPLIT and two tracer experiments: [`TURBULENCE.md`](TURBULENCE.md).
 In the checks so far the turbulence method matches measured spread better (Sagebrush
 0.78× measured against 0.55× for Briggs) and comes within 0.9–2.4× of HYSPLIT's zone
 distances on four past days, where the Briggs curves are up to 5× farther. The published
-maps still use `briggs`.
+maps use `turbulence` since Nov. 24, 2026 (`make_map_picker.py`, `MODEL_ARGS`); the
+command line's default is still `briggs`.
 
 ### Water spray at the source
 
