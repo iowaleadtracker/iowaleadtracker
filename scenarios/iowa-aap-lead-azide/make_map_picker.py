@@ -492,18 +492,26 @@ def run_maps(runs: list[Run], *, saved: bool) -> list[str]:
         return r, done
 
     skipped = []
-    with ThreadPoolExecutor(PARALLEL_RUNS if saved else 1) as pool:
-        for r, done in pool.map(one, runs):  # in order, so the log reads as before
-            print(f"building {r.which}", flush=True)
-            for line in done.stdout.splitlines() + done.stderr.splitlines():
-                if any(marker in line for marker in BUILD_LOG_MARKERS):
-                    print("  " + line)
-            if saved and done.returncode == NOT_SAVED_EXIT:
-                r.out.unlink(missing_ok=True)
-                skipped.append(r.which)
-                print("  skipped: its forecast isn't saved yet; the next refresh downloads it")
-            elif done.returncode:
-                raise SystemExit(f"model run failed for {r.which}:\n{done.stderr[-2000:]}")
+
+    def report(r: Run, done: subprocess.CompletedProcess[str]) -> None:
+        print(f"building {r.which}", flush=True)
+        for line in done.stdout.splitlines() + done.stderr.splitlines():
+            if any(marker in line for marker in BUILD_LOG_MARKERS):
+                print("  " + line)
+        if saved and done.returncode == NOT_SAVED_EXIT:
+            r.out.unlink(missing_ok=True)
+            skipped.append(r.which)
+            print("  skipped: its forecast isn't saved yet; the next refresh downloads it")
+        elif done.returncode:
+            raise SystemExit(f"model run failed for {r.which}:\n{done.stderr[-2000:]}")
+
+    if saved:
+        with ThreadPoolExecutor(PARALLEL_RUNS) as pool:
+            for r, done in pool.map(one, runs):  # in order, so the log reads as before
+                report(r, done)
+    else:  # downloading: one at a time, and a failure stops the rest
+        for r in runs:
+            report(*one(r))
     return skipped
 
 
