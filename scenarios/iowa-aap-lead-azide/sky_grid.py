@@ -23,7 +23,7 @@ Open-Meteo counts each point as a request: a download costs about 770 per model.
 3-hourly refresh that is at most about 4,600 a day while both models are needed (HRRR 4
 times, GFS twice), against a free limit of about 10,000 a day that the lead forecasts
 also use (README "Open-Meteo limits"). Requests are PAUSE seconds apart, for the
-per-minute limit.
+per-minute limit (PAUSE_WITH_KEY with a commercial key in OPEN_METEO_API_KEY).
 """
 
 from __future__ import annotations
@@ -31,6 +31,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import math
+import os
 import sys
 import time
 import urllib.parse
@@ -40,7 +41,7 @@ from typing import Any
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parents[1]))  # the repo root, for dispersal.met
 
-from dispersal.met import http_json  # noqa: E402
+from dispersal.met import API_KEY_ENV, http_json  # noqa: E402
 
 CACHE = HERE / "met_cache" / "sky_grid.json"
 EXPORT = HERE / "outputs" / "sky_grid.json"
@@ -59,6 +60,8 @@ HRRR_HOURS = 48  # HRRR is asked only for days whose maps end within this many h
 #: 6 hours and HRRR every hour, but each download costs about 770 requests (see above).
 MAX_AGE = {"ncep_hrrr_conus": dt.timedelta(hours=6), "gfs_seamless": dt.timedelta(hours=12)}
 PAUSE = 25.0  # seconds between requests: Open-Meteo also limits requests per minute
+#: The pause with a commercial key (OPEN_METEO_API_KEY), whose per-minute limit is higher.
+PAUSE_WITH_KEY = 2.0
 VARS = ("cloud_cover", "precipitation")
 #: The hours every map can need, in Central standard time: the earliest blast (11:00)
 #: to the latest (13:00) plus the 8-hour run and an hour to spare.
@@ -142,12 +145,17 @@ def saved_set(saved: dict[str, Any] | None, model: str) -> list[tuple[str, Any]]
     return [(u, saved[u]) for u in parts] if parts and saved else None
 
 
+def pause() -> float:
+    """Return the seconds between requests: shorter with a commercial key."""
+    return PAUSE_WITH_KEY if os.environ.get(API_KEY_ENV, "").strip() else PAUSE
+
+
 def download(model: str, todo: list[str]) -> list[tuple[str, Any]] | None:
     """Download a model's grid for ``todo``; None (and a message) if any request fails."""
     got = []
     for k, u in enumerate(urls(model, todo)):
         if k:
-            time.sleep(PAUSE)
+            time.sleep(pause())
         try:
             resp = http_json(u)
         except Exception as e:  # noqa: BLE001 - any failure: keep what is saved

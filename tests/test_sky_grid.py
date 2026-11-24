@@ -163,10 +163,20 @@ def test_hrrr_draws_the_days_it_covers(api: FakeApi) -> None:
 
 def test_requests_are_spaced_out(api: FakeApi, monkeypatch: pytest.MonkeyPatch) -> None:
     pauses: list[float] = []
+    monkeypatch.delenv("OPEN_METEO_API_KEY", raising=False)
     monkeypatch.setattr(sky_grid, "PAUSE", 25.0)
     monkeypatch.setattr(sky_grid.time, "sleep", pauses.append)
     sky_grid.fetch(DAYS, NOW - dt.timedelta(days=5))
     assert pauses == [25.0] * (len(api.asked) - 1)
+
+
+def test_shorter_pause_with_a_commercial_key(api: FakeApi, monkeypatch: pytest.MonkeyPatch) -> None:
+    pauses: list[float] = []
+    monkeypatch.setenv("OPEN_METEO_API_KEY", "test-key")
+    monkeypatch.setattr(sky_grid, "PAUSE", 25.0)
+    monkeypatch.setattr(sky_grid.time, "sleep", pauses.append)
+    sky_grid.fetch(DAYS, NOW - dt.timedelta(days=5))
+    assert pauses == [sky_grid.PAUSE_WITH_KEY] * (len(api.asked) - 1)
 
 
 def test_each_model_is_kept_for_its_own_time(api: FakeApi) -> None:

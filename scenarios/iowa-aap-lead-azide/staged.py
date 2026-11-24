@@ -116,7 +116,8 @@ def build() -> None:
     """Run the model for every day, case and time (downloads only if CACHE is missing).
 
     With CACHE saved, the runs go in parallel and skip times it lacks
-    (make_map_picker.run_maps); the first download runs them one after another.
+    (make_map_picker.run_maps). Without it, the first run downloads alone, then
+    run_maps downloads one run per start hour and runs the rest in parallel.
     """
     import make_map_picker as site  # noqa: PLC0415
 
@@ -164,9 +165,11 @@ def build() -> None:
         skipped = site.run_maps([run(j) for j in jobs], saved=True)
         if skipped:
             print(f"skipped {len(skipped)} staged maps without saved forecasts")
-    else:  # one at a time: each run's --as-of comes from the download before it
-        for j in jobs:
-            site.run_maps([run(j)], saved=False)
+    else:  # the first run downloads alone; the rest get --as-of from that pull
+        first = run(jobs[0])
+        site.run_maps([first], saved=False)
+        rest = [run(j) for j in jobs[1:]]
+        site.run_maps(rest, saved=False, downloaded=[site.start_hour(first)])
 
 
 def complete_times(day: str) -> list[str]:
