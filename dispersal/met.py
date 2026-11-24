@@ -78,6 +78,33 @@ class NotSaved(BaseException):
     """
 
 
+#: Environment variable holding an Open-Meteo commercial API key. When it is set,
+#: requests go to the customer servers with the key; without it, to the free API.
+API_KEY_ENV = "OPEN_METEO_API_KEY"
+
+#: Free API host -> commercial (customer) host.
+_CUSTOMER_HOSTS = {
+    "api.open-meteo.com": "customer-api.open-meteo.com",
+    "archive-api.open-meteo.com": "customer-archive-api.open-meteo.com",
+}
+
+
+def _request_url(url: str) -> str:
+    """Return the address to send ``url`` to: the customer API with the key, if one is set.
+
+    Everything else (the cache keys, the saved forecasts, error messages) uses the
+    free-API address, so the key is never written to a file and saved forecasts still
+    match whether or not a key is set.
+    """
+    key = os.environ.get(API_KEY_ENV, "").strip()
+    parts = urllib.parse.urlsplit(url)
+    host = _CUSTOMER_HOSTS.get(parts.netloc)
+    if not key or host is None:
+        return url
+    query = "&".join(q for q in (parts.query, urllib.parse.urlencode({"apikey": key})) if q)
+    return urllib.parse.urlunsplit(parts._replace(netloc=host, query=query))
+
+
 def _cache_lookup(url: str) -> Any:  # noqa: ANN401 - Open-Meteo JSON (object or list)
     """Return the cached response for ``url``, loading the cache file on first use."""
     if not MET_CACHE["path"]:
@@ -108,7 +135,8 @@ def http_json(url: str, timeout: float = 60, tries: int = 4) -> Any:  # noqa: AN
     """GET a JSON document, retrying rate limits (429) and server errors with backoff.
 
     With ``--met-cache``, responses are stored in (and replayed from) a JSON file, so a
-    rerun makes no requests.
+    rerun makes no requests. With OPEN_METEO_API_KEY set, Open-Meteo requests use the
+    commercial API (see ``_request_url``); ``url`` stays the cache key either way.
     """
     cached = _cache_lookup(url)
     if cached is not None:
@@ -117,7 +145,9 @@ def http_json(url: str, timeout: float = 60, tries: int = 4) -> Any:  # noqa: AN
         raise NotSaved(url)
     if not url.startswith("https://"):
         raise ValueError(f"refusing non-HTTPS URL {url!r}")
-    req = urllib.request.Request(url, headers={"User-Agent": "puff-dispersal/1.0"})  # noqa: S310 - HTTPS checked above
+    req = urllib.request.Request(  # noqa: S310 - HTTPS checked above
+        _request_url(url), headers={"User-Agent": "puff-dispersal/1.0"}
+    )
     for attempt in range(tries):
         try:
             with urllib.request.urlopen(req, timeout=timeout) as r:  # noqa: S310 - HTTPS checked above
