@@ -262,7 +262,7 @@ def day_num(day: str) -> int:
 def window_note(day: str) -> str:
     """Say another day's maps use the same blast times ("" for the planned and HHS days).
 
-    The planned day's time is covered by the "No time yet." paragraph (time_note).
+    The planned day's time is covered by the time paragraph (TIME_HEAD, time_note).
     """
     if day in (PLANNED_DAY, HHS_DAY):
         return ""
@@ -357,6 +357,17 @@ MISTING = (
     "of the airborne lead. Most of the cloud rises above the spray within seconds, and "
     "breathable-size particles slip around water drops. Soaking and the earth cover mainly "
     "keep lead from getting airborne at all, which points toward the lower cases."
+)
+# FEMA's Wireless Emergency Alert ("Imminent Threat Alert") sent to phones near the plant on
+# Nov. 24, 2026; text checked from the maintainer's screenshot. It has no public address;
+# news reports of it could not be opened from the build environment, so none is linked.
+FEMA_CITE = "FEMA emergency alert, Nov. 24"
+FEMA_ALERT = (
+    "\u201cPLANNED, CONTROLLED DETONATION at Iowa Army Ammunition Plant in Middletown Wed, "
+    "Nov 25 at 9 AM. Some residents within 5 MILES SW of the plant MAY BE EVACUATED. For 5 "
+    "to 20 miles; stay indoors with windows closed to avoid airborne lead dust, noise and "
+    "vibration. For routes and shelters monitor local media. FOR EVACUATION DETAILS call "
+    "FEMA:1-800-621-3362\u201d"
 )
 HHS_URL = "https://hhs.iowa.gov/media/19822/download?inline="
 HHS_LINK = f'<a href="{HHS_URL}" rel="noopener">Iowa HHS fact sheet</a>'
@@ -620,17 +631,19 @@ def facts(
 # Wording
 
 
-TIME_HEAD = "No time yet."
+TIME_HEAD = "Set for 9 a.m."
 # Subheading for the dates the Army planned before the current one, newest first.
 EARLIER_HEAD = "Earlier dates."
 
 
 def time_note(built_txt: str) -> str:
-    """Say the Army hasn't given a time, what's modeled, and where the window comes from."""
+    """Give the announced time, the official alert, what's modeled, and why the window."""
     return (
-        f"As of this update ({built_txt}), the Army hasn\u2019t announced a time for "
-        "Wednesday; it has said only \u201cWednesday morning\u201d (Acting Secretary of the "
-        f"Army on X). These maps model blasts {WINDOW_HOURLY}, from that morning through the "
+        f"As of this update ({built_txt}), a FEMA emergency alert sent to phones near the "
+        "plant on Nov. 24 sets the detonation for 9 a.m. Wednesday, Nov. 25 (FEMA emergency "
+        "alert, Nov. 24); the Army had said \u201cWednesday morning\u201d (Acting Secretary "
+        f"of the Army on X). The alert reads: {FEMA_ALERT} Weather can still delay the "
+        f"blasts. These maps open on 9 a.m. and also model blasts {WINDOW_HOURLY}, through the "
         "\u201capproximately noon\u201d that Iowa HHS\u2019s fact sheet gave for the earlier "
         "Monday, Nov. 23 date (Iowa HHS fact sheet). The permit has the Army update its "
         "estimate of where lead dust could go at least 48 hours before the blasts and hourly "
@@ -999,7 +1012,8 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
         (
             "When is the lead azide blast at the Iowa Army Ammunition Plant?",
             f"{TRUMP_HOLD} (Sources: {TRUMP_SOURCE_TEXT}.) "
-            "The Army says Wednesday morning, Nov. 25, 2026; it hasn\u2019t given a time. It had "
+            "FEMA says 9 a.m. Wednesday, Nov. 25, 2026; the Army had said Wednesday morning. "
+            "The Army had "
             "planned Monday, Nov. 23. On Nov. 22, the government told the court, which had put "
             "the permit on hold, that the Army had postponed it to Tuesday, Nov. 24. "
             f"{court_pause([m['day'] for m in more], lead)} (Sources: {COURT_SOURCES_TEXT}.) "
@@ -1066,8 +1080,9 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             "## Key facts",
             "",
             (
-                "- Blast: Wednesday morning, Nov. 25, 2026, no exact time (Acting Secretary of "
-                "the Army on X, Nov. 23, after the court ruling; President Trump had ordered a "
+                "- Blast: 9 a.m. Wednesday, Nov. 25, 2026 (FEMA emergency alert, Nov. 24; the "
+                "Acting Secretary of the Army had said Wednesday morning on X, Nov. 23, after the "
+                "court ruling; President Trump had ordered a "
                 "hold earlier that day, see Presidential hold); the Army had scheduled "
                 "Wednesday on Nov. 22 (Army, Nov. 22), after "
                 "Monday, Nov. 23 and Tuesday, Nov. 24 (Nov. 22 court filing); the court lifted its "
@@ -1083,8 +1098,8 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             f"- Presidential hold: {TRUMP_HOLD} Sources: {TRUMP_SOURCE_TEXT}",
             f"- Why Wednesday: {WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_TEXT}",
             (
-                f"- Time: {time_note(ctx['built_txt'])} Sources: {SECARMY_URL}; {HHS_URL}; "
-                f"{RESPONSE_URL}"
+                f"- Time: {time_note(ctx['built_txt'])} Sources: {FEMA_CITE} (no public "
+                f"address); {SECARMY_URL}; {HHS_URL}; {RESPONSE_URL}"
             ),
             f"- Earlier date, Tuesday: {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_TEXT}",
             f"- Earlier date, Monday: {WHY_MONDAY} Source: {ARMY_CITE}, {ARMY_URL}",

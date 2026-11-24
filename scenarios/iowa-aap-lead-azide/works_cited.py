@@ -172,6 +172,12 @@ REFERENCES = [
         "https://www.epa.gov/air-emissions-factors-and-quantification/ap-42-fifth-edition-volume-i-chapter-15-ordnance"
     )
     + ".",
+    (
+        "FEMA, 2026: Imminent Threat Alert: planned, controlled detonation at Iowa Army "
+        "Ammunition Plant in Middletown Wed, Nov 25 at 9 AM. Wireless Emergency Alert, Federal "
+        "Emergency Management Agency, 24 November 2026 (as received on a phone near the plant; "
+        "no public web address)."
+    ),
     "Finn, D., K. L. Clawson, R. M. Eckman, H. Liu, E. S. Russell, Z. Gao, and S. Brooks, "
     "2016: Project Sagebrush: Revisiting the value of the horizontal plume spread parameter "
     "&sigma;<sub>y</sub>. <i>J. Appl. Meteor. Climatol.</i>, <b>55</b>, 1305&ndash;1322, "
@@ -359,8 +365,8 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
         (
             "Charges",
             (
-                "Two equal blasts inside earth-covered magazines, modeled every hour from 9 a.m. "
-                "to 1 p.m. (the Army has said only Wednesday morning, with no time)"
+                "Two equal blasts inside earth-covered magazines at 9 a.m. Wednesday (FEMA "
+                "2026), also modeled every hour to 1 p.m. in case of a delay"
             ),
             (
                 "Two detonations at about noon on the earlier Monday date (Iowa HHS 2026); drums "
@@ -557,6 +563,13 @@ def method_intro(pct: dict[str, str]) -> str:
 #: entry for every change to the model, its settings or its sources.
 CHANGES_HEAD = "Change log"
 CHANGES = [
+    (
+        "Nov. 24",
+        (
+            "Maps open on a 9 a.m. blast, the time in FEMA&rsquo;s Nov. 24 emergency alert "
+            "(FEMA 2026); the later hours stay in case of a delay."
+        ),
+    ),
     (
         "Nov. 24",
         "The cloud now spreads with the forecast&rsquo;s turbulence instead of fixed "

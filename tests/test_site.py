@@ -264,7 +264,8 @@ def test_court_hold_leads_the_summary_and_faq(rendered: tuple[str, list, str]) -
     # Newest first: the president's Nov. 23 order, then the Army's Wednesday date.
     assert when.startswith(f"{fs.TRUMP_HOLD} (Sources: {fs.TRUMP_SOURCE_TEXT}.) ")
     assert (
-        "The Army says Wednesday morning, Nov. 25, 2026; it hasn\u2019t given a time. It had "
+        "FEMA says 9 a.m. Wednesday, Nov. 25, 2026; the Army had said Wednesday morning. "
+        "The Army had "
         "planned Monday, Nov. 23. On Nov. 22, the government told the court, which had put "
         "the permit on hold, that the Army had postponed it to Tuesday, Nov. 24."
     ) in when
@@ -486,10 +487,11 @@ def test_about_box_cites_the_tuesday_filing() -> None:
     ) in about
     assert "<p><b>$time_head</b> $time_note</p>" in about
     assert "<b>$earlier_head</b> $why_tuesday Sources: $tuesday_sources. $why_monday" in about
-    assert fs.TIME_HEAD == "No time yet."
+    assert fs.TIME_HEAD == "Set for 9 a.m."
     assert fs.time_note("X").startswith(
-        "As of this update (X), the Army hasn\u2019t announced a time for Wednesday; it has "
-        "said only \u201cWednesday morning\u201d (Acting Secretary of the Army on X)."
+        "As of this update (X), a FEMA emergency alert sent to phones near the plant on "
+        "Nov. 24 sets the detonation for 9 a.m. Wednesday, Nov. 25 (FEMA emergency alert, "
+        "Nov. 24)"
     )
 
 
@@ -674,7 +676,7 @@ def rendered_wednesday_lead(
 def test_wednesday_leads(rendered_wednesday_lead: tuple[str, list, str]) -> None:
     summary, faq, llms = rendered_wednesday_lead
     assert "<h3>Where the cloud goes on Wednesday, Nov. 25</h3>" in summary
-    assert fs.window_note("Wednesday, Nov. 25") == ""  # "No time yet." covers Wednesday
+    assert fs.window_note("Wednesday, Nov. 25") == ""  # TIME_HEAD's paragraph covers it
     for d in ("Monday, Nov. 23", "Tuesday, Nov. 24"):
         assert f"<h3>{d}, an earlier planned date</h3>" in summary
     assert summary.index("Wednesday, Nov. 25</h3>") < summary.index("Monday, Nov. 23, an")
@@ -764,8 +766,8 @@ def test_one_model_order_per_day(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     monkeypatch.setattr(site, "MAPS", tmp_path / "maps")
     monkeypatch.setattr(site.staged, "CACHE", tmp_path / "none.json")
     monkeypatch.setattr(site, "days_to_build", lambda: ["2026-11-25"])
-    # 5:40 p.m. CST Tuesday: 11:00 Wednesday is 17.3 h away, noon 18.3 h (rounded: 17 h, 19 h)
-    pulled = dt.datetime.fromisoformat("2026-11-24T17:40-06:00")
+    # 3:40 p.m. CST Tuesday: 9:00 Wednesday (the default) is 17.3 h away, 10:00 18.3 h
+    pulled = dt.datetime.fromisoformat("2026-11-24T15:40-06:00")
     monkeypatch.setattr(site, "retrieved_at", lambda *_a, **_k: pulled)
     orders = set()
 
@@ -779,7 +781,8 @@ def test_one_model_order_per_day(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 
     monkeypatch.setattr(site.subprocess, "run", fake_run)
     site.build()
-    assert orders == {site.WEATHER}  # one order for the whole day: noon is over 18 h out
+    # one order for the whole day, picked at the default 9:00 (under 18 h out): HRRR first
+    assert orders == {site.WEATHER_SHORT_RANGE}
 
 
 def test_president_and_governor_elect_after_the_ruling() -> None:
@@ -849,8 +852,10 @@ def test_change_log_follows_the_method_note() -> None:
     assert body.index(head) < body.index("<h3>References</h3>")
     days = [int(when.split()[-1]) for when, _ in works_cited.CHANGES]
     assert days == sorted(days, reverse=True)
-    assert "turbulence" in works_cited.CHANGES[0][1]
-    assert works_cited.TURBULENCE_URL in works_cited.CHANGES[0][1]
+    assert any(
+        "turbulence" in what and works_cited.TURBULENCE_URL in what
+        for _, what in works_cited.CHANGES
+    )
     assert "change log" in works_cited.method_intro(pct)
 
 
@@ -869,3 +874,13 @@ def test_saved_forecasts_without_temperature_get_the_fallback(tmp_path: Path) ->
     assert site.temperature_args(old) == ["--air-temperature-c", site.FALLBACK_AIR_TEMPERATURE_C]
     assert site.temperature_args(new) == []
     assert site.temperature_args(tmp_path / "missing.json") == []  # a refresh downloads it
+
+
+def test_time_note_quotes_fema_alert() -> None:
+    """The announced 9 a.m. time comes with the official alert's own instructions, verbatim."""
+    note = fs.time_note("X")
+    assert fs.FEMA_ALERT in note
+    assert "1-800-621-3362" in fs.FEMA_ALERT
+    assert "MAY BE EVACUATED" in fs.FEMA_ALERT
+    assert site.DEFAULT == staged.DEFAULT_TIME == "09:00"
+    assert any(r.startswith("FEMA, 2026:") for r in works_cited.REFERENCES)

@@ -44,7 +44,7 @@ TZ = ZoneInfo("America/Chicago")
 DAYS = ["2026-11-25", "2026-11-26", "2026-11-27"]
 TIMES = ["09:00", "10:00", "11:00", "12:00", "13:00"]  # forecast_summary.WINDOW
 DEFAULT_DAY = DAYS[0]
-DEFAULT_TIME = "12:00"
+DEFAULT_TIME = "09:00"  # make_map_picker.DEFAULT
 #: The first model is shown; the other makes up the weather-model spread.
 WEATHER = "gfs_seamless,ecmwf_ifs025"
 MODELS_TEXT = "GFS and ECMWF only (GFS shown; ECMWF in the weather-model spread)"
@@ -62,8 +62,9 @@ WHEN_HTML = (
     "until the Eighth Circuit agrees and Governor-elect Rob Sand agrees to the operation. "
     'Later that day, <a href="{ruling}">the 8th Circuit cleared the way</a> for the '
     'detonation. That evening, <a href="{secarmy}">the Acting Secretary of the Army said</a> '
-    "the detonation will be Wednesday morning, as previously scheduled. The Army hasn&rsquo;t "
-    "announced a time, and Thursday and Friday haven&rsquo;t been announced."
+    "the detonation will be Wednesday morning, as previously scheduled. On Nov. 24, a FEMA "
+    "emergency alert set it for 9 a.m. Wednesday. Thursday and Friday haven&rsquo;t been "
+    "announced."
 )
 
 
