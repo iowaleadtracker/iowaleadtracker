@@ -215,8 +215,11 @@ REFERENCES = [
     "U.S. EPA, "
     + _a("https://www.epa.gov/sites/default/files/2020-11/documents/b15_eo7_draft_feb08.pdf")
     + ".",
-    "McFate, L., 2026: Postponed: Lead azide detonation. U.S. Army Sustainment Command, "
+    "McFate, L., 2026a: Postponed: Lead azide detonation. U.S. Army Sustainment Command, "
     f"19 November 2026, {ACCESSED}, " + _a("https://www.army.mil/article/296926") + ".",
+    "McFate, L., 2026b: Public safety advisory: Controlled, mitigated detonation of unstable "
+    "[lead azide]. U.S. Army Sustainment Command, 24 November 2026, accessed 24 November "
+    "2026, " + _a("https://www.army.mil/article/297039") + ".",
     "NOAA, 2025: Radar images: Reflectivity. NOAA JetStream, last updated 11 March 2025, "
     "accessed 23 November 2026, " + _a("https://www.noaa.gov/jetstream/reflectivity") + ".",
     (
@@ -365,8 +368,8 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
         (
             "Charges",
             (
-                "Two equal blasts inside earth-covered magazines at 9 a.m. Wednesday (FEMA "
-                "2026), also modeled every hour to 1 p.m. in case of a delay"
+                "Two equal blasts inside earth-covered magazines at about 9 a.m. Wednesday "
+                "(McFate 2026b; FEMA 2026), also modeled every hour to 1 p.m. in case of a delay"
             ),
             (
                 "Two detonations at about noon on the earlier Monday date (Iowa HHS 2026); drums "
@@ -566,9 +569,9 @@ CHANGES = [
     (
         "Nov. 24",
         (
-            "Maps open on a 9 a.m. blast, the time in FEMA&rsquo;s Nov. 24 emergency alert "
-            "(FEMA 2026), with 8:30 and 9:30 a.m. added; the later hours stay in case of a "
-            "delay."
+            "Maps open on a 9 a.m. blast, the time in the Army&rsquo;s Nov. 24 public safety "
+            "advisory and FEMA&rsquo;s emergency alert (McFate 2026b; FEMA 2026), with 8:30 and "
+            "9:30 a.m. added; the later hours stay in case of a delay."
         ),
     ),
     (
