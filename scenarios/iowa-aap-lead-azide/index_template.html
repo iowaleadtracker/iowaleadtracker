@@ -126,6 +126,7 @@
 </header>
 <dialog id="note" aria-labelledby="note-h">
   <h2 id="note-h" tabindex="-1" autofocus>About this map</h2>
+  <p><b>$time_head</b> $time_note</p>
   <p>$about_who</p>
   <p><b>Source code.</b> The model, the saved weather forecasts, and every assumption are
     public on <a href="$source_url" rel="noopener">GitHub</a>, free to check, run, and improve.</p>
@@ -133,7 +134,7 @@
     into the air or how the Army will set up the charges. This map assumes <span class="u-us">about
     9,700 pounds</span><span class="u-metric" hidden>about 4,400 kg (9,700 pounds)</span> of lead
     azide in 68 drums (the amount an Army spokesperson gave), which the Army plans to set off in two blasts
-    inside earth-covered bunkers (no time has been given). The Iowa Lead Tracker lets you simulate four
+    inside earth-covered bunkers at about 9 a.m. Wednesday (Army, Nov. 24). The Iowa Lead Tracker lets you simulate four
     possibilities for how much of the lead gets into the air: Low ($pct_low), Middle
     ($pct_mid), High ($pct_high), or EPA permit ($pct_permit). In each case, the lead in
     the air comes in pieces small enough to breathe in, and the rest stays at the plant.</p>
@@ -147,19 +148,18 @@
     numbers would give a very different map.</p>
   <p><b>Water misting.</b> $misting Source:
     <a href="$advisory_url" rel="noopener">Army public advisory, Nov. 18, 2026</a>.</p>
-  <p><b>Court case.</b> $court_pause Sources:
-    $court_sources.</p>
-  <p><b>When.</b> $trump_hold Sources: $trump_source. $why_wednesday Source:
-    $wednesday_source.</p>
-  <p><b>$time_head</b> $time_note</p>
-  <p><b>$earlier_head</b> $why_tuesday Sources: $tuesday_sources. $why_monday Source:
-    <a href="$army_url" rel="noopener">$army_cite</a>.</p>
   <p><b>The weather is a forecast.</b> The winds come from $n_models weather forecasts, current as
     of $got_txt. If the wind changes, the cloud will go somewhere else. The shaded areas show where
     the cloud <i>could</i> go, not where it <i>will</i> go.</p>
   <p><b>Don&rsquo;t use this map to decide if you&rsquo;re safe.</b> $not_checked
     A place that looks clear may not be. A place that looks affected may get no lead you could measure. For instructions, orders to
     stay inside or leave, and health questions, follow $who.</p>
+  <p><b>How the date was set.</b> $trump_hold Sources: $trump_source. $why_wednesday Source:
+    $wednesday_source.</p>
+  <p><b>Court case.</b> $court_pause Sources:
+    $court_sources.</p>
+  <p><b>$earlier_head</b> $why_tuesday Sources: $tuesday_sources. $why_monday Source:
+    <a href="$army_url" rel="noopener">$army_cite</a>.</p>
   <p><b>Contact.</b> $contact_html</p>
   <p><b>$mentions_head</b> $mentions_html</p>
   <p><b>Privacy.</b> The site counts visits with Cloudflare Web Analytics, which uses no cookies.

@@ -49,8 +49,8 @@ python3 tools/compare_site.py /tmp/site-before scenarios/iowa-aap-lead-azide/out
   iowaleadtracker.github.io rebuilds from `main` too. `make_map_picker.py --deploy` and
   `--publish` (by hand) also change the live site. Never commit `deploy.local.json` (it
   holds the Cloudflare account ID; it is git-ignored) or any token.
-- **Dated statements need rechecking.** Every build restamps "As of this update, the
-  Army hasn't announced a time for Wednesday" (it has said "Wednesday morning"); the summary and About dialog also report the
+- **Dated statements need rechecking.** Every build restamps "As of this update, a FEMA
+  emergency alert ... sets the detonation for 9 a.m. Wednesday"; the summary and About dialog also report the
   court pause and the Iowa HHS time. Check the
   news before merging to `main` (which deploys) or deploying by hand.
 - **Keep tests offline.** No test may use the network (see `tests/README.md`).

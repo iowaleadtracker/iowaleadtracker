@@ -84,7 +84,7 @@ def test_picker_page(built: Path) -> None:
     assert f'<a href="{forecast_summary.TRUMP_URL}">President Trump said</a>' in page
     assert "until the Eighth Circuit agrees and Governor-elect Rob Sand agrees" in page
     assert "the detonation will be Wednesday morning" in page
-    assert "The Army hasn&rsquo;t announced a time" in page.replace("\n", " ")
+    assert "a FEMA emergency alert set it for 9 a.m. Wednesday" in page.replace("\n", " ")
     assert "Thursday and Friday haven&rsquo;t been announced." in page
     assert f'<a href="{html.escape(forecast_summary.ARMY_WED_URL)}">the Army said</a>' in page
     assert f'<a href="{forecast_summary.RESPONSE_URL}">court filing on Nov. 22</a>' in page

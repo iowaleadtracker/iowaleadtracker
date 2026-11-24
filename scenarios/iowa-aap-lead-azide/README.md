@@ -8,7 +8,9 @@ Monday, Nov. 23, "until the latest possible moment prior to a forecasted tempera
 which "would risk further destabilization of the material." Source: Army Sustainment Command,
 "Postponed: Lead Azide Detonation," https://www.army.mil/article/296926. The article gives no
 time, so the maps cover 9 a.m. to 1 p.m., hourly. (On Nov. 23 the Acting Secretary of the
-Army said on X that the detonation will be "Wednesday morning," still with no clock time.)
+Army said on X that the detonation will be "Wednesday morning," still with no clock time.
+On Nov. 24 a FEMA emergency alert sent to phones near the plant set it for "Wed, Nov 25 at
+9 AM"; the maps now open on 9 a.m.)
 
 Inputs: about 9,700 lb of lead azide in 68 drums (Army Sustainment Command spokesperson via
 ABC News, 19 Nov 2026; 68 drums per EPA's emergency permit, which redacts the weight), two
@@ -88,7 +90,7 @@ everywhere any model puts lead.
 ## The site (iowaleadtracker.com)
 
 The home page has a blast-time dropdown (9:00 a.m. to 1:00 p.m., every hour; opens on
-noon), a
+9 a.m., FEMA's announced time), a
 "Lead in the air" dropdown (Low, Middle, High, EPA permit), and a U.S./metric switch. It loads
 one map at a time, so the first visit stays small. The settings for the model runs (place,
 date, mass, weather models, and since Nov. 24 the turbulence-based cloud spread,

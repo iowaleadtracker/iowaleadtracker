@@ -262,7 +262,7 @@ def day_num(day: str) -> int:
 def window_note(day: str) -> str:
     """Say another day's maps use the same blast times ("" for the planned and HHS days).
 
-    The planned day's time is covered by the "No time yet." paragraph (time_note).
+    The planned day's time is covered by the time paragraph (TIME_HEAD, time_note).
     """
     if day in (PLANNED_DAY, HHS_DAY):
         return ""
@@ -358,11 +358,31 @@ MISTING = (
     "breathable-size particles slip around water drops. Soaking and the earth cover mainly "
     "keep lead from getting airborne at all, which points toward the lower cases."
 )
+# The Army's public safety advisory of Nov. 24, 2026 (Lori McFate, Army Sustainment Command;
+# read in full from the maintainer's PDF of the page, printed Nov. 24, 9:28 a.m. CST). Quoted
+# or closely paraphrased in time_note: "on Wednesday, November 25, 2026 at approximately
+# 9:00 a.m. CST"; "A more precise time will be communicated after evaluating changing weather
+# patterns"; "FEMA is supporting the recommended relocation for all residents of Middletown,
+# Iowa, and immediate surrounding impacted areas commencing on Tuesday, 24 November 2026.
+# This defines the evacuation zone as a 5-mile cone extending southwest of IAAAP"; "the
+# evacuation extends one mile beyond the dispersion path"; "Residents who live outside the
+# recommended evacuation zone are encouraged to shelter in place. Best practices include
+# closing all windows and doors"; "The FEMA Helpline is available for all individuals who
+# have questions 24/7 at 1-800-621-3362"; maps "Six hours in advance of the detonation and
+# every hour thereafter until the detonation".
+ADVISORY_NOV24_URL = "https://www.army.mil/article/297039"
+ADVISORY_NOV24_CITE = "Army public safety advisory, Nov. 24"
+ARMY_MAPS_URL = "https://www.army.mil/asc#org-iowa-army-ammunition-plant"
+# FEMA's Wireless Emergency Alert ("Imminent Threat Alert") sent to phones near the plant on
+# Nov. 24, 2026, with the same 9 a.m. time; text checked from the maintainer's screenshot. It
+# has no public address, so it is named but not linked.
+FEMA_CITE = "FEMA emergency alert, Nov. 24"
 HHS_URL = "https://hhs.iowa.gov/media/19822/download?inline="
 HHS_LINK = f'<a href="{HHS_URL}" rel="noopener">Iowa HHS fact sheet</a>'
 # Sources named in parentheses without their address, as "(Iowa HHS fact sheet)". The page
 # links each name (time_note_html, and make_map_picker.linkify for the FAQ).
 NAMED_SOURCES = (
+    (ADVISORY_NOV24_CITE, ADVISORY_NOV24_URL),
     ("Acting Secretary of the Army on X", SECARMY_URL),
     ("Iowa HHS fact sheet", HHS_URL),
     ("Nov. 22 court filing", RESPONSE_URL),
@@ -620,21 +640,30 @@ def facts(
 # Wording
 
 
-TIME_HEAD = "No time yet."
+TIME_HEAD = "When."
 # Subheading for the dates the Army planned before the current one, newest first.
 EARLIER_HEAD = "Earlier dates."
 
 
 def time_note(built_txt: str) -> str:
-    """Say the Army hasn't given a time, what's modeled, and where the window comes from."""
+    """Give the key facts first: the time, the official evacuation and shelter advice, the maps.
+
+    The timeline that led here (court case, presidential hold, earlier dates) comes after it
+    on the page, under its own headings.
+    """
     return (
-        f"As of this update ({built_txt}), the Army hasn\u2019t announced a time for "
-        "Wednesday; it has said only \u201cWednesday morning\u201d (Acting Secretary of the "
-        f"Army on X). These maps model blasts {WINDOW_HOURLY}, from that morning through the "
-        "\u201capproximately noon\u201d that Iowa HHS\u2019s fact sheet gave for the earlier "
-        "Monday, Nov. 23 date (Iowa HHS fact sheet). The permit has the Army update its "
-        "estimate of where lead dust could go at least 48 hours before the blasts and hourly "
-        "from six hours before (Nov. 22 court filing)."
+        f"As of this update ({built_txt}), the Army plans the controlled detonation for about "
+        "9 a.m. CST Wednesday, Nov. 25, and says it will give a more precise time after "
+        "evaluating changing weather (Army public safety advisory, Nov. 24). FEMA supports "
+        "relocating all residents of Middletown and the immediate surrounding areas, starting "
+        "Nov. 24; the evacuation zone is a 5-mile cone extending southwest of the plant, "
+        "reaching one mile beyond the Army\u2019s modeled dispersion path. The Army encourages "
+        "people outside the zone to shelter in place, closing all windows and doors. "
+        "Questions about the evacuation area or help: FEMA Helpline 1-800-621-3362 (24/7) or "
+        "DisasterAssistance.gov. A FEMA emergency alert sent to phones near the plant gave the "
+        "same 9 a.m. time (FEMA emergency alert, Nov. 24). The Army says it will post updated "
+        f"maps at {ARMY_MAPS_URL} six hours before the detonation and every hour after that. "
+        f"These maps open on 9 a.m. and also model blasts {WINDOW_HOURLY} in case of a delay."
     )
 
 
@@ -643,7 +672,12 @@ def time_note_html(built_txt: str) -> str:
     out = time_note(built_txt)
     for name, url in NAMED_SOURCES:
         out = out.replace(f"({name})", f'(<a href="{url}" rel="noopener">{name}</a>)')
-    return out
+    return out.replace(
+        ARMY_MAPS_URL, f'<a href="{ARMY_MAPS_URL}" rel="noopener">army.mil/asc</a>'
+    ).replace(
+        "DisasterAssistance.gov",
+        '<a href="https://www.disasterassistance.gov/" rel="noopener">DisasterAssistance.gov</a>',
+    )
 
 
 def lb(x: float) -> str:
@@ -925,14 +959,8 @@ def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) ->
     return f"""<section id="summary" aria-labelledby="summary-h">
   <h2 id="summary-h">What the forecast shows</h2>
   <p class="caveat"><b>{CAVEAT}</b></p>
-  <h3>Court case</h3>
-  <p>{court_pause([m["day"] for m in more], lead)} Sources: {COURT_SOURCES_HTML}.</p>
   <h3>When will the detonation happen?</h3>
-  <p>{TRUMP_HOLD} Sources: {TRUMP_SOURCE_HTML}.</p>
-  <p>{WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_HTML}.</p>
-  <p><b>{TIME_HEAD}</b> {no_time}</p>
-  <p><b>{EARLIER_HEAD}</b> {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_HTML}.
-    {WHY_MONDAY} Source: <a href="{ARMY_URL}" rel="noopener">{ARMY_CITE}</a>.</p>
+  <p>{no_time}</p>
   {f'<p class="caveat">{ctx["pending_note"]}</p>' if ctx.get("pending_note") else ""}
   <h3>Where the cloud goes{on}</h3>
   <p>{note + " " if note else ""}{wind_sentence(f)} {path_sentence(f)} The path can shift with \
@@ -962,6 +990,13 @@ below it is
   <p>Not very. Nobody outside the Army knows how much lead will get into the air, and the wind
     forecast will change before the blasts. The four cases show the range. Use the map
     above to see each case and blast time. Last updated {built}.</p>
+  <h3>How the date was set</h3>
+  <p>{TRUMP_HOLD} Sources: {TRUMP_SOURCE_HTML}.</p>
+  <p>{WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_HTML}.</p>
+  <p><b>Court case.</b> {court_pause([m["day"] for m in more], lead)} Sources: \
+{COURT_SOURCES_HTML}.</p>
+  <p><b>{EARLIER_HEAD}</b> {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_HTML}.
+    {WHY_MONDAY} Source: <a href="{ARMY_URL}" rel="noopener">{ARMY_CITE}</a>.</p>
 </section>"""
 
 
@@ -998,13 +1033,13 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
         ),
         (
             "When is the lead azide blast at the Iowa Army Ammunition Plant?",
-            f"{TRUMP_HOLD} (Sources: {TRUMP_SOURCE_TEXT}.) "
-            "The Army says Wednesday morning, Nov. 25, 2026; it hasn\u2019t given a time. It had "
+            time_note(ctx["built_txt"])
+            + f" (Source: {ADVISORY_NOV24_CITE}, {ADVISORY_NOV24_URL}.) How the date was set: "
+            f"{TRUMP_HOLD} (Sources: {TRUMP_SOURCE_TEXT}.) The Army had "
             "planned Monday, Nov. 23. On Nov. 22, the government told the court, which had put "
             "the permit on hold, that the Army had postponed it to Tuesday, Nov. 24. "
             f"{court_pause([m['day'] for m in more], lead)} (Sources: {COURT_SOURCES_TEXT}.) "
-            f"{WHY_WEDNESDAY} (Source: {WEDNESDAY_SOURCE_TEXT}.) "
-            + time_note(ctx["built_txt"])
+            f"{WHY_WEDNESDAY} (Source: {WEDNESDAY_SOURCE_TEXT}.)"
             + f" Earlier dates: {WHY_TUESDAY} (Sources: {TUESDAY_SOURCES_TEXT}.) "
             f"{WHY_MONDAY} (Source: {ARMY_CITE}, {ARMY_URL}.)",
         ),
@@ -1066,8 +1101,10 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             "## Key facts",
             "",
             (
-                "- Blast: Wednesday morning, Nov. 25, 2026, no exact time (Acting Secretary of "
-                "the Army on X, Nov. 23, after the court ruling; President Trump had ordered a "
+                "- Blast: about 9 a.m. CST Wednesday, Nov. 25, 2026 (Army public safety "
+                "advisory, Nov. 24; FEMA emergency alert, Nov. 24; the "
+                "Acting Secretary of the Army had said Wednesday morning on X, Nov. 23, after the "
+                "court ruling; President Trump had ordered a "
                 "hold earlier that day, see Presidential hold); the Army had scheduled "
                 "Wednesday on Nov. 22 (Army, Nov. 22), after "
                 "Monday, Nov. 23 and Tuesday, Nov. 24 (Nov. 22 court filing); the court lifted its "
@@ -1076,16 +1113,16 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
                 f"modeled: {WINDOW_HOURLY} CST, on " + ", ".join(modeled) + "."
             ),
             (
+                f"- Time and official advice: {time_note(ctx['built_txt'])} Sources: "
+                f"{ADVISORY_NOV24_URL}; {FEMA_CITE} (no public address)"
+            ),
+            (
                 f"- Court case: {court_pause([m['day'] for m in more], lead)} "
                 f"Sources: {COURT_SOURCES_TEXT}"
             ),
             *([f"- Note: {ctx['pending_note']}"] if ctx.get("pending_note") else []),
             f"- Presidential hold: {TRUMP_HOLD} Sources: {TRUMP_SOURCE_TEXT}",
             f"- Why Wednesday: {WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_TEXT}",
-            (
-                f"- Time: {time_note(ctx['built_txt'])} Sources: {SECARMY_URL}; {HHS_URL}; "
-                f"{RESPONSE_URL}"
-            ),
             f"- Earlier date, Tuesday: {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_TEXT}",
             f"- Earlier date, Monday: {WHY_MONDAY} Source: {ARMY_CITE}, {ARMY_URL}",
             f"- Water misting: {MISTING} Source: Army public advisory, {ADVISORY_URL}",
