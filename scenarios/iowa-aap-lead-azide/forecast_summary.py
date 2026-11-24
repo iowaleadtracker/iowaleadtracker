@@ -249,8 +249,8 @@ COURT_HOLD = (
 PLANNED_DAY = "Wednesday, Nov. 25"
 #: The blast times the maps model, in words; must match make_map_picker.TIMES and
 #: staged.TIMES (tests/test_site.py checks).
-WINDOW = "8:30 a.m. to 1 p.m."
-WINDOW_HOURLY = "at 8:30, 9:00 and 9:30 a.m., then every hour to 1 p.m."
+WINDOW = "8:30 to 9:30 a.m."
+WINDOW_HOURLY = "at 8:30, 9:00 and 9:30 a.m."
 HHS_DAY = "Monday, Nov. 23"
 
 

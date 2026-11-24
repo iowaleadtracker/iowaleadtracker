@@ -2,7 +2,7 @@
 
 A set of maps at a hard-to-guess address on the main site, for people who have the link:
 blasts on Wednesday, Nov. 25, Thursday, Nov. 26 and Friday, Nov. 27, 2026, at 8:30,
-9:00 and 9:30 a.m. and then hourly to 1 p.m., for all four release cases, with only the
+9:00 and 9:30 a.m., for all four release cases, with only the
 GFS and ECMWF forecasts (GFS shown, ECMWF in the weather-model spread).
 
 These maps are not private. Nothing on the site links here, the pages are noindex, and the
@@ -41,7 +41,7 @@ CACHE = HERE / "met_cache" / "staged_forecasts.json"
 TZ = ZoneInfo("America/Chicago")
 #: Wednesday (the Army's announced date, Nov. 22) through Friday.
 DAYS = ["2026-11-25", "2026-11-26", "2026-11-27"]
-TIMES = ["08:30", "09:00", "09:30", "10:00", "11:00", "12:00", "13:00"]  # site.TIMES
+TIMES = ["08:30", "09:00", "09:30"]  # site.TIMES
 DEFAULT_DAY = DAYS[0]
 DEFAULT_TIME = "09:00"  # make_map_picker.DEFAULT
 #: The first model is shown; the other makes up the weather-model spread.

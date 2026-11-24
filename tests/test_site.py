@@ -501,10 +501,10 @@ def test_about_box_leads_with_when() -> None:
 def test_window_words_match_the_blast_times() -> None:
     """The page's blast-time words match the times both sites build."""
     for times in (site.TIMES, staged.TIMES):
-        assert [site.label(t) for t in (times[0], times[-1])] == ["8:30 a.m.", "1:00 p.m."]
-        assert fs.WINDOW == "8:30 a.m. to 1 p.m."
-        assert fs.WINDOW_HOURLY == "at 8:30, 9:00 and 9:30 a.m., then every hour to 1 p.m."
-        assert times == ["08:30", "09:00", "09:30", "10:00", "11:00", "12:00", "13:00"]
+        assert [site.label(t) for t in (times[0], times[-1])] == ["8:30 a.m.", "9:30 a.m."]
+        assert fs.WINDOW == "8:30 to 9:30 a.m."
+        assert fs.WINDOW_HOURLY == "at 8:30, 9:00 and 9:30 a.m."
+        assert times == ["08:30", "09:00", "09:30"]
     assert site.DEFAULT in site.TIMES
     assert staged.DEFAULT_TIME in staged.TIMES
 
@@ -559,7 +559,7 @@ def test_read_maps_days_and_model_counts(tmp_path: Path, monkeypatch: pytest.Mon
     for c, _, _ in site.CASES:
         for t in site.TIMES:
             (tmp_path / site.map_name(c, t)).write_text(_fake_map(four), encoding="utf-8")
-            if t != "13:00":  # Thursday is missing one time
+            if t != site.TIMES[-1]:  # Thursday is missing one time
                 (tmp_path / site.map_name(c, t, thu)).write_text(
                     _fake_map(four[:3]), encoding="utf-8"
                 )
@@ -567,7 +567,7 @@ def test_read_maps_days_and_model_counts(tmp_path: Path, monkeypatch: pytest.Mon
     assert list(maps.days) == ["2026-11-25"]  # partly built Thursday left out
     assert site.lead_day(maps) == site.DATE == site.LEAD_DAY  # opens on Wednesday
     for c, _, _ in site.CASES:
-        (tmp_path / site.map_name(c, "13:00", thu)).write_text(
+        (tmp_path / site.map_name(c, site.TIMES[-1], thu)).write_text(
             _fake_map(four[:3]), encoding="utf-8"
         )
     maps = site.read_maps()

@@ -68,14 +68,14 @@ PAST_DAYS = [("2026-11-23", "mon"), ("2026-11-24", "tue"), ("2026-11-26", "thu")
 LEAD_DAYS = ["2026-11-25"]
 LEAD_DAY = LEAD_DAYS[0]
 LAT, LON = 40.825518, -91.266502
-# 8:30 to 1 p.m. (forecast_summary.WINDOW_HOURLY): on Nov. 24 a FEMA emergency alert set the
-# time at 9 a.m., so half an hour either side of it, then hourly to the "approximately noon"
-# Iowa HHS had given for Nov. 23, in case of a delay (maintainer's choice, Nov. 24).
+# 8:30, 9:00 and 9:30 a.m. (forecast_summary.WINDOW_HOURLY): the Army's Nov. 24 advisory and
+# FEMA's alert give about 9 a.m., so half an hour either side of it. Fewer times make each
+# refresh and deploy faster (maintainer's choice, Nov. 24; 10 a.m. to 1 p.m. were dropped).
 # Each start hour sizes its own wind grid, so each costs one Open-Meteo grid download per
 # weather model and day (README "Open-Meteo limits"); other minutes within an hour are free
 # (9:30 uses 9:00's). A time whose forecast isn't saved yet is skipped until the next refresh
 # (run_maps), so adding one never makes a deploy download.
-TIMES = ["08:30", "09:00", "09:30", "10:00", "11:00", "12:00", "13:00"]
+TIMES = ["08:30", "09:00", "09:30"]
 DEFAULT = "09:00"  # FEMA's Nov. 24 emergency alert: "Wed, Nov 25 at 9 AM"
 NOON_HOUR = 12
 # (id used in file names and the URL, --release-case, label). See README "Release cases".

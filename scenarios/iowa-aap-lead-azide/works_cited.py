@@ -369,7 +369,8 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
             "Charges",
             (
                 "Two equal blasts inside earth-covered magazines at about 9 a.m. Wednesday "
-                "(McFate 2026b; FEMA 2026), also modeled every hour to 1 p.m. in case of a delay"
+                "(McFate 2026b; FEMA 2026), also modeled at 8:30 and 9:30 a.m. in case the time "
+                "shifts"
             ),
             (
                 "Two detonations at about noon on the earlier Monday date (Iowa HHS 2026); drums "
@@ -570,8 +571,9 @@ CHANGES = [
         "Nov. 24",
         (
             "Maps open on a 9 a.m. blast, the time in the Army&rsquo;s Nov. 24 public safety "
-            "advisory and FEMA&rsquo;s emergency alert (McFate 2026b; FEMA 2026), with 8:30 and "
-            "9:30 a.m. added; the later hours stay in case of a delay."
+            "advisory and FEMA&rsquo;s emergency alert (McFate 2026b; FEMA 2026). Blast times "
+            "are now 8:30, 9:00 and 9:30 a.m. only, so forecast updates go out faster; the 10 "
+            "a.m. to 1 p.m. maps were dropped."
         ),
     ),
     (
