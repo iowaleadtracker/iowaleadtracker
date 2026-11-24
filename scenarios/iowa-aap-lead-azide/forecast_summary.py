@@ -247,7 +247,7 @@ COURT_HOLD = (
 
 # The planned day (the Army's Nov. 22 announcement), which the summary leads with by
 # default (facts()["day"] can name another), and the earlier day Iowa HHS gave "approximately
-# noon" for. The window (WINDOW) now spans the Army's "Wednesday morning" and that noon.
+# noon" for. The window (WINDOW) is half an hour either side of the Army's and FEMA's 9 a.m.
 PLANNED_DAY = "Wednesday, Nov. 25"
 #: The blast times the maps model, in words; must match make_map_picker.TIMES and
 #: staged.TIMES (tests/test_site.py checks).

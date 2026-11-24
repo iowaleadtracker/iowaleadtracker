@@ -1077,3 +1077,38 @@ def test_cache_only_runs_never_download(monkeypatch: pytest.MonkeyPatch) -> None
     monkeypatch.setitem(met.MET_CACHE, "path", None)
     with pytest.raises(met.NotSaved):
         met.http_json("https://api.open-meteo.com/v1/forecast?latitude=0")
+
+
+def _labeled_runs(tmp_path: Path) -> list[site.Run]:
+    """Return runs labeled as build() labels them: the planned day without its date."""
+    runs = []
+    for day in (site.DATE, "2026-11-26"):
+        for t in ("08:30", "09:00"):
+            for case in ("low", "permit"):
+                which = f"{case} {t}" if day == site.DATE else f"{day} {case} {t}"
+                cmd = ["--time", f"{day}T{t}-06:00"]
+                runs.append(site.Run(which, cmd, tmp_path / f"{day}-{case}-{t}.html"))
+    return runs
+
+
+def test_a_new_time_may_be_skipped_until_the_next_refresh(tmp_path: Path) -> None:
+    """Every map of a start hour skipped (a time added since the refresh) is allowed."""
+    runs = _labeled_runs(tmp_path)
+    site.check_skipped(runs, [r.which for r in runs if r.which.endswith("08:30")])
+
+
+def test_some_maps_of_one_hour_skipped_stops_the_build(tmp_path: Path) -> None:
+    """Some maps of one start hour built and others skipped: the saved forecasts are broken."""
+    runs = _labeled_runs(tmp_path)
+    with pytest.raises(SystemExit, match="only some maps built: 2026-11-26T08"):
+        site.check_skipped(runs, ["2026-11-26 low 08:30"])
+
+
+def test_the_default_time_skipped_stops_the_build(tmp_path: Path) -> None:
+    """The planned day's default time skipped would leave the page without its first map."""
+    runs = _labeled_runs(tmp_path)
+    gone = [r.which for r in runs if r.which in ("low 09:00", "permit 09:00")]
+    with pytest.raises(SystemExit, match="default-time maps skipped: low 09:00, permit 09:00"):
+        site.check_skipped(runs, gone)
+    # another day's 9:00 alone is a whole start hour, so it may wait for the refresh
+    site.check_skipped(runs, [r.which for r in runs if r.which.startswith("2026-11-26")])
