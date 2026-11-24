@@ -77,6 +77,14 @@ ACCESSED = "accessed 20 November 2026"
 
 # Alphabetical by first author, then year. HTML.
 REFERENCES = [
+    "Associated Press, 2026: Federal appeals court clears way for U.S. Army to detonate "
+    "degraded bomb-making material in Iowa. Published by KCRG-TV9, 23 November 2026, accessed "
+    "23 November 2026, "
+    + _a(
+        "https://www.kcrg.com/2026/11/23/"
+        "federal-appeals-court-clears-way-us-army-detonate-degraded-bomb-making-material-iowa/"
+    )
+    + ".",
     (
         "Aurell, J., B. K. Gullett, D. Tabor, R. K. Williams, W. Mitchell, and M. R. Kemme, 2015: "
         "Aerostat-based sampling of emissions from open burning and open detonation of military "
