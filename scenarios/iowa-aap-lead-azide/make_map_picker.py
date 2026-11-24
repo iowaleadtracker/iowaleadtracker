@@ -81,7 +81,7 @@ NOON_HOUR = 12
 # (id used in file names and the URL, --release-case, label). See README "Release cases".
 CASES = [
     ("low", "ap42-floor", "Low"),
-    ("mid", "fine-20", "Middle"),
+    ("mid", "army-26", "Middle"),
     ("high", "tnt-fine", "High"),
     ("permit", "permit-100", "EPA permit"),
 ]

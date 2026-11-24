@@ -220,7 +220,7 @@ def test_contact_in_about_citation_and_llms(rendered: tuple[str, list, str]) -> 
     assert f'href="{insta}" rel="noopener"' in works_cited.CONTACT_HTML
     assert insta in works_cited.CONTACT_TEXT
     ctx = {
-        "pct": {"low": "7%", "mid": "20%", "high": "55%", "permit": "100%"},
+        "pct": {"low": "7%", "mid": "26%", "high": "55%", "permit": "100%"},
         "n_models": "seven",
         "got_txt": "November 21, 2026, at 5:54 p.m. CST",
         "shown_model": "RRFS",
@@ -825,7 +825,7 @@ def test_methodology_and_references_dialog() -> None:
     page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
     assert '<h2 id="cite-h" tabindex="-1" autofocus>Methodology and References</h2>' in page
     assert 'aria-haspopup="dialog">Methodology and References</button>' in page
-    pct = {"low": "7%", "mid": "20%", "high": "55%", "permit": "100%"}
+    pct = {"low": "7%", "mid": "26%", "high": "55%", "permit": "100%"}
     ctx = {
         "pct": pct,
         "n_models": "two",
@@ -841,12 +841,12 @@ def test_methodology_and_references_dialog() -> None:
     assert '<a href="https://narac.llnl.gov/hotspot" rel="noopener">HotSpot</a>' in note
     for part in ("Gaussian puff", "71.1%", "6,900 lb", "Church (1969)", "100%, which EPA"):
         assert part in note
-    assert "55% (high), 20% (middle) and 7% (low)" in note
+    assert "55% (high), 26% (middle) and 7% (low)" in note
 
 
 def test_change_log_follows_the_method_note() -> None:
     """A dated change log sits right after the method note, newest first, with the spread switch."""
-    pct = {"low": "7%", "mid": "20%", "high": "55%", "permit": "100%"}
+    pct = {"low": "7%", "mid": "26%", "high": "55%", "permit": "100%"}
     ctx: dict[str, Any] = {
         "pct": pct,
         "n_models": "two",

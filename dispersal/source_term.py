@@ -69,9 +69,10 @@ RELEASE_CASES = {
         "7% of the lead airborne, all respirable: the lowest share consistent with "
         "EPA AP-42 Ch. 15 blasting-cap tests (low case)"
     ),
-    "fine-20": (
-        "20% of the lead airborne, all respirable: the upper-bound precedent for detonations "
-        "of nuclear weapon assemblies in DOE-HDBK-3010, sec. 4.1, footnote 2 (middle case)"
+    "army-26": (
+        "26% of the lead airborne, all respirable: the 'Mitigated 0.26' value on the Army's "
+        "Nov. 24, 2026 public advisory plume maps, read as an emission factor; the advisory "
+        "doesn't define it (middle case)"
     ),
     "tnt-fine": (
         "airborne respirable mass equal to the TNT-equivalent mass, the DOE-HDBK-3010 "
@@ -86,7 +87,7 @@ RELEASE_CASES = {
 
 FINE_CASES: dict[str, float | None] = {
     "ap42-floor": 0.07,
-    "fine-20": 0.20,
+    "army-26": 0.26,
     "tnt-fine": None,  # None = TNT-equivalent
     "permit-100": 1.00,
 }
