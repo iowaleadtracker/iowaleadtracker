@@ -97,9 +97,9 @@ posted 9:54 a.m. CST) and converted it to HYSPLIT's format with HYSPLIT's `api2a
 
 **Observations.** To check the analysis we used:
 
-- hourly and 20-minute reports from the airport stations at Burlington (KBRL), Fort
-  Madison (KFSW), Mount Pleasant (KMPZ) and Ottumwa (KOTM), from the Iowa Environmental
-  Mesonet;
+- hourly and 20-minute reports from 18 airports within 85 miles (Burlington, Fort Madison,
+  Mount Pleasant, Keokuk, Quincy, Hannibal and Kirksville, Mo., and others) and Iowa DOT
+  road weather stations (3 reported near the hour), from the Iowa Environmental Mesonet;
 - the Davenport NWS radar's wind profile (KDVN, VAD Wind Profile product, 9:00 and
   9:55 a.m.), from NOAA's Level III archive on AWS;
 - the 6 a.m. CST weather balloons at Davenport (DVN) and Lincoln, Ill. (ILX);
@@ -223,6 +223,37 @@ each station.*
 | Fort Madison (KFSW), 9:15 a.m. | 12 mi S | 10 kt from 010° | 8 kt from 034° |
 | Mount Pleasant (KMPZ), 9:15 a.m. | 17 mi NW | 7 kt from 050° | 8 kt from 044° |
 | Ottumwa (KOTM), 8:53 a.m. | 64 mi W | 6 kt from 030° | not sampled |
+
+**Across the region the analysis has no bias.** To see whether the single-station misses
+are noise or a pattern, we compared the analysis with every airport and Iowa DOT road weather
+station within 85 miles that reported near 9 and 10 a.m.: 21 stations, from Burlington to
+Kirksville, Mo., including Keokuk, Hannibal, Mo., and the Cantril road station on the cloud's
+path (Table 3b; all of them in [`data/obs/station_vs_hrrr_analysis.csv`](data/obs/station_vs_hrrr_analysis.csv)).
+Reports within 20 minutes of the hour are vector-averaged; the analysis is its 10 m wind at
+each station.
+
+*Table 3b. HRRR analysis minus observed surface wind, 21 stations within 85 miles.
+Positive direction error: the analysis wind comes from farther clockwise.*
+
+| Hour | Mean direction error | Median | Mean absolute | Mean speed error |
+|---|---|---|---|---|
+| 9 a.m. | +3° | 0° | 12° | +0.2 kt |
+| 10 a.m. | +2° | 0° | 8° | 0.0 kt |
+
+The analysis is unbiased in direction and speed, and typically within 8–12° at any one
+station. The largest misses are next to the plant (Burlington airport, −33° at 9 a.m.;
+Fort Madison, +24°) and at the Mount Pleasant road station (+42° to +49°, with a wind about
+half the airport's 2 miles away, which suggests a sheltered sensor). The stations closest to
+the plant averaged about 35° at 10 a.m. (Burlington airport and road station, Fort Madison,
+Mount Pleasant), close to the analysis's 29° at the plant and about 8° more northerly than
+the tracker's 43°.
+
+Other sources we looked for and couldn't use yet: 1-minute airport winds (not yet in the
+Iowa Environmental Mesonet's archive for today), the West Point soil moisture station on the
+cloud's path (no data), the Lincoln, Ill., Des Moines and St. Louis radars (115–150 miles
+away, too far to see the lowest kilometer near the plant), and particle monitors (EPA AirNow
+and low-cost PurpleAir sensors; their data services need keys or hosts this project hasn't
+set up, and fine-particle readings wouldn't measure lead).
 
 **Sky: sunnier than the "overcast" label, as sunny as the forecast's sunshine.** Every
 station reported no clouds below 12,000 ft except a few at 3,700 ft at Ottumwa. The
