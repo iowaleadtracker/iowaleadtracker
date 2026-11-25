@@ -181,13 +181,21 @@ def test_source_code_is_linked(rendered: tuple[str, list, str]) -> None:
     assert works_cited.SOURCE_URL.startswith("https://github.com/iowaleadtracker/")
 
 
+def dialog(page: str, dialog_id: str) -> str:
+    """Return the template's ``<dialog id=...>`` element (note: About; cite: Methodology)."""
+    start = page.index(f'<dialog id="{dialog_id}"')
+    return page[start : page.index("</dialog>", start)]
+
+
 def test_court_pause_note_in_about_dialog() -> None:
-    """The About dialog reports the Eighth Circuit case, with links to the reports."""
+    """About gives the Eighth Circuit ruling in one linked sentence; Methodology the full case."""
     page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
-    start = page.index('<dialog id="note"')  # the "About this map" dialog
-    about = page[start : page.index("</dialog>", start)]
-    assert "<b>Court case.</b> $court_pause" in about
-    assert "$court_sources" in about
+    about, cite = dialog(page, "note"), dialog(page, "cite")
+    assert "<b>Court case.</b> $court_short" in about
+    assert f'href="{fs.RULING_URL}"' in fs.COURT_SHORT_HTML
+    assert "$court_pause" not in about
+    assert "<b>Court case.</b> $court_pause" in cite
+    assert "$court_sources" in cite
     assert f'href="{fs.COURT_URL}"' in fs.COURT_SOURCES_HTML
     assert f'href="{fs.RULING_URL}"' in fs.COURT_SOURCES_HTML
     assert fs.RULING_URL.startswith("https://www.kcrg.com/")  # the AP report
@@ -477,19 +485,48 @@ def test_two_days_court_paragraph(rendered_two_days: tuple[str, list, str]) -> N
 
 
 def test_about_box_leads_with_when() -> None:
-    """The About box opens with the time and official advice; the timeline comes last."""
+    """The About box opens with the time and official advice and keeps to the essentials.
+
+    The timeline (how the date was set, the court case, earlier dates) and the details
+    behind the four cases are in the Methodology and References dialog (Nov. 25, 2026).
+    """
     page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
-    start = page.index('<dialog id="note"')
-    about = " ".join(page[start : page.index("</dialog>", start)].split())
-    first = about.index("<p>", about.index("About this map</h2>"))
-    assert about[first:].startswith("<p><b>$time_head</b> $time_note</p>")
+    about = " ".join(dialog(page, "note").split())
+    cite = " ".join(dialog(page, "cite").split())
+    first = about.index("About this map</h2>") + len("About this map</h2>")
+    assert about[first:].startswith(" $about_time <p><b>Court case.</b>")
+    lead = fs.about_time_html("X")
+    assert lead.startswith(f"<p><b>{fs.TIME_HEAD}</b> As of this update (X)")
+    for part in ("5-mile cone", "shelter in place", "1-800-621-3362", "army.mil/asc"):
+        assert part in lead
+    assert lead.index("1-800-621-3362") < lead.index("army.mil/asc")  # help before maps
+
+    # the same sentences as the FAQ's and llms.txt's time paragraph, only split up
+    def plain(html_text: str) -> str:
+        return " ".join(re.sub(r"<[^>]+>|<p>|</p>", " ", html_text).split())
+
+    about_text = plain(re.sub(r"<b>[^<]*</b>", "", lead))
+    for sentence in plain(fs.time_note_html("X")).split(". "):
+        assert sentence in about_text
+    heads = [
+        "<b>Court case.</b>",
+        "<b>What the map shows.</b>",
+        "<b>Don&rsquo;t use this map to decide if you&rsquo;re safe.</b>",
+        "<b>Who made it.</b> $about_who",
+        "<b>Contact.</b>",
+        "<b>Privacy.</b>",
+    ]
+    assert [about.index(h) for h in heads] == sorted(about.index(h) for h in heads)
     history = (
         "<b>How the date was set.</b> $trump_hold Sources: $trump_source. $why_wednesday "
         "Source: $wednesday_source.</p>"
     )
-    assert about.index("Don&rsquo;t use this map") < about.index(history)
-    assert about.index(history) < about.index("<b>Court case.</b>")
-    assert "<b>$earlier_head</b> $why_tuesday Sources: $tuesday_sources. $why_monday" in about
+    for moved in (history, "$why_tuesday", "$precedent", "$misting", "$release_point"):
+        assert moved not in about
+        assert moved in cite
+    assert cite.index(history) < cite.index("<b>Court case.</b> $court_pause")
+    assert "<b>$earlier_head</b> $why_tuesday Sources: $tuesday_sources. $why_monday" in cite
+    assert cite.index("$why_monday") < cite.index("$cite_html")
     assert fs.TIME_HEAD == "When."
     assert fs.time_note("X").startswith(
         "As of this update (X), the Army plans the controlled detonation for about 9 a.m. CST "
@@ -807,13 +844,11 @@ def test_president_and_governor_elect_after_the_ruling() -> None:
     assert (fs.RULING_CITE, fs.RULING_URL) in fs.CITED_SOURCES
 
 
-def test_mentions_in_about_box() -> None:
-    """News mentions sit in the About box after Contact and link the original outlet."""
+def test_mentions_in_methodology() -> None:
+    """News mentions sit in Methodology and References (not About) and link the outlet."""
     page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
-    start = page.index('<dialog id="note"')
-    about = page[start : page.index("</dialog>", start)]
-    assert "<p><b>$mentions_head</b> $mentions_html</p>" in about
-    assert about.index("$contact_html") < about.index("$mentions_html")
+    assert "$mentions_html" not in dialog(page, "note")
+    assert "<p><b>$mentions_head</b> $mentions_html</p>" in dialog(page, "cite")
     assert works_cited.MENTIONS_HEAD == "Mentions of the Iowa Lead Tracker."
     for outlet, date, url in works_cited.MENTIONS:
         assert f'<a href="{url}" rel="noopener">{outlet}</a>, {date}' in works_cited.MENTIONS_HTML
@@ -1112,3 +1147,18 @@ def test_the_default_time_skipped_stops_the_build(tmp_path: Path) -> None:
         site.check_skipped(runs, gone)
     # another day's 9:00 alone is a whole start hour, so it may wait for the refresh
     site.check_skipped(runs, [r.which for r in runs if r.which.startswith("2026-11-26")])
+
+
+def test_about_safety_paragraph_says_no_warranty_and_no_verdicts() -> None:
+    """The safety paragraph: not official or checked, no verdicts, warranty, or liability."""
+    about = " ".join(dialog(site.PAGE_TEMPLATE.read_text(encoding="utf-8"), "note").split())
+    i = about.index("<b>Don&rsquo;t use this map to decide if you&rsquo;re safe.</b>")
+    para = about[i : about.index("</p>", i)]
+    for part in (
+        "$not_checked",
+        "can&rsquo;t tell you whether any particular home or place will get lead",
+        "It comes with no warranty",
+        "Its maker isn&rsquo;t responsible for any loss or harm from using it",
+        "follow $who",
+    ):
+        assert part in para

@@ -130,8 +130,38 @@
 </header>
 <dialog id="note" aria-labelledby="note-h">
   <h2 id="note-h" tabindex="-1" autofocus>About this map</h2>
-  <p><b>$time_head</b> $time_note</p>
-  <p><b>The numbers are estimates.</b> The Army estimates that 26% of the lead gets into the air
+  $about_time
+  <p><b>Court case.</b> $court_short</p>
+  <p><b>What the map shows.</b> Where lead from <span class="u-us">about 9,700
+    pounds</span><span class="u-metric" hidden>about 4,400 kg (9,700 pounds)</span> of lead
+    azide could travel and settle, for four guesses of how much of the lead gets into the air:
+    Low ($pct_low), U.S. Army mitigated ($pct_mid, the Army&rsquo;s own estimate), High
+    ($pct_high), and EPA permit ($pct_permit, what EPA requires the Army to assume). No one has
+    measured a blast like this, and different numbers would give a very different map. The
+    winds come from $n_models weather forecasts, current as of $got_txt. If the wind changes,
+    the cloud will go somewhere else. The shaded areas show where the cloud <i>could</i> go,
+    not where it <i>will</i> go.</p>
+  <p><b>Don&rsquo;t use this map to decide if you&rsquo;re safe.</b> $not_checked It doesn&rsquo;t
+    speak for them, and it can&rsquo;t tell you whether any particular home or place will get
+    lead. It comes with no warranty: it may be wrong or out of date. Its maker isn&rsquo;t
+    responsible for any loss or harm from using it; you use it at your own risk. A place that looks clear
+    may not be. A place that looks affected may get no lead you could measure. For
+    instructions, orders to stay inside or leave, and health questions, follow $who.</p>
+  <p><b>Who made it.</b> $about_who The model, the saved weather forecasts, and every assumption
+    are public on <a href="$source_url" rel="noopener">GitHub</a>, free to check, run, and
+    improve. The details behind the four cases, the Army&rsquo;s mitigation, and how the date
+    was set are under Methodology and References.</p>
+  <p><b>Contact.</b> $contact_html</p>
+  <p><b>Privacy.</b> The site counts visits with Cloudflare Web Analytics, which uses no cookies.
+    Map tiles load from Esri&rsquo;s servers, which see your IP address and the part of the map you
+    view. Only your browser keeps your choice of units and map style.</p>
+  <p class="meta">No warranty. Last updated $built_txt.</p>
+  <form method="dialog"><button type="submit">OK</button></form>
+</dialog>
+<dialog id="cite" class="wide" aria-labelledby="cite-h">
+  <h2 id="cite-h" tabindex="-1" autofocus>Methodology and References</h2>
+  <h3>Background</h3>
+  <p><b>The four cases.</b> The Army estimates that 26% of the lead gets into the air
     with its mitigation (an emission factor of 0.26, in its
     <a href="$army_maps_pdf" rel="noopener">Nov. 24 &ldquo;Mitigated 0.26&rdquo; maps</a>), but no
     one has measured a blast like this. This map assumes <span class="u-us">about
@@ -155,30 +185,14 @@
   <p><b>Mitigation.</b> $misting Sources:
     <a href="$advisory_nov24_url" rel="noopener">Army public safety advisory, Nov. 24, 2026</a>;
     $briefing_sources_html.</p>
-  <p><b>Source code and author.</b> $about_who The model, the saved weather forecasts, and
-    every assumption are public on <a href="$source_url" rel="noopener">GitHub</a>, free to check, run, and improve.</p>
-  <p><b>The weather is a forecast.</b> The winds come from $n_models weather forecasts, current as
-    of $got_txt. If the wind changes, the cloud will go somewhere else. The shaded areas show where
-    the cloud <i>could</i> go, not where it <i>will</i> go.</p>
-  <p><b>Don&rsquo;t use this map to decide if you&rsquo;re safe.</b> $not_checked
-    A place that looks clear may not be. A place that looks affected may get no lead you could measure. For instructions, orders to
-    stay inside or leave, and health questions, follow $who.</p>
+  <h3>Timeline</h3>
   <p><b>How the date was set.</b> $trump_hold Sources: $trump_source. $why_wednesday Source:
     $wednesday_source.</p>
   <p><b>Court case.</b> $court_pause Sources:
     $court_sources.</p>
   <p><b>$earlier_head</b> $why_tuesday Sources: $tuesday_sources. $why_monday Source:
     <a href="$army_url" rel="noopener">$army_cite</a>.</p>
-  <p><b>Contact.</b> $contact_html</p>
   <p><b>$mentions_head</b> $mentions_html</p>
-  <p><b>Privacy.</b> The site counts visits with Cloudflare Web Analytics, which uses no cookies.
-    Map tiles load from Esri&rsquo;s servers, which see your IP address and the part of the map you
-    view. Only your browser keeps your choice of units and map style.</p>
-  <p class="meta">No warranty. Last updated $built_txt.</p>
-  <form method="dialog"><button type="submit">OK</button></form>
-</dialog>
-<dialog id="cite" class="wide" aria-labelledby="cite-h">
-  <h2 id="cite-h" tabindex="-1" autofocus>Methodology and References</h2>
   $cite_html
   <form method="dialog"><button type="submit">Close</button></form>
 </dialog>

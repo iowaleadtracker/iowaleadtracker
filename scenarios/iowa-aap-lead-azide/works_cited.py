@@ -599,6 +599,17 @@ CHANGES = [
     (
         "Nov. 25",
         (
+            "The About box is shorter: when, the evacuation zone and FEMA helpline, the "
+            "Army&rsquo;s maps, what the map shows, and a clearer warning: it comes with no "
+            "warranty, its maker isn&rsquo;t responsible for loss or harm from using it, and it "
+            "can&rsquo;t say whether any one place will get lead. The details of "
+            "the four cases, the mitigation, the timeline, and news mentions moved here. The "
+            "maps did not change."
+        ),
+    ),
+    (
+        "Nov. 25",
+        (
             "The weather-model spread now uses NOAA&rsquo;s GFS itself: the GFS feed it used "
             "was really HRRR for the first two days, so HRRR was counted twice. ECMWF&rsquo;s "
             "run now uses ECMWF&rsquo;s own mixing height instead of a fixed typical value."
