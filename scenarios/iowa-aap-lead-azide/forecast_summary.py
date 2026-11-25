@@ -450,44 +450,55 @@ NYT_BLAST_CITE = "New York Times, Nov. 25"
 # Army will update the public on the status of the operation no later than 11:00 a.m. CST."
 ARMY_NOV25_URL = "https://www.army.mil/article/297089"
 ARMY_NOV25_CITE = "Army update, Nov. 25"
+# The Army's 3 p.m. update, "Deposition Maps as of 3:00 PM (CST) - Lead Azide" (army.mil
+# article 297109, Nov. 25, 2026), two map slides stamped "a/o 251500NOV26", read from the
+# images on api.army.mil. Air slide: "Sensors report no lead detection at this time", with a
+# legend giving "0.18 ug/m3 - Lead Air Sampling Method Detection Limit". Ground slide: "Post
+# detonation sampling underway. Results will be published when available." Its modeled
+# "Mitigated 0.26" deposition areas: 27 sq mi above 100 ug/ft2, 191 sq mi above 5 ug/ft2.
+# Both slides: "AWAIT US ARMY TO ANNOUNCE ALL-CLEAR DETERMINATION."
+ARMY_3PM_URL = "https://www.army.mil/article/297109"
+ARMY_3PM_CITE = "Army maps, Nov. 25, 3 p.m."
 # EPA Region 7's public "Iowa Army Ammunition Plant Response Data Viewer" (ArcGIS), read on
-# Nov. 25, 2026 at 12:20 p.m. CST from its public feature layers: four real-time (Xact)
-# lead monitors, AS01-AS04, about 7 to 40 km southwest of the plant, reported 241 readings
-# from 7:00 a.m. to 12:20 p.m. CST; the highest was 0.0102 ug/m3 (AS04, 10:00 a.m.). The
-# viewer cites DOE's PAC-1 short-term screening level for lead, 32 ug/m3. Its other 36 air
-# stations (AS-05 to AS-40) collect samples for lab analysis, none posted yet.
+# Nov. 25, 2026 at 4 p.m. CST from its public feature layers: four real-time (Xact) lead
+# monitors, AS01-AS04, about 7 to 40 km southwest of the plant, reported 322 readings from
+# 7:00 a.m. to 4:00 p.m. CST; the highest was 0.0102 ug/m3 (AS04, 10:00 a.m.), all below the
+# Army's 0.18 ug/m3 detection limit (ARMY_3PM_URL). Its other 36 air stations (AS-05 to
+# AS-40) collect samples for lab analysis, none posted yet.
 EPA_VIEWER_URL = "https://experience.arcgis.com/experience/1ddcf8b9d8314971b00dac8893ae9cd6"
 EPA_VIEWER_CITE = "EPA response data viewer, Nov. 25"
 EARLY_AIR = (
-    "EPA\u2019s four real-time lead monitors southwest of the plant read no more than about "
-    "0.01 micrograms of lead per cubic meter of air through 12:20 p.m. CST, far below the "
-    f"32 micrograms per cubic meter short-term screening level EPA cites ({EPA_VIEWER_CITE}). "
-    "These are early readings only. Lab results from EPA\u2019s other air samples, and soil "
-    "and water sampling, are still pending and are needed before anyone knows where lead "
-    "settled."
+    "Every reading from EPA\u2019s four real-time lead monitors southwest of the plant, "
+    "through 4 p.m. CST, was below the 0.18 micrograms per cubic meter detection limit the "
+    f"Army cites ({EPA_VIEWER_CITE}). These are early readings only. Lab results from "
+    "EPA\u2019s other air samples, and soil and water sampling, are still pending and are "
+    "needed before anyone knows where lead settled."
 )
 BLAST_DONE = (
-    "News outlets report that the Army carried out the controlled detonation on Wednesday "
-    f"morning, Nov. 25 ({NYT_BLAST_CITE}). The Army said it would detonate at 9 a.m. CST and "
-    "update the public on the status of the operation no later than 11 a.m. CST "
-    f"({ARMY_NOV25_CITE}). {EARLY_AIR} Wait for the Army\u2019s official confirmation of the "
-    "results, and follow official instructions."
+    f"The Army carried out the controlled detonation on Wednesday morning, Nov. 25 "
+    f"({NYT_BLAST_CITE}); it had set it for 9 a.m. CST ({ARMY_NOV25_CITE}). In its 3 p.m. CST "
+    "update, "
+    "the Army said air sensors report no lead detection at this time, and that sampling of "
+    "the ground after the detonation is underway, with results to be published when "
+    f"available ({ARMY_3PM_CITE}). {EARLY_AIR} Wait for the Army to announce its all-clear "
+    "determination, and follow official instructions."
+)
+BLAST_STATUS_HTML = (
+    "<b>Blast done:</b> the Army carried out the detonation Wednesday morning, Nov. 25 "
+    f'(<a href="{ARMY_NOV25_URL}" rel="noopener">{ARMY_NOV25_CITE}</a>; '
+    f'<a href="{NYT_BLAST_URL}" rel="noopener">{NYT_BLAST_CITE}</a>). At 3 p.m. CST the Army '
+    "said air sensors report no lead detection at this time and ground sampling is underway "
+    f'(<a href="{ARMY_3PM_URL}" rel="noopener">{ARMY_3PM_CITE}</a>). '
+    "<b>Wait for the Army to announce its all-clear determination</b>, and follow official "
+    "instructions."
 )
 EARLY_AIR_HTML = (
-    "<b>Early air readings:</b> EPA&rsquo;s four real-time lead monitors southwest of the plant "
-    "read no more than about 0.01 &micro;g/m&sup3; of lead in the air through 12:20 p.m. CST, "
-    "far below the 32 &micro;g/m&sup3; short-term screening level EPA cites "
+    "<b>Early air readings:</b> every reading from EPA&rsquo;s four real-time lead monitors "
+    "southwest of the plant, through 4 p.m. CST, was below the 0.18 &micro;g/m&sup3; "
+    "detection limit the Army cites "
     f'(<a href="{EPA_VIEWER_URL}" rel="noopener">{EPA_VIEWER_CITE}</a>). These are early '
     "readings only: <b>lab results from EPA&rsquo;s other air samples, and soil and water "
     "sampling, are still pending and are needed</b> before anyone knows where lead settled."
-)
-BLAST_STATUS_HTML = (
-    "<b>Blast reported done:</b> news outlets report that the Army carried out the detonation "
-    f'Wednesday morning, Nov. 25 (<a href="{NYT_BLAST_URL}" rel="noopener">{NYT_BLAST_CITE}</a>). '
-    "The Army said it will update the public on the operation no later than 11 a.m. CST "
-    f'(<a href="{ARMY_NOV25_URL}" rel="noopener">{ARMY_NOV25_CITE}</a>). '
-    "Wait for the Army&rsquo;s official confirmation of the results, and follow official "
-    "instructions."
 )
 # FEMA and the Army's advice, for the page header (Army public safety advisory, Nov. 24).
 FEMA_HEADER_HTML = (
@@ -509,6 +520,7 @@ NAMED_SOURCES = (
     (NYT_BLAST_CITE, NYT_BLAST_URL),
     (ARMY_NOV25_CITE, ARMY_NOV25_URL),
     (EPA_VIEWER_CITE, EPA_VIEWER_URL),
+    (ARMY_3PM_CITE, ARMY_3PM_URL),
     (ADVISORY_NOV24_CITE, ADVISORY_NOV24_URL),
     ("Acting Secretary of the Army on X", SECARMY_URL),
     ("Iowa HHS fact sheet", HHS_URL),
@@ -798,9 +810,12 @@ def _time_parts(built_txt: str) -> dict[str, str]:
             "(FEMA emergency alert, Nov. 24)."
         ),
         "maps": (
-            "The Army\u2019s latest maps estimate where lead may be in the air and on the "
-            f"ground for the mitigated blast, using an emission factor of 0.26 ({ARMY_MAPS_CITE}). "
-            f"The Army\u2019s maps and updates are at {ARMY_MAPS_URL}."
+            "The Army\u2019s latest maps still show its model estimate for the mitigated "
+            "blast, using an emission factor of 0.26: lead on surfaces above 100 \u00b5g/ft\u00b2 "
+            "over 27 square miles and above 5 \u00b5g/ft\u00b2 over 191 square miles; ground "
+            f"sampling is underway to check it ({ARMY_3PM_CITE}). Its earlier maps used the "
+            f"same 0.26 ({ARMY_MAPS_CITE}). The Army\u2019s maps and updates are at "
+            f"{ARMY_MAPS_URL}."
         ),
         "window": (f"These maps model blasts {WINDOW_HOURLY}, around the planned time."),
     }
