@@ -9,7 +9,7 @@ analyzed weather, NOAA's HYSPLIT and the U.S. Army's map against EPA's real-time
 > are not official NOAA products. The model maps below are estimates for assumed releases.
 > They are not measurements, and nothing here says how much lead reached any place.
 
-**Status.** Preliminary analysis, pending peer review. Second draft, updated Nov. 25, 2026, about 4:30 p.m. CST, seven and a half
+**Status.** Preliminary analysis, pending peer review. Second draft, updated Nov. 25, 2026, about 5:30 p.m. CST, eight and a half
 hours after the detonation. It replaces a first draft that an independent review found wrong in
 several places ([what changed](#what-changed-since-the-first-draft)). The model comparison
 covers the first two hours on NOAA's archived weather; later hours, the Army's results and
@@ -62,7 +62,8 @@ The supporting results:
 - **The wind forecast was right in speed and 9–18° off in direction where it mattered.**
   Matched hour for hour with NOAA's HRRR analysis, the forecast wind in the lowest 250 m
   came from 9–18° too far east at 9, 10 and 11 a.m. and noon; speeds agreed within
-  0.7 m/s. By 1 p.m. the error was 5° or less, and at 2 and 3 p.m. 4° or less. The five surface stations within 16 miles averaged 28° and 31° at 9 and
+  0.7 m/s. By 1 p.m. the error was 5° or less, and at 2 and 3 p.m. 4° or less; at
+  4 p.m. it was 5–12° the other way. The five surface stations within 16 miles averaged 28° and 31° at 9 and
   10 a.m., against the forecast's 42° and 44°. Rerun on the analyzed weather, the
   tracker's own cloud heads toward 215–218° instead of 229–231°, and the two footprints
   barely overlap (5–14% by intersection over union).
@@ -75,8 +76,10 @@ The supporting results:
   pressure-level data its path shifts 7° and its near-field zones halve.
 - **The Army's final map agrees with the tracker's forecast on direction and speed, and
   puts far more lead near the plant.** Stamped 7 a.m. on Nov. 25, it points 230° (the
-  tracker's forecast: 229–231°) and has the cloud 27, 43 and 79 miles out at 2, 3 and 5
-  hours (the tracker: 31, 48 and 85). Both rest on forecasts, and both point 10° to 15°
+  tracker's forecast: 229–231°) and has the cloud 6, 27, 43 and 79 miles out at half an
+  hour, 2, 3 and 5 hours (the tracker: 6, 31, 48 and 85). HYSPLIT on analyzed weather
+  has it 5 and 28 miles out at the first two, so the runs differ from the Army's marks
+  in direction, not speed. Both rest on forecasts, and both point 10° to 15°
   west of the analyzed wind. The Army's 100 µg/ft² zone covers 29 sq mi and reaches 12
   miles; the tracker's, for the same 26%, covers 2 sq mi and reaches 4. A coarse share
   of particles in the tracker gives 12 to 18 sq mi, so it could explain much of the
@@ -85,7 +88,9 @@ The supporting results:
 ## 1. What this can and can't say
 
 - **Two hours of archived weather.** The HYSPLIT reference runs end at 11 a.m., when NOAA's
-  first archive file ends. Anything about later hours is the tracker alone.
+  first archive file ends. Later hours are the tracker and, for the cloud's position
+  only, a HYSPLIT run on the pressure-level analyses, the weaker of its two weather
+  inputs.
 - **No lead measurements beyond four instruments.** EPA lists 43 sampling sites; only the
   four real-time monitors have public results, and the layer names neither the substance
   nor a detection limit. Filter, soil, wipe and water results will be the test of what
@@ -139,11 +144,11 @@ Two forms of NOAA's HRRR for the morning:
 - **NOAA ARL's archive** (`20261125_12-17_hrrr`, 6 to 11 a.m., posted about 12:40 p.m.):
   hourly HRRR on its native levels with surface fluxes, in HYSPLIT's format. This is the
   weather the HYSPLIT reference runs use, as in the back-test.
-- **The hourly analyses** for 9 a.m. to 3 p.m. (15 to 21 UTC) on pressure levels every
+- **The hourly analyses** for 9 a.m. to 4 p.m. (15 to 22 UTC) on pressure levels every
   25 hPa, from NOAA's archive on AWS, converted with HYSPLIT's `api2arl_v4`
   ([`blast-day/nowcast_hrrr.sh`](../../../validation/hysplit-backtest/blast-day/README.md)).
   Each is available an hour after its time. They are used for the wind comparison in
-  section 4 and, through noon, for a second HYSPLIT run.
+  section 4 and, through 3 p.m., for a second HYSPLIT run.
 
 HRRR assimilates surface stations, radar, aircraft, balloons and satellites each hour
 (Benjamin et al. 2016; Dowell et al. 2022).
@@ -177,7 +182,8 @@ HYSPLIT 5.4.2 (Stein et al. 2015), public Linux build, set up as in the
 [back-test](../../../validation/hysplit-backtest/README.md): a vertical line source from
 10 m to the cloud top (251 m) at the plant, 3,130 kg of lead (100%) in four sizes (0.3, 1,
 3 and 10 µm at 9,500 kg/m³) released over 6 minutes from 9:00 a.m.; 200,000 particles;
-hourly means in the 0–10 m layer and deposition. The tracker starts from five layers with
+hourly means in the 0–10 m layer, deposition, and a snapshot of the 0–10 m layer every
+30 minutes. The tracker starts from five layers with
 a 63 m initial spread, so the two differ in the first cells. Dry deposition speeds are
 fixed per size: the tracker's Zhang et al. (2001) values at a 5 m/s reference wind (0.16,
 0.10, 0.32 and 3.66 cm/s), or its Emerson et al. (2020) values. The tracker itself varies
@@ -190,7 +196,7 @@ Two sets of runs:
 
 - **Reference:** NOAA ARL's archived HRRR, 9 to 11 a.m., on a 0.003° grid, with Zhang and
   with Emerson speeds.
-- **Sensitivity:** the pressure-level analyses, 9 a.m. to noon, on a 0.005° grid, Zhang
+- **Sensitivity:** the pressure-level analyses, 9 a.m. to 3 p.m., on a 0.005° grid, Zhang
   speeds. Without surface fluxes HYSPLIT estimates mixing from the profiles.
 
 Nothing is held fixed in either. The public HYSPLIT build refuses forecast weather without
@@ -272,24 +278,27 @@ The cloud starts between the ground and 251 m.*
 | about 870 m (900 hPa) | 10.1, 63° / 10.5, 65° (−2°) | 10.9, 65° / 10.3, 61° (+4°) | 9.9, 72° / 10.2, 63° (+9°) | 9.4, 70° / 9.3, 63° (+7°) |
 <!-- /table:wind -->
 
-*Table 1b. The same for the afternoon hours analyzed so far. The forecast's direction
-error is gone by 2 p.m.*
+*Table 1b. The same for the afternoon hours analyzed so far. The morning's direction
+error is gone by 2 p.m. At 4 p.m. the forecast is off the other way.*
 
 <!-- table:wind_pm -->
-| Level | 1 p.m. | 2 p.m. | 3 p.m. |
-|---|---|---|---|
-| 10 m | 6.3, 52° / 6.3, 47° (+5°) | 5.7, 45° / 6.0, 45° (0°) | 5.8, 54° / 5.6, 54° (0°) |
-| about 40 m (1000 hPa) | 7.4, 51° / 7.3, 47° (+4°) | 6.7, 45° / 6.8, 47° (−2°) | 7.1, 52° / 7.0, 56° (−4°) |
-| about 240 m (975 hPa) | 8.7, 52° / 8.8, 51° (+1°) | 8.1, 46° / 8.4, 49° (−3°) | 9.0, 54° / 9.4, 58° (−4°) |
-| about 450 m (950 hPa) | 9.4, 51° / 9.4, 53° (−2°) | 9.1, 52° / 8.9, 51° (+1°) | 9.2, 55° / 10.2, 59° (−4°) |
-| about 660 m (925 hPa) | 9.5, 58° / 9.6, 56° (+2°) | 9.2, 51° / 9.3, 53° (−2°) | 10.2, 59° / 10.7, 61° (−2°) |
-| about 870 m (900 hPa) | 10.6, 68° / 10.0, 60° (+8°) | 9.8, 61° / 9.5, 57° (+4°) | 10.7, 63° / 11.0, 65° (−2°) |
+| Level | 1 p.m. | 2 p.m. | 3 p.m. | 4 p.m. |
+|---|---|---|---|---|
+| 10 m | 6.3, 52° / 6.3, 47° (+5°) | 5.7, 45° / 6.0, 45° (0°) | 5.8, 54° / 5.6, 54° (0°) | 5.2, 43° / 4.9, 48° (−5°) |
+| about 40 m (1000 hPa) | 7.4, 51° / 7.3, 47° (+4°) | 6.7, 45° / 6.8, 47° (−2°) | 7.1, 52° / 7.0, 56° (−4°) | 6.6, 46° / 6.1, 54° (−8°) |
+| about 240 m (975 hPa) | 8.7, 52° / 8.8, 51° (+1°) | 8.1, 46° / 8.4, 49° (−3°) | 9.0, 54° / 9.4, 58° (−4°) | 9.8, 52° / 9.3, 64° (−12°) |
+| about 450 m (950 hPa) | 9.4, 51° / 9.4, 53° (−2°) | 9.1, 52° / 8.9, 51° (+1°) | 9.2, 55° / 10.2, 59° (−4°) | 9.7, 60° / 10.6, 68° (−8°) |
+| about 660 m (925 hPa) | 9.5, 58° / 9.6, 56° (+2°) | 9.2, 51° / 9.3, 53° (−2°) | 10.2, 59° / 10.7, 61° (−2°) | 11.6, 64° / 11.4, 71° (−7°) |
+| about 870 m (900 hPa) | 10.6, 68° / 10.0, 60° (+8°) | 9.8, 61° / 9.5, 57° (+4°) | 10.7, 63° / 11.0, 65° (−2°) | 12.2, 69° / 12.0, 74° (−5°) |
 <!-- /table:wind_pm -->
 
 Speeds agree within 0.7 m/s at every level and hour. Direction does not: through the
 layer the cloud starts in, the forecast wind came from 9–18° too far east in all four
 morning hours, and from 11 a.m. the error reached up to 870 m. It did not last: at
 1 p.m. the forecast was within 5° below 700 m, and at 2 and 3 p.m. within 4° (Table 1b).
+At 4 p.m. the forecast wind came from 5–12° too far north instead. By then the modeled
+cloud is more than 100 miles from the plant, so the wind over the plant no longer steers
+it.
 The forecast had turned the low-level wind toward the east about three hours before the
 analyzed wind got there. The forecast also had the tracker's
 80 m wind at 5.1 m/s from 44° at 9 a.m.; the analysis has no 80 m level, but its 40 m and
@@ -594,8 +603,7 @@ line would be about 2% of that background, so PM2.5 can't show it.
 
 *Table 7. The Army's final "Mitigated 0.26" maps (a/o 7 a.m. Nov. 25) against the
 tracker's 26% case. Army distances are from the plume's tip; values from the marker's
-center are in parentheses. Tracker ground zones are after 8 hours; tracker cloud positions
-are the extent and center of its snapshot at 0.18 µg/m³ or more.*
+center are in parentheses. Tracker ground zones are after 8 hours.*
 
 <!-- table:army -->
 |  | Army, final map | Tracker, forecast | Tracker, analyzed weather |
@@ -606,24 +614,51 @@ are the extent and center of its snapshot at 0.18 µg/m³ or more.*
 | farthest, bearing | 37 mi (40), 232° (233°) | 35 mi, 231° | 36 mi, 218° |
 | Plume axis | 230° on the ground, 227° in air |  |  |
 | Overlap of the 5 µg/ft² zones with the Army's |  | 0.37 (0.16) | 0.00 (0.00) |
-| Cloud at 2 h | 27 mi | 24–37 mi, center 31 mi at 231° | 23–35 mi, center 29 mi at 217° |
-| Cloud at 3 h | 43 mi | 39–57 mi, center 48 mi at 231° | 37–55 mi, center 46 mi at 219° |
-| Cloud at 5 h | 79 mi | 72–98 mi, center 85 mi at 229° | 68–94 mi, center 81 mi at 220° |
 <!-- /table:army -->
+
+*Table 7b. The cloud at the Army map's four time marks. Army: distance along its path
+to each mark. Models: where a snapshot of ground-level air is 0.18 µg/m³ or more
+(nearest to farthest distance) and its air-weighted center, 26% case. HYSPLIT on the
+pressure-level analyses is the weaker of its two weather inputs (section 5) and stands in
+at 3 and 5 hours until NOAA ARL's afternoon file is posted.*
+
+<!-- table:marks -->
+| Time | Army mark (path 227°) | Tracker, forecast | Tracker, analyzed weather | HYSPLIT, ARL archive | HYSPLIT, pressure-level analyses |
+|---|---|---|---|---|---|
+| T+0.5 h | 6 mi | 5–9 mi, center 6 mi at 228° | 5–8 mi, center 6 mi at 215° | 3–9 mi, center 5 mi at 215° | 3–10 mi, center 6 mi at 222° |
+| T+2 h | 27 mi | 24–37 mi, center 31 mi at 231° | 23–35 mi, center 29 mi at 217° | 19–38 mi, center 28 mi at 219° | 21–45 mi, center 32 mi at 224° |
+| T+3 h | 43 mi | 39–57 mi, center 48 mi at 231° | 37–55 mi, center 46 mi at 219° | not yet run | 30–74 mi, center 50 mi at 223° |
+| T+5 h | 79 mi | 72–98 mi, center 85 mi at 229° | 69–94 mi, center 81 mi at 220° | not yet run | 48–120 mi, center 87 mi at 222° |
+<!-- /table:marks -->
 
 ![Figure 4](figures/fig4_air_snapshots.png)
 
-*Figure 4. Lead in air at one moment, 0.18 µg/m³ or more: the tracker's snapshots 2, 3
-and 5 hours after the detonation, with the cloud path from the Army's final air map
-(shaded) and the Army's mark for that time (ring).*
+*Figure 4. Lead in air at one moment, 0.18 µg/m³ or more, 26% case: snapshots half an
+hour, 2, 3 and 5 hours after the detonation from the tracker on the forecast and on
+analyzed weather and, through 2 hours, from HYSPLIT on NOAA ARL's archived weather. The
+cloud path from the Army's final air map is shaded and the Army's mark for each time is
+the ring.*
 
 On direction and speed the Army's final map and the tracker's forecast agree. The Army's
 plume lies along 230° on the ground and 227° in air; the tracker's forecast map along
 229°–231°. The 5 µg/ft² zones are the same length (37 and 35 miles) and overlap by 37%
 of their combined area, more than the tracker and HYSPLIT overlap on the same weather.
-The Army's marks at 2, 3 and 5 hours fall inside the tracker's forecast cloud at each
-time, 4 to 6 miles behind its center. Its mark at half an hour is 6 miles out; the tracker saves no
-snapshot then.
+All four of the Army's marks fall inside the tracker's forecast cloud at that time
+(Table 7b, Figure 4). At half an hour the mark and the center of the tracker's cloud are
+both 6 miles out; at 2, 3 and 5 hours the mark is 4 to 6 miles behind the center.
+
+Speed is not where the models and the Army differ. Half an hour after the detonation
+every run has the cloud's center 5 to 6 miles out, and at 2 hours 28 to 32 miles out
+against the Army's 27. That holds for the tracker on either weather and for HYSPLIT on
+either weather file. The marks differ from the analyzed-weather runs in direction only:
+the Army's path lies along 227°, and those runs put the center at 215°–222° at half an
+hour and 217°–224° at 2 hours. HYSPLIT's cloud is longer than the tracker's at each time
+(19–38 against 23–35 miles at 2 hours). I haven't tested why. Wind that changes with
+height stretching HYSPLIT's particles along the path is the likely reason. On NOAA
+ARL's archived weather HYSPLIT covers the first two marks. For 3 and 5 hours the only
+HYSPLIT run so far uses the pressure-level analyses, the weaker of its two weather
+inputs, and it puts the center 50 and 87 miles out against the Army's 43 and 79 and the
+tracker's 46 and 81 on analyzed weather.
 
 Both are forecasts, and both miss the analyzed wind the same way. On analyzed weather the
 tracker's cloud runs along 215°–220°, as HYSPLIT's does, and its 5 µg/ft² zone shares
@@ -729,6 +764,7 @@ runs HYSPLIT (`blast-day/2026-11-25-9am-{zhang,emerson}-early2h.CONTROL` on the 
 |---|---|
 | `lib.py` | readers for the tracker's maps and HYSPLIT's output; zones, centers, overlap |
 | `compare.py` | the numbers for Tables 4–6 and 8 |
+| `snapshots.py` | the cloud at the Army's time marks from the tracker's time steps and HYSPLIT's 30-minute snapshots; Table 7b |
 | `tables.py` | writes Tables 1 and 4–10 into this file from the data |
 | `army_map.py` | traces and measures both issues of the Army's maps; Table 7 |
 | `forecast_vs_analysis.py` | Table 1 |

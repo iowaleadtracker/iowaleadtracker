@@ -229,16 +229,30 @@ def army(d: dict[str, Any], a: dict[str, Any]) -> str:
         b_iou = box["overlap_ground_5"][f"tracker {k}"]["iou"]
         ov.append(f"{t_iou:.2f} ({b_iou:.2f})")
     rows.append(["Overlap of the 5 µg/ft² zones with the Army's", "", *ov])
-    for h, cut in f["air_cuts"].items():
-        if h not in tr["forecast"]:
-            continue
-        cells = []
-        for t in tr.values():
-            s = t[h]["snapshot"]
-            ext = f"{s['air018']['near_mi']:.0f}{DASH}{s['air018']['reach_mi']:.0f} mi"
-            cells.append(f"{ext}, center {s['center_mi']:.0f} mi at {s['center_bearing']:.0f}°")
-        rows.append([f"Cloud at {h} h", f"{cut['miles']:.0f} mi", *cells])
     return table(["", "Army, final map", "Tracker, forecast", "Tracker, analyzed weather"], rows)
+
+
+def marks(a: dict[str, Any], sn: dict[str, Any]) -> str:
+    """Table 8: the cloud at the Army map's time marks, snapshots at 0.18 µg/m³ or more."""
+    cols = {
+        "Tracker, forecast": "tracker forecast",
+        "Tracker, analyzed weather": "tracker analysis",
+        "HYSPLIT, ARL archive": "hysplit archive",
+        "HYSPLIT, pressure-level analyses": "hysplit pressure levels",
+    }
+    rows = []
+    for h, cut in a["final"]["air_cuts"].items():
+        row = [f"T+{h} h", f"{cut['miles']:.0f} mi"]
+        for key in cols.values():
+            s = sn[key].get(h)
+            if s is None:
+                row.append("not yet run")
+                continue
+            ext = f"{s['near_mi']:.0f}{DASH}{s['reach_mi']:.0f} mi"
+            row.append(f"{ext}, center {s['center_mi']:.0f} mi at {s['center_bearing']:.0f}°")
+        rows.append(row)
+    axis = a["final"]["air_path"]["axis_bearing"]
+    return table(["Time", f"Army mark (path {axis:.0f}°)", *cols], rows)
 
 
 def sensitivity(d: dict[str, Any], a: dict[str, Any]) -> str:
@@ -334,6 +348,7 @@ def main() -> None:
     a = json.loads((HERE / "data/army_map.json").read_text())
     fva = json.loads((HERE / "data/forecast_vs_analysis.json").read_text())
     cov = json.loads((HERE / "data/monitor_coverage.json").read_text())
+    snaps = json.loads((HERE / "data/snapshots.json").read_text())
     blocks = {
         "wind": wind(fva, [h for h in sorted(fva, key=int) if int(h) <= NOON + 6]),
         "wind_pm": wind(fva, [h for h in sorted(fva, key=int) if int(h) > NOON + 6]),
@@ -341,6 +356,7 @@ def main() -> None:
         "overlap": overlap(d),
         "monitors": monitors(d),
         "army": army(d, a),
+        "marks": marks(a, snaps),
         "sensitivity": sensitivity(d, a),
         "sites": sites(cov),
         "windows": windows(cov),

@@ -2,7 +2,8 @@
 
 Usage (from the repository root, ``HYSPLIT_DIR`` set)::
 
-    python figure.py FORECAST_MAPS ANALYSIS_MAPS HYSPLIT_RUN ARMY_DIR EPA_DIR COVERAGE.json OUT_DIR
+    python figure.py FORECAST_MAPS ANALYSIS_MAPS HYSPLIT_RUN ARMY_DIR EPA_DIR COVERAGE.json \
+        FORECAST_CACHE ANALYSIS_CACHE OUT_DIR
 
 Figures 1, 2 and 4 are maps for the 26% case (the Army's emission factor): lead on the
 ground, hourly mean air, and end-of-hour snapshots against the Army's final air map. Figure 3 is
@@ -29,6 +30,7 @@ from typing import TYPE_CHECKING, Any
 import army_map
 import lib
 import matplotlib as mpl
+import snapshots
 
 mpl.use("Agg")
 import matplotlib.patheffects as pe
@@ -266,32 +268,38 @@ def fig_air(runs: dict[str, lib.Fields], epa: Sites, hours: list[int], out: Path
 
 
 def fig_snap(
-    runs: dict[str, lib.Fields],
+    snaps: dict[str, snapshots.Snaps],
     path: lib.Fields,
     marks: dict[str, dict[str, float]],
     epa: Sites,
     out: Path,
 ) -> None:
-    """Figure 4: end-of-hour snapshots against the Army's cloud path and its time marks."""
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5.6), constrained_layout=True)
-    exts = (
-        (-92.1, -91.0, 40.25, 40.95),
-        (-92.4, -91.0, 40.05, 40.95),
-        (-93.0, -91.0, 39.65, 40.95),
-    )
-    for ax, h, ext in zip(axes, (2, 3, 5), exts, strict=True):
+    """Figure 4: the cloud at the Army map's four time marks, against its path and marks."""
+    fig, axes = plt.subplots(2, 2, figsize=(13, 10.5), constrained_layout=True)
+    exts = {
+        "0.5": (-91.62, -91.12, 40.62, 40.90),
+        "2": (-92.1, -91.0, 40.25, 40.95),
+        "3": (-92.4, -91.0, 40.05, 40.95),
+        "5": (-93.0, -91.0, 39.65, 40.95),
+    }
+    for ax, (mark, ext) in zip(axes.flat, exts.items(), strict=True):
         base(ax, ext, epa)
         outline(ax, path, path.dep[0], 0.5, "army", fill=True)
-        for key in ("forecast", "analysis"):
-            outline(ax, runs[key], runs[key].snap[h], lib.ARMY_AIR, key)
-        m = marks[str(h)]
+        for key in ("forecast", "analysis", "hysplit"):
+            if mark in snaps[key]:
+                f, field = snaps[key][mark]
+                smooth = 2 if key == "hysplit" else 0
+                outline(ax, f, field, lib.ARMY_AIR, key, smooth=smooth)
+        m = marks[mark]
         ax.plot(m["lon"], m["lat"], "o", ms=9, mfc="white", mec=C["army"], mew=2.5, zorder=7)
         ax.annotate(
-            f"Army T+{h}", (m["lon"], m["lat"]), fontsize=7.5, color=INK, weight="bold",
+            f"Army T+{mark}", (m["lon"], m["lat"]), fontsize=7.5, color=INK, weight="bold",
             xytext=(-8, 8), textcoords="offset points", ha="right", zorder=9,
         )  # fmt: skip
-        ax.set_title(f"{h} hours after the detonation", fontsize=10, color=INK, loc="left")
-    legend(axes[2], ["forecast", "analysis", "army"], {"army": ": cloud path"})
+        when = "30 minutes" if mark == "0.5" else f"{mark} hours"
+        note = "" if mark in snaps["hysplit"] else " (HYSPLIT's archived weather ends at 2 hours)"
+        ax.set_title(f"{when} after the detonation{note}", fontsize=10, color=INK, loc="left")
+    legend(axes[0][1], ["forecast", "analysis", "hysplit", "army"], {"army": ": cloud path"})
     title(
         fig,
         "Modeled lead in air at one moment, 0.18 µg/m³ or more, 26% case, "
@@ -466,7 +474,9 @@ def fig_coverage(cov: dict[str, Any], out: Path) -> None:
 
 def main(args: list[str]) -> None:
     """Read every source and draw the four figures."""
-    fc_dir, an_dir, hy_run, army_dir, epa_dir, cov_json, out = (Path(a) for a in args)
+    fc_dir, an_dir, hy_run, army_dir, epa_dir, cov_json, fc_cache, an_cache, out = (
+        Path(a) for a in args
+    )
     out.mkdir(parents=True, exist_ok=True)
     epa, readings = sites(epa_dir)
     runs = {
@@ -487,7 +497,12 @@ def main(args: list[str]) -> None:
     path = army_map.to_fields(air, army_map.air_anchor(ARMY_MAP, air), px)
     fig_ground(runs, army, epa, hours[-1], out / "fig1_ground.png")
     fig_air(runs, epa, hours, out / "fig2_air_hourly.png")
-    fig_snap(runs, path, army_map.cuts(ARMY_MAP, air), epa, out / "fig4_air_snapshots.png")
+    snaps = {
+        "forecast": snapshots.tracker_snaps(fc_cache),
+        "analysis": snapshots.tracker_snaps(an_cache),
+        "hysplit": snapshots.hysplit_snaps(hy_run),
+    }
+    fig_snap(snaps, path, army_map.cuts(ARMY_MAP, air), epa, out / "fig4_air_snapshots.png")
     fig_coverage(json.loads(cov_json.read_text()), out / "fig5_monitor_coverage.png")
     low = {
         "forecast": lib.tracker(fc_dir / "low-0900.html"),

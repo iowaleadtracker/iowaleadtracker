@@ -26,7 +26,7 @@ after the hour (Nov. 25: 15Z at 15:54, 16Z at 16:53, 17Z at 17:53 UTC). `nowcast
 `api2arl_v4` (about 20 s and 550 MB per hour, full 3 km grid, 1013–50 hPa) and appends it
 to `work/hrrr_nowcast_20261125.arl`. Give later hours (e.g. `18 23`) to extend it.
 `./run_blast_day.sh nowcast` then runs the `*-analyses` input, which reads that file
-with nothing held fixed; its run length (line 5 of the CONTROL, now 3 hours) must end at
+with nothing held fixed; its run length (line 5 of the CONTROL, now 6 hours) must end at
 or before the last analysis in the file.
 
 This is not the same weather input as ARL's archive: pressure levels every 25 hPa instead
@@ -41,7 +41,7 @@ about half the size. `api2arl_v4` needs ecCodes (`apt-get install libeccodes0`).
 | CONTROL | Hours | Deposition speeds |
 |---|---|---|
 | `2026-11-25-9am-zhang-early2h`, `-emerson-early2h` | 2 | Zhang, Emerson; on the first archive file (the comparison's reference runs) |
-| `2026-11-25-9am-zhang-analyses` | 3 | Zhang; on the hourly pressure-level analyses, 0.005° grid shifted southwest |
+| `2026-11-25-9am-zhang-analyses` | 6 | Zhang; on the hourly pressure-level analyses, 0.005° grid shifted southwest |
 | `2026-11-25-9am-zhang` | 8 | Zhang |
 | `2026-11-25-9am-emerson` | 8 | Emerson |
 
@@ -49,6 +49,9 @@ Made from the back-test's Monday (overcast) inputs. Changed: start `26 11 25 15 
 the two met files, and a grid centred on the plant spanning 3° × 4° (about 330 × 340 km)
 since the wind direction is not known in advance. Release, particle sizes, output levels
 (0, 0–10 m, 0–100 m) and `SETUP.CFG` (200,000 particles) are as in the back-test.
+The three Zhang inputs also write a second grid, `csnap`: a snapshot of the 0–10 m layer
+every 30 minutes, for comparing the cloud's position with the time marks on the Army's
+map. Adding it does not change the hourly output (`cdump` is byte-identical).
 
 The fixed dry deposition speeds are the tracker's values at its 5 m/s reference wind (the
 back-test's "Method"); they are the same on every day, while the tracker itself varies them

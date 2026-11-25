@@ -57,10 +57,12 @@ cache=$WORK/forecast/scenarios/iowa-aap-lead-azide/met_cache/map_met_all.json
 python3 "$P/scripts/forecast_vs_analysis.py" "$cache" "$WORK" "$ARL" > "$P/data/forecast_vs_analysis.json"
 python3 "$P/scripts/station_vs_hrrr.py" "$WORK" "$ARL" "$P/data/obs" > "$P/data/station_vs_hrrr.json"
 (cd "$P/scripts" && python3 monitor_coverage.py "$FC" "$WORK/maps" "$WORK/run_arl_zhang" ../data/epa) > "$P/data/monitor_coverage.json"
+AN_CACHE=$(ls "$PWD/$P"/data/met_hrrr_asof_*.json)
+(cd "$P/scripts" && python3 snapshots.py "$cache" "$AN_CACHE" "$WORK/run_arl_zhang" "$WORK/run_analyses_zhang") > "$P/data/snapshots.json"
 
 # 6. Figures
 (cd "$P/scripts" && python3 figure.py "$FC" "$WORK/maps" "$WORK/run_arl_zhang" ../data/army ../data/epa \
-  ../data/monitor_coverage.json ../figures)
+  ../data/monitor_coverage.json "$cache" "$AN_CACHE" ../figures)
 # 7. Tables in README.md
 python3 "$P/scripts/tables.py"
 echo "done: $P/data, $P/figures, tables in $P/README.md"
