@@ -606,7 +606,9 @@ CHANGES = [
         (
             "The page now says news outlets report the Army carried out the detonation "
             "Wednesday morning (New York Times, Nov. 25), and to wait for the Army&rsquo;s "
-            "official confirmation of the results. The maps did not change."
+            "official confirmation of the results. The header, the &ldquo;When was the "
+            "detonation?&rdquo; question and the time paragraph now speak of the blast in "
+            "the past tense. The maps did not change."
         ),
     ),
     (

@@ -763,12 +763,9 @@ def _time_parts(built_txt: str) -> dict[str, str]:
         "maps": (
             "The Army\u2019s latest maps estimate where lead may be in the air and on the "
             f"ground for the mitigated blast, using an emission factor of 0.26 ({ARMY_MAPS_CITE}). "
-            f"The Army says it will post updated maps at {ARMY_MAPS_URL} six hours before the "
-            "detonation and every hour after that."
+            f"The Army\u2019s maps and updates are at {ARMY_MAPS_URL}."
         ),
-        "window": (
-            f"These maps open on 9 a.m. and model blasts {WINDOW_HOURLY}, in case the time shifts."
-        ),
+        "window": (f"These maps model blasts {WINDOW_HOURLY}, around the planned time."),
     }
 
 
@@ -1095,7 +1092,7 @@ def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) ->
     return f"""<section id="summary" aria-labelledby="summary-h">
   <h2 id="summary-h">What the forecast shows</h2>
   <p class="caveat"><b>{CAVEAT}</b></p>
-  <h3>When will the detonation happen?</h3>
+  <h3>When was the detonation?</h3>
   <p>{no_time}</p>
   {f'<p class="caveat">{ctx["pending_note"]}</p>' if ctx.get("pending_note") else ""}
   <h3>Where the cloud goes{on}</h3>
@@ -1172,7 +1169,7 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
             f"public at {SOURCE_URL} so anyone can check them.",
         ),
         (
-            "When is the lead azide blast at the Iowa Army Ammunition Plant?",
+            "When was the lead azide blast at the Iowa Army Ammunition Plant?",
             time_note(ctx["built_txt"])
             + f" (Source: {ADVISORY_NOV24_CITE}, {ADVISORY_NOV24_URL}.) How the date was set: "
             f"{TRUMP_HOLD} (Sources: {TRUMP_SOURCE_TEXT}.) The Army had "
