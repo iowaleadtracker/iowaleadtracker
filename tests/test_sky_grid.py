@@ -136,7 +136,7 @@ def test_window_covers_every_blast_time() -> None:
     import staged  # noqa: PLC0415
 
     hours = int(site.MODEL_ARGS[site.MODEL_ARGS.index("--hours") + 1])
-    for times in (site.TIMES, staged.TIMES):
+    for times in (site.TIMES, *(staged.times_for(d) for d in staged.DAYS)):
         first = min(dt.time.fromisoformat(t) for t in times)
         last = max(dt.time.fromisoformat(t) for t in times)
         start = dt.datetime.combine(dt.date(2026, 11, 25), sky_grid.FIRST)

@@ -64,7 +64,8 @@ PAUSE = 25.0  # seconds between requests: Open-Meteo also limits requests per mi
 PAUSE_WITH_KEY = 2.0
 VARS = ("cloud_cover", "precipitation")
 #: The hours every map can need, in Central standard time: from the hour of the earliest
-#: blast (8:30, so 8:00) to 22:00, past the latest (9:30) plus the 8-hour run. The end is
+#: blast (8:30, so 8:00) to 22:00, past the latest (9:30; noon on the staged Wednesday) plus
+#: the 8-hour run. The end is
 #: where it was for the old 11:00-13:00 blasts, so when HRRR is used (hrrr_days) and the
 #: daily request budget stay the same. Must cover make_map_picker.TIMES and staged.TIMES
 #: (tests/test_sky_grid.py checks).

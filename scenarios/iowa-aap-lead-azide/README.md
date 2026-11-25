@@ -378,7 +378,8 @@ time costs a few hundred.
   (Wednesday only, 3-4 models, 5 hours; about 800 with the earlier 11 a.m.-12:30 p.m.
   window and Thursday)
   and the staged refresh about 800 (3 days, 2 models, 2 start hours; 2,000 with 5 hours,
-  about 1,200 before). Each run
+  about 1,200 before; an estimated 1,500 since Nov. 25, with Wednesday's three later start
+  hours, the two extra pressure levels and ECMWF's mixing height). Each run
   stays under the hourly limit (5,000). Over a day, the 3-hourly main refresh, the
   6-hourly staged refresh and the weather grid add up to about 22,000, twice the
   daily limit, so this only works because GitHub's runners don't usually share one
@@ -479,7 +480,8 @@ its own saved forecasts, so its Wednesday numbers differ from the main site's.
 ### Staged Wednesday-Friday maps
 
 `staged.py` builds a separate set of maps for blasts on Wednesday, Nov. 25, Thursday,
-Nov. 26 and Friday, Nov. 27, at 8:30, 9:00 and 9:30 a.m., all four cases, with only GFS and ECMWF
+Nov. 26 and Friday, Nov. 27, at 8:30, 9:00 and 9:30 a.m. (Wednesday also at 10 and 11
+a.m. and noon, in case the blast is pushed back: `EXTRA_TIMES`), all four cases, with only GFS and ECMWF
 (GFS shown, ECMWF as the weather-model spread). They sit in their own folder on the main
 site (`staged.DIR_NAME`), which nothing links to; the pages and the folder are noindex,
 and the sitemap, robots.txt, `llms.txt` and the GitHub Pages mirror leave them out.
