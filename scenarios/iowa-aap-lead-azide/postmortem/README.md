@@ -9,7 +9,7 @@ analyzed weather, NOAA's HYSPLIT and the U.S. Army's map against EPA's real-time
 > are not official NOAA products. The model maps below are estimates for assumed releases.
 > They are not measurements, and nothing here says how much lead reached any place.
 
-**Status.** Second draft, updated Nov. 25, 2026, about 1:15 p.m. CST, four hours after
+**Status.** Preliminary analysis, pending peer review. Second draft, updated Nov. 25, 2026, about 1:15 p.m. CST, four hours after
 the detonation. It replaces a first draft that an independent review found wrong in
 several places ([what changed](#what-changed-since-the-first-draft)). The model comparison
 covers the first two hours on NOAA's archived weather; later hours, the Army's results and

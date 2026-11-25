@@ -61,6 +61,9 @@ FLOOR = 1e-4  # µg/m³, where zero readings and zero predictions are drawn in f
 MI_PER_DEG_LAT = lib.KM_PER_DEG / lib.KM_PER_MI
 HOUR_LABEL = {1: "9 to 10 a.m.", 2: "10 to 11 a.m.", 3: "11 a.m. to noon", 4: "noon to 1 p.m."}
 WIDE_MAP_DEG = 2
+STAMP = "Iowa Lead Tracker (iowaleadtracker.com) \u00b7 Preliminary analysis, pending peer review"
+STAMP_NOTE = "Unofficial analysis, not from the Army or any government agency"
+STAMP_BAND = 0.045  # share of the figure height kept for the source line
 Sites = tuple[list[dict[str, Any]], dict[str, tuple[float, float]]]
 Readings = dict[str, list[tuple[dt.datetime, float]]]
 
@@ -198,8 +201,13 @@ def legend(
 
 
 def title(fig: Figure, text: str) -> None:
-    """Left-aligned figure title in the text ink."""
+    """Left-aligned figure title, and the source line along the bottom of every figure."""
     fig.suptitle(text, fontsize=11, color=INK, x=0.01, ha="left")
+    engine = fig.get_layout_engine()
+    if engine is not None:
+        engine.set(rect=(0, STAMP_BAND, 1, 1 - STAMP_BAND))  # keep the bottom band clear
+    fig.text(0.01, 0.012, STAMP, fontsize=8.5, color=INK, weight="bold", ha="left", va="bottom")
+    fig.text(0.99, 0.012, STAMP_NOTE, fontsize=8, color=MUTED, ha="right", va="bottom")
 
 
 def fig_ground(
