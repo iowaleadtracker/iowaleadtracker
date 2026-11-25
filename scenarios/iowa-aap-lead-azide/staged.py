@@ -2,8 +2,8 @@
 
 A set of maps at a hard-to-guess address on the main site, for people who have the link:
 blasts on Wednesday, Nov. 25, Thursday, Nov. 26 and Friday, Nov. 27, 2026, at 8:30,
-9:00 and 9:30 a.m., for all four release cases, with only the
-GFS and ECMWF forecasts (GFS shown, ECMWF in the weather-model spread).
+9:00 and 9:30 a.m. (Wednesday also at 10 and 11 a.m. and noon), for all four release
+cases, with only the GFS and ECMWF forecasts (GFS shown, ECMWF in the weather-model spread).
 
 These maps are not private. Nothing on the site links here, the pages are noindex, and the
 folder is left out of the sitemap, robots.txt and llms.txt. The GitHub Pages mirror
@@ -41,11 +41,15 @@ CACHE = HERE / "met_cache" / "staged_forecasts.json"
 TZ = ZoneInfo("America/Chicago")
 #: Wednesday (the Army's announced date, Nov. 22) through Friday.
 DAYS = ["2026-11-25", "2026-11-26", "2026-11-27"]
-TIMES = ["08:30", "09:00", "09:30"]  # site.TIMES
+TIMES = ["08:30", "09:00", "09:30"]  # site.TIMES; every day has these
+#: Later blast times for some days only. Wednesday's in case the blast is pushed back from
+#: 9 a.m. (maintainer's choice, Nov. 25). Each start hour costs its own forecast download.
+EXTRA_TIMES = {"2026-11-25": ["10:00", "11:00", "12:00"]}
+NOON_HM = 12
 DEFAULT_DAY = DAYS[0]
 DEFAULT_TIME = "09:00"  # make_map_picker.DEFAULT
 #: The first model is shown; the other makes up the weather-model spread.
-WEATHER = "gfs_seamless,ecmwf_ifs025"
+WEATHER = "gfs_global,ecmwf_ifs025"  # the GFS alone (see make_map_picker.WEATHER)
 MODELS_TEXT = "GFS and ECMWF only (GFS shown; ECMWF in the weather-model spread)"
 
 UNOFFICIAL = "This is an unofficial estimate, not from the Army or any government agency."
@@ -130,7 +134,7 @@ def build() -> None:
         (day, case, release_case, name, t)
         for day in DAYS
         for case, release_case, name in site.CASES
-        for t in TIMES
+        for t in times_for(day)
     ]
 
     def run(job: tuple[str, str, str, str, str]) -> site.Run:
@@ -172,12 +176,52 @@ def build() -> None:
         site.run_maps(rest, saved=False, downloaded=[site.start_hour(first)])
 
 
+def times_for(day: str) -> list[str]:
+    """Return the blast times modeled on ``day``: TIMES, then any EXTRA_TIMES."""
+    return TIMES + EXTRA_TIMES.get(day, [])
+
+
+def times_words(days: dict[str, list[str]]) -> str:
+    """Say when the built maps' blasts are: 'at 8:30, 9:00 and 9:30 a.m. (Wednesday also ...)'.
+
+    ``days`` maps each shown day to its built times, so a later time whose maps weren't
+    built (no saved forecast for that hour yet) isn't promised.
+    """
+    import forecast_summary as fs  # noqa: PLC0415
+
+    later = {d: [t for t in ts if t not in TIMES] for d, ts in days.items()}
+    extra = [f"{day_label(d).split(',')[0]} also at {spoken(ts)}" for d, ts in later.items() if ts]
+    return fs.WINDOW_HOURLY + (f" ({'; '.join(extra)})" if extra else "")
+
+
+def spoken(times: list[str]) -> str:
+    """Return ['10:00', '11:00', '12:00'] as '10 and 11 a.m. and noon'."""
+    groups: list[tuple[str, list[str]]] = []  # (a.m. / p.m. / noon, clock times)
+    for t in times:
+        h, m = map(int, t.split(":"))
+        part = "noon" if (h, m) == (NOON_HM, 0) else "a.m." if h < NOON_HM else "p.m."
+        clock = f"{(h - 1) % 12 + 1}" + (f":{m:02d}" if m else "")
+        if groups and groups[-1][0] == part != "noon":
+            groups[-1][1].append(clock)
+        else:
+            groups.append((part, [clock]))
+    words = ["noon" if part == "noon" else f"{and_list(clocks)} {part}" for part, clocks in groups]
+    return " and ".join(words)
+
+
+def and_list(items: list[str]) -> str:
+    """Return ['a', 'b', 'c'] as 'a, b and c'."""
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
+
+
 def complete_times(day: str) -> list[str]:
     """Return the blast times on ``day`` with a map for every case."""
     import make_map_picker as site  # noqa: PLC0415
 
     return [
-        t for t in TIMES if all((MAPS / map_name(day, c, t)).exists() for c, _, _ in site.CASES)
+        t
+        for t in times_for(day)
+        if all((MAPS / map_name(day, c, t)).exists() for c, _, _ in site.CASES)
     ]
 
 
@@ -196,10 +240,13 @@ def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
         f'<option value="{d}"{" selected" if d == DEFAULT_DAY else ""}>{day_label(d)}</option>'
         for d in days
     )
-    times = sorted({t for ts in days.values() for t in ts})
+    # The time menu lists the chosen day's times (TIMES_BY_DAY in the page's script), so a
+    # time one day lacks can't leave an old map showing. It starts on the opening day's.
+    times_by_day = {d: [[t, site.label(t)] for t in ts] for d, ts in days.items()}
+    first_day = DEFAULT_DAY if DEFAULT_DAY in days else next(iter(days))
     time_opts = "".join(
         f'<option value="{t}"{" selected" if t == DEFAULT_TIME else ""}>{site.label(t)}</option>'
-        for t in times
+        for t in days[first_day]
     )
     case_opts = "".join(
         f'<option value="{c}"{" selected" if c == site.DEFAULT_CASE else ""}>{n}</option>'
@@ -228,7 +275,7 @@ def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
 <header>
   <h1>{site.SITE_NAME}: Wednesday to Friday runs</h1>
   <p class="warn" role="note"><b>{UNOFFICIAL} {NOT_SAFE}</b> Follow official instructions.</p>
-  <p class="about">These maps model blasts on {day_list}, {fs.WINDOW_HOURLY}, with
+  <p class="about">These maps model blasts on {day_list}, {times_words(days)}, with
     {MODELS_TEXT}. {when} Forecasts this far ahead change more and are less certain than
     the main site&rsquo;s. Weather forecast from {html.escape(got_txt)}. Last updated
     {html.escape(built_txt)}. Main site, summary and sources:
@@ -244,7 +291,19 @@ def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
 <iframe id="map" title="Map of where lead from the blast could travel and settle"></iframe>
 <script>
 const FILES = {json.dumps(files)};
+const TIMES_BY_DAY = {json.dumps(times_by_day)};
 const $ = (id) => document.getElementById(id);
+function fillTimes() {{
+  // Keep the chosen time if the new day has it, else the latest time it has before it.
+  const s = $("t"); const want = s.value; const ts = TIMES_BY_DAY[$("d").value] || [];
+  s.innerHTML = "";
+  let pick = 0;
+  ts.forEach(([v, label], i) => {{
+    s.add(new Option(label, v));
+    if (v <= want) pick = i;
+  }});
+  s.selectedIndex = pick;
+}}
 function show() {{
   const key = $("d").value + "-" + $("c").value + "-" + $("t").value.replace(":", "");
   if (FILES[key]) $("map").src = FILES[key];
@@ -253,9 +312,11 @@ function step(k) {{
   const s = $("t"); const i = s.selectedIndex + k;
   if (i >= 0 && i < s.options.length) {{ s.selectedIndex = i; show(); }}
 }}
-for (const id of ["d", "t", "c"]) $(id).onchange = show;
+$("d").onchange = () => {{ fillTimes(); show(); }};
+for (const id of ["t", "c"]) $(id).onchange = show;
 $("prev").onclick = () => step(-1);
 $("next").onclick = () => step(1);
+fillTimes();  // the browser may restore another day on reload
 show();
 </script>
 </body>

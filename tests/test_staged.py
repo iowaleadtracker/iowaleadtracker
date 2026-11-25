@@ -32,16 +32,31 @@ def built(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     (out / "maps").mkdir(parents=True)
     for day in staged.DAYS:
         for case, _, _ in site.CASES:
-            for t in staged.TIMES:
+            for t in staged.times_for(day):
                 (out / "maps" / staged.map_name(day, case, t)).write_text(MAP, encoding="utf-8")
     return out
 
 
 def test_settings() -> None:
-    """Wednesday to Friday, 8:30, 9:00 and 9:30 a.m., GFS and ECMWF only."""
+    """Wednesday to Friday, 8:30, 9:00 and 9:30 a.m. (Wednesday also 10, 11 and noon)."""
     assert staged.DAYS == ["2026-11-25", "2026-11-26", "2026-11-27"]
     assert staged.TIMES == ["08:30", "09:00", "09:30"]
-    assert staged.WEATHER == "gfs_seamless,ecmwf_ifs025"
+    assert staged.times_for("2026-11-25") == ["08:30", "09:00", "09:30", "10:00", "11:00", "12:00"]
+    assert staged.times_for("2026-11-26") == staged.times_for("2026-11-27") == staged.TIMES
+    built = {d: staged.times_for(d) for d in staged.DAYS}
+    assert staged.times_words(built) == (
+        "at 8:30, 9:00 and 9:30 a.m. (Wednesday also at 10 and 11 a.m. and noon)"
+    )
+    # later maps not built (no saved forecast yet): the text doesn't promise them
+    assert (
+        staged.times_words(dict.fromkeys(staged.DAYS, staged.TIMES))
+        == "at 8:30, 9:00 and 9:30 a.m."
+    )
+    assert staged.times_words({"2026-11-25": [*staged.TIMES, "10:00"]}).endswith(
+        "(Wednesday also at 10 a.m.)"
+    )
+    assert staged.spoken(["10:00", "10:30", "13:00"]) == "10 and 10:30 a.m. and 1 p.m."
+    assert staged.WEATHER == "gfs_global,ecmwf_ifs025"
     assert staged.day_label("2026-11-25") == "Wednesday, Nov. 25, 2026"
     assert staged.day_label("2026-11-27") == "Friday, Nov. 27, 2026"
     assert re.fullmatch(r"s-[0-9a-f]{10}", staged.DIR_NAME)
@@ -69,7 +84,7 @@ def test_model_args_change_only_weather_and_file() -> None:
 
 def test_picker_page(built: Path) -> None:
     n = staged.write_pages()
-    assert n == 3 * 3 * len(site.CASES) == 36
+    assert n == (3 * 3 + 3) * len(site.CASES) == 48
     page = (built / "index.html").read_text(encoding="utf-8")
     assert '<meta name="robots" content="noindex, nofollow">' in page
     assert "This is an unofficial estimate, not from the Army or any government agency." in page
@@ -93,7 +108,15 @@ def test_picker_page(built: Path) -> None:
     m = re.search(r"const FILES = (\{.*?\});", page)
     assert m
     files = json.loads(m.group(1))
-    assert len(files) == 36
+    assert len(files) == 48  # 3 days x 3 times x 4 cases, plus Wednesday's 3 later times
+    assert files["2026-11-25-permit-1200"] == "maps/2026-11-25-permit-1200.html"
+    assert "2026-11-26-permit-1200" not in files
+    m = re.search(r"const TIMES_BY_DAY = (\{.*?\});", page)
+    assert m
+    by_day = {d: [t for t, _ in ts] for d, ts in json.loads(m.group(1)).items()}
+    assert by_day["2026-11-25"] == staged.times_for("2026-11-25")
+    assert by_day["2026-11-26"] == by_day["2026-11-27"] == staged.TIMES
+    assert "Wednesday also at 10 and 11 a.m. and noon" in page
     assert files["2026-11-25-permit-0900"] == "maps/2026-11-25-permit-0900.html"
     assert '<option value="09:30">9:30 a.m.</option>' in page
     for mp in (built / "maps").glob("*.html"):  # each map stays out of search too
@@ -203,7 +226,7 @@ def test_refresh_downloads_once_then_runs_the_rest_with_its_time(
     def arg(cmd: list[str], name: str) -> str | None:
         return cmd[cmd.index(name) + 1] if name in cmd else None
 
-    n = len(staged.DAYS) * len(site.CASES) * len(staged.TIMES)
+    n = sum(len(staged.times_for(d)) for d in staged.DAYS) * len(site.CASES)
     assert len(ran) == n
     first, *rest = ran
     assert arg(first[0], "--as-of") is None

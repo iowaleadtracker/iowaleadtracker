@@ -131,3 +131,84 @@ def test_replay_takes_the_same_fallback_as_the_download(
     monkeypatch.setattr("urllib.request.urlopen", lambda *_a, **_k: pytest.fail("downloaded"))
     monkeypatch.setenv(met.CACHE_ONLY_ENV, "1")
     assert fetch() == downloaded
+
+
+@pytest.mark.parametrize(("model", "z_up"), [("ncep_hrrr_conus", 80), ("gfs_seamless", 120)])
+def test_wind_level_aloft_is_one_the_model_serves(
+    monkeypatch: pytest.MonkeyPatch, model: str, z_up: int
+) -> None:
+    """HRRR is asked for its 80 m wind (it has no 120 m); other models for 120 m."""
+    import datetime as dt  # noqa: PLC0415
+
+    asked: list[str] = []
+
+    def answer(url: str, *_a: Any, **_k: Any) -> dict[str, Any]:
+        asked.append(url)
+        return {"hourly": {}}
+
+    monkeypatch.setattr(met, "http_json", answer)
+    monkeypatch.setattr(met, "_data_problem", lambda *_a, **_k: None)
+    start = dt.datetime(2026, 11, 25, 15, tzinfo=dt.timezone.utc)
+    got = met.fetch_open_meteo([41.5], [-91.2], start, start, model=model, now=start)
+    assert got[2] == z_up
+    hourly = urllib.parse.parse_qs(urllib.parse.urlsplit(asked[0]).query)["hourly"][0]
+    assert f"wind_speed_{z_up}m" in hourly.split(",")
+
+
+def test_low_pressure_levels_kept_on_high_pressure_days() -> None:
+    """At the Iowa plant (222 m) 1000 and 975 hPa are asked for; on high ground they aren't.
+
+    On Nov. 25, 2026 the ground pressure there was 1005 hPa, putting 975 hPa near 250 m.
+    """
+    assert met.pressure_levels_for(222.0) == [1000, 975, 950, 925, 900, 850, 800, 700]
+    assert met.pressure_levels_for(1600.0)[0] == 850
+
+
+def test_ecmwf_mixing_height_comes_from_its_9_km_data(monkeypatch: pytest.MonkeyPatch) -> None:
+    """ecmwf_ifs025 has no mixing height: it is copied in from ecmwf_ifs, hour by hour."""
+    import numpy as np  # noqa: PLC0415
+
+    times = ["2026-11-25T15:00", "2026-11-25T16:00"]
+    data = [{"hourly": {"time": times, "boundary_layer_height": [None, None]}} for _ in range(2)]
+    src = met._MetSource("x", data, 120, [], np.array([40.8]), np.array([-91.3, -91.2]))
+    asked: list[str] = []
+
+    def answer(url: str, *_a: Any, **_k: Any) -> list[dict[str, Any]]:
+        asked.append(url)
+        hourly = {"time": times[::-1], "boundary_layer_height": [550.0, 345.0]}
+        return [{"hourly": hourly}, {"hourly": hourly}]
+
+    monkeypatch.setattr(met, "http_json", answer)
+    assert met._borrow_mixing_height(src, "ecmwf_ifs025") == "ecmwf_ifs"
+    q = urllib.parse.parse_qs(urllib.parse.urlsplit(asked[0]).query)
+    assert q["models"] == ["ecmwf_ifs"]
+    assert q["hourly"] == ["boundary_layer_height"]
+    assert src.data[1]["hourly"]["boundary_layer_height"] == [345.0, 550.0]  # matched by time
+    # the downloaded responses (the cache holds the same objects) are left as they were
+    assert data[1]["hourly"]["boundary_layer_height"] == [None, None]
+    # a model with its own mixing height, or none to borrow from, asks for nothing
+    assert met._borrow_mixing_height(src, "ecmwf_ifs025") is None
+    assert met._borrow_mixing_height(src, "gfs_global") is None
+    assert len(asked) == 1
+
+
+@pytest.mark.parametrize(
+    "reply",
+    [
+        [{"hourly": {"time": ["2026-11-25T15:00"]}}],  # no boundary_layer_height
+        [{"hourly": {"time": ["2026-11-25T15:00"], "boundary_layer_height": [None]}}],
+        {"error": True, "reason": "x"},
+    ],
+)
+def test_no_usable_borrowed_mixing_height_falls_back(
+    monkeypatch: pytest.MonkeyPatch, reply: Any
+) -> None:
+    """A malformed or empty answer leaves the data alone and claims no borrowed value."""
+    import numpy as np  # noqa: PLC0415
+
+    data = [{"hourly": {"time": ["2026-11-25T15:00"], "boundary_layer_height": [None]}}]
+    src = met._MetSource("x", data, 120, [], np.array([40.8]), np.array([-91.3]))
+    monkeypatch.setattr(met, "http_json", lambda *_a, **_k: reply)
+    assert met._borrow_mixing_height(src, "ecmwf_ifs025") is None
+    assert src.data is data
+    assert data[0]["hourly"]["boundary_layer_height"] == [None]

@@ -1,11 +1,19 @@
 # Downloads fresh weather forecasts for the Iowa scenario every 3 hours through
 # Wednesday, Nov. 25 (the court filing leaves the blast day open), and proposes them as a pull request (main takes changes only through a
-# reviewed pull request). It never deploys; merging the pull request does
+# reviewed pull request). Run by hand with the `branch` input, it refreshes that branch
+# instead and pushes the new forecasts onto it. It never deploys; merging the pull request does
 # (.github/workflows/deploy.yml), so check the news before merging.
 name: Refresh forecast
 
 on:
   workflow_dispatch:
+    inputs:
+      branch:
+        description: >-
+          Refresh this branch instead of main, and push the new forecasts onto it (no
+          separate pull request). Pick the same branch under "Use workflow from". Not main.
+        required: false
+        default: ""
   schedule:
     # Every 3 hours: one run downloads 4 models (8 until Nov. 23) for a 25-point grid and
     # each modeled day (DAYS), and hourly runs hit Open-Meteo's free daily limit on Nov. 22.
@@ -39,10 +47,30 @@ jobs:
             echo "go=true" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Which branch?
+        id: target
+        if: steps.when.outputs.go == 'true'
+        env:
+          TARGET: ${{ inputs.branch }}
+        run: |
+          if [ -z "$TARGET" ]; then
+            echo "ref=main" >> "$GITHUB_OUTPUT"
+          elif [ "$TARGET" = "main" ]; then
+            echo "::error::main only changes through a reviewed pull request; leave the branch empty."
+            exit 1
+          elif ! git check-ref-format --branch "$TARGET" >/dev/null 2>&1 \
+              || ! git ls-remote --exit-code "https://github.com/${GITHUB_REPOSITORY}" "refs/heads/$TARGET" >/dev/null; then
+            echo "::error::No branch named $TARGET."
+            exit 1
+          else
+            echo "ref=$TARGET" >> "$GITHUB_OUTPUT"
+            echo "Refreshing branch \`$TARGET\`." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - uses: actions/checkout@v7
         if: steps.when.outputs.go == 'true'
         with:
-          ref: main
+          ref: ${{ steps.target.outputs.ref }}
 
       - uses: actions/setup-python@v7
         if: steps.when.outputs.go == 'true'
@@ -79,8 +107,32 @@ jobs:
         if: steps.refresh.outputs.changed == 'true'
         run: python -m pytest -q
 
+      - name: Push the new forecasts onto the chosen branch
+        if: steps.refresh.outputs.changed == 'true' && steps.target.outputs.ref != 'main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET: ${{ steps.target.outputs.ref }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          pulled=$(python - <<'PY'
+          import datetime as dt, json
+          from pathlib import Path
+          f = Path("scenarios/iowa-aap-lead-azide/met_cache/map_met_all.json")
+          stamps = json.loads(f.read_text())["__fetched__"]
+          t = min(dt.datetime.fromisoformat(v) for v in stamps.values())
+          print(f"{t.astimezone(dt.timezone(dt.timedelta(hours=-6))):%b %-d, %-I:%M %p} CST")
+          PY
+          )
+          git add scenarios/*/met_cache/map_met_all.json scenarios/*/met_cache/sky_grid.json tests/data/
+          git commit -q -m "Refresh forecast (pulled $pulled)" \
+            -m "Downloaded by refresh-forecast.yml, run by hand on this branch; golden regression data regenerated (intended map change)."
+          git push origin "HEAD:$TARGET"
+          gh workflow run ci.yml --ref "$TARGET"
+          echo "Pushed the new forecasts to \`$TARGET\`." >> "$GITHUB_STEP_SUMMARY"
+
       - name: Push the branch and open or update the pull request
-        if: steps.refresh.outputs.changed == 'true'
+        if: steps.refresh.outputs.changed == 'true' && steps.target.outputs.ref == 'main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

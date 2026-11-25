@@ -65,7 +65,7 @@ Useful changes:
 - **Near the site:** add `--extent-km 15 --hours 2`.
 
 The site's maps use four models (`WEATHER` in `make_map_picker.py`): `--weather-model
-ncep_rrfs_conus,gfs_seamless,ncep_hrrr_conus,ecmwf_ifs025`. The first that covers the whole
+ncep_rrfs_conus,gfs_global,ncep_hrrr_conus,ecmwf_ifs025`. The first that covers the whole
 run is shown, and the rest make up the spread. Within 18 hours of a blast (counted from when
 the saved forecasts were pulled, so a rebuild picks the same order) HRRR goes first instead
 (`WEATHER_SHORT_RANGE`). Why these four, as of Nov. 23, 2026:
@@ -76,8 +76,14 @@ the saved forecasts were pulled, so a rebuild picks the same order) HRRR goes fi
   to two and a half days out.
 - **GFS** reaches farthest. It, RRFS and HRRR are the only models that give the mixing
   height through Open-Meteo; for the others the model assumes one from the stability class.
+  The site asks for `gfs_global`, the GFS alone: Open-Meteo's `gfs_seamless` serves HRRR
+  for the first two days over the US, so until Nov. 25 the spread's "GFS" was HRRR again
+  on Wednesday.
 - **ECMWF** is the best global model for the large-scale pattern, so it stays in the
-  spread, but without a mixing height it isn't shown.
+  spread, but it isn't shown. Its 0.25&deg; data (`ecmwf_ifs025`) has no mixing height and
+  only the 1000, 925, 850 and 700 hPa levels near the ground (ECMWF publishes no others);
+  since Nov. 25 the mixing height comes from the same forecast's 9 km data (`ecmwf_ifs`),
+  instead of a fixed value for the stability class.
 
 ICON, GEM, UKMO and Météo-France were dropped: no mixing height (UKMO also has no 120 m
 wind), coarse over Iowa, and they doubled the downloads, which hit Open-Meteo's free daily
@@ -364,14 +370,16 @@ time costs a few hundred.
   another network. The cloud sandbox this was built in shares its address with other
   users and ran out several times.
 - Each blast hour costs its own grid downloads: the model sizes the 5 x 5 wind grid from
-  the winds over that run, so every start hour is a separate request of about 65 (25
-  points x 2.6, for 26 variables counted per 10) per weather model and day; times within the same hour share it.
+  the winds over that run, so every start hour is a separate request of about 85 (25
+  points x 3.3, for 33 variables counted per 10; about 65 before 1000 and 975 hPa were
+  added on Nov. 25) per weather model and day; times within the same hour share it.
   With 8:30, 9:00 and 9:30 a.m. (2 start hours; 9:30 shares 9:00's), the main refresh costs
   about 400-550 per run; with hourly times from 9 a.m. to 1 p.m. it was about 1,000-1,300
   (Wednesday only, 3-4 models, 5 hours; about 800 with the earlier 11 a.m.-12:30 p.m.
   window and Thursday)
   and the staged refresh about 800 (3 days, 2 models, 2 start hours; 2,000 with 5 hours,
-  about 1,200 before). Each run
+  about 1,200 before; an estimated 1,500 since Nov. 25, with Wednesday's three later start
+  hours, the two extra pressure levels and ECMWF's mixing height). Each run
   stays under the hourly limit (5,000). Over a day, the 3-hourly main refresh, the
   6-hourly staged refresh and the weather grid add up to about 22,000, twice the
   daily limit, so this only works because GitHub's runners don't usually share one
@@ -436,6 +444,14 @@ Forecasts improve as the event approaches. The page and `met_cache/map_met_all.j
 Wednesday, Nov. 25, and pushes the result to the `forecast-refresh` branch with a pull request. It
 never deploys; merging the pull request does.
 
+To refresh a branch that isn't merged yet (a change that alters the weather requests, so
+its saved forecasts must be pulled again), run the workflow by hand: Actions → "Refresh
+forecast" (or "Refresh staged forecast") → Run workflow, pick the branch under "Use workflow
+from" and type it again as `branch`. It checks out that branch, refreshes and tests it,
+and pushes the new forecasts onto it as one commit, with no separate pull request. It uses
+the repository's Open-Meteo key, so it avoids the free limit a shared address can hit.
+`main` is refused: it only changes through a reviewed pull request.
+
 ### More than one day
 
 `DAYS` in `make_map_picker.py` lists the days the main site models. Since Nov. 24 that is only
@@ -464,7 +480,8 @@ its own saved forecasts, so its Wednesday numbers differ from the main site's.
 ### Staged Wednesday-Friday maps
 
 `staged.py` builds a separate set of maps for blasts on Wednesday, Nov. 25, Thursday,
-Nov. 26 and Friday, Nov. 27, at 8:30, 9:00 and 9:30 a.m., all four cases, with only GFS and ECMWF
+Nov. 26 and Friday, Nov. 27, at 8:30, 9:00 and 9:30 a.m. (Wednesday also at 10 and 11
+a.m. and noon, in case the blast is pushed back: `EXTRA_TIMES`), all four cases, with only GFS and ECMWF
 (GFS shown, ECMWF as the weather-model spread). They sit in their own folder on the main
 site (`staged.DIR_NAME`), which nothing links to; the pages and the folder are noindex,
 and the sitemap, robots.txt, `llms.txt` and the GitHub Pages mirror leave them out.

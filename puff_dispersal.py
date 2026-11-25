@@ -287,7 +287,7 @@ def _add_run_args(p: argparse.ArgumentParser) -> None:
     p.add_argument(
         "--no-pressure-levels",
         action="store_true",
-        help="do not use pressure-level winds aloft; extend the 100/120 m wind "
+        help="do not use pressure-level winds aloft; extend the 100/120/80 m wind "
         "with the stability power law instead",
     )
     p.add_argument(

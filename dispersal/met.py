@@ -39,12 +39,25 @@ HOURLY_VARS = [
 STD_PRESSURE_LEVELS = [1000, 975, 950, 925, 900, 850, 800, 700, 600, 500]  # hPa
 
 
+#: Near-surface wind level aloft (m) asked of the forecast API, and of named models that
+#: serve a different one. Open-Meteo's HRRR has 80 m wind but no 120 m (every value comes
+#: back empty), so before Nov. 25, 2026 HRRR runs used a power-law guess from 10 m instead.
+FORECAST_WIND_ALOFT_M = 120
+MODEL_WIND_ALOFT_M = {"ncep_hrrr_conus": 80}
+
+#: Named models without a mixing height, and the model that has it for the same forecast.
+#: ECMWF's 0.25 deg open data (ecmwf_ifs025) has no boundary-layer height; Open-Meteo's
+#: 9 km IFS (ecmwf_ifs) does, but no pressure levels. Without this the class default was
+#: used: about 800 m from the blast on Nov. 25, 2026, against 345-470 m in HRRR and ECMWF.
+MIXING_HEIGHT_FROM = {"ecmwf_ifs025": "ecmwf_ifs"}
+
+
 # Built-in weather-model ensemble for --weather-model ensemble (Open-Meteo model names; the
 # Iowa site passes its own list). The first is the run shown;
 # the rest feed the uncertainty view. HRRR is used only when it covers the whole run.
 WEATHER_ENSEMBLE = [
     "ecmwf_ifs025",
-    "gfs_seamless",
+    "gfs_global",  # the GFS alone; gfs_seamless is HRRR for the first two days over the US
     "icon_seamless",
     "gem_seamless",
     "ukmo_seamless",
@@ -213,14 +226,26 @@ def http_json(url: str, timeout: float = 60, tries: int = 4) -> Any:  # noqa: AN
     raise RuntimeError(f"no response from {url}")  # pragma: no cover - loop always returns
 
 
-def pressure_levels_for(elev_m: float | None, n: int = 6) -> list[int]:
-    """Return the standard pressure levels (hPa) that sit above the ground at this elevation.
+#: How far (hPa) a level may sit below the standard-atmosphere ground pressure and still be
+#: asked for. Real ground pressure runs well above the standard value on high-pressure days
+#: (1005 vs 987 hPa at the Iowa plant on Nov. 25, 2026, which put 975 hPa near 250 m above
+#: ground); a level that turns out to be under ground is carried up from the one below it
+#: (``_pressure_level_fields``), so asking for one costs only download size.
+LEVEL_MARGIN_HPA = 50.0
 
-    Surface pressure from the standard-atmosphere barometric formula; a level must be
-    at least 20 hPa below it.
+
+def pressure_levels_for(elev_m: float | None, n: int = 8) -> list[int]:
+    """Return the lowest ``n`` standard pressure levels (hPa) that may sit above the ground.
+
+    Ground pressure comes from the standard-atmosphere barometric formula, which misses
+    the day's weather by tens of hPa, so levels up to ``LEVEL_MARGIN_HPA`` below it are
+    kept. Before Nov. 25, 2026 a level had to be 20 hPa above that estimate, which dropped
+    1000 and 975 hPa in Iowa and left no wind data between 80 m and about 450 m. (At the
+    plant 1000 hPa sits below the 80 m level, so it is carried up from it; 975 hPa, near
+    250 m, is the one that adds data.)
     """
     p_sfc = 1013.25 * (1.0 - 2.25577e-5 * max(elev_m or 0.0, 0.0)) ** 5.25588
-    return [p for p in STD_PRESSURE_LEVELS if p < p_sfc - 20.0][:n]
+    return [p for p in STD_PRESSURE_LEVELS if p < p_sfc + LEVEL_MARGIN_HPA][:n]
 
 
 def _open_meteo_url(
@@ -299,7 +324,8 @@ def fetch_open_meteo(
     it to when saved forecasts were pulled to replay them on a later date.
 
     Picks the ERA5 archive for past dates and the forecast API otherwise. Also asks
-    for one near-surface wind level aloft (100 m in ERA5, 120 m in the forecast API)
+    for one near-surface wind level aloft (100 m in ERA5; 120 m in the forecast API, or
+    the model's own level from ``MODEL_WIND_ALOFT_M``, e.g. 80 m for HRRR)
     and, when ``levels`` is given, wind and geopotential height on those pressure
     levels (served by the forecast API; the archive returns none). If a request is
     refused, retries with fewer variables, then tries the other source.
@@ -327,14 +353,15 @@ def fetch_open_meteo(
     forecast = (
         "Open-Meteo forecast (best-match NWP)",
         "https://api.open-meteo.com/v1/forecast",
-        120,
+        FORECAST_WIND_ALOFT_M,
     )
     if end > now + dt.timedelta(days=15.5):
         raise SystemExit("Forecast data only reaches ~16 days ahead; pick an earlier time.")
     order = [archive, forecast] if end < now - dt.timedelta(days=6) else [forecast, archive]
     if model:  # a named forecast model: only the forecast API serves it
         base_params["models"] = model
-        order = [(f"Open-Meteo forecast, {model}", forecast[1], forecast[2])]
+        z_model = MODEL_WIND_ALOFT_M.get(model, forecast[2])
+        order = [(f"Open-Meteo forecast, {model}", forecast[1], z_model)]
     tiers: list[tuple[bool, tuple[int, ...]]] = [(True, tuple(levels)), (True, ()), (False, ())]
     if not levels:
         tiers = tiers[1:]
@@ -518,6 +545,61 @@ class _MetSource:
     lon_nodes: FloatArray
 
 
+def _borrow_mixing_height(src: _MetSource, model: str | None) -> str | None:
+    """Fill a named model's missing mixing height from ``MIXING_HEIGHT_FROM``.
+
+    Asks the other model for ``boundary_layer_height`` alone, on the same points and days,
+    and puts it into copies of the points in ``src.data``, hour by hour; the responses
+    themselves stay as downloaded, since the saved-forecast cache holds the same objects.
+    Returns that model's name, or None when the model has its own mixing height, has no
+    stand-in, or the other model gives no usable value (the class default then applies).
+    """
+    other = MIXING_HEIGHT_FROM.get(model or "")
+    have = [x for d in src.data for x in d["hourly"].get("boundary_layer_height") or []]
+    if other is None or any(x is not None for x in have):
+        return None
+    lat, lon = np.meshgrid(src.lat_nodes, src.lon_nodes, indexing="ij")
+    times = src.data[0]["hourly"]["time"]
+    params = {
+        "latitude": ",".join(f"{v:.4f}" for v in lat.ravel()),
+        "longitude": ",".join(f"{v:.4f}" for v in ((lon.ravel() + 180) % 360) - 180),
+        "wind_speed_unit": "ms",
+        "timezone": "GMT",
+        "start_date": times[0][:10],
+        "end_date": times[-1][:10],
+        "models": other,
+        "hourly": "boundary_layer_height",
+    }
+    url = "https://api.open-meteo.com/v1/forecast?" + urllib.parse.urlencode(params, safe=",")
+    try:
+        filled = _filled_points(src.data, http_json(url))
+    except Exception as e:  # noqa: BLE001 - reported; the class default is the fallback
+        print(f"note: no mixing height from {other}: {_error_detail(e)}", file=sys.stderr)
+        return None
+    if not any(x is not None for d in filled for x in d["hourly"]["boundary_layer_height"]):
+        print(f"note: no mixing height from {other}: no values for this run", file=sys.stderr)
+        return None
+    src.data = filled
+    return other
+
+
+def _filled_points(data: list[Json], got: Any) -> list[Json]:  # noqa: ANN401 - Open-Meteo JSON
+    """Return copies of ``data`` with ``got``'s ``boundary_layer_height``, matched by time.
+
+    Raises ValueError, KeyError or TypeError when ``got`` isn't one answer per point.
+    """
+    points = got if isinstance(got, list) else [got]
+    if (isinstance(got, dict) and got.get("error")) or len(points) != len(data):
+        raise ValueError("unexpected response")
+    filled = []
+    for d, p in zip(data, points, strict=True):
+        hourly = p["hourly"]
+        by_time = dict(zip(hourly["time"], hourly["boundary_layer_height"], strict=True))
+        blh = [by_time.get(t) for t in d["hourly"]["time"]]
+        filled.append({**d, "hourly": {**d["hourly"], "boundary_layer_height": blh}})
+    return filled
+
+
 def _fetch_wind_grid(  # noqa: PLR0913 - the request's own settings
     lat0: float,
     lon0: float,
@@ -644,8 +726,9 @@ def build_met(  # noqa: PLR0913 - mirrors the command-line options
 
     Fetches a ``grid_n`` x ``grid_n`` grid of Open-Meteo points sized to the distance
     the wind could carry the cloud, derives the stability class (Pasquill-Turner) and
-    fills a missing mixing height with the class default. Without a level aloft, the
-    10 m wind is extended to 100 m with the stability power law.
+    fills a missing mixing height from ``MIXING_HEIGHT_FROM``, else with the class
+    default. Without a level aloft, the 10 m wind is extended to 100 m with the stability
+    power law.
 
     Returns
     -------
@@ -670,7 +753,10 @@ def build_met(  # noqa: PLR0913 - mirrors the command-line options
         now=now,
         extra=extra,
     )
+    borrowed = _borrow_mixing_height(src, model)
     data, name, z_up = src.data, src.name, src.z_up
+    if borrowed:
+        name += f" (mixing height from {borrowed})"
     ny, nx = len(src.lat_nodes), len(src.lon_nodes)
     ws = _stack(data, "wind_speed_10m", 3.0, ny, nx)
     wd = _stack(data, "wind_direction_10m", 270.0, ny, nx)
@@ -747,7 +833,7 @@ def transport_wind(
 ) -> tuple[FloatArray, FloatArray]:
     """Wind (u, v) at transport height ``zt``.
 
-    10 m to the level aloft (100/120 m): blended on a log-height scale. Above that:
+    10 m to the level aloft (100, 120 or 80 m): blended on a log-height scale. Above that:
     linear interpolation through the pressure-level winds when the weather source has
     them (held constant above the top level); otherwise the stability power law, up to
     the mixing height.

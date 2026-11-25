@@ -100,6 +100,7 @@ WORDS = {
 }
 COMPASS = list(WORDS)
 MODEL_SHORT = {
+    "gfs_global": "GFS",
     "gfs_seamless": "GFS",
     "ncep_hrrr_conus": "HRRR",
     "ncep_rrfs_conus": "RRFS",

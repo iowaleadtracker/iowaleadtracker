@@ -42,7 +42,9 @@ Contents: [Summary](#summary) · [Using it](#using-it) · [Why change](#why-chan
   daytime neutral air (stability class D); the lowest ground zone (5 µg/ft²) is about the
   same. The turbulence-based
   method comes within 0.9–2.4× on every day, including a stable evening, while the cloud's
-  path is the same.
+  path is the same. After the Nov. 25 weather fixes (HRRR's 80 m wind,
+  the 975 hPa level) it comes within 0.8–1.9×; the stable evening moved from
+  1.5–1.8× to 1.0–1.1× ([Rerun](#rerun-after-the-nov-25-weather-fixes)).
 - **It leans toward higher concentrations on purpose.** The scheme's turbulence values
   are 1-hour values; the default scales the crosswind growth to a 10-minute basis with an
   averaging-time rule CALPUFF uses for its Pasquill–Gifford curves (not for its turbulence
@@ -415,6 +417,54 @@ Reading these:
   maps it is the zone that changes most.
 - **The deposition scheme** (Zhang or Emerson) changes the ground zones by up to about 50%
   but not the comparison with HYSPLIT.
+
+### Rerun after the Nov. 25 weather fixes
+
+On Nov. 25 the model's weather changed in two ways that touch this check (TURBULENCE.md's
+method did not change): HRRR's 80 m wind is used (Open-Meteo has no 120 m wind for HRRR, so
+the model had been guessing that level from the 10 m wind with the stability power law), and
+the 975 hPa level is used (a rule meant to skip levels under the ground dropped it and 1000
+hPa, leaving no wind data between 80 m and about 450 m; 975 hPa is about 250 m up at the plant.
+1000 hPa is asked for again too, but it sits below the 80 m level there, so the model carries
+the 80 m wind up instead). The GFS and ECMWF changes of the
+same day don't apply here: these runs use HRRR only. HYSPLIT's numbers don't change; it
+reads NOAA's HRRR files directly.
+
+Both versions were run again the same day on the same Open-Meteo HRRR, with the commands
+under [Reproducing the numbers](#reproducing-the-numbers). The Nov. 24 code reproduced the
+published **Turbulence (default)** rows above to within rounding, so the archived weather
+had not changed. Ours ÷ HYSPLIT, same deposition speeds:
+
+| Case | Run | Air ≥ PAC-1 | Ground ≥100 | Ground ≥40 | Ground ≥5 | Peak air h1 | Peak air h2 | Peak air h3 |
+|---|---|---|---|---|---|---|---|---|
+| Overcast | Before, Zhang | 1.5× | 2.0× | 1.4× | 1.0× | 0.8× | 1.8× | 1.1× |
+| Overcast | **After**, Zhang | 1.5× | 1.8× | 1.4× | 1.0× | 0.9× | 1.9× | 1.1× |
+| Sunny | Before, Zhang | 1.8× | 1.8× | 1.6× | 0.9× | 1.3× | 1.5× | 1.1× |
+| Sunny | **After**, Zhang | 1.9× | 1.9× | 1.6× | 0.9× | 1.2× | 1.5× | 1.1× |
+| Windy | Before, Zhang | 1.0× | 1.0× | 1.2× | 1.1× | 0.9× | 0.7× | 0.6× |
+| Windy | **After**, Zhang | 1.0× | 1.0× | 1.2× | 1.1× | 0.9× | 0.7× | 0.6× |
+| Stable evening | Before, Zhang | 1.5× | 1.7× | 1.8× | 1.3× | 0.8× | 1.3× | 0.8× |
+| Stable evening | **After**, Zhang | 1.0× | 1.1× | 1.1× | 0.8× | 1.3× | 1.4× | 1.2× |
+| Stable evening | Before, Emerson | 1.8× | 2.4× | 1.7× | 1.2× | 0.8× | 1.0× | 0.7× |
+| Stable evening | **After**, Emerson | 1.1× | 1.6× | 1.1× | 0.8× | 1.2× | 1.2× | 1.0× |
+
+After the fixes, the stable evening's own numbers (Zhang) are peak air 2,197 / 761 / 596 /
+263 µg/m³ at hours 1, 2, 3 and 5; air above PAC-1 to 43 mi; ground above 100 / 40 / 5
+µg/ft² to 24 / 43 / 43 mi; 1,120 lb deposited. Emerson's daytime rows move like Zhang's.
+
+- **The stable evening improves the most.** The old guess at 120 m was a fast,
+  unturned wind (7.8 m/s from 183° in the first hour, from a 2 m/s surface wind and the
+  class F power law); HRRR's 80 m wind was 3.3 m/s from 209°, and 975 hPa (about 200 m up)
+  4.4 m/s from 218°. The cloud now travels about a third less far in 5 hours and its
+  path turns about 14° to the east, toward HYSPLIT's (ours had headed 20–30° west of it).
+  Its distances go from 1.5–1.8× HYSPLIT's to 1.0–1.1×; the 5 µg/ft² zone is now 0.8×,
+  because the 5-hour run ends nearer the plant. Peak air at hours 1–3 rises to 1.2–1.4×.
+- **The daytime days barely change**: distances within 0.1× of before, the path within
+  about 1°. Peak air in the first hour moves toward HYSPLIT's on the overcast and sunny
+  days (0.8× to 0.9×, 1.3× to 1.2×). In well-mixed daytime air the guessed and real winds
+  near the ground were close.
+- **The figures above** (`docs/turbulence/*.png`) and the earlier tables are from before
+  the fixes.
 
 ## Sensitivity
 

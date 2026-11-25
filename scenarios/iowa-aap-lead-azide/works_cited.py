@@ -332,10 +332,12 @@ REFERENCES = [
 ]
 
 MODEL_CREDITS = {  # Open-Meteo model name -> who runs it
-    "gfs_seamless": "NOAA NCEP (GFS)",
+    "gfs_global": "NOAA NCEP (GFS)",
+    "gfs_seamless": "NOAA NCEP (GFS, with HRRR for the first two days)",
     "ncep_hrrr_conus": "NOAA NCEP (HRRR)",
     "ncep_rrfs_conus": "NOAA NCEP (RRFS)",
-    "ecmwf_ifs025": "ECMWF (IFS 0.25&deg;)",
+    # its mixing height comes from the same forecast's 9 km data (met.MIXING_HEIGHT_FROM)
+    "ecmwf_ifs025": "ECMWF (IFS 0.25&deg;, with the mixing height from IFS 9 km)",
     "icon_seamless": "DWD (ICON)",
     "gem_seamless": "Environment and Climate Change Canada (GEM)",
     "ukmo_seamless": "the UK Met Office",
@@ -594,6 +596,30 @@ def method_intro(pct: dict[str, str]) -> str:
 #: entry for every change to the model, its settings or its sources.
 CHANGES_HEAD = "Change log"
 CHANGES = [
+    (
+        "Nov. 25",
+        (
+            "The weather-model spread now uses NOAA&rsquo;s GFS itself: the GFS feed it used "
+            "was really HRRR for the first two days, so HRRR was counted twice. ECMWF&rsquo;s "
+            "run now uses ECMWF&rsquo;s own mixing height instead of a fixed typical value."
+        ),
+    ),
+    (
+        "Nov. 25",
+        (
+            "The wind at about 250 m above the ground (the 975 hPa level, near the top of the "
+            "cloud) is now used. A rule meant to skip levels under the ground left it out, so "
+            "the wind between 80 m and about 450 m was a straight-line guess."
+        ),
+    ),
+    (
+        "Nov. 25",
+        (
+            "Maps drawn from the HRRR forecast use its 80 m wind near the ground. The "
+            "forecast service has no 120 m wind for HRRR, so until now the wind between "
+            "the ground and the lowest pressure level was estimated from the 10 m wind."
+        ),
+    ),
     (
         "Nov. 25",
         (

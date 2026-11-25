@@ -385,7 +385,7 @@ def test_days_and_map_names() -> None:
 
 def test_forecast_order_rrfs_then_gfs() -> None:
     """RRFS is shown where it covers the run (Monday); otherwise GFS (Tuesday)."""
-    assert site.WEATHER.split(",")[:2] == ["ncep_rrfs_conus", "gfs_seamless"]
+    assert site.WEATHER.split(",")[:2] == ["ncep_rrfs_conus", "gfs_global"]
 
 
 def test_days_to_build(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -634,7 +634,7 @@ def test_four_weather_models_and_hrrr_first_near_the_blast() -> None:
     """RRFS leads a day or more out; HRRR leads within 18 hours; four models in all."""
     assert site.WEATHER.split(",") == [
         "ncep_rrfs_conus",
-        "gfs_seamless",
+        "gfs_global",
         "ncep_hrrr_conus",
         "ecmwf_ifs025",
     ]
