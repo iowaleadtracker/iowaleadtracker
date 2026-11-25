@@ -601,7 +601,7 @@ CHANGES = [
             "barriers, two walls of water tanks, a foam-filled dam and a screen and foam on the "
             "magazines, and Col. Aaron Teller&rsquo;s account of a 1977 blast with no "
             "mitigation that put about 25% of the lead into the air (Lis 2026; Purpura 2026). "
-            "Added a note that moving where the blast starts by a few miles changes which "
+            "Added a note that moving where the blast starts by 2 or 3 miles changes which "
             "towns are inside the lines more than how far they reach. The maps did not change."
         ),
     ),

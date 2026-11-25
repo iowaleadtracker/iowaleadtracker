@@ -15,6 +15,7 @@ any building is, so some points may lie outside the plant.
     python3 tools/release_point_sensitivity.py OUT_DIR [--cases permit-100,army-26]
 
 Runs use the saved forecasts only (no downloads) and write ``OUT_DIR/<point>_<case>.html``
+(replacing any from an earlier run)
 plus ``OUT_DIR/results.json``. About 30 s per run, four at a time.
 """
 
@@ -118,6 +119,8 @@ def main(argv: list[str] | None = None) -> None:
     if a.run is not None:  # one model run, in its own process
         run_shifted(a.run)
         return
+    # Absolute, because the runs start in the repo root and this process may not.
+    a.out = a.out.resolve()
     a.out.mkdir(parents=True, exist_ok=True)
     cases = [c.strip() for c in a.cases.split(",") if c.strip()]
     args = model_args()
@@ -126,14 +129,13 @@ def main(argv: list[str] | None = None) -> None:
     for name, lat, lon in points():
         for case in cases:
             out = a.out / f"{name}_{case}.html"
+            out.unlink(missing_ok=True)  # never summarize a map left from an older run
             cmd = [sys.executable, __file__, str(a.out), "--run"]
             cmd += ["--lat", str(lat), "--lon", str(lon), "--release-case", case]
             jobs.append((name, case, out, [*cmd, *args, "-o", str(out)]))
 
     def run(job: tuple[str, str, Path, list[str]]) -> str:
-        name, case, out, cmd = job
-        if out.exists():
-            return f"{name} {case}: kept"
+        name, case, _, cmd = job
         r = subprocess.run(cmd, capture_output=True, text=True, env=env, check=False, cwd=ROOT)  # noqa: S603
         tail = r.stderr.strip().splitlines()[-1:] if r.returncode else []
         return f"{name} {case}: " + ("ok" if not r.returncode else f"FAILED {tail}")
@@ -141,20 +143,34 @@ def main(argv: list[str] | None = None) -> None:
     with ThreadPoolExecutor(mmp.PARALLEL_RUNS) as ex:
         for line in ex.map(run, jobs):
             print(line, flush=True)
-    results = {
-        case: {name: summarize(a.out / f"{name}_{case}.html") for name, _, _ in points()}
+    # A failed run leaves no map: record it as null and keep the rest.
+    results: dict[str, dict[str, Any]] = {
+        case: {
+            name: summarize(f) if (f := a.out / f"{name}_{case}.html").exists() else None
+            for name, _, _ in points()
+        }
         for case in cases
     }
-    (a.out / "results.json").write_text(json.dumps(results, indent=1), encoding="utf-8")
+    meta = {"forecast_pulled": str(mmp.retrieved_at()), "blast": f"{mmp.DATE}T{mmp.DEFAULT}"}
+    (a.out / "results.json").write_text(
+        json.dumps({"meta": meta, **results}, indent=1), encoding="utf-8"
+    )
+    failed = 0
     for case, rows in results.items():
         print(f"\n{case}, {mmp.DATE} {mmp.DEFAULT}")
         print("point  5 ug/ft2 mi  40 ug/ft2 mi  100 ug/ft2 mi  air max ug/m3  towns >= 5")
         for name, r in rows.items():
+            if r is None:
+                failed += 1
+                print(f"{name:5} (run failed)")
+                continue
             print(
                 f"{name:5} {r['yellow']['reach_mi']:>11} {r['orange']['reach_mi']:>13} "
                 f"{r['red']['reach_mi']:>14} {r['air_max_ug_m3']:>14}  "
                 + "; ".join(r["yellow"]["towns"])
             )
+    if failed:
+        raise SystemExit(f"{failed} run(s) failed; their entries in results.json are null")
 
 
 if __name__ == "__main__":

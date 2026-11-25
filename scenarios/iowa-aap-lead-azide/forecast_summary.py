@@ -398,17 +398,17 @@ MISTING = (
 # atmosphere"; KCCI: "about 75% of the lead particulate stayed at the site and 25% entered the
 # atmosphere"). No report of the 1977 blast has been found; the Army gave no reduction estimate.
 PRECEDENT = (
-    "Col. Aaron Teller, who leads the operation, said that the last time the Army set off this "
-    "much lead azide, about 7,000 pounds in the open in Colorado in 1977 with no mitigation, "
-    "about 25% of the lead went into the air. The Army hasn\u2019t said how much its "
-    "mitigation lowers that."
+    "Col. Aaron Teller, who leads the operation, said that the last time the Army disposed of a "
+    "lead azide stockpile, about 7,000 pounds set off in the open in Colorado in 1977 with no "
+    "mitigation, about 25% of the lead went into the air. The Army hasn\u2019t said how much "
+    "its mitigation lowers that."
 )
 # README "Release point: sensitivity check" (tools/release_point_sensitivity.py).
 RELEASE_POINT = (
     "The map starts the cloud at one point for the plant; the Army hasn\u2019t said exactly "
     "where the blasts will be, and it plans to vent them across part of the plant. Moving "
-    "that point a few miles barely changes how far the lead reaches, but it can change which "
-    "towns are inside the lines."
+    "that point 2 or 3 miles changes how far the lead reaches only a little, but it can "
+    "change which towns are inside the lines."
 )
 # The Army's public safety advisory of Nov. 24, 2026 (Lori McFate, Army Sustainment Command;
 # read in full from the maintainer's PDF of the page, printed Nov. 24, 9:28 a.m. CST). Quoted
