@@ -1,0 +1,44 @@
+station_id,instruments,lat,lon,miles_from_plant,bearing_from_plant
+AS-01,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.77722,-91.32383,4.5,222
+AS-02,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.70835,-91.44983,12.5,230
+AS-03,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.64666,-91.5639,19.9,232
+AS-04,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.58356,-91.69738,28.1,233
+AS-05,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.4216,-91.719,36.6,220
+AS-06,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.74142,-91.33352,6.8,211
+AS-07,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.76861,-91.51954,13.8,253
+AS-08,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.63793,-91.31857,13.2,192
+AS-09,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.66757,-91.51175,16.8,230
+AS-10,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.63135,-91.73568,28.0,241
+AS-11,"Air Cassette, Summa Cannister",40.75523,-91.3725,7.4,229
+AS-12,"Air Cassette, Summa Cannister",40.70358,-91.36345,9.8,211
+AS-13,"Air Cassette, Summa Cannister",40.67543,-91.43935,13.8,221
+AS-14,"Air Cassette, Summa Cannister",40.5898,-91.53175,21.4,220
+AS-15,"Air Cassette, Summa Cannister",40.67525,-91.62724,21.5,241
+AS-16,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.58356,-91.63913,25.7,229
+AS-17,"Air Cassette, Summa Cannister",40.5903,-91.6906,27.5,234
+AS-18,"Air Cassette, Summa Cannister",40.53197,-91.56631,25.6,218
+AS-19,"Air Cassette, Summa Cannister",40.57734,-91.76587,31.2,237
+AS-20,"Air Cassette, Summa Cannister",40.85031,-91.60283,17.7,276
+AS-21,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.81298,-91.45352,9.8,265
+AS-22,"Air Cassette, Summa Cannister",40.82107,-91.56409,15.6,269
+AS-23,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.78477,-91.603,17.8,261
+AS-24,"Air Cassette, Summa Cannister",40.75541,-91.61196,18.7,255
+AS-25,"Air Cassette, Summa Cannister",40.78088,-91.69943,22.8,262
+AS-26,"Air Cassette, Summa Cannister",40.72607,-91.71876,24.6,254
+AS-27,"Air Cassette, Summa Cannister",40.72604,-91.53525,15.6,244
+AS-28,"Air Cassette, Summa Cannister",40.76929,-91.77566,26.9,262
+AS-29,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.72643,-91.6606,21.7,252
+AS-30,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.83528,-91.70866,23.1,272
+AS-31,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.8669,-91.31544,3.8,318
+AS-32,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.83769,-91.19256,4.0,78
+AS-33,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.82562,-91.25453,0.6,89
+AS-34,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.71118,-91.2302,8.1,166
+AS-35,"Dust Trak, AreaRAE, Air Cassette, Summa Cannister",40.63334,-91.36952,14.3,202
+AS-36,"Air Cassette, Summa Cannister",40.45946,-91.56749,29.8,212
+AS-37,"Air Cassette, Summa Cannister",40.49539,-91.678,31.4,223
+AS-38,"Air Cassette, Summa Cannister",40.52407,-91.79898,34.8,233
+AS-39,"Air Cassette, Summa Cannister",40.52654,-91.98179,42.7,241
+AS-40,"Air Cassette, Summa Cannister",40.45234,-91.88159,41.2,231
+AS-41,"Air Cassette, Summa Cannister",40.82131,-91.16024,5.6,93
+AS-42,"Air Cassette, Summa Cannister",40.78614,-91.10745,8.7,108
+AS-43,"Air Cassette, Summa Cannister",40.75628,-91.27247,4.8,184

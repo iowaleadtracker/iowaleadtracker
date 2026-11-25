@@ -9,6 +9,15 @@ happened, and with the U.S. Army's own plume map**
 > are not official NOAA products. Nothing below says what lead was actually measured
 > anywhere; no measurements were public when this was written.
 
+> **Under revision; don't quote this draft.** An independent review on Nov. 25
+> ([`reviews/referee-report-1.md`](reviews/referee-report-1.md)) found errors that change
+> some results below: the tracker's air numbers after hour 1 use the wrong field, the
+> forecast check compares different times (matched in time, the forecast wind was 9–18° too
+> easterly in the lowest 250 m), the agreement with HYSPLIT near the plant doesn't hold on
+> the two-hour analysis run, the Army map's placement is less certain than stated, and the
+> sky-cover sentence is wrong. EPA's public air data
+> ([`data/epa/`](data/epa/README.md)) arrived after this draft and isn't in it yet.
+
 **Status.** First draft, written Nov. 25, 2026, late morning CST, about two hours after the
 detonation. It uses the one hour of analyzed weather available then (9 a.m.). Sections
 marked *pending* will be filled in as the later hours are archived (see
