@@ -585,6 +585,14 @@ CHANGES = [
     (
         "Nov. 25",
         (
+            "The weather-model spread now uses NOAA&rsquo;s GFS itself: the GFS feed it used "
+            "was really HRRR for the first two days, so HRRR was counted twice. ECMWF&rsquo;s "
+            "run now uses ECMWF&rsquo;s own mixing height instead of a fixed typical value."
+        ),
+    ),
+    (
+        "Nov. 25",
+        (
             "Winds at about 50 m and 250 m above the ground (the 1000 and 975 hPa levels) "
             "are now used. They were left out by a rule meant to skip levels under the "
             "ground, so the wind between 80 m and about 450 m was a straight-line guess."
