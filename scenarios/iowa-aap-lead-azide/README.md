@@ -561,6 +561,20 @@ after a detonation has occurred." Detonation 25 Nov 2026, 0900 CST. Ground lines
   blast. The model can't represent these, so the case applies the Army's 0.26 directly.
 - **Particle sizes** are not given; the case keeps the site's all-respirable fume sizes, so it
   is not a reproduction of the Army's HPAC/SHARC/NARAC run.
+- **What the map labels say** (re-read Nov. 25 from the maintainer's copy of the same PDF):
+  100 µg/ft² is "EPA Maximum Allowed for Lead on Windows", 5 µg/ft² "EPA Maximum Allowed for
+  Lead on Floors", and 0.18 µg/m³ is "Lead Air Sampling Method Detection Limit".
+- **The advisory text** (army.mil/article/297039, by Lori McFate, Army Sustainment Command,
+  Nov. 24; read from the maintainer's browser print of the page, Nov. 24, 1:29 PM, because
+  army.mil refuses scripted downloads) adds to the list above "extensive drone surveillance of
+  lead levels" and says the foam barriers are there "to absorb thermal energy and reduce
+  airborne particulate dispersal," with "state-of-the-art atmospheric dispersion modeling to
+  determine the design of the controlled detonation." The evacuation cone follows "consequence
+  management modeling" by the Defense Threat Reduction Agency (DTRA). Maps were to be updated
+  six hours before the detonation and hourly after that, with "a final estimate of the extent
+  of the affected area" after it. The advisory gives no emission factor, no reduction estimate,
+  and none of the briefing details below (water tanks, coffer dam, tarp and screen, vent, the
+  1977 figure).
 
 ### Nov. 24 briefing: the mitigation in more detail
 
