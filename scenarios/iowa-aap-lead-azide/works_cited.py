@@ -209,6 +209,13 @@ REFERENCES = [
     "court approval. KCRG-TV9, 23 November 2026, accessed 23 November 2026, "
     + _a("https://www.kcrg.com/2026/11/23/president-trump-orders-military-pause-iowa-detonation/")
     + ".",
+    "Lis, A., 2026: Here&rsquo;s how Army plans to minimize toxic lead dust following Iowa "
+    "ammunitions blast. Shaw Local, 24 November 2026, accessed 25 November 2026, "
+    + _a(
+        "https://www.shawlocal.com/news/2026/11/24/"
+        "heres-how-army-plans-to-minimize-toxic-lead-dust-following-iowa-ammunitions-blast/"
+    )
+    + ".",
     "MACTEC Federal Programs, 2008: Emission factors developed based on Exploding Ordnance "
     "Emission Study Phase II Series 7 testing conducted at Aberdeen Proving Ground, Maryland. "
     "Draft background report, AP-42 5th ed., Chapter 15, U.S. Army Environmental Command and "
@@ -226,6 +233,13 @@ REFERENCES = [
         "Pasquill, F., 1961: The estimation of the dispersion of windborne material. <i>Meteor. "
         "Mag.</i>, <b>90</b>, 33&ndash;49."
     ),
+    "Purpura, P., 2026: What else could the lead azide blast release? KCCI 8 News, 24 November "
+    "2026, accessed 25 November 2026, "
+    + _a(
+        "https://www.kcci.com/article/what-else-could-a-lead-azide-detonation-release-in-eastern-iowa/"
+        "74526545"
+    )
+    + ".",
     (
         "Schiller, L., and A. Naumann, 1933: &Uuml;ber die grundlegenden Berechnungen bei der "
         "Schwerkraftaufbereitung. <i>Z. Ver. Dtsch. Ing.</i>, <b>77</b>, 318&ndash;320."
@@ -604,6 +618,17 @@ CHANGES = [
             "Maps drawn from the HRRR forecast use its 80 m wind near the ground. The "
             "forecast service has no 120 m wind for HRRR, so until now the wind between "
             "the ground and the lowest pressure level was estimated from the 10 m wind."
+        ),
+    ),
+    (
+        "Nov. 25",
+        (
+            "Added what the Army described at its Nov. 24 news conference: a vent in the "
+            "barriers, two walls of water tanks, a foam-filled dam and a screen and foam on the "
+            "magazines, and Col. Aaron Teller&rsquo;s account of a 1977 blast with no "
+            "mitigation that put about 25% of the lead into the air (Lis 2026; Purpura 2026). "
+            "Added a note that moving where the blast starts by 2 or 3 miles changes which "
+            "towns are inside the lines more than how far they reach. The maps did not change."
         ),
     ),
     (
