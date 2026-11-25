@@ -45,13 +45,10 @@ if [[ ${FETCH_EPA:-0} == 1 ]]; then python3 "$P/scripts/epa_fetch.py" "$P/data/e
 # 5. Numbers
 cache=$WORK/forecast/scenarios/iowa-aap-lead-azide/met_cache/map_met_all.json
 (cd "$P/scripts" && python3 compare.py "$FC" "$WORK/maps" "$WORK/run_analyses_zhang" "$WORK/run_analyses_emerson" ../data/epa) > "$P/data/compare.json"
-(cd "$P/scripts" && python3 army_map.py ../data/army/army_mitigated026_ground_a-o_240630NOV26.jpg \
-  ../data/army/army_mitigated026_air_a-o_240630NOV26.jpg "$FC/mid-0900.html" "$WORK/maps/an_mid.html") > "$P/data/army_map.json"
+(cd "$P/scripts" && python3 army_map.py ../data/army "$FC/mid-0900.html" "$WORK/maps/an_mid.html") > "$P/data/army_map.json"
 python3 "$P/scripts/forecast_vs_analysis.py" "$cache" "$WORK" "$ARL" > "$P/data/forecast_vs_analysis.json"
 python3 "$P/scripts/station_vs_hrrr.py" "$WORK" "$ARL" "$P/data/obs" > "$P/data/station_vs_hrrr.json"
 
 # 6. Figures
-(cd "$P/scripts" && python3 figure.py "$FC" "$WORK/maps" "$WORK/run_analyses_zhang" \
-  ../data/army/army_mitigated026_ground_a-o_240630NOV26.jpg ../data/army/army_mitigated026_air_a-o_240630NOV26.jpg \
-  ../data/epa ../figures)
+(cd "$P/scripts" && python3 figure.py "$FC" "$WORK/maps" "$WORK/run_analyses_zhang" ../data/army ../data/epa ../figures)
 echo "done: $P/data, $P/figures"

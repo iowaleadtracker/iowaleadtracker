@@ -124,7 +124,7 @@ def main(args: list[str]) -> None:
         fields[f"hysplit analysis {label}"] = lib.hysplit(hz, scale)
         fields[f"hysplit analysis emerson {label}"] = lib.hysplit(he, scale)
     for name, f in fields.items():
-        hours = hy_hours if name.startswith("hysplit") else [1, 2, 3, 4, 8]
+        hours = hy_hours if name.startswith("hysplit") else [1, 2, 3, 4, 5, 8]
         out["runs"][name] = summary(f, hours)
         out["at_monitors"][name] = at_monitors(f, stations, hy_hours)
     out["overlap"] = {}

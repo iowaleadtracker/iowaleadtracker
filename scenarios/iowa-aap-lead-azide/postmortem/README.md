@@ -13,6 +13,8 @@ Army's plume map, and EPA's real-time air monitors**
 It replaces a first draft that an independent review found wrong in several places
 ([what changed](#what-changed-since-the-first-draft)). It covers the first two hours on
 analyzed weather; later hours, the Army's results and all lab sampling are still to come.
+The Army comparison uses the Army's final maps before the detonation (stamped 7 a.m.
+Nov. 25), which replaced an earlier issue used in the first version of this draft.
 It was drafted with an AI coding assistant, and the first draft was reviewed by a
 separate AI referee ([`reviews/`](reviews/referee-report-1.md)); the maintainer has not
 yet checked every number by hand.
@@ -53,11 +55,14 @@ Three hours after the detonation, four things can be compared with those maps.
    the 100% case, and its highest hourly air from 1.5 to 12 miles out is 2 to 3.6 times
    HYSPLIT's. The two models' paths differ by about 9° (213° against 222°), and their
    zones overlap by a quarter to a third.
-4. **The Army's map, stamped the morning of Nov. 24 and still its public map on the
-   morning of the detonation, points 241° and puts far more lead near the plant.** Its 100 µg/ft² zone covers 27 sq mi and reaches 14 miles; the
-   tracker's, for the same 26%, covers 2 sq mi and reaches 4. Coarser particles or
-   faster deposition in the tracker reach 9 to 19 sq mi, so they could explain part of
-   the gap. The Army hasn't published its model's inputs.
+4. **The Army's final map agrees with the tracker's forecast on direction and speed, and
+   puts far more lead near the plant.** Stamped 7 a.m. on Nov. 25, it points 230° (the
+   tracker's forecast: 229–231°) and has the cloud 27, 43 and 79 miles out at 2, 3 and 5
+   hours (the tracker: 31, 48 and 85). Both rest on forecasts, and both point 10° to 15°
+   west of the analyzed wind. The Army's 100 µg/ft² zone covers 29 sq mi and reaches 12
+   miles; the tracker's, for the same 26%, covers 2 sq mi and reaches 4. A coarse share
+   of particles in the tracker gives 11 to 19 sq mi, so it could explain much of the
+   gap. The Army hasn't published its model's inputs.
 
 ## 1. What this can and can't say
 
@@ -73,10 +78,9 @@ Three hours after the detonation, four things can be compared with those maps.
   is a lower bound on forecast error. There is no wind observation at the plant.
 - **HYSPLIT is a reference model, not the truth.** Here it runs on pressure-level data
   every 25 hPa without surface heat fluxes, with fixed deposition speeds.
-- **The Army map is read from two JPEG images** stamped the morning of Nov. 24. The
-  maintainer reports the Army was showing the same maps at 7 and 8 a.m. on Nov. 25; we
-  don't know whether the weather behind them was updated. Its position is good to a few
-  miles; its model, particle sizes and source are unknown.
+- **The Army map is read from two JPEG images** of its final maps before the detonation,
+  at 1.66 pixels per mile. Positions are good to about 3 miles; its model, particle sizes
+  and source are unknown.
 - **Zone edges are not boundaries.** A place outside a modeled zone may still get lead,
   and a place inside it may get none you could measure.
 
@@ -186,25 +190,24 @@ dust and emergency-planning levels used here as map lines, not outdoor health li
 
 ### 3.7 The Army's map
 
-Two 1200 × 675 JPEG images of the Army's "Mitigated 0.26" advisory, stamped "Issued Nov.
-24, 2026" and "a/o 240630NOV26", supplied by the maintainer ([`data/army/`](data/army)).
-The stamps read as 6:30 a.m. on Nov. 24. The maintainer reports that these were the
-Army's maps as of about 7 a.m. on Nov. 25 and that its 8 a.m. release that day showed the
-same maps; the scenario README describes a PDF of the advisory stamped 240848NOV26, which we
-haven't compared. So these were the Army's current public maps at the detonation. What
-isn't known is the weather forecast behind them: if the stamp marks the model run, it was
-about 26 hours old at 9 a.m.; if the Army reran the model and kept the stamp, it was
-newer.
+Two 1200 × 675 JPEG images of the Army's "Mitigated 0.26" advisory maps, stamped "Issued
+Nov. 25, 2026" and "a/o 250700NOV26" (7:00 a.m. on the day of the detonation), supplied
+by the maintainer as the Army's final maps before it ([`data/army/`](data/army); U.S. Army
+2026a). An earlier issue stamped a/o 240630NOV26 is there too (U.S. Army 2026c). The
+final maps print areas of 29 and 186 sq mi for 100 and 5 µg/ft² (the earlier issue: 27
+and 148) and mark the cloud's path in air at T+0.5, T+2, T+3 and T+5 hours.
 
 `scripts/army_map.py` selects the shaded pixels by hue. Distances use the map's scale bar
-(2.52 px per mile). The source is taken to be the upwind tip of the plume itself, which
-starts inside the magenta box, 2.4 miles west-northwest of the box's center (the first
-draft measured from the center). North is assumed up. Checks: the traced zones come to
-142 and 26 sq mi against the 148 and 27 printed on the map; a fit through ten labeled
-cities gives a scale of 2.58 px per mile and north within 2° of up, but places the plant
-8 miles north of the tip with 7 px residuals, so the base map can't be georeferenced from
-this image to better than several miles. We give results from the tip and show how they
-change from the box center. Areas quoted are the printed ones.
+(1.66 px per mile, so one pixel is 0.6 mile). The source is taken to be the upwind tip of
+the ground plume, at the southwest edge of the magenta marker that the legend labels
+"Iowa Army Ammunition Plant"; the marker's center is 3 miles away, and results from it
+are given as the alternative. North is assumed up. The traced zones come to 165 and
+26 sq mi against the printed 186 and 29, so the tracing runs about 10% small; areas quoted
+are the printed ones. On the air map the cloud's path is one band, crossed by four lines
+labeled with times. We read each line's end points from an enlarged crop (good to about
+1 px) and take the cloud's position at that time as the point where the line crosses the
+band's long axis. The map doesn't say whether a line marks the cloud's center or its
+leading edge.
 
 ### 3.8 EPA's data
 
@@ -342,7 +345,7 @@ by 8 hours.*
 
 *Figure 1. Modeled lead on the ground for the 26% case: 5 µg/ft² (left) and 100 µg/ft²
 (right, enlarged). Tracker zones are after 8 hours; HYSPLIT's after 2. The Army's zones
-are traced from its map and placed from the plume's tip. Diamonds are EPA's four real-time
+are traced from its final map and placed from the plume's tip. Diamonds are EPA's four real-time
 monitors; open squares are EPA's other sampling sites, with no public results.*
 
 ![Figure 2](figures/fig2_air_hourly.png)
@@ -403,7 +406,7 @@ first hour. The highest single 5-minute reading there, at 9:10 a.m., was 0.0021 
 about 2,700 to 3,600 times lower, and lower still against the 26% and 100% cases.
 
 At the three farther monitors the models disagree with each other. They lie at 230°–233°,
-along the forecast's path. On analyzed weather the tracker's cloud passes south of all
+along the forecast's path and the axis of the Army's final map (230°). On analyzed weather the tracker's cloud passes south of all
 three and predicts nothing there; HYSPLIT, whose path is 9° farther west, still predicts
 0.09 to 0.9 µg/m³ for the lowest case, 15 to 4,600 times the highest readings there. So
 only AS01 tests all three runs, and it tests them unequally: it sits at 92% of HYSPLIT's
@@ -446,47 +449,51 @@ be about 2% of that background, so PM2.5 can't show it.
 
 ## 7. The Army's map
 
-*Table 7. The Army's "Mitigated 0.26" map (stamped 6:30 a.m. Nov. 24; its public map
-through the morning of Nov. 25) against the tracker's 26% case. Army distances are from the plume's tip; values from the
-box center are in parentheses where they differ by more than a mile or 3°. Tracker ground
-zones are after 8 hours.*
+*Table 7. The Army's final "Mitigated 0.26" maps (a/o 7 a.m. Nov. 25) against the
+tracker's 26% case. Army distances are from the plume's tip; values from the marker's
+center are in parentheses. Tracker ground zones are after 8 hours; tracker cloud positions
+are the extent and center of its snapshot at 0.18 µg/m³ or more.*
 
-| | Army map | Tracker, forecast | Tracker, analyzed weather |
+| | Army, final map | Tracker, forecast | Tracker, analyzed weather |
 |---|---|---|---|
-| Ground ≥ 100 µg/ft²: area | 27 sq mi (printed) | 2.2 sq mi | 2.0 sq mi |
-| farthest, bearing | 14 mi (15), 240° (247°) | 4.2 mi, 225° | 3.7 mi, 207° |
-| Ground ≥ 5 µg/ft²: area | 148 sq mi (printed) | 90 sq mi | 104 sq mi |
-| farthest, bearing | 36 mi (38), 240° (243°) | 35 mi, 231° | 34 mi, 219° |
-| Plume axis | 241° | | |
-| Overlap of the 5 µg/ft² zones with the Army's | | 0.14 (0.00) | 0.01 (0.00) |
-| Air ≥ 0.18 µg/m³ at +1 h: extent, center | 4–7 mi, 5.7 mi at 243° (258°) | 11–17 mi, 14 mi at 230° | 10–16 mi, 13 mi at 214° |
-| at +4 h | 10–67 mi, 41 mi at 238° | 55–78 mi, 66 mi at 230° | 50–72 mi, 61 mi at 221° |
-| at +8 h | 89–106 mi, 97 mi at 227° | 128–153 mi, 140 mi at 225° | 124–150 mi, 137 mi at 219° |
+| Ground ≥ 100 µg/ft²: area | 29 sq mi (printed) | 2.2 sq mi | 2.0 sq mi |
+| farthest, bearing | 12 mi (15), 238° (241°) | 4.2 mi, 225° | 3.7 mi, 207° |
+| Ground ≥ 5 µg/ft²: area | 186 sq mi (printed) | 90 sq mi | 104 sq mi |
+| farthest, bearing | 37 mi (40), 232° (233°) | 35 mi, 231° | 34 mi, 219° |
+| Plume axis | 230° on the ground, 227° in air | | |
+| Overlap of the 5 µg/ft² zones with the Army's | | 0.37 (0.16) | 0.00 (0.00) |
+| Cloud at 2 h | 27 mi | 24–37 mi, center 31 mi at 231° | 22–34 mi, center 28 mi at 218° |
+| at 3 h | 43 mi | 39–57 mi, center 48 mi at 231° | 35–52 mi, center 44 mi at 220° |
+| at 5 h | 79 mi | 72–98 mi, center 85 mi at 229° | 67–92 mi, center 79 mi at 220° |
 
 ![Figure 4](figures/fig4_air_snapshots.png)
 
-*Figure 4. Lead in air at one moment, 0.18 µg/m³ or more: the tracker's snapshots 1, 4
-and 8 hours after the detonation and the Army map's three shapes. We read the Army's
-smallest shape as +1 h, the long chain as +4 h and the far shape as +8 h; the map's
-labels sit beside them but don't mark them.*
+*Figure 4. Lead in air at one moment, 0.18 µg/m³ or more: the tracker's snapshots 2, 3
+and 5 hours after the detonation, with the cloud path from the Army's final air map
+(shaded) and the Army's mark for that time (ring).*
 
-The Army's plume points 241°, 10° west of the tracker's forecast and 22° to 34° west of
-the tracker on analyzed weather. Its 5 µg/ft² zone is as long as the tracker's (36 against
-34–35 miles) and about half again the area, and overlaps the forecast zone by 14% and the
-analyzed-weather zone hardly at all. If the map's weather dates from
-its stamp, a forecast made a day ahead could explain a direction difference of this size
-without any difference between the models; the tracker's own forecast, pulled 24 minutes
-before the detonation, was off by 15°.
+On direction and speed the Army's final map and the tracker's forecast agree. The Army's
+plume lies along 230° on the ground and 227° in air; the tracker's forecast map along
+229°–231°. The 5 µg/ft² zones are the same length (37 and 35 miles) and overlap by 37%
+of their combined area, more than the tracker and HYSPLIT overlap on the same weather.
+The Army's marks at 2, 3 and 5 hours fall inside the tracker's forecast cloud at each
+time, 4 to 6 miles behind its center. Its mark at half an hour is 6 miles out; the tracker saves no
+snapshot then.
 
-The Army's cloud is slower from the start. Its +1 h shape is 4 to 7 miles out where the
-tracker's is 10 to 17; at +4 and +8 h its centers are 41 and 97 miles out against 61–66
-and 137–140, about two-thirds of the tracker's speed. At +4 h its cloud still reaches back
-to 10 miles from the plant. That pattern suggests a cloud that stays lower, in slower
-wind, or a release that lasts longer, though a slower wind forecast would do the same.
+Both are forecasts, and both miss the analyzed wind the same way. On analyzed weather the
+tracker's cloud runs along 213°–220° and its 5 µg/ft² zone shares almost nothing with the
+Army's. If the analysis is closer to the truth than the two forecasts (section 4), the
+Army's map pointed 10° to 15° too far west, as the tracker's did. EPA's three farther
+real-time monitors sit on that forecast axis.
 
-The Army's 100 µg/ft² zone is 12 to 13 times the tracker's in area and reaches 14 miles
-against 4. Table 8 shows what the tracker gives for the same 26% when its assumptions
-change.
+The earlier issue of the Army's map, stamped 6:30 a.m. Nov. 24, pointed 241° and moved
+the cloud more slowly (about 41 miles at 4 hours). The final issue turned 11° toward the
+south and moves the cloud a third to a half faster, consistent with a newer forecast.
+
+The amounts differ. The Army's 100 µg/ft² zone is 13 to 15 times the tracker's in area
+(29 sq mi against 2.0–2.2) and reaches 12 miles against 4; its 5 µg/ft² zone is about
+twice the tracker's (186 sq mi against 90–104). Table 8 shows what the tracker gives for
+the same 26% when its assumptions change.
 
 *Table 8. Tracker on analyzed weather, 26% airborne, after 8 hours, under other
 assumptions.*
@@ -500,27 +507,29 @@ assumptions.*
 | Fine sizes, deposition speed +1 cm/s | 9.4 sq mi, 11 mi | 328 sq mi, 60 mi | 254 lb |
 | Fine sizes, Emerson deposition | 2.9 sq mi, 5.1 mi | 145 sq mi, 41 mi | 113 lb |
 | Fine sizes, cloud top 151 m instead of 251 m | 3.7 sq mi, 7.0 mi | 83 sq mi, 33 mi | 103 lb |
-| **Army map** | **27 sq mi, 14 mi** | **148 sq mi, 36 mi** | not given |
+| **Army, final map** | **29 sq mi, 12 mi** | **186 sq mi, 37 mi** | not given |
 
-Coarser particles move the tracker most of the way: an all-coarse release reaches 19 sq mi
-and 13 miles. A faster deposition speed does about half as much. Neither reproduces the
-Army's shape. Every variant that enlarges the 100 µg/ft² zone more than four-fold also enlarges the
-5 µg/ft² zone to 177–328 sq mi, past the Army's 148; the Army's two areas differ by a
-factor of 5.5, the tracker's by 13 to 52. Other explanations are open: the Army's lines may
-be a conservative percentile or a probability, not a mean; its source may be lower or
-last longer, as the slow cloud suggests; its deposition scheme or accumulation period may
-differ; water and foam may be modeled as wet removal near the source. The first draft
-called particle size the likeliest cause. The runs here support it as one contributor and
-nothing more.
+A coarse share of particles moves the tracker most of the way. With half the airborne
+lead in 30 and 100 µm particles, or with sizes spread over 1–30 µm, its 5 µg/ft² zone
+comes to 177–192 sq mi, matching the Army's 186, and its 100 µg/ft² zone to 11–14 sq mi
+and 11 miles, against the Army's 29 sq mi and 12 miles. An all-coarse release reaches
+19 sq mi. A faster deposition speed for fine particles does less for the high zone and
+overshoots the low one. So the Army's map looks like a model with a substantial coarse
+fraction, though no variant here reaches 29 sq mi. Other explanations stay open: the
+Army's lines may be a conservative percentile, not a mean; its source may be lower or its
+deposition scheme different; water and foam may be modeled as removal near the source.
+The Army hasn't published its model's inputs, and these runs don't identify them.
 
 ## 8. What it means for the tracker
 
 - **Direction.** The published map pointed about 15° too far west of where the analyzed
-  wind and the nearby stations put the low-level flow. The site showed a ±5° direction
-  spread and three other weather models; whether those covered the analyzed path is not
-  yet checked. In the back-test the tracker's path matched HYSPLIT's within about 5° in daytime, but
-  both models ran on archived weather there, so it never tested the forecast. A forecast error of this size should be
-  expected and shown.
+  wind and the nearby stations put the low-level flow. The Army's final map pointed the
+  same way as the tracker's, so this was an error in the weather forecasts, not in one
+  model. The site showed a ±5° direction spread and three other weather models; whether
+  those covered the analyzed path is not yet checked. In the back-test the tracker's path
+  matched HYSPLIT's within about 5° in daytime, but both models ran on archived weather
+  there, so it never tested the forecast. A forecast error of this size should be expected
+  and shown.
 - **Amounts near the plant.** On the same weather the tracker's high zones are about 2 to
   3 times HYSPLIT's. For a screening map that is the cautious side, and larger than the
   back-test found.
@@ -532,7 +541,8 @@ nothing more.
   the site's current statement, to wait for official results, stands.
 - **Coarse particles.** The published cases put all airborne lead in fine sizes. Table 8
   shows that a coarse share changes the lead on the ground within 15 miles by a factor of
-  7 to 12. The tracker should show a coarse case.
+  7 to 12 and brings the tracker's zones close to the Army's. The tracker should show a
+  coarse case.
 
 ## 9. Next steps
 
@@ -545,7 +555,8 @@ nothing more.
   interval.
 - Repeat the comparison with HYSPLIT's turbulence diagnostics and with the tracker's
   stability taken from the analysis's profile.
-- Get the Army's map as a PDF with a known projection, and its model inputs.
+- Get the Army's maps as PDFs with a known projection, its post-detonation map, and its
+  model inputs.
 
 ## Reproducing
 
@@ -566,7 +577,7 @@ the saved analyzed weather, downloads and converts the HRRR analyses, runs HYSPL
 |---|---|
 | `lib.py` | readers for the tracker's maps and HYSPLIT's output; zones, centers, overlap |
 | `compare.py` | Tables 4–6 and 8 |
-| `army_map.py` | traces and measures the Army's map; Table 7 |
+| `army_map.py` | traces and measures both issues of the Army's maps; Table 7 |
 | `forecast_vs_analysis.py` | Table 1 |
 | `station_vs_hrrr.py` | Table 2 and the 21-station comparison |
 | `vad_decode.py`, `airnow_extract.py`, `epa_fetch.py` | the radar, AirNow and EPA downloads |
@@ -594,6 +605,9 @@ corrected here:
   larger zone without testing it.
 - It said nearby stations reported no low cloud; Fairfield and Oskaloosa did.
 - It had no EPA data.
+- It used an earlier issue of the Army's map (stamped Nov. 24). The Army's final maps
+  point 11° farther south and move the cloud faster, and agree with the tracker's
+  forecast on both.
 
 ## References
 
@@ -641,12 +655,14 @@ corrected here:
   modeling system. *Bull. Amer. Meteor. Soc.*, **96**, 2059–2077,
   doi:10.1175/BAMS-D-14-00110.1.
 - U.S. Army, 2026a: Public advisory maps, "Mitigated 0.26" dispersion and deposition,
-  detonation 25 Nov 2026 0900 CST. Issued Nov. 24, 2026, a/o 240630NOV26; the Army's
-  current maps as of about 7 a.m. CST Nov. 25, per the maintainer (two 1200 × 675
-  JPEG images supplied by the maintainer; in `data/army/`).
+  detonation 25 Nov 2026 0900 CST. Issued Nov. 25, 2026, a/o 250700NOV26 (two 1200 × 675
+  JPEG images supplied by the maintainer as the Army's final maps before the detonation;
+  in `data/army/`).
 - U.S. Army, 2026b: Emergency permit application for treatment of lead azide, Quality
   Assurance Project Plan (redacted). Posted by EPA at
   https://response.epa.gov/site/site_profile.aspx?site_id=17211 (retrieved Nov. 25, 2026).
+- U.S. Army, 2026c: Public advisory maps, "Mitigated 0.26", earlier issue. Issued Nov.
+  24, 2026, a/o 240630NOV26 (two JPEG images supplied by the maintainer; in `data/army/`).
 - Zhang, L., S. Gong, J. Padro, and L. Barrie, 2001: A size-segregated particle dry
   deposition scheme for an atmospheric aerosol module. *Atmos. Environ.*, **35**, 549–560,
   doi:10.1016/S1352-2310(00)00326-5.
