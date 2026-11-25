@@ -1,0 +1,272 @@
+{
+ "mid-0900.html": {
+  "shown": "ncep_hrrr_conus",
+  "lead_lb": 1794.253536602115,
+  "deposited_lb": 243.32785895940802,
+  "grid_km": 0.687517467728467,
+  "dep100": {
+   "reach_mi": 4.1759260859949485,
+   "area_mi2": 2.1900344633031197
+  },
+  "dep40": {
+   "reach_mi": 9.630247162421133,
+   "area_mi2": 9.125143597096333
+  },
+  "dep5": {
+   "reach_mi": 34.90379120305588,
+   "area_mi2": 90.33892161125368
+  },
+  "dep5_far_bearing": 231.40752827435404,
+  "air_peak_ugm3": 276.6309111956084,
+  "pac1_reach_mi": 8.71118068332505,
+  "hours": [
+   {
+    "h": 1,
+    "t": "2026-11-25T16:00:00Z",
+    "wind_ms": 4.15,
+    "wind_from": 43,
+    "stability": "D",
+    "mixing_height_m": 438,
+    "sunshine_wm2": 187,
+    "peak_ugm3": 276.6309111956084,
+    "air018_reach_mi": 16.691487552913557,
+    "air018_area_mi2": 42.52316916246891,
+    "center_mi": 5.614201880292881,
+    "center_bearing": 228.67729638115887
+   },
+   {
+    "h": 2,
+    "t": "2026-11-25T17:00:00Z",
+    "wind_ms": 4.95,
+    "wind_from": 49,
+    "stability": "D",
+    "mixing_height_m": 642,
+    "sunshine_wm2": 297,
+    "peak_ugm3": 276.6309111956084,
+    "air018_reach_mi": 34.377318394545135,
+    "air018_area_mi2": 181.04284896639123,
+    "center_mi": 12.016972153390228,
+    "center_bearing": 229.86064998938386
+   },
+   {
+    "h": 3,
+    "t": "2026-11-25T18:00:00Z",
+    "wind_ms": 5.57,
+    "wind_from": 54,
+    "stability": "D",
+    "mixing_height_m": 718,
+    "sunshine_wm2": 368,
+    "peak_ugm3": 13.51689951415268,
+    "air018_reach_mi": 52.85120491058922,
+    "air018_area_mi2": 398.4037694492258,
+    "center_mi": 30.025915021211176,
+    "center_bearing": 230.82313588552617
+   },
+   {
+    "h": 4,
+    "t": "2026-11-25T19:00:00Z",
+    "wind_ms": 6.06,
+    "wind_from": 53,
+    "stability": "D",
+    "mixing_height_m": 762,
+    "sunshine_wm2": 379,
+    "peak_ugm3": 3.9754017286405743,
+    "air018_reach_mi": 71.93353481506011,
+    "air018_area_mi2": 644.7826465708268,
+    "center_mi": 47.607632419184355,
+    "center_bearing": 230.75424131124765
+   },
+   {
+    "h": 5,
+    "t": "2026-11-25T20:00:00Z",
+    "wind_ms": 6.01,
+    "wind_from": 49,
+    "stability": "D",
+    "mixing_height_m": 860,
+    "sunshine_wm2": 324,
+    "peak_ugm3": 1.758127283441686,
+    "air018_reach_mi": 90.81149363182155,
+    "air018_area_mi2": 848.0908459141331,
+    "center_mi": 66.07689280920145,
+    "center_bearing": 229.7671154184372
+   },
+   {
+    "h": 6,
+    "t": "2026-11-25T21:00:00Z",
+    "wind_ms": 5.77,
+    "wind_from": 50,
+    "stability": "D",
+    "mixing_height_m": 958,
+    "sunshine_wm2": 239,
+    "peak_ugm3": 1.0775858709123742,
+    "air018_reach_mi": 108.54313892201338,
+    "air018_area_mi2": 957.5925690792891,
+    "center_mi": 84.60313248658271,
+    "center_bearing": 228.47546956398674
+   },
+   {
+    "h": 7,
+    "t": "2026-11-25T22:00:00Z",
+    "wind_ms": 5.48,
+    "wind_from": 49,
+    "stability": "D",
+    "mixing_height_m": 975,
+    "sunshine_wm2": 132,
+    "peak_ugm3": 0.6604705587167972,
+    "air018_reach_mi": 125.99389688598885,
+    "air018_area_mi2": 984.7854969986363,
+    "center_mi": 103.00086851859363,
+    "center_bearing": 227.26459052403618
+   },
+   {
+    "h": 8,
+    "t": "2026-11-25T23:00:00Z",
+    "wind_ms": 4.62,
+    "wind_from": 39,
+    "stability": "D",
+    "mixing_height_m": 945,
+    "sunshine_wm2": 46,
+    "peak_ugm3": 0.4765639422685871,
+    "air018_reach_mi": 143.7672513661001,
+    "air018_area_mi2": 953.5775058965668,
+    "center_mi": 121.63336716188181,
+    "center_bearing": 226.27253952505845
+   }
+  ]
+ },
+ "permit-0900.html": {
+  "shown": "ncep_hrrr_conus",
+  "lead_lb": 6900.975140777365,
+  "deposited_lb": 935.8763806131068,
+  "grid_km": 0.687517467728467,
+  "dep100": {
+   "reach_mi": 13.290346268571549,
+   "area_mi2": 14.78273262729606
+  },
+  "dep40": {
+   "reach_mi": 23.3000403759448,
+   "area_mi2": 38.50810597974652
+  },
+  "dep5": {
+   "reach_mi": 75.38070636201714,
+   "area_mi2": 478.52253023173165
+  },
+  "dep5_far_bearing": 229.34250990275936,
+  "air_peak_ugm3": 1063.9650430600318,
+  "pac1_reach_mi": 22.69836575441599,
+  "hours": [
+   {
+    "h": 1,
+    "t": "2026-11-25T16:00:00Z",
+    "wind_ms": 4.15,
+    "wind_from": 43,
+    "stability": "D",
+    "mixing_height_m": 438,
+    "sunshine_wm2": 187,
+    "peak_ugm3": 1063.9650430600318,
+    "air018_reach_mi": 16.77758651287667,
+    "air018_area_mi2": 49.45827829626212,
+    "center_mi": 5.614201880292881,
+    "center_bearing": 228.67729638115887
+   },
+   {
+    "h": 2,
+    "t": "2026-11-25T17:00:00Z",
+    "wind_ms": 4.95,
+    "wind_from": 49,
+    "stability": "D",
+    "mixing_height_m": 642,
+    "sunshine_wm2": 297,
+    "peak_ugm3": 1063.9650430600318,
+    "air018_reach_mi": 35.575590687798055,
+    "air018_area_mi2": 224.47853248856978,
+    "center_mi": 12.016972153389661,
+    "center_bearing": 229.86064998938159
+   },
+   {
+    "h": 3,
+    "t": "2026-11-25T18:00:00Z",
+    "wind_ms": 5.57,
+    "wind_from": 54,
+    "stability": "D",
+    "mixing_height_m": 718,
+    "sunshine_wm2": 368,
+    "peak_ugm3": 51.98807505443336,
+    "air018_reach_mi": 55.05904498323994,
+    "air018_area_mi2": 524.5132539610971,
+    "center_mi": 30.0259150212106,
+    "center_bearing": 230.82313588552526
+   },
+   {
+    "h": 4,
+    "t": "2026-11-25T19:00:00Z",
+    "wind_ms": 6.06,
+    "wind_from": 53,
+    "stability": "D",
+    "mixing_height_m": 762,
+    "sunshine_wm2": 379,
+    "peak_ugm3": 15.290006648617615,
+    "air018_reach_mi": 75.53956652318402,
+    "air018_area_mi2": 908.8643022707946,
+    "center_mi": 47.607632419184355,
+    "center_bearing": 230.75424131124765
+   },
+   {
+    "h": 5,
+    "t": "2026-11-25T20:00:00Z",
+    "wind_ms": 6.01,
+    "wind_from": 49,
+    "stability": "D",
+    "mixing_height_m": 860,
+    "sunshine_wm2": 324,
+    "peak_ugm3": 6.76202801323725,
+    "air018_reach_mi": 95.95522224297332,
+    "air018_area_mi2": 1299.7854539704015,
+    "center_mi": 66.07689280920145,
+    "center_bearing": 229.7671154184372
+   },
+   {
+    "h": 6,
+    "t": "2026-11-25T21:00:00Z",
+    "wind_ms": 5.77,
+    "wind_from": 50,
+    "stability": "D",
+    "mixing_height_m": 958,
+    "sunshine_wm2": 239,
+    "peak_ugm3": 4.144561041970667,
+    "air018_reach_mi": 115.46737885065966,
+    "air018_area_mi2": 1635.5907383435465,
+    "center_mi": 84.60313248658271,
+    "center_bearing": 228.47546956398674
+   },
+   {
+    "h": 7,
+    "t": "2026-11-25T22:00:00Z",
+    "wind_ms": 5.48,
+    "wind_from": 49,
+    "stability": "D",
+    "mixing_height_m": 975,
+    "sunshine_wm2": 132,
+    "peak_ugm3": 2.540271379679988,
+    "air018_reach_mi": 134.7593802302763,
+    "air018_area_mi2": 1927.7778363225714,
+    "center_mi": 103.00086851859363,
+    "center_bearing": 227.26459052403618
+   },
+   {
+    "h": 8,
+    "t": "2026-11-25T23:00:00Z",
+    "wind_ms": 4.62,
+    "wind_from": 39,
+    "stability": "D",
+    "mixing_height_m": 945,
+    "sunshine_wm2": 46,
+    "peak_ugm3": 1.8329382394945648,
+    "air018_reach_mi": 154.3440237658568,
+    "air018_area_mi2": 2186.931914480107,
+    "center_mi": 121.63336716188168,
+    "center_bearing": 226.27253952505902
+   }
+  ]
+ }
+}
