@@ -140,6 +140,11 @@ REFERENCES = [
     "Emerson, E. W., and Coauthors, 2020: Revisiting particle dry deposition and its role in "
     "radiative effect estimates. <i>Proc. Natl. Acad. Sci. USA</i>, <b>117</b>, "
     "26&thinsp;076&ndash;26&thinsp;082, " + doi("10.1073/pnas.2014761117") + ".",
+    "EPA Region 7, 2026: Iowa Army Ammunition Plant response data viewer (real-time lead "
+    "monitors and air sampling stations). ArcGIS Experience, U.S. Environmental Protection "
+    "Agency, accessed 25 November 2026, "
+    + _a("https://experience.arcgis.com/experience/1ddcf8b9d8314971b00dac8893ae9cd6")
+    + ".",
     (
         "EPA, 1978: National ambient air quality standards for lead. <i>Fed. Regist.</i>, "
         "<b>43</b>, "
@@ -606,6 +611,15 @@ def method_intro(pct: dict[str, str]) -> str:
 #: entry for every change to the model, its settings or its sources.
 CHANGES_HEAD = "Change log"
 CHANGES = [
+    (
+        "Nov. 25",
+        (
+            "Early air readings: EPA&rsquo;s four real-time lead monitors southwest of the "
+            "plant, through 12:20 p.m. CST, with a note that lab results from the other air "
+            "samples, and soil and water sampling, are still pending and needed. The maps did "
+            "not change."
+        ),
+    ),
     (
         "Nov. 25",
         (
