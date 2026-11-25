@@ -1150,7 +1150,7 @@ def test_the_default_time_skipped_stops_the_build(tmp_path: Path) -> None:
 
 
 def test_about_safety_paragraph_says_no_warranty_and_no_verdicts() -> None:
-    """The safety paragraph: not made or checked by officials, no verdicts, no warranty."""
+    """The safety paragraph: not official or checked, no verdicts, warranty, or liability."""
     about = " ".join(dialog(site.PAGE_TEMPLATE.read_text(encoding="utf-8"), "note").split())
     i = about.index("<b>Don&rsquo;t use this map to decide if you&rsquo;re safe.</b>")
     para = about[i : about.index("</p>", i)]
@@ -1158,6 +1158,7 @@ def test_about_safety_paragraph_says_no_warranty_and_no_verdicts() -> None:
         "$not_checked",
         "can&rsquo;t tell you whether any particular home or place will get lead",
         "It comes with no warranty",
+        "Its maker isn&rsquo;t responsible for any loss or harm from using it",
         "follow $who",
     ):
         assert part in para

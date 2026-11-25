@@ -600,8 +600,9 @@ CHANGES = [
         "Nov. 25",
         (
             "The About box is shorter: when, the evacuation zone and FEMA helpline, the "
-            "Army&rsquo;s maps, what the map shows, and a clearer warning that it comes with no "
-            "warranty and can&rsquo;t say whether any one place will get lead. The details of "
+            "Army&rsquo;s maps, what the map shows, and a clearer warning: it comes with no "
+            "warranty, its maker isn&rsquo;t responsible for loss or harm from using it, and it "
+            "can&rsquo;t say whether any one place will get lead. The details of "
             "the four cases, the mitigation, the timeline, and news mentions moved here. The "
             "maps did not change."
         ),
