@@ -211,6 +211,13 @@ RULING_URL = (
     "federal-appeals-court-clears-way-us-army-detonate-degraded-bomb-making-material-iowa/"
 )
 RULING_CITE = "Associated Press on KCRG, Nov. 23, 2026"
+#: The court case in one sentence, for the About box (the full timeline, COURT_HOLD, is in
+#: the Methodology and References dialog). From the AP report above.
+COURT_SHORT_HTML = (
+    "On Monday, Nov. 23, the 8th U.S. Circuit Court of Appeals cleared the way for the Army "
+    f'to detonate the lead azide (<a href="{RULING_URL}" rel="noopener">{RULING_CITE}</a>). '
+    "The full timeline and its sources are under Methodology and References."
+)
 # The same ruling, and Gov.-elect Rob Sand's Nov. 23 post, as reported by Iowa Public Radio
 # (published Nov. 22, 2026, 9:11 p.m. CST, "updated Monday afternoon"; read in full from the
 # maintainer's copy, saved Nov. 23, 9:16 p.m.). "In a Monday order, judges lifted the stay";
@@ -715,33 +722,51 @@ TIME_HEAD = "When."
 EARLIER_HEAD = "Earlier dates."
 
 
+def _time_parts(built_txt: str) -> dict[str, str]:
+    """Return the time paragraph's sentences by topic: when, evacuation, alert, maps, window."""
+    return {
+        "when": (
+            f"As of this update ({built_txt}), the Army plans the controlled detonation for "
+            "about 9 a.m. CST Wednesday, Nov. 25, and says it will give a more precise time "
+            "after evaluating changing weather (Army public safety advisory, Nov. 24)."
+        ),
+        "evacuation": (
+            "FEMA supports relocating all residents of Middletown and the immediate surrounding "
+            "areas, starting Nov. 24; the evacuation zone is a 5-mile cone extending southwest "
+            "of the plant, reaching one mile beyond the Army\u2019s modeled dispersion path. "
+            "The Army encourages people outside the zone to shelter in place, closing all "
+            "windows and doors. Questions about the evacuation area or help: FEMA Helpline "
+            "1-800-621-3362 (24/7) or DisasterAssistance.gov."
+        ),
+        "alert": (
+            "A FEMA emergency alert sent to phones near the plant gave the same 9 a.m. time "
+            "(FEMA emergency alert, Nov. 24)."
+        ),
+        "maps": (
+            "The Army\u2019s latest maps estimate where lead may be in the air and on the "
+            f"ground for the mitigated blast, using an emission factor of 0.26 ({ARMY_MAPS_CITE}). "
+            f"The Army says it will post updated maps at {ARMY_MAPS_URL} six hours before the "
+            "detonation and every hour after that."
+        ),
+        "window": (
+            f"These maps open on 9 a.m. and model blasts {WINDOW_HOURLY}, in case the time shifts."
+        ),
+    }
+
+
 def time_note(built_txt: str) -> str:
     """Give the key facts first: the time, the official evacuation and shelter advice, the maps.
 
     The timeline that led here (court case, presidential hold, earlier dates) comes after it
     on the page, under its own headings.
     """
-    return (
-        f"As of this update ({built_txt}), the Army plans the controlled detonation for about "
-        "9 a.m. CST Wednesday, Nov. 25, and says it will give a more precise time after "
-        "evaluating changing weather (Army public safety advisory, Nov. 24). FEMA supports "
-        "relocating all residents of Middletown and the immediate surrounding areas, starting "
-        "Nov. 24; the evacuation zone is a 5-mile cone extending southwest of the plant, "
-        "reaching one mile beyond the Army\u2019s modeled dispersion path. The Army encourages "
-        "people outside the zone to shelter in place, closing all windows and doors. "
-        "Questions about the evacuation area or help: FEMA Helpline 1-800-621-3362 (24/7) or "
-        "DisasterAssistance.gov. A FEMA emergency alert sent to phones near the plant gave the "
-        "same 9 a.m. time (FEMA emergency alert, Nov. 24). The Army\u2019s latest maps estimate "
-        "where lead may be in the air and on the ground for the mitigated blast, using an "
-        f"emission factor of 0.26 ({ARMY_MAPS_CITE}). The Army says it will post updated "
-        f"maps at {ARMY_MAPS_URL} six hours before the detonation and every hour after that. "
-        f"These maps open on 9 a.m. and model blasts {WINDOW_HOURLY}, in case the time shifts."
-    )
+    p = _time_parts(built_txt)
+    return " ".join(p[k] for k in ("when", "evacuation", "alert", "maps", "window"))
 
 
-def time_note_html(built_txt: str) -> str:
-    """Return time_note() with its sources linked."""
-    out = time_note(built_txt)
+def _link_sources(text: str) -> str:
+    """Link the named sources, army.mil/asc and DisasterAssistance.gov in ``text``."""
+    out = text
     for name, url in NAMED_SOURCES:
         out = out.replace(f"({name})", f'(<a href="{url}" rel="noopener">{name}</a>)')
     return out.replace(
@@ -749,6 +774,30 @@ def time_note_html(built_txt: str) -> str:
     ).replace(
         "DisasterAssistance.gov",
         '<a href="https://www.disasterassistance.gov/" rel="noopener">DisasterAssistance.gov</a>',
+    )
+
+
+def time_note_html(built_txt: str) -> str:
+    """Return time_note() with its sources linked."""
+    return _link_sources(time_note(built_txt))
+
+
+#: The About box's first three headings (its short form of the time paragraph).
+EVACUATION_HEAD = "Evacuation and help."
+ARMY_MAPS_HEAD = "The Army\u2019s maps."
+
+
+def about_time_html(built_txt: str) -> str:
+    """Return time_note()'s sentences as three short About-box paragraphs, linked.
+
+    When (with the FEMA alert and the times modeled), then the evacuation zone and helpline,
+    then the Army's own maps, so a reader on a phone finds the official help at a glance.
+    """
+    p = {k: _link_sources(v) for k, v in _time_parts(built_txt).items()}
+    return (
+        f"<p><b>{TIME_HEAD}</b> {p['when']} {p['alert']} {p['window']}</p>\n"
+        f"  <p><b>{EVACUATION_HEAD}</b> {p['evacuation']}</p>\n"
+        f"  <p><b>{ARMY_MAPS_HEAD}</b> {p['maps']}</p>"
     )
 
 
