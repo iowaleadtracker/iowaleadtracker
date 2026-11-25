@@ -36,7 +36,8 @@ The forecast held up. Above about 200 m, the tracker's first-hour winds were wit
 1 m/s and 6° of NOAA's 9 a.m. HRRR analysis, and the analysis agreed with the Davenport
 radar's measured winds within about 10° and, at most levels, 1 m/s. Near the ground the analysis was about
 15° more northerly than the forecast; surface stations around the plant disagreed with each
-other by more than that. Run on the 9 a.m. analysis, HYSPLIT put the lead where the tracker
+other by more than that. By 10 a.m., though, the analyzed wind in the lowest 450 m had
+turned 12–19° more northerly than the forecast. Run on the 9 a.m. analysis, HYSPLIT put the lead where the tracker
 did: both send it southwest (about 230°), and the ground zones agree closely (100 µg/ft²:
 2.2 vs 2.3 sq mi; 40 µg/ft²: 9.1 vs 8.0 sq mi) except the faintest one (5 µg/ft²: 90 vs
 139 sq mi). The tracker's cloud travels about 20% faster than HYSPLIT's after the first few
@@ -189,6 +190,23 @@ The 6 a.m. balloons at Davenport and Lincoln, Ill., had winds from 65–95° in 
 kilometer, more easterly than the analysis at the plant three hours later. They are 70–130
 miles away and three hours earlier, so they don't contradict it.
 
+**By 10 a.m. the low-level wind had turned.** The tracker's "hour 1" winds are valid at
+10 a.m., so the 10 a.m. analysis (posted 10:53 a.m.) is the cleaner test (Table 1b). Above
+about 600 m the forecast still holds. Below it, where the cloud starts, the analyzed wind
+came 12–19° more from the north than forecast. That would carry the near-field lead
+more to the south-southwest than the tracker's 230°.
+
+*Table 1b. Wind at the plant at 10 a.m.: tracker forecast against the 10 a.m. HRRR
+analysis.*
+
+| Height | Tracker forecast | HRRR analysis, 10 a.m. |
+|---|---|---|
+| 10 m | 4.2 m/s from 43° | 5.0 m/s from 29° |
+| about 240 m | 7.5 m/s from 54° | 7.2 m/s from 35° |
+| about 450 m | 8.4 m/s from 58° | 8.7 m/s from 46° |
+| about 660 m | 9.9 m/s from 59° | 9.6 m/s from 55° |
+| about 870 m | 10.5 m/s from 64° | 10.3 m/s from 61° |
+
 **Near the ground: within the stations' own spread.** Around 9 a.m. the stations reported
 north-northeast to northeast winds of 7–13 kt (Table 3). The analysis at the plant
 (7 kt from 24°) sits inside that range; the tracker's forecast (8 kt from 43°) does too.
@@ -247,6 +265,15 @@ published forecast. HYSPLIT: the 9 a.m. analysis held for 8 hours.*
 230°, past West Point and Donnellson (Figure 1, left). Within about 10 miles, where the
 highest ground levels are, the two agree within 20% in area and distance in both cases.
 HYSPLIT's first-hour peak is 25% higher; PAC-1 reaches about as far.
+
+**The first hour on two real analyses.** Once the 10 a.m. analysis posted, we ran HYSPLIT
+for the first hour on the 9 and 10 a.m. analyses together, with nothing held. Its cloud
+center at hour 1 is 6.0 miles out at 222°, the same as the held run (5.7 miles, 222°); the
+tracker's is 5.6 miles at 229°. Air at 0.18 µg/m³ reaches 19 miles in the 26% case,
+against 17 in both other runs. (Its peaks are higher, 589 µg/m³ for 26%, because that run
+used the finer 0.003° grid, so they aren't comparable with Table 4.) The turn in the wind
+shows up after the first hour, which the hourly runs in [Next steps](#7-next-steps) will
+cover.
 
 **The tracker's far zones are narrower.** The 5 µg/ft² zone ends at about the same
 distance in the 26% case, but HYSPLIT's covers about 1.5 times the area: its cloud is wider.
@@ -312,11 +339,16 @@ about half the Army's 27 for a quarter of the lead.
 
 ## 6. Discussion
 
-**What the tracker got right.** The forecast it was built on was good: the winds that
-carry the cloud were within about 1 m/s and 6° of the analysis, and the analysis within
+**What the tracker got right.** The forecast it was built on was good at 9 a.m.: the winds
+that carry the cloud were within about 1 m/s and 6° of the analysis, and the analysis within
 about 10° of the radar. Given the weather, its near-field numbers, where people
 are closest and levels highest, are within about 20% of HYSPLIT's, and its direction matches
 HYSPLIT's and, farther out, the Army's.
+
+**Where the forecast slipped.** By 10 a.m. the lowest 450 m had turned 12–19° more
+northerly than forecast. If that lasted, the lead near the plant went more to the
+south-southwest than the published map showed, and farther from the Army's map, which
+pointed more westerly. The hourly reruns will show how long it lasted.
 
 **Where it differs from HYSPLIT.** Its faint far zones are narrower and its cloud runs
 farther by the end of the day. The first is a known choice (the 10-minute spread basis),
