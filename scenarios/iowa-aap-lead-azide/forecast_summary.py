@@ -356,14 +356,59 @@ TUESDAY_SOURCES_HTML = (
 # will be thoroughly saturated with water by misters." Its "Mitigated 0.26" maps (ARMY_MAPS_PDF)
 # are the Army's estimate with these measures. The model's own spray runs (README, "Water
 # misting and soil soaking"): 0.1% at 528 gal/min up to 19% at 26,000 gal/min.
+#
+# The Nov. 24 news conference, as reported by Shaw Local (BRIEFING_URL) and KCCI
+# (KCCI_BRIEF_URL), both read in full Nov. 25 (README "Nov. 24 briefing"): Col. Aaron Teller
+# said "a vent opening was placed in the protective barriers ... to vent debris into three
+# miles of uninhabited area"; "two walls of four 16,000-gallon water tanks around the
+# bunkers"; a coffer dam "filled with aqueous foam concentrate 380"; on the magazine tops "a
+# tarp; a containment screen specifically designed to contain lead ... and a layer of foam at
+# least two feet thick." The advisory itself lists none of these.
+BRIEFING_URL = (
+    "https://www.shawlocal.com/news/2026/11/24/"
+    "heres-how-army-plans-to-minimize-toxic-lead-dust-following-iowa-ammunitions-blast/"
+)
+BRIEFING_CITE = "Shaw Local, Nov. 24"
+KCCI_BRIEF_URL = (
+    "https://www.kcci.com/article/what-else-could-a-lead-azide-detonation-release-in-eastern-iowa/"
+    "74526545"
+)
+KCCI_BRIEF_CITE = "KCCI, Nov. 24"
+BRIEFING_SOURCES_HTML = (
+    f'<a href="{BRIEFING_URL}" rel="noopener">{BRIEFING_CITE}</a>; '
+    f'<a href="{KCCI_BRIEF_URL}" rel="noopener">{KCCI_BRIEF_CITE}</a>'
+)
+BRIEFING_SOURCES_TEXT = f"{BRIEFING_CITE}, {BRIEFING_URL}; {KCCI_BRIEF_CITE}, {KCCI_BRIEF_URL}"
 MISTING = (
     "The Army says the blasts will be inside earth-covered concrete magazines, with sand "
     "barriers about two stories high, a \u201cwater wall\u201d and gel blocks, aqueous foam "
     "barriers, and the soil around the magazines soaked by misters before and during the "
-    "blast. The Army\u2019s estimate for this mitigated blast is an emission factor of 0.26 "
+    "blast. At a Nov. 24 news conference, the Army also described a vent in the barriers "
+    "aimed at about 3 miles of the plant where no one lives, two walls of four 16,000-gallon "
+    "water tanks, a dam around the magazines filled with foam, and a tarp, a screen to hold "
+    "in lead, and at least 2 feet of foam on top of the magazines. "
+    "The Army\u2019s estimate for this mitigated blast is an emission factor of 0.26 "
     "(26% of the lead airborne), the U.S. Army mitigated case here. This model can\u2019t "
     "represent the barriers, foam or gel; its own runs of water spray alone, at about 500 to "
     "26,000 gallons a minute, caught less than 1% to about 19% of the airborne lead."
+)
+# The 1977 figure is Teller's account at the Nov. 24 news conference (Shaw Local: "in 1977,
+# when approximately 7,000 pounds of the material were exploded in open air in Colorado. With
+# no mitigation efforts, Teller said only 25% of the lead particulate went into the
+# atmosphere"; KCCI: "about 75% of the lead particulate stayed at the site and 25% entered the
+# atmosphere"). No report of the 1977 blast has been found; the Army gave no reduction estimate.
+PRECEDENT = (
+    "Col. Aaron Teller, who leads the operation, said that the last time the Army set off this "
+    "much lead azide, about 7,000 pounds in the open in Colorado in 1977 with no mitigation, "
+    "about 25% of the lead went into the air. The Army hasn\u2019t said how much its "
+    "mitigation lowers that."
+)
+# README "Release point: sensitivity check" (tools/release_point_sensitivity.py).
+RELEASE_POINT = (
+    "The map starts the cloud at one point for the plant; the Army hasn\u2019t said exactly "
+    "where the blasts will be, and it plans to vent them across part of the plant. Moving "
+    "that point a few miles barely changes how far the lead reaches, but it can change which "
+    "towns are inside the lines."
 )
 # The Army's public safety advisory of Nov. 24, 2026 (Lori McFate, Army Sustainment Command;
 # read in full from the maintainer's PDF of the page, printed Nov. 24, 9:28 a.m. CST). Quoted
@@ -406,6 +451,7 @@ NAMED_SOURCES = (
     ("Iowa HHS fact sheet", HHS_URL),
     ("Nov. 22 court filing", RESPONSE_URL),
     (ARMY_MAPS_CITE, ARMY_MAPS_PDF),
+    (BRIEFING_CITE, BRIEFING_URL),
 )
 # Far-reach distances swing a lot between forecast updates (see README "Why the numbers move").
 REACH_NOTE = (
@@ -1014,6 +1060,8 @@ below it is
     (an emission factor of 0.26), but no one has measured a blast like this, and the wind
     forecast will change before the blasts. The four cases show the range. Use the map
     above to see each case and blast time. Last updated {built}.</p>
+  <p>{PRECEDENT} Sources: {BRIEFING_SOURCES_HTML}.</p>
+  <p>{RELEASE_POINT}</p>
   <h3>How the date was set</h3>
   <p>{TRUMP_HOLD} Sources: {TRUMP_SOURCE_HTML}.</p>
   <p>{WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_HTML}.</p>
@@ -1099,7 +1147,8 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
                 "\u201cmitigated\u201d plume maps), high "
                 f"{pct['high']} (a rule from the same handbook for explosions), and EPA permit "
                 f"{pct.get('permit', '100%')} (the emission factor EPA requires for the Army's "
-                "official plume maps)."
+                f"official plume maps). {PRECEDENT.removesuffix('.')} ({BRIEFING_CITE}). "
+                f"{RELEASE_POINT}"
             ),
         ),
         ("How does this compare with the Army's official maps?", ARMY_COMPARE + " " + t.weather),
@@ -1152,7 +1201,12 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             f"- Why Wednesday: {WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_TEXT}",
             f"- Earlier date, Tuesday: {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_TEXT}",
             f"- Earlier date, Monday: {WHY_MONDAY} Source: {ARMY_CITE}, {ARMY_URL}",
-            f"- Mitigation: {MISTING} Source: {ADVISORY_NOV24_CITE}, {ADVISORY_NOV24_URL}",
+            (
+                f"- Mitigation: {MISTING} Sources: {ADVISORY_NOV24_CITE}, {ADVISORY_NOV24_URL}; "
+                f"{BRIEFING_SOURCES_TEXT}"
+            ),
+            f"- 1977 precedent: {PRECEDENT} Sources: {BRIEFING_SOURCES_TEXT}",
+            f"- Release point: {RELEASE_POINT}",
             (
                 f"- Assumed: {t.amount} (Army Sustainment Command spokesperson via ABC News, "
                 f"19 Nov 2026; 68 drums per EPA's emergency permit). Share airborne: {t.pct}, "
