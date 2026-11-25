@@ -227,6 +227,11 @@ REFERENCES = [
     "McFate, L., 2026b: Public safety advisory: Controlled, mitigated detonation of unstable "
     "[lead azide]. U.S. Army Sustainment Command, 24 November 2026, accessed 24 November "
     "2026, " + _a("https://www.army.mil/article/297039") + ".",
+    "New York Times, 2026: Live coverage of the Iowa lead azide detonation. <i>The New York "
+    "Times</i>, 25 November 2026 (read by the maintainer; not fetched by this site&rsquo;s "
+    "tools, which nytimes.com blocks), "
+    + _a("https://www.nytimes.com/live/2026/11/25/us/iowa-detonation-ammunition-news")
+    + ".",
     "NOAA, 2025: Radar images: Reflectivity. NOAA JetStream, last updated 11 March 2025, "
     "accessed 23 November 2026, " + _a("https://www.noaa.gov/jetstream/reflectivity") + ".",
     (
@@ -596,6 +601,14 @@ def method_intro(pct: dict[str, str]) -> str:
 #: entry for every change to the model, its settings or its sources.
 CHANGES_HEAD = "Change log"
 CHANGES = [
+    (
+        "Nov. 25",
+        (
+            "The page now says news outlets report the Army carried out the detonation "
+            "Wednesday morning (New York Times, Nov. 25), and to wait for the Army&rsquo;s "
+            "official confirmation of the results. The maps did not change."
+        ),
+    ),
     (
         "Nov. 25",
         (

@@ -437,6 +437,23 @@ ARMY_MAPS_URL = "https://www.army.mil/asc#org-iowa-army-ammunition-plant"
 # advisory as the latest version (checked against the maintainer's copy of the PDF).
 ARMY_MAPS_PDF = "https://d34w7g4gy10iej.cloudfront.net/pubs/pdf_78382.pdf"
 ARMY_MAPS_CITE = "Army \u201cMitigated 0.26\u201d maps, Nov. 24"
+# The blast itself. The New York Times live coverage of Nov. 25, 2026 reported the detonation
+# as done; the maintainer read it there (this build's tools couldn't fetch nytimes.com, which
+# blocks automated readers). Other outlets reported it too. No Army statement of the results
+# had been checked when this was written, so the page says to wait for the Army's.
+NYT_BLAST_URL = "https://www.nytimes.com/live/2026/11/25/us/iowa-detonation-ammunition-news"
+NYT_BLAST_CITE = "New York Times, Nov. 25"
+BLAST_DONE = (
+    "News outlets report that the Army carried out the controlled detonation on Wednesday "
+    f"morning, Nov. 25 ({NYT_BLAST_CITE}). Wait for the Army\u2019s official confirmation of "
+    "the results, and follow official instructions."
+)
+BLAST_STATUS_HTML = (
+    "<b>Blast reported done:</b> news outlets report that the Army carried out the detonation "
+    f'Wednesday morning, Nov. 25 (<a href="{NYT_BLAST_URL}" rel="noopener">{NYT_BLAST_CITE}</a>). '
+    "Wait for the Army&rsquo;s official confirmation of the results, and follow official "
+    "instructions."
+)
 # FEMA and the Army's advice, for the page header (Army public safety advisory, Nov. 24).
 FEMA_HEADER_HTML = (
     "<b>FEMA evacuation:</b> Middletown and a 5-mile cone southwest of the plant; outside it, "
@@ -454,6 +471,7 @@ HHS_LINK = f'<a href="{HHS_URL}" rel="noopener">Iowa HHS fact sheet</a>'
 # Sources named in parentheses without their address, as "(Iowa HHS fact sheet)". The page
 # links each name (time_note_html, and make_map_picker.linkify for the FAQ).
 NAMED_SOURCES = (
+    (NYT_BLAST_CITE, NYT_BLAST_URL),
     (ADVISORY_NOV24_CITE, ADVISORY_NOV24_URL),
     ("Acting Secretary of the Army on X", SECARMY_URL),
     ("Iowa HHS fact sheet", HHS_URL),
@@ -726,9 +744,9 @@ def _time_parts(built_txt: str) -> dict[str, str]:
     """Return the time paragraph's sentences by topic: when, evacuation, alert, maps, window."""
     return {
         "when": (
-            f"As of this update ({built_txt}), the Army plans the controlled detonation for "
-            "about 9 a.m. CST Wednesday, Nov. 25, and says it will give a more precise time "
-            "after evaluating changing weather (Army public safety advisory, Nov. 24)."
+            f"As of this update ({built_txt}), {BLAST_DONE[0].lower()}{BLAST_DONE[1:]} The Army "
+            "had planned it for about 9 a.m. CST Wednesday, Nov. 25 (Army public safety "
+            "advisory, Nov. 24)."
         ),
         "evacuation": (
             "FEMA supports relocating all residents of Middletown and the immediate surrounding "
@@ -1227,7 +1245,8 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             "## Key facts",
             "",
             (
-                "- Blast: about 9 a.m. CST Wednesday, Nov. 25, 2026 (Army public safety "
+                f"- Blast: {BLAST_DONE} Planned for "
+                "about 9 a.m. CST Wednesday, Nov. 25, 2026 (Army public safety "
                 "advisory, Nov. 24; FEMA emergency alert, Nov. 24; the "
                 "Acting Secretary of the Army had said Wednesday morning on X, Nov. 23, after the "
                 "court ruling; President Trump had ordered a "

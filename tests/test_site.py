@@ -529,10 +529,23 @@ def test_about_box_leads_with_when() -> None:
     assert cite.index("$why_monday") < cite.index("$cite_html")
     assert fs.TIME_HEAD == "When."
     assert fs.time_note("X").startswith(
-        "As of this update (X), the Army plans the controlled detonation for about 9 a.m. CST "
-        "Wednesday, Nov. 25, and says it will give a more precise time after evaluating "
-        "changing weather (Army public safety advisory, Nov. 24)."
+        "As of this update (X), news outlets report that the Army carried out the controlled "
+        "detonation on Wednesday morning, Nov. 25 (New York Times, Nov. 25). Wait for the "
+        "Army\u2019s official confirmation of the results, and follow official instructions. "
+        "The Army had planned it for about 9 a.m. CST Wednesday, Nov. 25 (Army public safety "
+        "advisory, Nov. 24)."
     )
+
+
+def test_blast_status_says_to_wait_for_the_army() -> None:
+    """The reported blast is attributed, linked, and points readers to the Army's results."""
+    for text in (fs.BLAST_DONE, fs.BLAST_STATUS_HTML):
+        assert "official confirmation of the results" in text
+        assert "follow official instructions" in text
+        assert "safe" not in text.lower()  # no verdicts about anyone's safety
+    assert fs.NYT_BLAST_URL in fs.BLAST_STATUS_HTML
+    assert fs.NYT_BLAST_URL in fs.time_note_html("X")
+    assert any(r.startswith("New York Times, 2026:") for r in works_cited.REFERENCES)
 
 
 def test_window_words_match_the_blast_times() -> None:
