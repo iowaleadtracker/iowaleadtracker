@@ -53,8 +53,8 @@ Three hours after the detonation, four things can be compared with those maps.
    the 100% case, and its highest hourly air from 1.5 to 12 miles out is 2 to 3.6 times
    HYSPLIT's. The two models' paths differ by about 9° (213° against 222°), and their
    zones overlap by a quarter to a third.
-4. **The Army's map, made from a forecast a day earlier, points 241° and puts far more
-   lead near the plant.** Its 100 µg/ft² zone covers 27 sq mi and reaches 14 miles; the
+4. **The Army's map, stamped the morning of Nov. 24 and still its public map on the
+   morning of the detonation, points 241° and puts far more lead near the plant.** Its 100 µg/ft² zone covers 27 sq mi and reaches 14 miles; the
    tracker's, for the same 26%, covers 2 sq mi and reaches 4. Coarser particles or
    faster deposition in the tracker reach 9 to 19 sq mi, so they could explain part of
    the gap. The Army hasn't published its model's inputs.
@@ -73,9 +73,10 @@ Three hours after the detonation, four things can be compared with those maps.
   is a lower bound on forecast error. There is no wind observation at the plant.
 - **HYSPLIT is a reference model, not the truth.** Here it runs on pressure-level data
   every 25 hPa without surface heat fluxes, with fixed deposition speeds.
-- **The Army map is read from two JPEG images** of a map dated the morning before the
-  detonation. Its position is good to a few miles; its model, particle sizes and source
-  are unknown.
+- **The Army map is read from two JPEG images** stamped the morning of Nov. 24. The
+  maintainer reports the Army was showing the same maps at 7 and 8 a.m. on Nov. 25; we
+  don't know whether the weather behind them was updated. Its position is good to a few
+  miles; its model, particle sizes and source are unknown.
 - **Zone edges are not boundaries.** A place outside a modeled zone may still get lead,
   and a place inside it may get none you could measure.
 
@@ -187,9 +188,13 @@ dust and emergency-planning levels used here as map lines, not outdoor health li
 
 Two 1200 × 675 JPEG images of the Army's "Mitigated 0.26" advisory, stamped "Issued Nov.
 24, 2026" and "a/o 240630NOV26", supplied by the maintainer ([`data/army/`](data/army)).
-The scenario README describes a PDF of the same advisory stamped 240848NOV26; we haven't
-compared the two, and the Army said it would update its maps before and after the
-detonation. So this is a forecast made about 26 hours ahead.
+The stamps read as 6:30 a.m. on Nov. 24. The maintainer reports that these were the
+Army's maps as of about 7 a.m. on Nov. 25 and that its 8 a.m. release that day showed the
+same maps; the scenario README describes a PDF of the advisory stamped 240848NOV26, which we
+haven't compared. So these were the Army's current public maps at the detonation. What
+isn't known is the weather forecast behind them: if the stamp marks the model run, it was
+about 26 hours old at 9 a.m.; if the Army reran the model and kept the stamp, it was
+newer.
 
 `scripts/army_map.py` selects the shaded pixels by hue. Distances use the map's scale bar
 (2.52 px per mile). The source is taken to be the upwind tip of the plume itself, which
@@ -441,8 +446,8 @@ be about 2% of that background, so PM2.5 can't show it.
 
 ## 7. The Army's map
 
-*Table 7. The Army's "Mitigated 0.26" map (a forecast from the morning of Nov. 24)
-against the tracker's 26% case. Army distances are from the plume's tip; values from the
+*Table 7. The Army's "Mitigated 0.26" map (stamped 6:30 a.m. Nov. 24; its public map
+through the morning of Nov. 25) against the tracker's 26% case. Army distances are from the plume's tip; values from the
 box center are in parentheses where they differ by more than a mile or 3°. Tracker ground
 zones are after 8 hours.*
 
@@ -468,8 +473,10 @@ labels sit beside them but don't mark them.*
 The Army's plume points 241°, 10° west of the tracker's forecast and 22° to 34° west of
 the tracker on analyzed weather. Its 5 µg/ft² zone is as long as the tracker's (36 against
 34–35 miles) and about half again the area, and overlaps the forecast zone by 14% and the
-analyzed-weather zone hardly at all. A forecast made a day ahead explains a direction
-difference of this size without any difference between the models.
+analyzed-weather zone hardly at all. If the map's weather dates from
+its stamp, a forecast made a day ahead could explain a direction difference of this size
+without any difference between the models; the tracker's own forecast, pulled 24 minutes
+before the detonation, was off by 15°.
 
 The Army's cloud is slower from the start. Its +1 h shape is 4 to 7 miles out where the
 tracker's is 10 to 17; at +4 and +8 h its centers are 41 and 97 miles out against 61–66
@@ -634,7 +641,8 @@ corrected here:
   modeling system. *Bull. Amer. Meteor. Soc.*, **96**, 2059–2077,
   doi:10.1175/BAMS-D-14-00110.1.
 - U.S. Army, 2026a: Public advisory maps, "Mitigated 0.26" dispersion and deposition,
-  detonation 25 Nov 2026 0900 CST. Issued Nov. 24, 2026, a/o 240630NOV26 (two 1200 × 675
+  detonation 25 Nov 2026 0900 CST. Issued Nov. 24, 2026, a/o 240630NOV26; the Army's
+  current maps as of about 7 a.m. CST Nov. 25, per the maintainer (two 1200 × 675
   JPEG images supplied by the maintainer; in `data/army/`).
 - U.S. Army, 2026b: Emergency permit application for treatment of lead azide, Quality
   Assurance Project Plan (redacted). Posted by EPA at

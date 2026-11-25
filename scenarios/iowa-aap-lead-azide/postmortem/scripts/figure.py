@@ -46,7 +46,7 @@ NAMES = {
     "forecast": "Tracker, forecast shown at 9 a.m.",
     "analysis": "Tracker, analyzed weather",
     "hysplit": "HYSPLIT, hourly analyses",
-    "army": "Army map (Nov. 24 forecast)",
+    "army": "Army map (stamped Nov. 24)",
 }
 INK, MUTED = "#191919", "#666666"
 TOWNS = {
