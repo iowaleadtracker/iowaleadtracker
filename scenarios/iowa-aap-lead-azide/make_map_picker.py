@@ -160,12 +160,12 @@ TZ = ZoneInfo("America/Chicago")
 SITE_URL = "https://iowaleadtracker.com/"
 SITE_NAME = "Iowa Lead Tracker"
 DESCRIPTION = (
-    "Unofficial, open-model map of where lead from the planned Nov. 25, 2026 blast at the "
+    "Unofficial, open-model map of where lead from the Nov. 25, 2026 blast at the "
     "Iowa Army Ammunition Plant could travel and settle, with its data, assumptions, and "
     "sources published."
 )
 # The same without the date, for an update whose maps don't include the planned day yet.
-DESCRIPTION_NO_DATE = DESCRIPTION.replace("the planned Nov. 25, 2026 blast", "the planned blast")
+DESCRIPTION_NO_DATE = DESCRIPTION.replace("the Nov. 25, 2026 blast", "the blast")
 # Response headers for Workers static assets (written to the site as _headers).
 CSP = (
     "default-src 'none'; "
@@ -700,10 +700,8 @@ def day_values(maps: Maps, lead: str) -> dict[str, str]:
         "day_hidden": "" if len(maps.days) > 1 else " hidden",
         "day_codes": json.dumps({d: c for d, c in DAYS if d in maps.days}),
         "all_days": json.dumps({c: day_label(d) for d, c in [*PAST_DAYS, *DAYS]}),
-        # "planned" only for the planned day; an older day is just "the blast".
-        "header_lead": "Lead from the "
-        + ("blast" if note else "planned blast")
-        + " at the Iowa Army Ammunition Plant",
+        # The blast was reported done on Nov. 25 (forecast_summary.BLAST_DONE).
+        "header_lead": "Lead from the blast at the Iowa Army Ammunition Plant",
         "header_days": day_label(lead)
         + (f" (also modeled: {', '.join(others)})" if others else ""),
         "pending_note": html.escape(note),
@@ -1019,6 +1017,7 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "advisory_url": forecast_summary.ADVISORY_URL,
         "advisory_nov24_url": forecast_summary.ADVISORY_NOV24_URL,
         "army_maps_pdf": forecast_summary.ARMY_MAPS_PDF,
+        "blast_status": forecast_summary.BLAST_STATUS_HTML,
         "fema_header": forecast_summary.FEMA_HEADER_HTML,
         "court_pause": forecast_summary.court_pause([day_label(d) for d in told]),
         "court_url": forecast_summary.COURT_URL,

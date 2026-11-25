@@ -266,11 +266,11 @@ def test_faq_links_are_live() -> None:
 def test_key_facts_lead_the_summary_and_faq(rendered: tuple[str, list, str]) -> None:
     """The time and official advice come first; how the date was set comes after."""
     summary, faq, llms = rendered
-    assert summary.index("When will the detonation happen?") < summary.index("Where the cloud")
+    assert summary.index("When was the detonation?") < summary.index("Where the cloud")
     assert summary.index("Where the cloud") < summary.index("How the date was set")
     assert summary.index("How the date was set") < summary.index("Court case")
     assert fs.COURT_URL in summary
-    when = dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
+    when = dict(faq)["When was the lead azide blast at the Iowa Army Ammunition Plant?"]
     assert when.startswith("As of this update (")
     assert when.index("about 9 a.m. CST Wednesday") < when.index(fs.TRUMP_HOLD)
     assert fs.ADVISORY_NOV24_URL in when
@@ -453,7 +453,7 @@ def test_court_paragraph_names_the_days_modeled() -> None:
         "In a court filing on Nov. 22, 2026, the government said the Army postponed the "
         "controlled detonation again, to Tuesday, Nov. 24, and intends to act that day."
     )
-    assert "six hours before the detonation and every hour after that" in fs.time_note("X")
+    assert "The Army\u2019s maps and updates are at" in fs.time_note("X")
     assert f'<a href="{fs.ADVISORY_NOV24_URL}" rel="noopener">{fs.ADVISORY_NOV24_CITE}</a>' in (
         fs.time_note_html("X")
     )
@@ -480,7 +480,7 @@ def test_two_days_court_paragraph(rendered_two_days: tuple[str, list, str]) -> N
     summary, faq, llms = rendered_two_days
     both = "These maps model Wednesday, Nov. 25, and Thursday, Nov. 26."
     assert both in summary
-    assert both in dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
+    assert both in dict(faq)["When was the lead azide blast at the Iowa Army Ammunition Plant?"]
     assert both in llms
 
 
@@ -529,10 +529,30 @@ def test_about_box_leads_with_when() -> None:
     assert cite.index("$why_monday") < cite.index("$cite_html")
     assert fs.TIME_HEAD == "When."
     assert fs.time_note("X").startswith(
-        "As of this update (X), the Army plans the controlled detonation for about 9 a.m. CST "
-        "Wednesday, Nov. 25, and says it will give a more precise time after evaluating "
-        "changing weather (Army public safety advisory, Nov. 24)."
+        "As of this update (X), news outlets report that the Army carried out the controlled "
+        "detonation on Wednesday morning, Nov. 25 (New York Times, Nov. 25). The Army said it "
+        "would detonate at 9 a.m. CST and update the public on the status of the operation no "
+        "later than 11 a.m. CST (Army update, Nov. 25). Wait for the Army\u2019s official "
+        "confirmation of the results, and follow official instructions. "
+        "The Army had planned it for about 9 a.m. CST Wednesday, Nov. 25 (Army public safety "
+        "advisory, Nov. 24)."
     )
+
+
+def test_blast_status_says_to_wait_for_the_army() -> None:
+    """The reported blast is attributed, linked, and points readers to the Army's results."""
+    for text in (fs.BLAST_DONE, fs.BLAST_STATUS_HTML):
+        assert "official confirmation of the results" in text
+        assert "follow official instructions" in text
+        assert "safe" not in text.lower()  # no verdicts about anyone's safety
+    assert fs.NYT_BLAST_URL in fs.BLAST_STATUS_HTML
+    assert fs.NYT_BLAST_URL in fs.time_note_html("X")
+    for text in (fs.BLAST_DONE, fs.BLAST_STATUS_HTML):
+        assert "no later than 11 a.m. CST" in text
+    assert fs.ARMY_NOV25_URL in fs.BLAST_STATUS_HTML
+    assert fs.ARMY_NOV25_URL in fs.time_note_html("X")
+    assert any(r.startswith("McFate, L., 2026c:") for r in works_cited.REFERENCES)
+    assert any(r.startswith("New York Times, 2026:") for r in works_cited.REFERENCES)
 
 
 def test_window_words_match_the_blast_times() -> None:
@@ -549,12 +569,12 @@ def test_window_words_match_the_blast_times() -> None:
 @pytest.mark.slow
 def test_summary_why_section_cites_both(rendered: tuple[str, list, str]) -> None:
     summary, faq, llms = rendered
-    assert "<h3>When will the detonation happen?</h3>" in summary
+    assert "<h3>When was the detonation?</h3>" in summary
     assert fs.WHY_TUESDAY in summary
     assert fs.TUESDAY_SOURCES_HTML in summary
     assert (
         fs.WHY_TUESDAY
-        in dict(faq)["When is the lead azide blast at the Iowa Army Ammunition Plant?"]
+        in dict(faq)["When was the lead azide blast at the Iowa Army Ammunition Plant?"]
     )
     assert f"- Earlier date, Tuesday: {fs.WHY_TUESDAY} Sources: {fs.TUESDAY_SOURCES_TEXT}" in llms
 
@@ -736,7 +756,7 @@ def test_wednesday_leads(rendered_wednesday_lead: tuple[str, list, str]) -> None
     assert "Sand" not in fs.COURT_HOLD
     assert "cleared the way for the detonation (see Court case)" in fs.TRUMP_HOLD
     assert f'href="{fs.SAND_URL}"' in fs.COURT_SOURCES_HTML
-    when = summary[summary.index("When will the detonation happen?") :]
+    when = summary[summary.index("When was the detonation?") :]
     assert when.index(fs.WHY_WEDNESDAY) < when.index(fs.WHY_TUESDAY) < when.index(fs.WHY_MONDAY)
     why = [
         llms.index(k)
@@ -784,7 +804,7 @@ def test_day_values_wednesday_with_thursday_in_the_menu_only(
     lead = site.lead_day(maps)
     v = site.day_values(maps, lead)
     assert lead == "2026-11-25"
-    assert v["header_lead"] == "Lead from the planned blast at the Iowa Army Ammunition Plant"
+    assert v["header_lead"] == "Lead from the blast at the Iowa Army Ammunition Plant"
     assert v["header_days"] == "Wednesday, Nov. 25"  # no "also modeled: Thursday"
     assert v["pending_note"] == ""
     assert v["pending_hidden"] == " hidden"
@@ -798,7 +818,7 @@ def test_day_values_wednesday_with_thursday_in_the_menu_only(
     page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
     assert "<p>$header_lead, $header_days</p>" in page
     assert '<p class="daynote" id="pendingnote"$pending_hidden>$pending_note</p>' in page
-    assert "planned Nov. 25" not in site.DESCRIPTION_NO_DATE
+    assert "Nov. 25" not in site.DESCRIPTION_NO_DATE
     # Wednesday is always built, so the "not in this update" note never shows
     assert site.pending_note(site.DATE) == ""
 
