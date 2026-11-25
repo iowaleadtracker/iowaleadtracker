@@ -1,4 +1,4 @@
-"""Shared readers and measures for the postmortem scripts.
+"""Shared readers and measures for the comparison scripts.
 
 Both models are put on regular latitude-longitude grids so the same measures apply:
 the tracker's map payload (``Tracker``) and a HYSPLIT run directory (``Hysplit``).

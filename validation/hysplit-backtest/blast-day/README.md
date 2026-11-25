@@ -33,7 +33,7 @@ This is not the same weather input as ARL's archive: pressure levels every 25 hP
 of HRRR's native levels, and analyses without surface fluxes (HYSPLIT then estimates
 stability from the temperature and wind profile). `api2arl_v4` needs ecCodes
 (`apt-get install libeccodes0`). The results are in the
-[postmortem](../../../scenarios/iowa-aap-lead-azide/postmortem/README.md).
+[first comparison](../../../scenarios/iowa-aap-lead-azide/postmortem/README.md).
 
 ## Runs
 

@@ -1,4 +1,4 @@
-"""Every model number in the postmortem, as one JSON file.
+"""Every model number in the first comparison, as one JSON file.
 
 Usage (from the repository root, ``HYSPLIT_DIR`` set)::
 

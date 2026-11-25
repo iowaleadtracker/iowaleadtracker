@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Rebuild every number and figure in the postmortem.
+# Rebuild every number and figure in the first comparison.
 #
 #   HYSPLIT_DIR=/path/to/hysplit scenarios/iowa-aap-lead-azide/postmortem/scripts/reproduce.sh WORK
 #

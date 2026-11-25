@@ -1,4 +1,4 @@
-"""Draw the postmortem's four figures.
+"""Draw the four figures of the first comparison.
 
 Usage (from the repository root, ``HYSPLIT_DIR`` set)::
 
