@@ -19,6 +19,9 @@ truth, and its results here are not official NOAA or government material.
   stays within about 5° and a few miles of HYSPLIT's, hour by hour. In the stable evening
   it does not: ours heads 20–30° farther west and travels farther (53 vs 43 mi after
   5 hours).
+  (Rerun on Nov. 25 with HRRR's 80 m wind and the 1000 and 975 hPa levels: the evening
+  path turns about 14° toward HYSPLIT's and the cloud travels about a third less far; see
+  TURBULENCE.md, "Rerun after the Nov. 25 weather fixes".)
 - **The first hour matches** within about 20% (peak hourly air near the plant: ours
   815 / 849 / 586 / 1,429 µg/m³ against HYSPLIT's 0–10 m 1,000 / 801 / 636 / 1,742 on the
   overcast, sunny, windy and evening cases).
