@@ -23,6 +23,7 @@ TEN = 10
 MINUS = "\u2212"
 DASH = "\u2013"
 HUNDRED = 100
+NOON = 12
 LOW = 0.07  # the lowest release case
 ARMY_LINE = 0.18  # µg/m³
 NOISE = 0.01  # µg/m³, the highest reading any real-time monitor posted
@@ -55,10 +56,8 @@ def table(head: list[str], rows: list[list[str]]) -> str:
     return "\n".join(lines)
 
 
-def wind(fva: dict[str, Any]) -> str:
-    """Table 1: forecast against analysis at the plant, by level and hour."""
-    hours = sorted(fva, key=int)
-    names = {"15": "9 a.m.", "16": "10 a.m.", "17": "11 a.m.", "18": "Noon"}
+def wind(fva: dict[str, Any], hours: list[str]) -> str:
+    """Tables 1 and 2: forecast against analysis at the plant, by level and hour."""
     levels = {
         "10 m": "10 m",
         "1000 hPa": "about 40 m (1000 hPa)",
@@ -73,10 +72,19 @@ def wind(fva: dict[str, Any]) -> str:
         for h in hours:
             r = next(x for x in fva[h] if x["level"] == key)
             f, a = r["forecast"], r["analysis"]
-            err = f"{r['dir_error']:+.0f}°".replace("-", MINUS)
+            e = round(r["dir_error"])
+            err = "0°" if e == 0 else f"{e:+d}°".replace("-", MINUS)
             row.append(f"{f['ms']:.1f}, {f['from']:.0f}° / {a['ms']:.1f}, {a['from']:.0f}° ({err})")
         rows.append(row)
-    return table(["Level", *[names[h] for h in hours]], rows)
+    return table(["Level", *[clock(h) for h in hours]], rows)
+
+
+def clock(hour_utc: str) -> str:
+    """Return a UTC hour as CST clock text."""
+    h = int(hour_utc) - 6
+    if h == NOON:
+        return "Noon"
+    return f"{h} a.m." if h < NOON else f"{h - NOON} p.m."
 
 
 def models(d: dict[str, Any]) -> str:
@@ -327,7 +335,8 @@ def main() -> None:
     fva = json.loads((HERE / "data/forecast_vs_analysis.json").read_text())
     cov = json.loads((HERE / "data/monitor_coverage.json").read_text())
     blocks = {
-        "wind": wind(fva),
+        "wind": wind(fva, [h for h in sorted(fva, key=int) if int(h) <= NOON + 6]),
+        "wind_pm": wind(fva, [h for h in sorted(fva, key=int) if int(h) > NOON + 6]),
         "models": models(d),
         "overlap": overlap(d),
         "monitors": monitors(d),
