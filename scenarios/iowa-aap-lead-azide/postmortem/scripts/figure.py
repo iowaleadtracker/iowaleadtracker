@@ -1,4 +1,4 @@
-"""Draw the five figures of the first comparison.
+"""Draw the six figures of the first comparison.
 
 Usage (from the repository root, ``HYSPLIT_DIR`` set)::
 
@@ -8,7 +8,9 @@ Usage (from the repository root, ``HYSPLIT_DIR`` set)::
 Figures 1, 2 and 4 are maps for the 26% case (the Army's emission factor): lead on the
 ground, hourly mean air, and end-of-hour snapshots against the Army's final air map. Figure 3 is
 the air at EPA's four real-time monitors, readings against the 7% (lowest) case. Figure 5 is the
-direction sweep from ``monitor_coverage.py``. Every map shows EPA's 43 sampling sites; the
+direction sweep from ``monitor_coverage.py``. Figure 6 charts the numbers ``snapshots.py``
+and ``army_map.py`` saved next to COVERAGE.json: how far out and in what direction each
+source has the cloud at the Army map's four time marks. Every map shows EPA's 43 sampling sites; the
 four with public readings are labeled.
 
 One color per source throughout: tracker forecast, tracker on analyzed weather, HYSPLIT
@@ -472,8 +474,123 @@ def fig_coverage(cov: dict[str, Any], out: Path) -> None:
     plt.close(fig)
 
 
+MARK_ROWS = (
+    ("army", "Army map: mark on its path", "", True),
+    ("forecast", "Tracker, forecast shown at 9 a.m.", "tracker forecast", True),
+    ("analysis", "Tracker, analyzed weather", "tracker analysis", True),
+    ("hysplit", "HYSPLIT, NOAA ARL archived weather", "hysplit archive", True),
+    ("hysplit", "HYSPLIT, pressure-level analyses", "hysplit pressure levels", False),
+)  # color, row label, key in snapshots.json, filled marker (hollow: the weaker weather input)
+
+
+def _mark_panel(ax: Axes, hour: str, cut: dict[str, float], sn: dict[str, Any]) -> None:
+    """One time mark of figure 6: each source's cloud as a range of distance, with its center."""
+    ax.axvline(cut["miles"], color=C["army"], lw=1.2, zorder=1)
+    ax.plot(cut["miles"], 0, "o", ms=9, mfc="white", mec=C["army"], mew=2.5, zorder=5)
+    note = {"xytext": (7, 0), "textcoords": "offset points", "va": "center", "fontsize": 7.5}
+    ax.annotate(f"{cut['miles']:.0f} mi", (cut["miles"], 0), color=INK, **note)
+    far = cut["miles"]
+    for row, (key, _, run, filled) in enumerate(MARK_ROWS):
+        if not run:
+            continue
+        snap = sn[run].get(hour)
+        if snap is None:
+            ax.annotate(
+                "not yet run", (0.04, row), xycoords=("axes fraction", "data"), color=MUTED, **note
+            )
+            continue
+        near, reach, mid = snap["near_mi"], snap["reach_mi"], snap["center_mi"]
+        far = max(far, reach)
+        ax.plot([near, reach], [row, row], color=C[key], lw=7, alpha=0.3, solid_capstyle="butt")
+        ax.plot(mid, row, "o", ms=8, mfc=C[key] if filled else "white", mec=C[key], mew=2, zorder=5)
+        ax.annotate(f"center {mid:.0f} mi", (reach, row), color=INK, **note)
+    ax.set_xlim(0, far * 1.5)
+    ax.set_ylim(len(MARK_ROWS) - 0.4, -0.6)
+    label = "30 minutes" if hour == "0.5" else f"{hour} hours"
+    ax.set_title(f"{label} after the detonation", fontsize=9.5, color=INK, loc="left")
+    ax.set_xlabel("Miles from the plant", fontsize=8, color=MUTED)
+    ax.set_yticks(range(len(MARK_ROWS)))
+    ax.tick_params(labelsize=8, colors=MUTED, length=0)
+    ax.grid(axis="x", lw=0.3, color="#e6e6e6")
+    for sp in ax.spines.values():
+        sp.set_color("#cccccc")
+
+
+def fig_marks(sn: dict[str, Any], army: dict[str, Any], epa: Sites, out: Path) -> None:
+    """Figure 6: distance and direction of the cloud at the Army map's four time marks."""
+    cuts = army["air_cuts"]
+    fig = plt.figure(figsize=(12.5, 8.2), constrained_layout=True)
+    grid = fig.add_gridspec(2, len(cuts), height_ratios=(1, 1.15))
+    for k, (hour, cut) in enumerate(cuts.items()):
+        ax = fig.add_subplot(grid[0, k])
+        _mark_panel(ax, hour, cut, sn)
+        ax.set_yticklabels([r[1] for r in MARK_ROWS] if k == 0 else [])
+        for tick in ax.get_yticklabels():
+            tick.set_color(INK)
+    ax = fig.add_subplot(grid[1, :])
+    hours = [float(h) for h in cuts]
+    bearings = [lib.dist_brg(la, lo)[1] for la, lo in epa[1].values()]
+    ax.axhspan(min(bearings), max(bearings), color="#ececec", zorder=1)
+    ax.annotate(
+        f"EPA's four real-time lead monitors lie at {min(bearings):.0f}°"
+        f" to {max(bearings):.0f}° from the plant",
+        (0.08, max(bearings)),
+        fontsize=7.5,
+        color=MUTED,
+        va="top",
+        xytext=(0, -4),
+        textcoords="offset points",
+    )
+    path = army["air_path"]["axis_bearing"]
+    ax.plot(hours, [path] * len(hours), color=C["army"], lw=2, zorder=3)
+    ax.plot(hours, [path] * len(hours), "o", ms=9, mfc="white", mec=C["army"], mew=2.5, zorder=6)
+    ends = {"army": (hours[-1], path, "Army map: its path", 0)}
+    for key, name, run, filled in MARK_ROWS:
+        if not run:
+            continue
+        x = [float(h) for h in sn[run] if h in cuts]
+        y = [sn[run][h]["center_bearing"] for h in sn[run] if h in cuts]
+        ax.plot(x, y, color=C[key], lw=2, ls="-" if filled else (0, (4, 2)), zorder=4)
+        ax.plot(x, y, "o", ms=8, mfc=C[key] if filled else "white", mec=C[key], mew=2, zorder=6)
+        ends[run] = (x[-1], y[-1], name, 11 if x[-1] < hours[-1] else 0)  # clear of other lines
+    for end_x, end_y, name, lift in ends.values():
+        ax.annotate(
+            f"{name}, {end_y:.0f}°",
+            (end_x, end_y),
+            fontsize=7.5,
+            color=INK,
+            va="center",
+            xytext=(9, lift),
+            textcoords="offset points",
+        )
+    ax.set_xlim(0, hours[-1] + 1.9)
+    ax.set_xticks(hours)
+    ax.set_xticklabels(["30 min" if h < 1 else f"{h:g} hours" for h in hours])
+    ax.set_ylim(210, 236)
+    ax.set_title(
+        "Direction from the plant to the center of the cloud at each time"
+        " (degrees from north; 225° is southwest, larger is farther west)",
+        fontsize=9.5,
+        color=INK,
+        loc="left",
+    )
+    ax.set_xlabel("Time after the detonation", fontsize=8, color=MUTED)
+    ax.set_ylabel("Degrees", fontsize=8, color=MUTED)
+    ax.tick_params(labelsize=8, colors=MUTED)
+    ax.grid(lw=0.3, color="#e6e6e6")
+    for sp in ax.spines.values():
+        sp.set_color("#cccccc")
+    title(
+        fig,
+        "Where each source has the cloud at the Army map's four time marks, 26% case. "
+        "Bars: lead in air at the ground of 0.18 µg/m³ or more; dots: the cloud's center.",
+    )
+    fig.savefig(out, dpi=160)
+    plt.close(fig)
+
+
 def main(args: list[str]) -> None:
-    """Read every source and draw the four figures."""
+    """Read every source and draw the figures."""
     fc_dir, an_dir, hy_run, army_dir, epa_dir, cov_json, fc_cache, an_cache, out = (
         Path(a) for a in args
     )
@@ -504,6 +621,11 @@ def main(args: list[str]) -> None:
     }
     fig_snap(snaps, path, army_map.cuts(ARMY_MAP, air), epa, out / "fig4_air_snapshots.png")
     fig_coverage(json.loads(cov_json.read_text()), out / "fig5_monitor_coverage.png")
+    saved = {
+        n: json.loads((cov_json.parent / f"{n}.json").read_text())
+        for n in ("snapshots", "army_map")
+    }
+    fig_marks(saved["snapshots"], saved["army_map"][ARMY_MAP], epa, out / "fig6_time_marks.png")
     low = {
         "forecast": lib.tracker(fc_dir / "low-0900.html"),
         "analysis": lib.tracker(an_dir / "an_low.html"),

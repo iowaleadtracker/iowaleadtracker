@@ -639,12 +639,21 @@ analyzed weather and, through 2 hours, from HYSPLIT on NOAA ARL's archived weath
 cloud path from the Army's final air map is shaded and the Army's mark for each time is
 the ring.*
 
+![Figure 6](figures/fig6_time_marks.png)
+
+*Figure 6. Table 7b as a chart. Top: how far from the plant each source has the cloud at
+each of the Army's time marks. Bars span ground-level air of 0.18 µg/m³ or more, dots are
+the cloud's center, and the green line is the Army's mark. Bottom: the direction from the
+plant to the cloud's center at the same times, with the bearings of EPA's four real-time
+monitors shaded. Hollow markers are HYSPLIT on the pressure-level analyses, the weaker of
+its two weather inputs.*
+
 On direction and speed the Army's final map and the tracker's forecast agree. The Army's
 plume lies along 230° on the ground and 227° in air; the tracker's forecast map along
 229°–231°. The 5 µg/ft² zones are the same length (37 and 35 miles) and overlap by 37%
 of their combined area, more than the tracker and HYSPLIT overlap on the same weather.
 All four of the Army's marks fall inside the tracker's forecast cloud at that time
-(Table 7b, Figure 4). At half an hour the mark and the center of the tracker's cloud are
+(Table 7b, Figures 4 and 6). At half an hour the mark and the center of the tracker's cloud are
 both 6 miles out; at 2, 3 and 5 hours the mark is 4 to 6 miles behind the center.
 
 Speed is not where the models and the Army differ. Half an hour after the detonation
@@ -659,6 +668,16 @@ ARL's archived weather HYSPLIT covers the first two marks. For 3 and 5 hours the
 HYSPLIT run so far uses the pressure-level analyses, the weaker of its two weather
 inputs, and it puts the center 50 and 87 miles out against the Army's 43 and 79 and the
 tracker's 46 and 81 on analyzed weather.
+
+Figure 6 puts the two halves side by side. In distance the sources sit on top of each
+other at every mark. In direction they split into two groups that stay apart at every
+mark: the two forecasts (the Army's path at 227° and the tracker's forecast at
+228°–231°), and the tracker and HYSPLIT on analyzed weather (215°–220°). HYSPLIT on the
+pressure-level analyses runs between them at 222°–224°. EPA's real-time monitors lie at
+221° to 233°, so the forecast group runs through their bearings and the analyzed-weather
+group passes just south of them. This is direction only. Section 6 tests what the
+monitors would have read with the cloud's width counted, and finds AS01 inside the
+modeled cloud in every run.
 
 Both are forecasts, and both miss the analyzed wind the same way. On analyzed weather the
 tracker's cloud runs along 215°–220°, as HYSPLIT's does, and its 5 µg/ft² zone shares
@@ -772,7 +791,7 @@ runs HYSPLIT (`blast-day/2026-11-25-9am-{zhang,emerson}-early2h.CONTROL` on the 
 | `vad_decode.py`, `airnow_extract.py`, `epa_fetch.py` | the radar, AirNow and EPA downloads |
 | `run_tracker.sh` | the tracker on analyzed weather and Table 8's runs |
 | `monitor_coverage.py` | EPA sites in the modeled cloud and the direction sweep; Tables 9–10 |
-| `figure.py` | Figures 1–5 |
+| `figure.py` | Figures 1–6 |
 
 `data/obs/` and `data/epa/` hold the observations as extracted on Nov. 25; EPA's and
 AirNow's files change as new data post. `data/draft1/` holds the first draft's numbers.
