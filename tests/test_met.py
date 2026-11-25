@@ -183,8 +183,32 @@ def test_ecmwf_mixing_height_comes_from_its_9_km_data(monkeypatch: pytest.Monkey
     q = urllib.parse.parse_qs(urllib.parse.urlsplit(asked[0]).query)
     assert q["models"] == ["ecmwf_ifs"]
     assert q["hourly"] == ["boundary_layer_height"]
-    assert data[1]["hourly"]["boundary_layer_height"] == [345.0, 550.0]  # matched by time
+    assert src.data[1]["hourly"]["boundary_layer_height"] == [345.0, 550.0]  # matched by time
+    # the downloaded responses (the cache holds the same objects) are left as they were
+    assert data[1]["hourly"]["boundary_layer_height"] == [None, None]
     # a model with its own mixing height, or none to borrow from, asks for nothing
     assert met._borrow_mixing_height(src, "ecmwf_ifs025") is None
     assert met._borrow_mixing_height(src, "gfs_global") is None
     assert len(asked) == 1
+
+
+@pytest.mark.parametrize(
+    "reply",
+    [
+        [{"hourly": {"time": ["2026-11-25T15:00"]}}],  # no boundary_layer_height
+        [{"hourly": {"time": ["2026-11-25T15:00"], "boundary_layer_height": [None]}}],
+        {"error": True, "reason": "x"},
+    ],
+)
+def test_no_usable_borrowed_mixing_height_falls_back(
+    monkeypatch: pytest.MonkeyPatch, reply: Any
+) -> None:
+    """A malformed or empty answer leaves the data alone and claims no borrowed value."""
+    import numpy as np  # noqa: PLC0415
+
+    data = [{"hourly": {"time": ["2026-11-25T15:00"], "boundary_layer_height": [None]}}]
+    src = met._MetSource("x", data, 120, [], np.array([40.8]), np.array([-91.3]))
+    monkeypatch.setattr(met, "http_json", lambda *_a, **_k: reply)
+    assert met._borrow_mixing_height(src, "ecmwf_ifs025") is None
+    assert src.data is data
+    assert data[0]["hourly"]["boundary_layer_height"] == [None]

@@ -43,7 +43,7 @@ Contents: [Summary](#summary) · [Using it](#using-it) · [Why change](#why-chan
   same. The turbulence-based
   method comes within 0.9–2.4× on every day, including a stable evening, while the cloud's
   path is the same. After the Nov. 25 weather fixes (HRRR's 80 m wind,
-  the 1000 and 975 hPa levels) it comes within 0.8–1.9×; the stable evening moved from
+  the 975 hPa level) it comes within 0.8–1.9×; the stable evening moved from
   1.5–1.8× to 1.0–1.1× ([Rerun](#rerun-after-the-nov-25-weather-fixes)).
 - **It leans toward higher concentrations on purpose.** The scheme's turbulence values
   are 1-hour values; the default scales the crosswind growth to a 10-minute basis with an
@@ -423,8 +423,10 @@ Reading these:
 On Nov. 25 the model's weather changed in two ways that touch this check (TURBULENCE.md's
 method did not change): HRRR's 80 m wind is used (Open-Meteo has no 120 m wind for HRRR, so
 the model had been guessing that level from the 10 m wind with the stability power law), and
-the 1000 and 975 hPa levels are used (a rule meant to skip levels under the ground dropped
-them, leaving no wind data between 80 m and about 450 m). The GFS and ECMWF changes of the
+the 975 hPa level is used (a rule meant to skip levels under the ground dropped it and 1000
+hPa, leaving no wind data between 80 m and about 450 m; 975 hPa is about 250 m up at the plant.
+1000 hPa is asked for again too, but it sits below the 80 m level there, so the model carries
+the 80 m wind up instead). The GFS and ECMWF changes of the
 same day don't apply here: these runs use HRRR only. HYSPLIT's numbers don't change; it
 reads NOAA's HRRR files directly.
 

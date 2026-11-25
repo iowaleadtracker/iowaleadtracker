@@ -240,7 +240,9 @@ def pressure_levels_for(elev_m: float | None, n: int = 8) -> list[int]:
     Ground pressure comes from the standard-atmosphere barometric formula, which misses
     the day's weather by tens of hPa, so levels up to ``LEVEL_MARGIN_HPA`` below it are
     kept. Before Nov. 25, 2026 a level had to be 20 hPa above that estimate, which dropped
-    1000 and 975 hPa in Iowa and left no wind data between 80 m and about 450 m.
+    1000 and 975 hPa in Iowa and left no wind data between 80 m and about 450 m. (At the
+    plant 1000 hPa sits below the 80 m level, so it is carried up from it; 975 hPa, near
+    250 m, is the one that adds data.)
     """
     p_sfc = 1013.25 * (1.0 - 2.25577e-5 * max(elev_m or 0.0, 0.0)) ** 5.25588
     return [p for p in STD_PRESSURE_LEVELS if p < p_sfc + LEVEL_MARGIN_HPA][:n]
@@ -544,12 +546,13 @@ class _MetSource:
 
 
 def _borrow_mixing_height(src: _MetSource, model: str | None) -> str | None:
-    """Fill a named model's missing mixing height from ``MIXING_HEIGHT_FROM``, in place.
+    """Fill a named model's missing mixing height from ``MIXING_HEIGHT_FROM``.
 
     Asks the other model for ``boundary_layer_height`` alone, on the same points and days,
-    and copies it into ``src.data`` hour by hour. Returns that model's name, or None when
-    the model has its own mixing height, has no stand-in, or the request fails (the class
-    default then applies, as before).
+    and puts it into copies of the points in ``src.data``, hour by hour; the responses
+    themselves stay as downloaded, since the saved-forecast cache holds the same objects.
+    Returns that model's name, or None when the model has its own mixing height, has no
+    stand-in, or the other model gives no usable value (the class default then applies).
     """
     other = MIXING_HEIGHT_FROM.get(model or "")
     have = [x for d in src.data for x in d["hourly"].get("boundary_layer_height") or []]
@@ -569,19 +572,32 @@ def _borrow_mixing_height(src: _MetSource, model: str | None) -> str | None:
     }
     url = "https://api.open-meteo.com/v1/forecast?" + urllib.parse.urlencode(params, safe=",")
     try:
-        got = http_json(url)
+        filled = _filled_points(src.data, http_json(url))
     except Exception as e:  # noqa: BLE001 - reported; the class default is the fallback
         print(f"note: no mixing height from {other}: {_error_detail(e)}", file=sys.stderr)
         return None
-    points = got if isinstance(got, list) else [got]
-    if (isinstance(got, dict) and got.get("error")) or len(points) != len(src.data):
-        print(f"note: no mixing height from {other}", file=sys.stderr)
+    if not any(x is not None for d in filled for x in d["hourly"]["boundary_layer_height"]):
+        print(f"note: no mixing height from {other}: no values for this run", file=sys.stderr)
         return None
-    for d, p in zip(src.data, points, strict=True):  # same length, checked above
-        hourly = p["hourly"]
-        by_time = dict(zip(hourly["time"], hourly["boundary_layer_height"], strict=False))
-        d["hourly"]["boundary_layer_height"] = [by_time.get(t) for t in d["hourly"]["time"]]
+    src.data = filled
     return other
+
+
+def _filled_points(data: list[Json], got: Any) -> list[Json]:  # noqa: ANN401 - Open-Meteo JSON
+    """Return copies of ``data`` with ``got``'s ``boundary_layer_height``, matched by time.
+
+    Raises ValueError, KeyError or TypeError when ``got`` isn't one answer per point.
+    """
+    points = got if isinstance(got, list) else [got]
+    if (isinstance(got, dict) and got.get("error")) or len(points) != len(data):
+        raise ValueError("unexpected response")
+    filled = []
+    for d, p in zip(data, points, strict=True):
+        hourly = p["hourly"]
+        by_time = dict(zip(hourly["time"], hourly["boundary_layer_height"], strict=True))
+        blh = [by_time.get(t) for t in d["hourly"]["time"]]
+        filled.append({**d, "hourly": {**d["hourly"], "boundary_layer_height": blh}})
+    return filled
 
 
 def _fetch_wind_grid(  # noqa: PLR0913 - the request's own settings

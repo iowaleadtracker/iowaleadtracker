@@ -181,15 +181,16 @@ def times_for(day: str) -> list[str]:
     return TIMES + EXTRA_TIMES.get(day, [])
 
 
-def times_words(days: list[str]) -> str:
-    """Say when the blasts are, e.g. 'at 8:30, 9:00 and 9:30 a.m. (Wednesday also ...)'."""
+def times_words(days: dict[str, list[str]]) -> str:
+    """Say when the built maps' blasts are: 'at 8:30, 9:00 and 9:30 a.m. (Wednesday also ...)'.
+
+    ``days`` maps each shown day to its built times, so a later time whose maps weren't
+    built (no saved forecast for that hour yet) isn't promised.
+    """
     import forecast_summary as fs  # noqa: PLC0415
 
-    extra = [
-        f"{day_label(d).split(',')[0]} also at {spoken(EXTRA_TIMES[d])}"
-        for d in days
-        if EXTRA_TIMES.get(d)
-    ]
+    later = {d: [t for t in ts if t not in TIMES] for d, ts in days.items()}
+    extra = [f"{day_label(d).split(',')[0]} also at {spoken(ts)}" for d, ts in later.items() if ts]
     return fs.WINDOW_HOURLY + (f" ({'; '.join(extra)})" if extra else "")
 
 
@@ -274,7 +275,7 @@ def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
 <header>
   <h1>{site.SITE_NAME}: Wednesday to Friday runs</h1>
   <p class="warn" role="note"><b>{UNOFFICIAL} {NOT_SAFE}</b> Follow official instructions.</p>
-  <p class="about">These maps model blasts on {day_list}, {times_words(list(days))}, with
+  <p class="about">These maps model blasts on {day_list}, {times_words(days)}, with
     {MODELS_TEXT}. {when} Forecasts this far ahead change more and are less certain than
     the main site&rsquo;s. Weather forecast from {html.escape(got_txt)}. Last updated
     {html.escape(built_txt)}. Main site, summary and sources:
@@ -315,6 +316,7 @@ $("d").onchange = () => {{ fillTimes(); show(); }};
 for (const id of ["t", "c"]) $(id).onchange = show;
 $("prev").onclick = () => step(-1);
 $("next").onclick = () => step(1);
+fillTimes();  // the browser may restore another day on reload
 show();
 </script>
 </body>

@@ -60,7 +60,8 @@ jobs:
           elif [ "$TARGET" = "main" ]; then
             echo "::error::main only changes through a reviewed pull request; leave the branch empty."
             exit 1
-          elif ! git ls-remote --exit-code --heads "https://github.com/${GITHUB_REPOSITORY}" "$TARGET" >/dev/null; then
+          elif ! git check-ref-format --branch "$TARGET" >/dev/null 2>&1 \
+              || ! git ls-remote --exit-code "https://github.com/${GITHUB_REPOSITORY}" "refs/heads/$TARGET" >/dev/null; then
             echo "::error::No branch named $TARGET."
             exit 1
           else

@@ -43,8 +43,17 @@ def test_settings() -> None:
     assert staged.TIMES == ["08:30", "09:00", "09:30"]
     assert staged.times_for("2026-11-25") == ["08:30", "09:00", "09:30", "10:00", "11:00", "12:00"]
     assert staged.times_for("2026-11-26") == staged.times_for("2026-11-27") == staged.TIMES
-    assert staged.times_words(staged.DAYS) == (
+    built = {d: staged.times_for(d) for d in staged.DAYS}
+    assert staged.times_words(built) == (
         "at 8:30, 9:00 and 9:30 a.m. (Wednesday also at 10 and 11 a.m. and noon)"
+    )
+    # later maps not built (no saved forecast yet): the text doesn't promise them
+    assert (
+        staged.times_words(dict.fromkeys(staged.DAYS, staged.TIMES))
+        == "at 8:30, 9:00 and 9:30 a.m."
+    )
+    assert staged.times_words({"2026-11-25": [*staged.TIMES, "10:00"]}).endswith(
+        "(Wednesday also at 10 a.m.)"
     )
     assert staged.spoken(["10:00", "10:30", "13:00"]) == "10 and 10:30 a.m. and 1 p.m."
     assert staged.WEATHER == "gfs_global,ecmwf_ifs025"
