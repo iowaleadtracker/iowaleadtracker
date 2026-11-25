@@ -25,22 +25,23 @@ after the hour (Nov. 25: 15Z at 15:54, 16Z at 16:53, 17Z at 17:53 UTC). `nowcast
 15 17` waits for the analyses (`wrfprsf00`, pressure levels), converts each with HYSPLIT's
 `api2arl_v4` (about 20 s and 550 MB per hour, full 3 km grid, 1013–50 hPa) and appends it
 to `work/hrrr_nowcast_20261125.arl`. Give later hours (e.g. `18 23`) to extend it.
-`./run_blast_day.sh nowcast` then runs the two `*-analyses` inputs, which read that file
-with nothing held fixed; their run length (line 5 of each CONTROL, now 2 hours) must end
-at or before the last analysis in the file.
+`./run_blast_day.sh nowcast` then runs the `*-analyses` input, which reads that file
+with nothing held fixed; its run length (line 5 of the CONTROL, now 3 hours) must end at
+or before the last analysis in the file.
 
 This is not the same weather input as ARL's archive: pressure levels every 25 hPa instead
 of HRRR's native levels, and analyses without surface fluxes (HYSPLIT then estimates
-stability from the temperature and wind profile). `api2arl_v4` needs ecCodes
-(`apt-get install libeccodes0`). The results are in the
+stability from the temperature and wind profile). It matters: for 9 to 11 a.m. HYSPLIT's
+path on these analyses was 7° west of its path on ARL's archive, and its near-field zones
+about half the size. `api2arl_v4` needs ecCodes (`apt-get install libeccodes0`). The results are in the
 [first comparison](../../../scenarios/iowa-aap-lead-azide/postmortem/README.md).
 
 ## Runs
 
 | CONTROL | Hours | Deposition speeds |
 |---|---|---|
-| `2026-11-25-9am-zhang-analyses`, `-emerson-analyses` | 2 | Zhang, Emerson; on the hourly analyses, 0.005° grid shifted southwest |
-| `2026-11-25-9am-zhang-early2h` | 2 | Zhang |
+| `2026-11-25-9am-zhang-early2h`, `-emerson-early2h` | 2 | Zhang, Emerson; on the first archive file (the comparison's reference runs) |
+| `2026-11-25-9am-zhang-analyses` | 3 | Zhang; on the hourly pressure-level analyses, 0.005° grid shifted southwest |
 | `2026-11-25-9am-zhang` | 8 | Zhang |
 | `2026-11-25-9am-emerson` | 8 | Emerson |
 

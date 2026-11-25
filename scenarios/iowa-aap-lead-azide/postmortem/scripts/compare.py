@@ -2,13 +2,17 @@
 
 Usage (from the repository root, ``HYSPLIT_DIR`` set)::
 
-    python compare.py FORECAST_MAPS ANALYSIS_MAPS HYSPLIT_ZHANG HYSPLIT_EMERSON EPA_DIR > out.json
+    python compare.py FORECAST_MAPS ANALYSIS_MAPS HYSPLIT_ZHANG HYSPLIT_EMERSON \
+        HYSPLIT_PRESSURE EPA_DIR > out.json
 
 FORECAST_MAPS holds the site's maps rebuilt from the forecast it showed at 9 a.m.
 (``low-0900.html``, ``mid-0900.html``, ``permit-0900.html``). ANALYSIS_MAPS holds the
 tracker rerun on HRRR's analyzed hours (``an_low.html``, ``an_mid.html``,
-``an_permit.html``) and the sensitivity runs (``an_mid_*.html``). The HYSPLIT run
-directories are the runs on the hourly analyses. EPA_DIR holds ``epa_fetch.py`` output.
+``an_permit.html``) and the sensitivity runs (``an_mid_*.html``). HYSPLIT_ZHANG and
+HYSPLIT_EMERSON are the run directories on NOAA ARL's archived HRRR (native levels), the
+reference runs, keyed ``hysplit analysis``; HYSPLIT_PRESSURE is the run on the raw
+pressure-level analyses, keyed ``hysplit pressure levels``. EPA_DIR holds ``epa_fetch.py``
+output.
 """
 
 from __future__ import annotations
@@ -36,6 +40,7 @@ SENSITIVITY = {
     "fine sizes, cloud top 151 m": "an_mid_low_cloud.html",
 }
 NEAR_FIELD_MI = 15
+MONITOR_HOURS = 3
 
 
 def summary(f: lib.Fields, hours: list[int]) -> dict[str, Any]:
@@ -106,7 +111,7 @@ def at_monitors(
 
 def main(args: list[str]) -> None:
     """Build and print the JSON."""
-    fc_dir, an_dir, hz, he, epa = (Path(a) for a in args)
+    fc_dir, an_dir, hz, he, hp, epa = (Path(a) for a in args)
     stations = monitors(epa)
     hy = lib.hysplit(hz)
     hy_hours = sorted(hy.air)
@@ -123,10 +128,13 @@ def main(args: list[str]) -> None:
         fields[f"tracker analysis {label}"] = lib.tracker(an_dir / f"an_{case}.html")
         fields[f"hysplit analysis {label}"] = lib.hysplit(hz, scale)
         fields[f"hysplit analysis emerson {label}"] = lib.hysplit(he, scale)
+        fields[f"hysplit pressure levels {label}"] = lib.hysplit(hp, scale)
     for name, f in fields.items():
-        hours = hy_hours if name.startswith("hysplit") else [1, 2, 3, 4, 5, 8]
+        hours = sorted(f.air) if name.startswith("hysplit") else [1, 2, 3, 4, 5, 8]
         out["runs"][name] = summary(f, hours)
-        out["at_monitors"][name] = at_monitors(f, stations, hy_hours)
+        out["at_monitors"][name] = at_monitors(
+            f, stations, [h for h in hours if h <= MONITOR_HOURS]
+        )
     out["overlap"] = {}
     for label in CASES:
         pairs = {

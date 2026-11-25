@@ -10,7 +10,7 @@ the air at EPA's four real-time monitors, readings against the 7% (lowest) case.
 shows EPA's 43 sampling sites; the four with public readings are labeled.
 
 One color per source throughout: tracker forecast, tracker on analyzed weather, HYSPLIT
-on the hourly analyses, and the Army's map. The palette passed the dataviz skill's
+on NOAA ARL's archived HRRR, and the Army's map. The palette passed the dataviz skill's
 validator (color-vision separation); the legend and the paper's tables carry the same
 information without color.
 """
@@ -44,7 +44,7 @@ C = {"forecast": "#f47230", "analysis": "#257de0", "hysplit": "#6a4ce2", "army":
 NAMES = {
     "forecast": "Tracker, forecast shown at 9 a.m.",
     "analysis": "Tracker, analyzed weather",
-    "hysplit": "HYSPLIT, hourly analyses",
+    "hysplit": "HYSPLIT, NOAA ARL archived weather",
     "army": "Army map (final, 7 a.m. Nov. 25)",
 }
 INK, MUTED = "#191919", "#666666"

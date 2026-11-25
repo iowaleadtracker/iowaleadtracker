@@ -3,7 +3,7 @@
 # and run HYSPLIT on it. See README.md in this folder.
 #
 #   ./run_blast_day.sh fetch      wait for and download the two HRRR files
-#   ./run_blast_day.sh early      2-hour run (15-17 UTC) once the first file is posted
+#   ./run_blast_day.sh early      2-hour runs (15-17 UTC) once the first file is posted
 #   ./run_blast_day.sh full       8-hour runs (Zhang and Emerson speeds)
 #   ./run_blast_day.sh nowcast    runs on the hourly analyses nowcast_hrrr.sh builds
 #
@@ -43,9 +43,10 @@ run() {  # run <name>: one HYSPLIT run in its own folder
 
 case ${1:-} in
   fetch) for f in "${FILES[@]}"; do fetch "$f"; done ;;
-  early) fetch "${FILES[0]}"; run 2026-11-25-9am-zhang-early2h ;;
+  early) fetch "${FILES[0]}"
+         run 2026-11-25-9am-zhang-early2h & run 2026-11-25-9am-emerson-early2h & wait ;;
   full)  for f in "${FILES[@]}"; do fetch "$f"; done
          run 2026-11-25-9am-zhang & run 2026-11-25-9am-emerson & wait ;;
-  nowcast) run 2026-11-25-9am-zhang-analyses & run 2026-11-25-9am-emerson-analyses & wait ;;
+  nowcast) run 2026-11-25-9am-zhang-analyses ;;
   *) sed -n 2,12p "$0"; exit 2 ;;
 esac
