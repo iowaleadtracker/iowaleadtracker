@@ -41,7 +41,7 @@ def test_settings() -> None:
     """Wednesday to Friday, 8:30, 9:00 and 9:30 a.m., GFS and ECMWF only."""
     assert staged.DAYS == ["2026-11-25", "2026-11-26", "2026-11-27"]
     assert staged.TIMES == ["08:30", "09:00", "09:30"]
-    assert staged.WEATHER == "gfs_seamless,ecmwf_ifs025"
+    assert staged.WEATHER == "gfs_global,ecmwf_ifs025"
     assert staged.day_label("2026-11-25") == "Wednesday, Nov. 25, 2026"
     assert staged.day_label("2026-11-27") == "Friday, Nov. 27, 2026"
     assert re.fullmatch(r"s-[0-9a-f]{10}", staged.DIR_NAME)

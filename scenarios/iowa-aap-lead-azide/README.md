@@ -65,7 +65,7 @@ Useful changes:
 - **Near the site:** add `--extent-km 15 --hours 2`.
 
 The site's maps use four models (`WEATHER` in `make_map_picker.py`): `--weather-model
-ncep_rrfs_conus,gfs_seamless,ncep_hrrr_conus,ecmwf_ifs025`. The first that covers the whole
+ncep_rrfs_conus,gfs_global,ncep_hrrr_conus,ecmwf_ifs025`. The first that covers the whole
 run is shown, and the rest make up the spread. Within 18 hours of a blast (counted from when
 the saved forecasts were pulled, so a rebuild picks the same order) HRRR goes first instead
 (`WEATHER_SHORT_RANGE`). Why these four, as of Nov. 23, 2026:
@@ -76,8 +76,14 @@ the saved forecasts were pulled, so a rebuild picks the same order) HRRR goes fi
   to two and a half days out.
 - **GFS** reaches farthest. It, RRFS and HRRR are the only models that give the mixing
   height through Open-Meteo; for the others the model assumes one from the stability class.
+  The site asks for `gfs_global`, the GFS alone: Open-Meteo's `gfs_seamless` serves HRRR
+  for the first two days over the US, so until Nov. 25 the spread's "GFS" was HRRR again
+  on Wednesday.
 - **ECMWF** is the best global model for the large-scale pattern, so it stays in the
-  spread, but without a mixing height it isn't shown.
+  spread, but it isn't shown. Its 0.25&deg; data (`ecmwf_ifs025`) has no mixing height and
+  only the 1000, 925, 850 and 700 hPa levels near the ground (ECMWF publishes no others);
+  since Nov. 25 the mixing height comes from the same forecast's 9 km data (`ecmwf_ifs`),
+  instead of a fixed value for the stability class.
 
 ICON, GEM, UKMO and Météo-France were dropped: no mixing height (UKMO also has no 120 m
 wind), coarse over Iowa, and they doubled the downloads, which hit Open-Meteo's free daily

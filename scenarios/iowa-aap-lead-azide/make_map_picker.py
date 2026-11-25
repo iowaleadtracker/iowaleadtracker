@@ -96,10 +96,12 @@ DEFAULT_CASE = "permit"  # most conservative by default: better than a false sen
 # stays in the spread). ICON, GEM, UKMO and Meteo-France were dropped on Nov. 23, 2026: no
 # mixing height, coarse over Iowa, and they doubled the downloads against Open-Meteo's
 # daily limit.
-WEATHER = "ncep_rrfs_conus,gfs_seamless,ncep_hrrr_conus,ecmwf_ifs025"
+# GFS is Open-Meteo's gfs_global, the GFS alone: gfs_seamless serves HRRR for the first two
+# days over the US, so in the spread it repeated HRRR instead of adding GFS (Nov. 25, 2026).
+WEATHER = "ncep_rrfs_conus,gfs_global,ncep_hrrr_conus,ecmwf_ifs025"
 # Close to the blast, HRRR (hourly runs with the newest observations) goes first.
 HRRR_FIRST_HOURS = 18
-WEATHER_SHORT_RANGE = "ncep_hrrr_conus,ncep_rrfs_conus,gfs_seamless,ecmwf_ifs025"
+WEATHER_SHORT_RANGE = "ncep_hrrr_conus,ncep_rrfs_conus,gfs_global,ecmwf_ifs025"
 WEATHER_ORDER = WEATHER.split(",")
 MODEL_ARGS = [
     *("--material", "lead-azide"),

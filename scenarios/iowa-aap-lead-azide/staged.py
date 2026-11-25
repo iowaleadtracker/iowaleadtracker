@@ -45,7 +45,7 @@ TIMES = ["08:30", "09:00", "09:30"]  # site.TIMES
 DEFAULT_DAY = DAYS[0]
 DEFAULT_TIME = "09:00"  # make_map_picker.DEFAULT
 #: The first model is shown; the other makes up the weather-model spread.
-WEATHER = "gfs_seamless,ecmwf_ifs025"
+WEATHER = "gfs_global,ecmwf_ifs025"  # the GFS alone (see make_map_picker.WEATHER)
 MODELS_TEXT = "GFS and ECMWF only (GFS shown; ECMWF in the weather-model spread)"
 
 UNOFFICIAL = "This is an unofficial estimate, not from the Army or any government agency."

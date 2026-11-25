@@ -318,10 +318,12 @@ REFERENCES = [
 ]
 
 MODEL_CREDITS = {  # Open-Meteo model name -> who runs it
-    "gfs_seamless": "NOAA NCEP (GFS)",
+    "gfs_global": "NOAA NCEP (GFS)",
+    "gfs_seamless": "NOAA NCEP (GFS, with HRRR for the first two days)",
     "ncep_hrrr_conus": "NOAA NCEP (HRRR)",
     "ncep_rrfs_conus": "NOAA NCEP (RRFS)",
     "ecmwf_ifs025": "ECMWF (IFS 0.25&deg;)",
+    "ecmwf_ifs": "ECMWF (IFS 9 km)",
     "icon_seamless": "DWD (ICON)",
     "gem_seamless": "Environment and Climate Change Canada (GEM)",
     "ukmo_seamless": "the UK Met Office",

@@ -45,13 +45,19 @@ STD_PRESSURE_LEVELS = [1000, 975, 950, 925, 900, 850, 800, 700, 600, 500]  # hPa
 FORECAST_WIND_ALOFT_M = 120
 MODEL_WIND_ALOFT_M = {"ncep_hrrr_conus": 80}
 
+#: Named models without a mixing height, and the model that has it for the same forecast.
+#: ECMWF's 0.25 deg open data (ecmwf_ifs025) has no boundary-layer height; Open-Meteo's
+#: 9 km IFS (ecmwf_ifs) does, but no pressure levels. Without this the class default was
+#: used: about 800 m from the blast on Nov. 25, 2026, against 345-470 m in HRRR and ECMWF.
+MIXING_HEIGHT_FROM = {"ecmwf_ifs025": "ecmwf_ifs"}
+
 
 # Built-in weather-model ensemble for --weather-model ensemble (Open-Meteo model names; the
 # Iowa site passes its own list). The first is the run shown;
 # the rest feed the uncertainty view. HRRR is used only when it covers the whole run.
 WEATHER_ENSEMBLE = [
     "ecmwf_ifs025",
-    "gfs_seamless",
+    "gfs_global",  # the GFS alone; gfs_seamless is HRRR for the first two days over the US
     "icon_seamless",
     "gem_seamless",
     "ukmo_seamless",
@@ -537,6 +543,47 @@ class _MetSource:
     lon_nodes: FloatArray
 
 
+def _borrow_mixing_height(src: _MetSource, model: str | None) -> str | None:
+    """Fill a named model's missing mixing height from ``MIXING_HEIGHT_FROM``, in place.
+
+    Asks the other model for ``boundary_layer_height`` alone, on the same points and days,
+    and copies it into ``src.data`` hour by hour. Returns that model's name, or None when
+    the model has its own mixing height, has no stand-in, or the request fails (the class
+    default then applies, as before).
+    """
+    other = MIXING_HEIGHT_FROM.get(model or "")
+    have = [x for d in src.data for x in d["hourly"].get("boundary_layer_height") or []]
+    if other is None or any(x is not None for x in have):
+        return None
+    lat, lon = np.meshgrid(src.lat_nodes, src.lon_nodes, indexing="ij")
+    times = src.data[0]["hourly"]["time"]
+    params = {
+        "latitude": ",".join(f"{v:.4f}" for v in lat.ravel()),
+        "longitude": ",".join(f"{v:.4f}" for v in ((lon.ravel() + 180) % 360) - 180),
+        "wind_speed_unit": "ms",
+        "timezone": "GMT",
+        "start_date": times[0][:10],
+        "end_date": times[-1][:10],
+        "models": other,
+        "hourly": "boundary_layer_height",
+    }
+    url = "https://api.open-meteo.com/v1/forecast?" + urllib.parse.urlencode(params, safe=",")
+    try:
+        got = http_json(url)
+    except Exception as e:  # noqa: BLE001 - reported; the class default is the fallback
+        print(f"note: no mixing height from {other}: {_error_detail(e)}", file=sys.stderr)
+        return None
+    points = got if isinstance(got, list) else [got]
+    if (isinstance(got, dict) and got.get("error")) or len(points) != len(src.data):
+        print(f"note: no mixing height from {other}", file=sys.stderr)
+        return None
+    for d, p in zip(src.data, points, strict=True):  # same length, checked above
+        hourly = p["hourly"]
+        by_time = dict(zip(hourly["time"], hourly["boundary_layer_height"], strict=False))
+        d["hourly"]["boundary_layer_height"] = [by_time.get(t) for t in d["hourly"]["time"]]
+    return other
+
+
 def _fetch_wind_grid(  # noqa: PLR0913 - the request's own settings
     lat0: float,
     lon0: float,
@@ -663,8 +710,9 @@ def build_met(  # noqa: PLR0913 - mirrors the command-line options
 
     Fetches a ``grid_n`` x ``grid_n`` grid of Open-Meteo points sized to the distance
     the wind could carry the cloud, derives the stability class (Pasquill-Turner) and
-    fills a missing mixing height with the class default. Without a level aloft, the
-    10 m wind is extended to 100 m with the stability power law.
+    fills a missing mixing height from ``MIXING_HEIGHT_FROM``, else with the class
+    default. Without a level aloft, the 10 m wind is extended to 100 m with the stability
+    power law.
 
     Returns
     -------
@@ -689,7 +737,10 @@ def build_met(  # noqa: PLR0913 - mirrors the command-line options
         now=now,
         extra=extra,
     )
+    borrowed = _borrow_mixing_height(src, model)
     data, name, z_up = src.data, src.name, src.z_up
+    if borrowed:
+        name += f" (mixing height from {borrowed})"
     ny, nx = len(src.lat_nodes), len(src.lon_nodes)
     ws = _stack(data, "wind_speed_10m", 3.0, ny, nx)
     wd = _stack(data, "wind_direction_10m", 270.0, ny, nx)

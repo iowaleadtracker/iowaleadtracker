@@ -162,3 +162,29 @@ def test_low_pressure_levels_kept_on_high_pressure_days() -> None:
     """
     assert met.pressure_levels_for(222.0) == [1000, 975, 950, 925, 900, 850, 800, 700]
     assert met.pressure_levels_for(1600.0)[0] == 850
+
+
+def test_ecmwf_mixing_height_comes_from_its_9_km_data(monkeypatch: pytest.MonkeyPatch) -> None:
+    """ecmwf_ifs025 has no mixing height: it is copied in from ecmwf_ifs, hour by hour."""
+    import numpy as np  # noqa: PLC0415
+
+    times = ["2026-11-25T15:00", "2026-11-25T16:00"]
+    data = [{"hourly": {"time": times, "boundary_layer_height": [None, None]}} for _ in range(2)]
+    src = met._MetSource("x", data, 120, [], np.array([40.8]), np.array([-91.3, -91.2]))
+    asked: list[str] = []
+
+    def answer(url: str, *_a: Any, **_k: Any) -> list[dict[str, Any]]:
+        asked.append(url)
+        hourly = {"time": times[::-1], "boundary_layer_height": [550.0, 345.0]}
+        return [{"hourly": hourly}, {"hourly": hourly}]
+
+    monkeypatch.setattr(met, "http_json", answer)
+    assert met._borrow_mixing_height(src, "ecmwf_ifs025") == "ecmwf_ifs"
+    q = urllib.parse.parse_qs(urllib.parse.urlsplit(asked[0]).query)
+    assert q["models"] == ["ecmwf_ifs"]
+    assert q["hourly"] == ["boundary_layer_height"]
+    assert data[1]["hourly"]["boundary_layer_height"] == [345.0, 550.0]  # matched by time
+    # a model with its own mixing height, or none to borrow from, asks for nothing
+    assert met._borrow_mixing_height(src, "ecmwf_ifs025") is None
+    assert met._borrow_mixing_height(src, "gfs_global") is None
+    assert len(asked) == 1
