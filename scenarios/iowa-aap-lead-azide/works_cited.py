@@ -237,6 +237,10 @@ REFERENCES = [
     "screenshot; army.mil refuses this site&rsquo;s tools), "
     + _a("https://www.army.mil/article/297089")
     + ".",
+    "McFate, L., 2026d: Deposition maps as of 3:00 PM (CST) &ndash; lead azide. U.S. Army "
+    "Sustainment Command, 25 November 2026, accessed 25 November 2026, "
+    + _a("https://www.army.mil/article/297109")
+    + ".",
     "New York Times, 2026: Live coverage of the Iowa lead azide detonation. <i>The New York "
     "Times</i>, 25 November 2026 (read by the maintainer; not fetched by this site&rsquo;s "
     "tools, which nytimes.com blocks), "
@@ -611,6 +615,17 @@ def method_intro(pct: dict[str, str]) -> str:
 #: entry for every change to the model, its settings or its sources.
 CHANGES_HEAD = "Change log"
 CHANGES = [
+    (
+        "Nov. 25",
+        (
+            "The Army&rsquo;s 3 p.m. update: air sensors report no lead detection, ground "
+            "sampling is underway, and people should wait for its all-clear. EPA&rsquo;s "
+            "real-time readings through 4 p.m. were all below the 0.18 &micro;g/m&sup3; "
+            "detection limit the Army cites; lab and soil and water results are still pending. "
+            "The Army&rsquo;s latest maps (191 sq mi above 5 &micro;g/ft&sup2;) replace the "
+            "Nov. 24 ones as &ldquo;latest&rdquo;. The maps here did not change."
+        ),
+    ),
     (
         "Nov. 25",
         (

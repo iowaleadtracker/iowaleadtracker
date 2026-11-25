@@ -528,27 +528,33 @@ def test_about_box_leads_with_when() -> None:
     assert "<b>$earlier_head</b> $why_tuesday Sources: $tuesday_sources. $why_monday" in cite
     assert cite.index("$why_monday") < cite.index("$cite_html")
     assert fs.TIME_HEAD == "When."
-    assert fs.time_note("X").startswith(
-        "As of this update (X), news outlets report that the Army carried out the controlled "
-        "detonation on Wednesday morning, Nov. 25 (New York Times, Nov. 25). The Army said it "
-        "would detonate at 9 a.m. CST and update the public on the status of the operation no "
-        "later than 11 a.m. CST (Army update, Nov. 25). " + fs.EARLY_AIR + " Wait for the "
-        "Army\u2019s official confirmation of the results, and follow official instructions. "
-        "The Army had planned it for about 9 a.m. CST Wednesday, Nov. 25 (Army public safety "
-        "advisory, Nov. 24)."
+    note = fs.time_note("X")
+    assert note.startswith(
+        "As of this update (X), the Army carried out the controlled detonation on Wednesday "
+        "morning, Nov. 25 (New York Times, Nov. 25); it had set it for 9 a.m. CST (Army update, "
+        "Nov. 25). In its 3 p.m. CST update, the Army said air sensors report no lead detection "
+        "at this time, and that sampling of the ground after the detonation is underway, with "
+        "results to be published when available (Army maps, Nov. 25, 3 p.m.). "
     )
+    wait = " Wait for the Army to announce its all-clear determination, and follow official"
+    assert f"{fs.EARLY_AIR}{wait} instructions." in note
 
 
 def test_blast_status_says_to_wait_for_the_army() -> None:
     """The reported blast is attributed, linked, and points readers to the Army's results."""
     for text in (fs.BLAST_DONE, fs.BLAST_STATUS_HTML):
-        assert "official confirmation of the results" in text
+        assert "Wait for the Army to announce its all-clear determination" in text.replace(
+            "<b>", ""
+        ).replace("</b>", "")
         assert "follow official instructions" in text
+        assert "no lead detection at this time" in text
         assert "safe" not in text.lower()  # no verdicts about anyone's safety
     assert fs.NYT_BLAST_URL in fs.BLAST_STATUS_HTML
     assert fs.NYT_BLAST_URL in fs.time_note_html("X")
-    for text in (fs.BLAST_DONE, fs.BLAST_STATUS_HTML):
-        assert "no later than 11 a.m. CST" in text
+    assert fs.ARMY_3PM_URL in fs.BLAST_STATUS_HTML
+    assert fs.ARMY_3PM_URL in fs.time_note_html("X")
+    assert any(r.startswith("McFate, L., 2026d:") for r in works_cited.REFERENCES)
+    assert "191 square miles" in fs.time_note("X")  # the Army's latest maps, not Nov. 24's
     assert fs.ARMY_NOV25_URL in fs.BLAST_STATUS_HTML
     assert fs.ARMY_NOV25_URL in fs.time_note_html("X")
     assert any(r.startswith("McFate, L., 2026c:") for r in works_cited.REFERENCES)
