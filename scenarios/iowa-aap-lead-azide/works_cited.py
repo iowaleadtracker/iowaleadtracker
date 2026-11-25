@@ -583,6 +583,14 @@ CHANGES = [
     (
         "Nov. 25",
         (
+            "Winds at about 50 m and 250 m above the ground (the 1000 and 975 hPa levels) "
+            "are now used. They were left out by a rule meant to skip levels under the "
+            "ground, so the wind between 80 m and about 450 m was a straight-line guess."
+        ),
+    ),
+    (
+        "Nov. 25",
+        (
             "Maps drawn from the HRRR forecast use its 80 m wind near the ground. The "
             "forecast service has no 120 m wind for HRRR, so until now the wind between "
             "the ground and the lowest pressure level was estimated from the 10 m wind."

@@ -153,3 +153,12 @@ def test_wind_level_aloft_is_one_the_model_serves(
     assert got[2] == z_up
     hourly = urllib.parse.parse_qs(urllib.parse.urlsplit(asked[0]).query)["hourly"][0]
     assert f"wind_speed_{z_up}m" in hourly.split(",")
+
+
+def test_low_pressure_levels_kept_on_high_pressure_days() -> None:
+    """At the Iowa plant (222 m) 1000 and 975 hPa are asked for; on high ground they aren't.
+
+    On Nov. 25, 2026 the ground pressure there was 1005 hPa, putting 975 hPa near 250 m.
+    """
+    assert met.pressure_levels_for(222.0) == [1000, 975, 950, 925, 900, 850, 800, 700]
+    assert met.pressure_levels_for(1600.0)[0] == 850

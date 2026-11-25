@@ -220,14 +220,24 @@ def http_json(url: str, timeout: float = 60, tries: int = 4) -> Any:  # noqa: AN
     raise RuntimeError(f"no response from {url}")  # pragma: no cover - loop always returns
 
 
-def pressure_levels_for(elev_m: float | None, n: int = 6) -> list[int]:
-    """Return the standard pressure levels (hPa) that sit above the ground at this elevation.
+#: How far (hPa) a level may sit below the standard-atmosphere ground pressure and still be
+#: asked for. Real ground pressure runs well above the standard value on high-pressure days
+#: (1005 vs 987 hPa at the Iowa plant on Nov. 25, 2026, which put 975 hPa near 250 m above
+#: ground); a level that turns out to be under ground is carried up from the one below it
+#: (``_pressure_level_fields``), so asking for one costs only download size.
+LEVEL_MARGIN_HPA = 50.0
 
-    Surface pressure from the standard-atmosphere barometric formula; a level must be
-    at least 20 hPa below it.
+
+def pressure_levels_for(elev_m: float | None, n: int = 8) -> list[int]:
+    """Return the lowest ``n`` standard pressure levels (hPa) that may sit above the ground.
+
+    Ground pressure comes from the standard-atmosphere barometric formula, which misses
+    the day's weather by tens of hPa, so levels up to ``LEVEL_MARGIN_HPA`` below it are
+    kept. Before Nov. 25, 2026 a level had to be 20 hPa above that estimate, which dropped
+    1000 and 975 hPa in Iowa and left no wind data between 80 m and about 450 m.
     """
     p_sfc = 1013.25 * (1.0 - 2.25577e-5 * max(elev_m or 0.0, 0.0)) ** 5.25588
-    return [p for p in STD_PRESSURE_LEVELS if p < p_sfc - 20.0][:n]
+    return [p for p in STD_PRESSURE_LEVELS if p < p_sfc + LEVEL_MARGIN_HPA][:n]
 
 
 def _open_meteo_url(

@@ -364,8 +364,9 @@ time costs a few hundred.
   another network. The cloud sandbox this was built in shares its address with other
   users and ran out several times.
 - Each blast hour costs its own grid downloads: the model sizes the 5 x 5 wind grid from
-  the winds over that run, so every start hour is a separate request of about 65 (25
-  points x 2.6, for 26 variables counted per 10) per weather model and day; times within the same hour share it.
+  the winds over that run, so every start hour is a separate request of about 85 (25
+  points x 3.3, for 33 variables counted per 10; about 65 before 1000 and 975 hPa were
+  added on Nov. 25) per weather model and day; times within the same hour share it.
   With 8:30, 9:00 and 9:30 a.m. (2 start hours; 9:30 shares 9:00's), the main refresh costs
   about 400-550 per run; with hourly times from 9 a.m. to 1 p.m. it was about 1,000-1,300
   (Wednesday only, 3-4 models, 5 hours; about 800 with the earlier 11 a.m.-12:30 p.m.

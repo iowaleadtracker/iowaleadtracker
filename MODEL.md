@@ -270,8 +270,10 @@ If one fails, the script tries the other.
 The data is fetched on a 5×5 grid around the source, sized to how far the wind could
 carry the puffs. It is interpolated bilinearly in space and linearly in time.
 
-The forecast API also supplies wind and height on pressure levels (for example 950 to
-700 hPa), which the model uses for winds aloft. The archive API returns none, so
+The forecast API also supplies wind and height on pressure levels (the lowest eight
+that may be above the ground, 1000 to 700 hPa near sea level), which the model uses for
+winds aloft. A level that turns out to be under ground, or within 30 m of the one below,
+takes that lower level's wind instead. The archive API returns none, so
 historical runs fall back to a power-law profile above 100 m.
 
 ## Model
