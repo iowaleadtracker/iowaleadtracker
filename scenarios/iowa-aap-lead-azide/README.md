@@ -484,6 +484,47 @@ deploys. Until that file exists, the build makes no staged maps. Locally,
   bracket it (see below).
 - The 1 p.m. and 2 p.m. maps in `outputs/` are
   from the Friday, Nov 20 forecasts at the old location, with the old 20%-respirable case.
+- The release point is one point for the plant, not the magazines, whose location is not
+  public; the Army also plans to vent the blast across part of the plant. Moving the point a
+  few km changes which towns are inside the lines much more than how far the lines reach
+  (see [Release point](#release-point-sensitivity-check)).
+
+## Release point: sensitivity check
+
+`LAT, LON` (40.825518, -91.266502) is a point for the plant as a whole, about 400 m from
+Middletown's centre; it is not the magazines. Their location is not in any public source
+(the EPA permit redacts it), and the site does not try to find it. The Army also said on
+Nov. 24 that a vent in the barriers will direct the blast "into three miles of uninhabited
+area" of the plant, so the effective start of the cloud may be offset from the magazines.
+
+`tools/release_point_sensitivity.py` reruns the default map (9 a.m. Nov. 25, the saved
+forecasts pulled Nov. 24 at 6:06 PM CST, HRRR shown) from the published point and from a
+generic ring around it: 3 km in eight directions and 5 km in four. The weather is the same
+for every run; only the release point moves. The ring is not based on the plant boundary,
+so some points may be outside the plant. Results for the EPA permit and U.S. Army mitigated
+cases (13 points each):
+
+| | EPA permit (100%) | U.S. Army mitigated (26%) |
+|---|---|---|
+| 5 µg/ft² reach | 136-140 mi (published point 138) | 36-38 mi (37.7) |
+| 40 µg/ft² reach | 23.6-25.2 mi | 11.4-11.7 mi |
+| 100 µg/ft² reach | 14.3-14.6 mi | 4.6-5.5 mi |
+| Farthest PAC-1 air | 23.5-24.3 mi | 9.3-10.2 mi |
+| Peak 60-min air | 801-883 µg/m³ | 208-230 µg/m³ |
+
+The cloud's path (southwest, about 138 mi in 8 hours) is the same from every point. Town
+lists are not stable: the plume is narrow, so a 3 km shift moves it on or off a town. In the
+EPA permit case, lead on the ground at West Point ranged from 0 to 175 µg/ft² (149 from the
+published point) and at Donnellson from 4 to 71 (56). From the point 3 km northeast the plume
+passes over Middletown (765 µg/ft² in the EPA permit case, 199 in the Army case); from every
+other point Middletown gets none, because the published point is just south of the town and
+the wind carries the cloud away from it.
+
+So the reach and area numbers on the site hold up to the unknown release point; the towns in
+"towns at or above" lists, and numbers for single towns within about 25 mi, do not. The
+caveat after every list of towns covers this. One blast time and one weather model were
+checked, at each town's single grid cell; the published summary takes maxima over three
+times and the spread, which this does not.
 
 ## Release cases: research notes
 
@@ -520,6 +561,80 @@ after a detonation has occurred." Detonation 25 Nov 2026, 0900 CST. Ground lines
   blast. The model can't represent these, so the case applies the Army's 0.26 directly.
 - **Particle sizes** are not given; the case keeps the site's all-respirable fume sizes, so it
   is not a reproduction of the Army's HPAC/SHARC/NARAC run.
+
+### Nov. 24 briefing: the mitigation in more detail
+
+At the Nov. 24, 2026 news conference in Middletown, Col. Aaron Teller (commander, 71st
+Explosive Ordnance Disposal Group) described more than the advisory lists. From Alexa Lis,
+"Here's how Army plans to minimize toxic lead dust following Iowa ammunitions blast," Shaw
+Local, 24 Nov 2026 (https://www.shawlocal.com/news/2026/11/24/heres-how-army-plans-to-minimize-toxic-lead-dust-following-iowa-ammunitions-blast/),
+and Pepper Purpura, "What else could the lead azide blast release?", KCCI
+(https://www.kcci.com/article/what-else-could-a-lead-azide-detonation-release-in-eastern-iowa/74526545),
+both read in full on Nov. 25. These are news reports of what officials said, not the Army's
+own text (army.mil refuses scripted downloads).
+
+- **Barriers and a vent:** the two magazines are surrounded by "earthen-filled barriers that
+  extend high above the tops of the magazines." "A vent opening was placed in the protective
+  barriers," designed "to vent debris into three miles of uninhabited area" of the plant.
+- **Water tanks:** "two walls of four 16,000-gallon water tanks around the bunkers" (eight
+  tanks, about 128,000 gallons, roughly 110 times the mass of the lead azide), "designed to
+  capture the lead particulate before it enters the atmosphere." KCCI: "two rows of
+  16,000-gallon water tanks, a water wall, foam, gel blocks."
+- **Foam:** a coffer dam installed around the magazines on Nov. 23 "will be filled with
+  aqueous foam concentrate 380," Sandia's blast-mitigation foam. The magazine tops get "a
+  tarp; a containment screen specifically designed to contain lead" and "a layer of foam at
+  least two feet thick."
+- **The drums:** lead azide "in burlap bags and embedded in sawdust," in water and ethanol
+  (KCCI: "a water-and-ethanol mixture"), so the blast also burns sawdust, burlap and ethanol.
+  A search-result summary of other coverage said the charges include C-4 and diesel fuel;
+  no article read here says so.
+- **No reduction estimate:** "Our goal is to get to zero release," Teller said, and "we think
+  we have a very good chance of significantly reducing the last 25% of the lead release."
+  Shaw Local: the Army "did not give a specific estimate for the reduction." Hourly weather
+  balloons; EPA air monitoring before, during and after.
+
+### The 1977 precedent: about 25% airborne with no mitigation
+
+Teller cited the last disposal of a lead azide stockpile, "in 1977, when approximately 7,000
+pounds of the material were exploded in open air in Colorado. With no mitigation efforts,
+Teller said only 25% of the lead particulate went into the atmosphere" (Shaw Local; KCCI:
+"about 75% of the lead particulate stayed at the site and 25% entered the atmosphere"). No
+report of the 1977 test has been found here, so the figure is the Army's account of it, and
+it does not say how much of that 25% was small enough to breathe in.
+
+That is almost the same number as the Army's "Mitigated 0.26." The Army has not said how it
+derived 0.26. If it came from the 1977 figure, the mitigated maps give the barriers, water and
+foam little or no credit, which would make 0.26 cautious about the mitigation rather than a
+measure of it; Teller's "reducing the last 25%" reads that way. This is an inference, not
+something the Army has said. It also means the only measured figure cited for a blast like
+this is about 25%, which sits between the site's low (7%) and U.S. Army mitigated (26%) cases;
+the 100% of the EPA permit case is a regulatory bound, not an expected outcome.
+
+### Aqueous foam (AFC-380): what the literature supports
+
+- Sandia's fact sheet "Aqueous Foam for Explosive Containment" (SAND 2004-4516 P; archived at
+  https://webarchive.library.unt.edu/eot2008/20080916020955/http:/sandia.gov/mission/homeland/factsheets/Aqueous_foam_SANDDOC2004-4516P.pdf)
+  says the foam was "primarily engineered to capture explosively dispersed aerosols," that
+  "water drops suspended in the foam are the key," and that Sandia has an empirical
+  relationship for the capture fraction from explosive mass, foam expansion (60-300:1) and
+  thickness. It does not give the relationship or any capture numbers. Its enclosures are
+  sized "for up to several hundred pounds of HE"; its van test used "a 25-foot thickness of
+  aqueous foam" for 100 lb. The foam "requir[es] some sort of containment"; drainage is "only
+  10%" after 60 minutes.
+- Frakes, "Containment Options for IEDs and RDDs Using Aqueous Foam," SAND2011-3462C
+  (https://www.osti.gov/servlets/purl/1141006): "Scrubs particulate material," "Suppresses
+  cloud buoyancy"; "Must be confined"; tests of 1-50 lb; best blast attenuation at 60-100:1.
+- Hoffman and Mitchell, "Development of Defoamers for Confinement Foam," LLNL
+  UCRL-CONF-214716, 2003 (supplied by the maintainer): diluted 6:94 with water, about 98%
+  water, expansion about 100; "stabile for between 1.5 and 2 hours"; collapses with heat near
+  60 °C. No aerosol data; nothing on cold weather.
+- **For the 0.26:** about 9,700 lb of lead azide is about 3,800 lb TNT equivalent, some 10
+  times the fact sheet's design range and 38 times its van test. Cube-root scaling from that
+  test would call for roughly 85 ft of foam; the plan is a foam-filled coffer dam plus at least
+  2 ft on the magazine tops, over earth cover. Water drops also catch particles of about
+  0.1-1 µm least well (standard aerosol physics), which is the size lead fume condensed from
+  vapour tends to be. The published record supports the foam reducing airborne lead but gives
+  no number, so the site does not adjust the Army's 0.26 for it.
 
 ### Amount and setup: sources
 
@@ -668,3 +783,33 @@ Nov. 12, 2024 Federal Register rule
 - AP-42 Ch. 15 background, EO 05 fuzes and incendiaries: https://www.epa.gov/sites/default/files/2020-11/documents/b15_eo5.pdf
 - AP-42 Ch. 15 background, EO 11 incl. M15 cap (Oct 2008 draft): https://www.epa.gov/sites/default/files/2020-11/documents/b15_eo11_draft102008.pdf
 - AP-42 Section 15.8 draft, signals and simulators: https://gaftp.epa.gov/ap42/ch15/s08/draft/d15s08.pdf
+
+## Plant history: published sources
+
+Read in full on Nov. 25, 2026. None of these looks at airborne lead off the plant; the
+off-site health reviews cover explosives (RDX, HMX) and nitrate in water.
+
+- **EPA, NPL Site Narrative for Iowa Army Ammunition Plant** (proposed July 14, 1989; listed
+  Aug. 30, 1990), https://semspub.epa.gov/src/document/07/30296138. 19,127 acres; wastes
+  included "lead-containing sludges" and "ashes from incineration and open burning of
+  explosives"; 1984 tests found "RDX, TNT, and lead in creek sediments" of Brush Creek.
+- **ATSDR, Public Health Assessment, Iowa Army Ammunition Plant** (cited by ATSDR as 1999;
+  archived at https://webarchive.library.unt.edu/eot2008/20090506010334/http://www.atsdr.cdc.gov/hac/pha/iowaarmy/iaa_toc.html).
+  The plant has used "explosive materials and lead-based initiating compounds" since 1941.
+  "From 1968 to 1972, lead azide and gun powder were burned" at the North Burn Pads, where
+  soil still held 5,930 ppm lead at 3 ft (since removed). Soil and sediment: "no public
+  health hazards"; groundwater: "no apparent public health hazard" past, none now. The air
+  pathway is not evaluated.
+- **ATSDR, Letter Health Consultation, Sept. 19, 2013**,
+  https://www.atsdr.cdc.gov/hac/pha/iowaarmyammunitionplant/iowaarmyammunitionplantlhc09192013_508.pdf.
+  Off-site RDX and HMX "not harmful"; one well over the nitrate standard. Lead not evaluated.
+- **EPA Region 7, Hazardous Waste Management Permit, final September 2018** (RCRA ID
+  IA7213820445), https://www.epa.gov/system/files/documents/2025-05/iowa-army-ammunition-plant.pdf.
+  Routine open burning (140 lb/h) and open detonation (100 lb/h in condition VI.E.2; 60 lb/h
+  in EPA's response to comments) with weather limits like the emergency permit's, including no
+  detonation "during an inversion." No mention of lead azide.
+- **Army and EPA, Proposed Plan for Operable Unit 11, April 2026**,
+  https://iaaaprestoration.com/wp-content/uploads/11005-PP-OU11_Proposed_Plan_Final-APR2026.pdf.
+  No further action for 27 sites in 22 areas; 19,011 acres. Building 600-86, a laboratory from
+  1941 to 1986, analysed "primer mixes containing lead azide"; Line 6 made primers and
+  detonators until 1992; Line 7 was the "primer line" until about 1970.
