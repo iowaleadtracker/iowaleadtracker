@@ -18,6 +18,23 @@ government material.
 
 Each file is 3.4 GB; from S3 one took about 2½ minutes here.
 
+## Faster: raw HRRR (9 a.m. data by about 10:52 a.m.)
+
+NOAA's raw HRRR on AWS (`noaa-hrrr-bdp-pds`) posts each hour's analysis about 51 minutes
+after the hour (Nov. 25: 13Z at 13:51, 14Z at 14:51 UTC). The first 15 minutes after the
+blast (15:00–15:15 UTC) need the 15Z and 16Z analyses, so a run is possible from about
+**10:52 a.m. CST**, almost two hours before ARL's file.
+
+`nowcast_hrrr.sh 15 16` waits for those analyses (`wrfprsf00`, pressure levels), converts
+each with HYSPLIT's `api2arl_v4` (about 20 s, 550 MB per hour, full 3 km grid, 1013–50 hPa)
+and appends it to `work/hrrr_nowcast_20261125.arl`. Give later hours (e.g. `17 23`) to
+extend it. `./run_blast_day.sh nowcast` then runs the two `*-nowcast1h` inputs (9–10 a.m.).
+
+This is not the same weather input as ARL's archive: pressure levels every 25 hPa instead
+of HRRR's native levels, and analyses without surface fluxes (HYSPLIT then estimates
+stability from the temperature and wind profile). Treat it as preliminary and rerun on
+ARL's file when it is posted. `api2arl_v4` needs ecCodes (`apt-get install libeccodes0`).
+
 ## Runs
 
 | CONTROL | Hours | Deposition speeds |

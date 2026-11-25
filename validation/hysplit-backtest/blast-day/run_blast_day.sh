@@ -5,6 +5,7 @@
 #   ./run_blast_day.sh fetch      wait for and download the two HRRR files
 #   ./run_blast_day.sh early      2-hour run (15-17 UTC) once the first file is posted
 #   ./run_blast_day.sh full       8-hour runs (Zhang and Emerson speeds)
+#   ./run_blast_day.sh nowcast    1-hour runs on the file nowcast_hrrr.sh builds
 #
 # Needs HYSPLIT (hycs_std) and its bdyfiles: set HYSPLIT_DIR to the unpacked
 # distribution (the folder holding exec/ and bdyfiles/). WORK defaults to ./work.
@@ -34,7 +35,9 @@ run() {  # run <name>: one HYSPLIT run in its own folder
   cp "$HERE/$name.CONTROL" "$dir/CONTROL"
   cp "$HERE/SETUP.CFG" "$dir/"
   for f in ASCDATA.CFG LANDUSE.ASC ROUGLEN.ASC; do ln -sf "$HYSPLIT_DIR/bdyfiles/$f" "$dir/$f"; done
-  for f in "${FILES[@]}"; do [[ -f $WORK/$f ]] && ln -sf "$WORK/$f" "$dir/$f"; done
+  for f in "${FILES[@]}" hrrr_nowcast_20261125.arl; do
+    if [[ -f $WORK/$f ]]; then ln -sf "$WORK/$f" "$dir/$f"; fi
+  done
   (cd "$dir" && "$HYSPLIT_DIR/exec/hycs_std" > hycs_std.log 2>&1) && echo "$name: $dir/cdump"
 }
 
@@ -43,5 +46,6 @@ case ${1:-} in
   early) fetch "${FILES[0]}"; run 2026-11-25-9am-zhang-early2h ;;
   full)  for f in "${FILES[@]}"; do fetch "$f"; done
          run 2026-11-25-9am-zhang & run 2026-11-25-9am-emerson & wait ;;
-  *) sed -n 2,11p "$0"; exit 2 ;;
+  nowcast) run 2026-11-25-9am-zhang-nowcast1h & run 2026-11-25-9am-emerson-nowcast1h & wait ;;
+  *) sed -n 2,12p "$0"; exit 2 ;;
 esac
