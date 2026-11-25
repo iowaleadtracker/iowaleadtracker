@@ -5,10 +5,11 @@ Usage::
     HYSPLIT_DIR=/path/to/hysplit python station_vs_hrrr.py ARL_DIR ARL_FILE OBS_DIR > out.json
 
 ARL_FILE holds the 15 and 16 UTC analyses (nowcast_hrrr.sh). OBS_DIR holds the Iowa
-Environmental Mesonet downloads: network station lists (net_*.geojson), airport reports
-(asos_region.csv) and Iowa DOT road weather (rwis.csv). Reports within 20 minutes of the
-hour are vector-averaged; the analysis is its 10 m wind, rotated from grid to true north
-with the rotation HYSPLIT's profile tool reports for the lowest level.
+Environmental Mesonet downloads in ``data/obs``: station positions (station_coords.csv),
+airport reports (asos_region_20261125.csv) and Iowa DOT road weather
+(rwis_IA_20261125.csv). Reports within 20 minutes of the hour are vector-averaged; the
+analysis is its 10 m wind, rotated from grid to true north with the rotation HYSPLIT's
+profile tool reports for the lowest level.
 """
 
 from __future__ import annotations
@@ -28,27 +29,26 @@ LAT0, LON0 = 40.8255, -91.2665
 KT_PER_MS = 1 / 0.5144
 WINDOW_S = 20 * 60
 HOURS = (15, 16)
+NEAR_MI = 16
 
 
 def station_coords(obs: Path) -> dict[str, tuple[float, float, str]]:
-    """Return {station id: (lat, lon, name)} from the network lists."""
-    out = {}
-    for f in obs.glob("net_*.geojson"):
-        for ft in json.loads(f.read_text())["features"]:
-            lo, la = ft["geometry"]["coordinates"][:2]
-            out[ft["id"]] = (la, lo, ft["properties"].get("sname", ""))
-    return out
+    """Return {station id: (lat, lon, name)} from ``station_coords.csv``."""
+    with (obs / "station_coords.csv").open() as f:
+        return {
+            r["station"]: (float(r["lat"]), float(r["lon"]), r["name"]) for r in csv.DictReader(f)
+        }
 
 
 def reports(obs: Path) -> dict[str, list[tuple[dt.datetime, float, float]]]:
     """Return {station: [(time, direction, speed kt)]} from airport and road reports."""
     out: dict[str, list[tuple[dt.datetime, float, float]]] = {}
-    with (obs / "asos_region.csv").open() as f:
+    with (obs / "asos_region_20261125.csv").open() as f:
         for r in csv.DictReader(f):
             if r["drct"] not in ("M", "") and r["sknt"] not in ("M", ""):
                 t = dt.datetime.strptime(r["valid"], "%Y-%m-%d %H:%M")  # noqa: DTZ007 (UTC)
                 out.setdefault(r["station"], []).append((t, float(r["drct"]), float(r["sknt"])))
-    with (obs / "rwis.csv").open() as f:
+    with (obs / "rwis_IA_20261125.csv").open() as f:
         for r in csv.DictReader(f):
             if r["drct"] and r["sknt"]:
                 t = dt.datetime.strptime(r["obtime"], "%Y-%m-%d %H:%M:%S")  # noqa: DTZ007 (UTC)
@@ -126,7 +126,36 @@ def compare(arl_dir: str, arl: str, obs: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """Return mean, median and mean absolute errors by hour and station group."""
+    out: dict[str, Any] = {}
+    groups = {
+        "all": lambda _: True,
+        "airports": lambda r: not r["station"].endswith("I4"),
+        "road stations": lambda r: r["station"].endswith("I4"),
+        f"within {NEAR_MI} miles": lambda r: r["miles"] <= NEAR_MI,
+    }
+    for hour in HOURS:
+        for name, keep in groups.items():
+            sel = [r for r in rows if r["hour_utc"] == hour and keep(r)]
+            if not sel:
+                continue
+            d = sorted(r["dir_error"] for r in sel)
+            u = sum(-r["obs_kt"] * math.sin(math.radians(r["obs_dir"])) for r in sel)
+            v = sum(-r["obs_kt"] * math.cos(math.radians(r["obs_dir"])) for r in sel)
+            out[f"{hour} UTC, {name}"] = {
+                "n": len(sel),
+                "mean_dir_error": sum(d) / len(d),
+                "median_dir_error": d[len(d) // 2],
+                "mean_abs_dir_error": sum(abs(x) for x in d) / len(d),
+                "mean_speed_error_kt": sum(r["speed_error_kt"] for r in sel) / len(sel),
+                "observed_vector_mean_dir": (math.degrees(math.atan2(-u, -v)) + 360) % 360,
+            }
+    return out
+
+
 if __name__ == "__main__":
     arl_dir, arl, obs = sys.argv[1:4]
-    json.dump(compare(arl_dir, arl, Path(obs)), sys.stdout, indent=1)
+    table = compare(arl_dir, arl, Path(obs))
+    json.dump({"summary": summarize(table), "stations": table}, sys.stdout, indent=1)
     sys.stdout.write("\n")

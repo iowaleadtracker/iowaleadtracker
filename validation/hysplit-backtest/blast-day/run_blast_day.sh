@@ -5,7 +5,7 @@
 #   ./run_blast_day.sh fetch      wait for and download the two HRRR files
 #   ./run_blast_day.sh early      2-hour run (15-17 UTC) once the first file is posted
 #   ./run_blast_day.sh full       8-hour runs (Zhang and Emerson speeds)
-#   ./run_blast_day.sh nowcast    1-hour runs on the file nowcast_hrrr.sh builds
+#   ./run_blast_day.sh nowcast    runs on the hourly analyses nowcast_hrrr.sh builds
 #
 # Needs HYSPLIT (hycs_std) and its bdyfiles: set HYSPLIT_DIR to the unpacked
 # distribution (the folder holding exec/ and bdyfiles/). WORK defaults to ./work.
@@ -46,6 +46,6 @@ case ${1:-} in
   early) fetch "${FILES[0]}"; run 2026-11-25-9am-zhang-early2h ;;
   full)  for f in "${FILES[@]}"; do fetch "$f"; done
          run 2026-11-25-9am-zhang & run 2026-11-25-9am-emerson & wait ;;
-  nowcast) run 2026-11-25-9am-zhang-nowcast1h & run 2026-11-25-9am-emerson-nowcast1h & wait ;;
+  nowcast) run 2026-11-25-9am-zhang-analyses & run 2026-11-25-9am-emerson-analyses & wait ;;
   *) sed -n 2,12p "$0"; exit 2 ;;
 esac

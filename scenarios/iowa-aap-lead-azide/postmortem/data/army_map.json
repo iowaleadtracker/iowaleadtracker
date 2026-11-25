@@ -1,0 +1,133 @@
+{
+ "px_per_mi": 2.516,
+ "city_fit": {
+  "north_rotation_deg": -1.7355138978544755,
+  "px_per_mi_from_fit": 2.5783228719524813,
+  "rms_residual_px": 6.957704334742602,
+  "plant_minus_tip_mi_east": -1.0974688308176368,
+  "plant_minus_tip_mi_north": 7.979871752682892
+ },
+ "ground_axis_bearing": 240.83667438906676,
+ "anchors": {
+  "tip": {
+   "ground_5": {
+    "near_mi": 0.1987281399046105,
+    "far_mi": 36.23452197142622,
+    "far_bearing": 240.06023585081914,
+    "center_mi": 19.922885365445197,
+    "center_bearing": 239.86404724258398,
+    "drawn_area_mi2": 141.8584019350876
+   },
+   "ground_100": {
+    "near_mi": 0.1987281399046105,
+    "far_mi": 13.80409776376173,
+    "far_bearing": 239.74356283647074,
+    "center_mi": 7.2566724782408345,
+    "center_bearing": 238.31323511298837,
+    "drawn_area_mi2": 26.223268063724436
+   },
+   "air_pieces": [
+    {
+     "near_mi": 3.999326668819179,
+     "far_mi": 7.056947895295987,
+     "far_bearing": 237.65255650055798,
+     "center_mi": 5.6817548150044965,
+     "center_bearing": 243.26821002985244,
+     "drawn_area_mi2": 6.7927742574707874
+    },
+    {
+     "near_mi": 10.056900579395862,
+     "far_mi": 66.97610056366425,
+     "far_bearing": 233.8101390195987,
+     "center_mi": 41.204578635941445,
+     "center_bearing": 238.36332978885764,
+     "drawn_area_mi2": 429.05057868117814
+    },
+    {
+     "near_mi": 88.79056757557673,
+     "far_mi": 105.82063523746851,
+     "far_bearing": 224.31522249299084,
+     "center_mi": 96.79646454994511,
+     "center_bearing": 226.7316512636539,
+     "drawn_area_mi2": 85.62054994300388
+    }
+   ],
+   "overlap_ground_5": {
+    "tracker forecast": {
+     "intersection_mi2": 27.951665738932178,
+     "iou": 0.13950949800262535,
+     "a_in_b": 0.20317383537165445,
+     "b_in_a": 0.30806415130016035,
+     "army_traced_mi2": 137.5707362813786
+    },
+    "tracker analysis": {
+     "intersection_mi2": 2.620004312948612,
+     "iou": 0.010947492127550277,
+     "a_in_b": 0.01904451223420534,
+     "b_in_a": 0.025102570934462373,
+     "army_traced_mi2": 137.5707362813786
+    }
+   }
+  },
+  "box": {
+   "ground_5": {
+    "near_mi": 2.326053241398972,
+    "far_mi": 37.68348783849107,
+    "far_bearing": 243.02956092134912,
+    "center_mi": 21.404202604488727,
+    "center_bearing": 245.10950806502188,
+    "drawn_area_mi2": 141.8584019350876
+   },
+   "ground_100": {
+    "near_mi": 2.326053241398972,
+    "far_mi": 15.317544254803764,
+    "far_bearing": 247.0942303415828,
+    "center_mi": 8.823105127293342,
+    "center_bearing": 251.3732956584892,
+    "drawn_area_mi2": 26.223268063724436
+   },
+   "air_pieces": [
+    {
+     "near_mi": 5.817679319675854,
+     "far_mi": 8.609769086818151,
+     "far_bearing": 251.1468412355809,
+     "center_mi": 7.426650702628382,
+     "center_bearing": 257.857928094959,
+     "drawn_area_mi2": 6.7927742574707874
+    },
+    {
+     "near_mi": 11.63026620699486,
+     "far_mi": 68.18576496143785,
+     "far_bearing": 235.56888045002512,
+     "center_mi": 42.591170182624296,
+     "center_bearing": 241.0448631921442,
+     "drawn_area_mi2": 429.05057868117814
+    },
+    {
+     "near_mi": 89.77696311751818,
+     "far_mi": 106.66074550033822,
+     "far_bearing": 225.5284045926535,
+     "center_mi": 97.7324122295456,
+     "center_bearing": 228.03432497541107,
+     "drawn_area_mi2": 85.62054994300388
+    }
+   ],
+   "overlap_ground_5": {
+    "tracker forecast": {
+     "intersection_mi2": 0.0,
+     "iou": 0.0,
+     "a_in_b": 0.0,
+     "b_in_a": 0.0,
+     "army_traced_mi2": 137.6336445423803
+    },
+    "tracker analysis": {
+     "intersection_mi2": 0.0,
+     "iou": 0.0,
+     "a_in_b": 0.0,
+     "b_in_a": 0.0,
+     "army_traced_mi2": 137.6336445423803
+    }
+   }
+  }
+ }
+}

@@ -18,27 +18,28 @@ government material.
 
 Each file is 3.4 GB; from S3 one took about 2½ minutes here.
 
-## Faster: raw HRRR (9 a.m. data by about 10:52 a.m.)
+## Faster: raw HRRR analyses
 
-NOAA's raw HRRR on AWS (`noaa-hrrr-bdp-pds`) posts each hour's analysis about 51 minutes
-after the hour (Nov. 25: 13Z at 13:51, 14Z at 14:51 UTC). The first 15 minutes after the
-blast (15:00–15:15 UTC) need the 15Z and 16Z analyses, so a run is possible from about
-**10:52 a.m. CST**, almost two hours before ARL's file.
-
-`nowcast_hrrr.sh 15 16` waits for those analyses (`wrfprsf00`, pressure levels), converts
-each with HYSPLIT's `api2arl_v4` (about 20 s, 550 MB per hour, full 3 km grid, 1013–50 hPa)
-and appends it to `work/hrrr_nowcast_20261125.arl`. Give later hours (e.g. `17 23`) to
-extend it. `./run_blast_day.sh nowcast` then runs the two `*-nowcast1h` inputs (9–10 a.m.).
+NOAA's raw HRRR on AWS (`noaa-hrrr-bdp-pds`) posts each hour's analysis 51 to 54 minutes
+after the hour (Nov. 25: 15Z at 15:54, 16Z at 16:53, 17Z at 17:53 UTC). `nowcast_hrrr.sh
+15 17` waits for the analyses (`wrfprsf00`, pressure levels), converts each with HYSPLIT's
+`api2arl_v4` (about 20 s and 550 MB per hour, full 3 km grid, 1013–50 hPa) and appends it
+to `work/hrrr_nowcast_20261125.arl`. Give later hours (e.g. `18 23`) to extend it.
+`./run_blast_day.sh nowcast` then runs the two `*-analyses` inputs, which read that file
+with nothing held fixed; their run length (line 5 of each CONTROL, now 2 hours) must end
+at or before the last analysis in the file.
 
 This is not the same weather input as ARL's archive: pressure levels every 25 hPa instead
 of HRRR's native levels, and analyses without surface fluxes (HYSPLIT then estimates
-stability from the temperature and wind profile). Treat it as preliminary and rerun on
-ARL's file when it is posted. `api2arl_v4` needs ecCodes (`apt-get install libeccodes0`).
+stability from the temperature and wind profile). `api2arl_v4` needs ecCodes
+(`apt-get install libeccodes0`). The results are in the
+[postmortem](../../../scenarios/iowa-aap-lead-azide/postmortem/README.md).
 
 ## Runs
 
 | CONTROL | Hours | Deposition speeds |
 |---|---|---|
+| `2026-11-25-9am-zhang-analyses`, `-emerson-analyses` | 2 | Zhang, Emerson; on the hourly analyses, 0.005° grid shifted southwest |
 | `2026-11-25-9am-zhang-early2h` | 2 | Zhang |
 | `2026-11-25-9am-zhang` | 8 | Zhang |
 | `2026-11-25-9am-emerson` | 8 | Emerson |
@@ -48,9 +49,9 @@ the two met files, and a grid centred on the plant spanning 3° × 4° (about 33
 since the wind direction is not known in advance. Release, particle sizes, output levels
 (0, 0–10 m, 0–100 m) and `SETUP.CFG` (200,000 particles) are as in the back-test.
 
-**Check before comparing:** the fixed dry deposition speeds are Monday's, taken from our
-model's map for that day. For a like-for-like comparison, replace them with the speeds our
-model reports for the blast-day run (the back-test's "Method").
+The fixed dry deposition speeds are the tracker's values at its 5 m/s reference wind (the
+back-test's "Method"); they are the same on every day, while the tracker itself varies them
+with the hourly wind.
 
 ## Running
 
