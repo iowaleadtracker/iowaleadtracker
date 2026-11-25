@@ -104,7 +104,8 @@ posted 9:54 a.m. CST) and converted it to HYSPLIT's format with HYSPLIT's `api2a
   9:55 a.m.), from NOAA's Level III archive on AWS;
 - the 6 a.m. CST weather balloons at Davenport (DVN) and Lincoln, Ill. (ILX);
 - hourly sunshine at the Iowa State University soil moisture station at Crawfordsville
-  (CRFI4), about 30 miles north.
+  (CRFI4), about 30 miles north;
+- hourly PM2.5 and PM10 from EPA AirNow's public files for every monitor within 160 miles.
 
 The Army said it would launch weather balloons hourly at the site; we haven't seen those
 data published.
@@ -251,9 +252,21 @@ the tracker's 43°.
 Other sources we looked for and couldn't use yet: 1-minute airport winds (not yet in the
 Iowa Environmental Mesonet's archive for today), the West Point soil moisture station on the
 cloud's path (no data), the Lincoln, Ill., Des Moines and St. Louis radars (115–150 miles
-away, too far to see the lowest kilometer near the plant), and particle monitors (EPA AirNow
-and low-cost PurpleAir sensors; their data services need keys or hosts this project hasn't
-set up, and fine-particle readings wouldn't measure lead).
+away, too far to see the lowest kilometer near the plant), and low-cost PurpleAir sensors
+(their API needs a key this project hasn't set up).
+
+**Particle monitors.** EPA's AirNow network has no monitor within 40 miles of the plant.
+Its hourly PM2.5 and PM10 readings within 160 miles
+([`data/obs/airnow_pm_160mi_20261125.csv`](data/obs/airnow_pm_160mi_20261125.csv), from
+AirNow's public hourly files) read 4–12 µg/m³ PM2.5 from 5 to 10 a.m. CST, an ordinary
+background with no jump at 9 a.m., but every one of them except one is upwind or off to the
+side of the cloud's path. The exception is **Lake Sugema, Iowa** (PM2.5, near Keosauqua),
+40 miles from the plant at 257°: between the models' 230° and the Army map's 243–250°. At
+the models' speeds the cloud would pass 40 miles out around 11 a.m. to noon. Its first
+reading, for 10–11 a.m., was 8 µg/m³. *Pending:* its readings through the afternoon.
+These monitors measure all fine particles, not lead; a rise would show roughly where and
+when the cloud passed, not how much lead it carried, and AirNow's real-time data are
+preliminary until the agencies validate them.
 
 **Sky: sunnier than the "overcast" label, as sunny as the forecast's sunshine.** Every
 station reported no clouds below 12,000 ft except a few at 3,700 ft at Ottumwa. The
@@ -410,6 +423,7 @@ the right place. Neither says what was actually deposited; only sampling can.
   about 12:40 p.m. and 6:40 p.m. CST).
 - *Pending:* run the tracker itself on the analyzed weather, to separate forecast error
   from model differences.
+- *Pending:* the Lake Sugema PM2.5 monitor through the afternoon.
 - *Pending:* compare with EPA's and the Army's air and surface sampling when it is
   published, the only test against lead that was really there.
 - Try a size distribution with a coarse, soil-bound fraction (the model's `--size-preset
@@ -468,6 +482,9 @@ The repeat step rewrites the hour (characters 7–8) of each 50-byte record head
 - Dowell, D. C., and Coauthors, 2022: The High-Resolution Rapid Refresh (HRRR): An hourly
   updating convection-allowing forecast model. Part I: Motivation and system description.
   *Wea. Forecasting*, **37**, 1371–1395, doi:10.1175/WAF-D-21-0151.1.
+- EPA AirNow, 2026: Hourly data files, Nov. 25, 2026. U.S. Environmental Protection Agency,
+  https://files.airnowtech.org/airnow/2026/20261125/ (retrieved Nov. 25, 2026; preliminary,
+  unvalidated data).
 - Iowa Environmental Mesonet, 2026: ASOS/AWOS and ISU Soil Moisture Network data, and
   upper-air soundings. Iowa State University, https://mesonet.agron.iastate.edu/ (retrieved
   Nov. 25, 2026).
