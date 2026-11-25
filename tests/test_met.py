@@ -131,3 +131,25 @@ def test_replay_takes_the_same_fallback_as_the_download(
     monkeypatch.setattr("urllib.request.urlopen", lambda *_a, **_k: pytest.fail("downloaded"))
     monkeypatch.setenv(met.CACHE_ONLY_ENV, "1")
     assert fetch() == downloaded
+
+
+@pytest.mark.parametrize(("model", "z_up"), [("ncep_hrrr_conus", 80), ("gfs_seamless", 120)])
+def test_wind_level_aloft_is_one_the_model_serves(
+    monkeypatch: pytest.MonkeyPatch, model: str, z_up: int
+) -> None:
+    """HRRR is asked for its 80 m wind (it has no 120 m); other models for 120 m."""
+    import datetime as dt  # noqa: PLC0415
+
+    asked: list[str] = []
+
+    def answer(url: str, *_a: Any, **_k: Any) -> dict[str, Any]:
+        asked.append(url)
+        return {"hourly": {}}
+
+    monkeypatch.setattr(met, "http_json", answer)
+    monkeypatch.setattr(met, "_data_problem", lambda *_a, **_k: None)
+    start = dt.datetime(2026, 11, 25, 15, tzinfo=dt.timezone.utc)
+    got = met.fetch_open_meteo([41.5], [-91.2], start, start, model=model, now=start)
+    assert got[2] == z_up
+    hourly = urllib.parse.parse_qs(urllib.parse.urlsplit(asked[0]).query)["hourly"][0]
+    assert f"wind_speed_{z_up}m" in hourly.split(",")

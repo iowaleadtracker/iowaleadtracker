@@ -47,7 +47,7 @@ python3 puff_dispersal.py --lat 39.74 --lon -104.99 \
 | `--extent-km` | fit plume | fix the map to a square of this half-width around the source, for near-field detail |
 | `--wind-grid` | 5 | N×N Open-Meteo points for a spatially varying wind field |
 | `--weather-model` | `ensemble` | `ensemble`, `best-match`, or Open-Meteo model names separated by commas (see Weather models) |
-| `--no-pressure-levels` | off | ignore upper-level winds and extend the 100/120 m wind with a power law |
+| `--no-pressure-levels` | off | ignore upper-level winds and extend the 100, 120 or 80 m wind with a power law |
 | `--ensemble`, `--dir-spread` | 1, 10 | number of wind-direction runs and the ± range in degrees (see Wind uncertainty) |
 | `--met-cache FILE` | – | store Open-Meteo responses in a JSON file and reuse them on later runs |
 | `--land-use` | `grass` | surface type for dry deposition: `grass`, `crops`, `forest`, `urban`, `desert`, `water` |
@@ -276,9 +276,9 @@ historical runs fall back to a power-law profile above 100 m.
 
 ## Model
 
-- **Winds aloft**: Open-Meteo's 100 m (ERA5) or 120 m (forecast) wind is used with the
-  10 m wind, blended between them on a log-height scale. Above that, the wind is
-  interpolated linearly through the pressure-level winds where the source has them.
+- **Winds aloft**: Open-Meteo's 100 m (ERA5) or 120 m (forecast; 80 m for HRRR, which
+  has no 120 m) wind is used with the 10 m wind, blended between them on a log-height
+  scale. Above that, the wind is interpolated linearly through the pressure-level winds where the source has them.
   Otherwise it follows the stability power law up to the mixing height.
 - **Particle**: the equivalent-sphere diameter comes from mass and density. Settling
   velocity uses Stokes' law with the Cunningham slip correction, switching to

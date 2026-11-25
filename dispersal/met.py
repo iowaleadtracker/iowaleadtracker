@@ -39,6 +39,13 @@ HOURLY_VARS = [
 STD_PRESSURE_LEVELS = [1000, 975, 950, 925, 900, 850, 800, 700, 600, 500]  # hPa
 
 
+#: Near-surface wind level aloft (m) asked of the forecast API, and of named models that
+#: serve a different one. Open-Meteo's HRRR has 80 m wind but no 120 m (every value comes
+#: back empty), so before Nov. 25, 2026 HRRR runs used a power-law guess from 10 m instead.
+FORECAST_WIND_ALOFT_M = 120
+MODEL_WIND_ALOFT_M = {"ncep_hrrr_conus": 80}
+
+
 # Built-in weather-model ensemble for --weather-model ensemble (Open-Meteo model names; the
 # Iowa site passes its own list). The first is the run shown;
 # the rest feed the uncertainty view. HRRR is used only when it covers the whole run.
@@ -299,7 +306,8 @@ def fetch_open_meteo(
     it to when saved forecasts were pulled to replay them on a later date.
 
     Picks the ERA5 archive for past dates and the forecast API otherwise. Also asks
-    for one near-surface wind level aloft (100 m in ERA5, 120 m in the forecast API)
+    for one near-surface wind level aloft (100 m in ERA5; 120 m in the forecast API, or
+    the model's own level from ``MODEL_WIND_ALOFT_M``, e.g. 80 m for HRRR)
     and, when ``levels`` is given, wind and geopotential height on those pressure
     levels (served by the forecast API; the archive returns none). If a request is
     refused, retries with fewer variables, then tries the other source.
@@ -327,14 +335,15 @@ def fetch_open_meteo(
     forecast = (
         "Open-Meteo forecast (best-match NWP)",
         "https://api.open-meteo.com/v1/forecast",
-        120,
+        FORECAST_WIND_ALOFT_M,
     )
     if end > now + dt.timedelta(days=15.5):
         raise SystemExit("Forecast data only reaches ~16 days ahead; pick an earlier time.")
     order = [archive, forecast] if end < now - dt.timedelta(days=6) else [forecast, archive]
     if model:  # a named forecast model: only the forecast API serves it
         base_params["models"] = model
-        order = [(f"Open-Meteo forecast, {model}", forecast[1], forecast[2])]
+        z_model = MODEL_WIND_ALOFT_M.get(model, forecast[2])
+        order = [(f"Open-Meteo forecast, {model}", forecast[1], z_model)]
     tiers: list[tuple[bool, tuple[int, ...]]] = [(True, tuple(levels)), (True, ()), (False, ())]
     if not levels:
         tiers = tiers[1:]
@@ -747,7 +756,7 @@ def transport_wind(
 ) -> tuple[FloatArray, FloatArray]:
     """Wind (u, v) at transport height ``zt``.
 
-    10 m to the level aloft (100/120 m): blended on a log-height scale. Above that:
+    10 m to the level aloft (100, 120 or 80 m): blended on a log-height scale. Above that:
     linear interpolation through the pressure-level winds when the weather source has
     them (held constant above the top level); otherwise the stability power law, up to
     the mixing height.

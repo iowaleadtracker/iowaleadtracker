@@ -581,6 +581,14 @@ def method_intro(pct: dict[str, str]) -> str:
 CHANGES_HEAD = "Change log"
 CHANGES = [
     (
+        "Nov. 25",
+        (
+            "Maps drawn from the HRRR forecast use its 80 m wind near the ground. The "
+            "forecast service has no 120 m wind for HRRR, so until now the wind between "
+            "the ground and the lowest pressure level was estimated from the 10 m wind."
+        ),
+    ),
+    (
         "Nov. 24",
         (
             "FEMA&rsquo;s evacuation zone and helpline are in the page header. Text that said "
