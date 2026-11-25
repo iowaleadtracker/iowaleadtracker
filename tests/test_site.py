@@ -532,8 +532,8 @@ def test_about_box_leads_with_when() -> None:
         "As of this update (X), news outlets report that the Army carried out the controlled "
         "detonation on Wednesday morning, Nov. 25 (New York Times, Nov. 25). The Army said it "
         "would detonate at 9 a.m. CST and update the public on the status of the operation no "
-        "later than 11 a.m. CST (Army update, Nov. 25). Wait for the Army\u2019s official "
-        "confirmation of the results, and follow official instructions. "
+        "later than 11 a.m. CST (Army update, Nov. 25). " + fs.EARLY_AIR + " Wait for the "
+        "Army\u2019s official confirmation of the results, and follow official instructions. "
         "The Army had planned it for about 9 a.m. CST Wednesday, Nov. 25 (Army public safety "
         "advisory, Nov. 24)."
     )
@@ -552,6 +552,19 @@ def test_blast_status_says_to_wait_for_the_army() -> None:
     assert fs.ARMY_NOV25_URL in fs.BLAST_STATUS_HTML
     assert fs.ARMY_NOV25_URL in fs.time_note_html("X")
     assert any(r.startswith("McFate, L., 2026c:") for r in works_cited.REFERENCES)
+
+
+def test_early_air_readings_say_lab_results_are_pending() -> None:
+    """Early EPA readings are attributed, linked, and say more sampling is still needed."""
+    for text in (fs.EARLY_AIR, fs.EARLY_AIR_HTML):
+        assert "early readings only" in text.lower()
+        assert "still pending and are needed" in text.replace("</b>", "")
+        assert "soil and water sampling" in text
+        assert "safe" not in text.lower()  # no verdicts about anyone's safety
+    assert fs.EARLY_AIR in fs.time_note("X")
+    assert fs.EPA_VIEWER_URL in fs.EARLY_AIR_HTML
+    assert fs.EPA_VIEWER_URL in fs.time_note_html("X")
+    assert any(r.startswith("EPA Region 7, 2026:") for r in works_cited.REFERENCES)
     assert any(r.startswith("New York Times, 2026:") for r in works_cited.REFERENCES)
 
 
