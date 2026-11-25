@@ -200,7 +200,8 @@ OG_IMAGE_META = (
     '\n<meta property="og:image:width" content="1200">'
     '\n<meta property="og:image:height" content="630">'
     '\n<meta property="og:image:alt" '
-    'content="Map of the lead cloud\'s path from the Iowa Army Ammunition Plant">'
+    "content=\"Unofficial estimate: map of the lead cloud's path from the Iowa Army "
+    'Ammunition Plant across four weather models. Official updates and maps: army.mil/asc">'
     f'\n<meta name="twitter:image" content="{SITE_URL}og.png">'
 )
 DEFAULT_WHO = "the Army, your county emergency management office, and state health officials"
