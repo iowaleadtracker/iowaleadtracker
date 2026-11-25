@@ -1,7 +1,8 @@
 # Downloads GFS and ECMWF forecasts for the staged Wednesday-Friday maps
 # (scenarios/iowa-aap-lead-azide/staged.py) and proposes them as a pull request. Runs
 # every 6 hours through Friday, Nov. 27, at :10 (the main refresh runs every 3 hours
-# at :40), and by hand: Actions → "Refresh staged forecast" → Run workflow. It never deploys;
+# at :40), and by hand: Actions → "Refresh staged forecast" → Run workflow (optionally on a
+# branch: see the `branch` input). It never deploys;
 # merging the pull request does (.github/workflows/deploy.yml), so check the news first.
 #
 # It touches only met_cache/staged_forecasts.json, so the public maps and the hourly
@@ -10,6 +11,13 @@ name: Refresh staged forecast
 
 on:
   workflow_dispatch:
+    inputs:
+      branch:
+        description: >-
+          Refresh this branch instead of main, and push the new forecasts onto it (no
+          separate pull request). Pick the same branch under "Use workflow from". Not main.
+        required: false
+        default: ""
   schedule:
     - cron: "10 */6 * * *" # GFS and ECMWF update every 6 hours; GitHub may delay or skip runs
 
@@ -41,10 +49,29 @@ jobs:
             echo "go=true" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Which branch?
+        id: target
+        if: steps.when.outputs.go == 'true'
+        env:
+          TARGET: ${{ inputs.branch }}
+        run: |
+          if [ -z "$TARGET" ]; then
+            echo "ref=main" >> "$GITHUB_OUTPUT"
+          elif [ "$TARGET" = "main" ]; then
+            echo "::error::main only changes through a reviewed pull request; leave the branch empty."
+            exit 1
+          elif ! git ls-remote --exit-code --heads "https://github.com/${GITHUB_REPOSITORY}" "$TARGET" >/dev/null; then
+            echo "::error::No branch named $TARGET."
+            exit 1
+          else
+            echo "ref=$TARGET" >> "$GITHUB_OUTPUT"
+            echo "Refreshing branch \`$TARGET\`." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - uses: actions/checkout@v7
         if: steps.when.outputs.go == 'true'
         with:
-          ref: main
+          ref: ${{ steps.target.outputs.ref }}
 
       - uses: actions/setup-python@v7
         if: steps.when.outputs.go == 'true'
@@ -81,8 +108,23 @@ jobs:
         if: steps.refresh.outputs.changed == 'true'
         run: python -m pytest -q
 
+      - name: Push the new forecasts onto the chosen branch
+        if: steps.refresh.outputs.changed == 'true' && steps.target.outputs.ref != 'main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET: ${{ steps.target.outputs.ref }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scenarios/*/met_cache/staged_forecasts.json
+          git commit -q -m "Refresh staged Wed-Fri forecast (GFS, ECMWF)" \
+            -m "Downloaded by refresh-staged.yml, run by hand on this branch (intended map change)."
+          git push origin "HEAD:$TARGET"
+          gh workflow run ci.yml --ref "$TARGET"
+          echo "Pushed the new forecasts to \`$TARGET\`." >> "$GITHUB_STEP_SUMMARY"
+
       - name: Push the branch and open or update the pull request
-        if: steps.refresh.outputs.changed == 'true'
+        if: steps.refresh.outputs.changed == 'true' && steps.target.outputs.ref == 'main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

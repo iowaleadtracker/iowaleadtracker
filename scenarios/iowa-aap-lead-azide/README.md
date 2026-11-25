@@ -443,6 +443,14 @@ Forecasts improve as the event approaches. The page and `met_cache/map_met_all.j
 Wednesday, Nov. 25, and pushes the result to the `forecast-refresh` branch with a pull request. It
 never deploys; merging the pull request does.
 
+To refresh a branch that isn't merged yet (a change that alters the weather requests, so
+its saved forecasts must be pulled again), run the workflow by hand: Actions → "Refresh
+forecast" (or "Refresh staged forecast") → Run workflow, pick the branch under "Use workflow
+from" and type it again as `branch`. It checks out that branch, refreshes and tests it,
+and pushes the new forecasts onto it as one commit, with no separate pull request. It uses
+the repository's Open-Meteo key, so it avoids the free limit a shared address can hit.
+`main` is refused: it only changes through a reviewed pull request.
+
 ### More than one day
 
 `DAYS` in `make_map_picker.py` lists the days the main site models. Since Nov. 24 that is only
