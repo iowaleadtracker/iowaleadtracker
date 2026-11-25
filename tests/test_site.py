@@ -530,8 +530,10 @@ def test_about_box_leads_with_when() -> None:
     assert fs.TIME_HEAD == "When."
     assert fs.time_note("X").startswith(
         "As of this update (X), news outlets report that the Army carried out the controlled "
-        "detonation on Wednesday morning, Nov. 25 (New York Times, Nov. 25). Wait for the "
-        "Army\u2019s official confirmation of the results, and follow official instructions. "
+        "detonation on Wednesday morning, Nov. 25 (New York Times, Nov. 25). The Army said it "
+        "would detonate at 9 a.m. CST and update the public on the status of the operation no "
+        "later than 11 a.m. CST (Army update, Nov. 25). Wait for the Army\u2019s official "
+        "confirmation of the results, and follow official instructions. "
         "The Army had planned it for about 9 a.m. CST Wednesday, Nov. 25 (Army public safety "
         "advisory, Nov. 24)."
     )
@@ -545,6 +547,11 @@ def test_blast_status_says_to_wait_for_the_army() -> None:
         assert "safe" not in text.lower()  # no verdicts about anyone's safety
     assert fs.NYT_BLAST_URL in fs.BLAST_STATUS_HTML
     assert fs.NYT_BLAST_URL in fs.time_note_html("X")
+    for text in (fs.BLAST_DONE, fs.BLAST_STATUS_HTML):
+        assert "no later than 11 a.m. CST" in text
+    assert fs.ARMY_NOV25_URL in fs.BLAST_STATUS_HTML
+    assert fs.ARMY_NOV25_URL in fs.time_note_html("X")
+    assert any(r.startswith("McFate, L., 2026c:") for r in works_cited.REFERENCES)
     assert any(r.startswith("New York Times, 2026:") for r in works_cited.REFERENCES)
 
 

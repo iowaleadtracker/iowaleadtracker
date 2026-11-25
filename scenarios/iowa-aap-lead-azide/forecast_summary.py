@@ -443,14 +443,25 @@ ARMY_MAPS_CITE = "Army \u201cMitigated 0.26\u201d maps, Nov. 24"
 # had been checked when this was written, so the page says to wait for the Army's.
 NYT_BLAST_URL = "https://www.nytimes.com/live/2026/11/25/us/iowa-detonation-ammunition-news"
 NYT_BLAST_CITE = "New York Times, Nov. 25"
+# The Army's last notice before the blast, "Today's controlled detonation at Iowa Army
+# Ammunition Plant" (L. McFate, Army Sustainment Command, Nov. 25, 2026). Text checked from
+# the maintainer's screenshot; army.mil refuses this build's tools (HTTP 403). It reads: "At
+# 9:00 a.m. CST today, the U.S. Army will conduct a controlled, mitigated detonation ... the
+# Army will update the public on the status of the operation no later than 11:00 a.m. CST."
+ARMY_NOV25_URL = "https://www.army.mil/article/297089"
+ARMY_NOV25_CITE = "Army update, Nov. 25"
 BLAST_DONE = (
     "News outlets report that the Army carried out the controlled detonation on Wednesday "
-    f"morning, Nov. 25 ({NYT_BLAST_CITE}). Wait for the Army\u2019s official confirmation of "
-    "the results, and follow official instructions."
+    f"morning, Nov. 25 ({NYT_BLAST_CITE}). The Army said it would detonate at 9 a.m. CST and "
+    "update the public on the status of the operation no later than 11 a.m. CST "
+    f"({ARMY_NOV25_CITE}). Wait for the Army\u2019s official confirmation of the results, and "
+    "follow official instructions."
 )
 BLAST_STATUS_HTML = (
     "<b>Blast reported done:</b> news outlets report that the Army carried out the detonation "
     f'Wednesday morning, Nov. 25 (<a href="{NYT_BLAST_URL}" rel="noopener">{NYT_BLAST_CITE}</a>). '
+    "The Army said it will update the public on the operation no later than 11 a.m. CST "
+    f'(<a href="{ARMY_NOV25_URL}" rel="noopener">{ARMY_NOV25_CITE}</a>). '
     "Wait for the Army&rsquo;s official confirmation of the results, and follow official "
     "instructions."
 )
@@ -472,6 +483,7 @@ HHS_LINK = f'<a href="{HHS_URL}" rel="noopener">Iowa HHS fact sheet</a>'
 # links each name (time_note_html, and make_map_picker.linkify for the FAQ).
 NAMED_SOURCES = (
     (NYT_BLAST_CITE, NYT_BLAST_URL),
+    (ARMY_NOV25_CITE, ARMY_NOV25_URL),
     (ADVISORY_NOV24_CITE, ADVISORY_NOV24_URL),
     ("Acting Secretary of the Army on X", SECARMY_URL),
     ("Iowa HHS fact sheet", HHS_URL),
