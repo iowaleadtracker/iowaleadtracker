@@ -1,13 +1,14 @@
-"""Draw the four figures of the first comparison.
+"""Draw the five figures of the first comparison.
 
 Usage (from the repository root, ``HYSPLIT_DIR`` set)::
 
-    python figure.py FORECAST_MAPS ANALYSIS_MAPS HYSPLIT_RUN ARMY_DIR EPA_DIR OUT_DIR
+    python figure.py FORECAST_MAPS ANALYSIS_MAPS HYSPLIT_RUN ARMY_DIR EPA_DIR COVERAGE.json OUT_DIR
 
 Figures 1, 2 and 4 are maps for the 26% case (the Army's emission factor): lead on the
 ground, hourly mean air, and end-of-hour snapshots against the Army's final air map. Figure 3 is
-the air at EPA's four real-time monitors, readings against the 7% (lowest) case. Every map
-shows EPA's 43 sampling sites; the four with public readings are labeled.
+the air at EPA's four real-time monitors, readings against the 7% (lowest) case. Figure 5 is the
+direction sweep from ``monitor_coverage.py``. Every map shows EPA's 43 sampling sites; the
+four with public readings are labeled.
 
 One color per source throughout: tracker forecast, tracker on analyzed weather, HYSPLIT
 on NOAA ARL's archived HRRR, and the Army's map. The palette passed the dataviz skill's
@@ -19,6 +20,7 @@ from __future__ import annotations
 
 import csv
 import datetime as dt
+import json
 import math
 import sys
 from pathlib import Path
@@ -365,9 +367,98 @@ def fig_monitors(
     plt.close(fig)
 
 
+def fig_coverage(cov: dict[str, Any], out: Path) -> None:
+    """Figure 5: what the best-placed real-time monitor would read, by cloud direction."""
+    fig, ax = plt.subplots(figsize=(10, 5.2), constrained_layout=True)
+    keys = {
+        "forecast": "tracker forecast",
+        "analysis": "tracker analysis",
+        "hysplit": "hysplit analysis",
+    }
+    for k, (key, run) in enumerate(keys.items()):
+        sweep = cov["runs"][run]["sweep"]
+        x = [p["cloud_bearing"] for p in sweep]
+        y = [max(p["air_100pct_ugm3"] * LOW_SCALE, FLOOR) for p in sweep]
+        ax.plot(x, y, color=C[key], lw=2, zorder=4 + k)
+        own = cov["runs"][run]["cloud_bearing_hour1"]
+        ax.plot(
+            own,
+            max(sweep[len(sweep) // 2]["air_100pct_ugm3"] * LOW_SCALE, FLOOR),
+            "o",
+            ms=8,
+            mfc=C[key],
+            mec="white",
+            mew=1.5,
+            zorder=8,
+        )
+    for level, text in (
+        (0.18, "0.18: the Army map's air line"),
+        (0.01, "0.01: highest reading any monitor posted"),
+    ):
+        ax.axhline(level, color=MUTED, lw=1, ls=(0, (4, 3)), zorder=2)
+        ax.annotate(
+            text,
+            (249.5, level),
+            fontsize=7.5,
+            color=MUTED,
+            ha="right",
+            va="bottom",
+            xytext=(0, 2),
+            textcoords="offset points",
+        )
+    ax.axvspan(204, 211, color="#e6e6e6", zorder=1)
+    ax.annotate(
+        "along the surface wind\n(stations, analysis)",
+        (207.5, 60),
+        fontsize=7.5,
+        color=MUTED,
+        ha="center",
+    )
+    ax.set_yscale("log")
+    ax.set_ylim(FLOOR, 200)
+    ax.set_xlim(198, 250)
+    ax.set_yticks([FLOOR, 1e-3, 1e-2, 1e-1, 1, 10, 100])
+    ax.set_yticklabels(["0", "0.001", "0.01", "0.1", "1", "10", "100"])
+    ax.set_xlabel(
+        "Direction the cloud travels in its first hour (degrees from north; 225° is southwest)",
+        fontsize=8.5,
+        color=MUTED,
+    )
+    ax.set_ylabel(
+        "Highest hourly mean at any real-time monitor, µg/m³ (log scale)", fontsize=8.5, color=MUTED
+    )
+    ax.tick_params(labelsize=8, colors=MUTED)
+    ax.grid(lw=0.3, color="#e6e6e6")
+    for sp in ax.spines.values():
+        sp.set_color("#cccccc")
+    handles: list[Any] = [Line2D([], [], color=C[k], lw=2, label=NAMES[k]) for k in keys]
+    handles.append(
+        Line2D(
+            [],
+            [],
+            marker="o",
+            ls="",
+            mfc=MUTED,
+            mec="white",
+            ms=8,
+            label="each run's own direction",
+        )
+    )
+    ax.legend(
+        handles=handles, fontsize=7.5, loc="lower center", framealpha=0.95, edgecolor="#cccccc"
+    )
+    title(
+        fig,
+        "If the modeled cloud is turned to another direction, what would EPA's real-time "
+        "monitors read? Lowest case (7% airborne).",
+    )
+    fig.savefig(out, dpi=160)
+    plt.close(fig)
+
+
 def main(args: list[str]) -> None:
     """Read every source and draw the four figures."""
-    fc_dir, an_dir, hy_run, army_dir, epa_dir, out = (Path(a) for a in args)
+    fc_dir, an_dir, hy_run, army_dir, epa_dir, cov_json, out = (Path(a) for a in args)
     out.mkdir(parents=True, exist_ok=True)
     epa, readings = sites(epa_dir)
     runs = {
@@ -389,6 +480,7 @@ def main(args: list[str]) -> None:
     fig_ground(runs, army, epa, hours[-1], out / "fig1_ground.png")
     fig_air(runs, epa, hours, out / "fig2_air_hourly.png")
     fig_snap(runs, path, army_map.cuts(ARMY_MAP, air), epa, out / "fig4_air_snapshots.png")
+    fig_coverage(json.loads(cov_json.read_text()), out / "fig5_monitor_coverage.png")
     low = {
         "forecast": lib.tracker(fc_dir / "low-0900.html"),
         "analysis": lib.tracker(an_dir / "an_low.html"),

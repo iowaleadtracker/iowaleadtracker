@@ -6,7 +6,8 @@ Usage (from the repository root)::
 
 Each generated table sits between ``<!-- table:NAME -->`` and ``<!-- /table:NAME -->``
 in ``README.md``. The numbers come from ``data/compare.json``, ``data/army_map.json`` and
-``data/forecast_vs_analysis.json`` (written by ``reproduce.sh``), so the tables can't
+``data/forecast_vs_analysis.json`` and ``data/monitor_coverage.json`` (written by
+``reproduce.sh``), so the tables can't
 drift from the data. Captions and prose are written by hand.
 """
 
@@ -22,6 +23,9 @@ TEN = 10
 MINUS = "\u2212"
 DASH = "\u2013"
 HUNDRED = 100
+LOW = 0.07  # the lowest release case
+ARMY_LINE = 0.18  # µg/m³
+NOISE = 0.01  # µg/m³, the highest reading any real-time monitor posted
 
 
 def num(x: float) -> str:
@@ -262,11 +266,66 @@ def sensitivity(d: dict[str, Any], a: dict[str, Any]) -> str:
     return table(["Run", "≥ 100 µg/ft²", "≥ 5 µg/ft²", "Lead on the ground within 15 mi"], rows)
 
 
+def sites(c: dict[str, Any]) -> str:
+    """Table 9: EPA sites inside the modeled cloud, 7% case."""
+    runs = {"Tracker, forecast": "tracker forecast", "Tracker, analyzed": "tracker analysis"}
+    runs["HYSPLIT, ARL archive"] = "hysplit analysis"
+    by = {k: {s["site"]: s for s in c["runs"][v]["sites"]} for k, v in runs.items()}
+    info = by["Tracker, analyzed"]
+    keep = [
+        n
+        for n, s in info.items()
+        if s["real_time_lead"]
+        or any(
+            b.get(n, {}).get("air_100pct_ugm3", 0) * LOW >= ARMY_LINE
+            for k, b in by.items()
+            if "forecast" not in k
+        )
+    ]
+    keep.sort(key=lambda n: (not info[n]["real_time_lead"], info[n]["miles"]))
+    rows = []
+    for n in keep:
+        s = info[n]
+        kind = (
+            "**real-time lead**"
+            if s["real_time_lead"]
+            else ("filter, dust monitor" if "Dust" in s["instruments"] else "filter")
+        )
+        air = [
+            num(b[n]["air_100pct_ugm3"] * LOW) if n in b else "not reached in 2 h"
+            for b in by.values()
+        ]
+        rows.append([n, f"{s['miles']:.1f} mi at {s['bearing']:.0f}°", kind, *air])
+    return table(["Site", "From the plant", "Instruments", *runs], rows)
+
+
+def windows(c: dict[str, Any]) -> str:
+    """Table 10: cloud directions the real-time monitors would catch, by share of the lead."""
+    runs = {"Tracker, forecast": "tracker forecast", "Tracker, analyzed": "tracker analysis"}
+    runs["HYSPLIT, ARL archive (AS01, AS02 only)"] = "hysplit analysis"
+    rows = []
+    for share in (0.07, 0.01, 0.001):
+        for level, label in ((ARMY_LINE, "0.18"), (NOISE, "0.01")):
+            row = [f"{share:.1%}".replace(".0%", "%"), f"{label} µg/m³"]
+            for key in runs.values():
+                ok = [
+                    x["cloud_bearing"]
+                    for x in c["runs"][key]["sweep"]
+                    if x["air_100pct_ugm3"] * share >= level
+                ]
+                row.append(f"{min(ok):.0f}°{DASH}{max(ok):.0f}°" if ok else "none")
+            rows.append(row)
+    return table(
+        ["Share of the lead airborne", "Hourly mean at a monitor of at least", *runs], rows
+    )
+
+
 def main() -> None:
     """Rewrite every marked table in README.md."""
     d = json.loads((HERE / "data/compare.json").read_text())
     a = json.loads((HERE / "data/army_map.json").read_text())
     fva = json.loads((HERE / "data/forecast_vs_analysis.json").read_text())
+    cov = json.loads((HERE / "data/monitor_coverage.json").read_text())
     blocks = {
         "wind": wind(fva),
         "models": models(d),
@@ -274,6 +333,8 @@ def main() -> None:
         "monitors": monitors(d),
         "army": army(d, a),
         "sensitivity": sensitivity(d, a),
+        "sites": sites(cov),
+        "windows": windows(cov),
     }
     path = HERE / "README.md"
     text = path.read_text()
