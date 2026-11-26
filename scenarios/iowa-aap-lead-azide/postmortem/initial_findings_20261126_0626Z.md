@@ -5,9 +5,37 @@
 As of Nov. 26, 2026, 12:26 a.m. CST (06:26 UTC), about 15 hours after the detonation.
 
 > **Unofficial.** This is a screening analysis by a private citizen, not from the Army or
-> any government agency. The maps and charts are model estimates for assumed releases. They
-> are not measurements, and nothing here says how much lead reached any place. Follow
-> official instructions.
+> any government agency. Don't use it to decide if you're safe; follow official
+> instructions. The maps and charts are model estimates for assumed releases. They are not
+> measurements, and nothing here says how much lead reached any place.
+
+> **Under review (added Nov. 26, 2026, 1 a.m. CST).** An independent referee review of this
+> summary ([report](reviews/initial-findings-review-1.md)) recommends major revision. It
+> found that nearly every number matches the data, and that several conclusions in
+> section 2 go further than the evidence. The text below is left as first written. Until a
+> corrected version replaces it, read it with these problems in mind:
+>
+> 1. **The source point is not the detonation site.** Every distance and bearing is
+>    measured from one point taken for the whole plant. The site of the detonation is not
+>    public. Moving it 2 km would move the nearest monitor's bearing by about 15°, as much
+>    as the direction windows quoted in section 2. Statements that the nearest monitor "was
+>    placed to catch" a cloud, or was "inside the modeled cloud in every run," hold only for
+>    the assumed point.
+> 2. **The ranking of the four explanations is firmer than the evidence.** The lofted-cloud
+>    explanation was not modeled, and the weather file on the model's own levels shows the
+>    air mixed to about 150 m at 9 a.m., which the "stable layer between 40 and 240 m"
+>    statement does not reflect.
+> 3. **Explanation 4 is not limited to small releases.** In the tracker's runs a cloud
+>    heading 204° to 207° would be missed by every real-time monitor even for the 7% case.
+>    "Every direction estimated here falls inside" the window is wrong for 204° to 211°.
+> 4. **The detection limit is an extrapolation the readings don't fit.** The 0.009 µg/m³
+>    figure extends the published table below its shortest sampling time, and noise of that
+>    size would have produced far more non-zero readings than were posted.
+> 5. **The Notre-Dame paper's authors point to the timing of sampling, not particle size,**
+>    and a field study of detonation emissions that could be read in full was cited from
+>    its abstract only.
+> 6. **"10 to 15 degrees" is 7 to 14 degrees across the runs compared,** and the analyzed
+>    weather is itself a model product with two versions that differ by about 7°.
 
 This is a short summary of the [first comparison](README.md), which has the methods, data
 and code. It answers two questions: did the weather follow the dispersal maps the Army and
