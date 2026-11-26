@@ -19,6 +19,10 @@ Army's results and all lab sampling are still to come. It was drafted with an AI
 first draft was reviewed by a separate AI referee; the maintainer has not yet checked every
 number by hand.
 
+A short brief on one result, the map of EPA's monitors against the forecast and analyzed
+paths, is in [`monitor-placement-brief/`](monitor-placement-brief/README.md). It can be
+reproduced on its own.
+
 Contents: [Summary](#summary) · [1. What this can and can't say](#1-what-this-can-and-cant-say) ·
 [2. The event](#2-the-event) · [3. Data and methods](#3-data-and-methods) ·
 [4. The weather](#4-the-weather-forecast-against-what-was-analyzed-and-observed) ·

@@ -33,6 +33,8 @@ htmlcov/
 # NumPy scratch arrays and pickles (the model doesn't write these; keep them out of the repo)
 *.npy
 *.npz
+# ...except the small saved fields behind the monitor-placement brief
+!scenarios/iowa-aap-lead-azide/postmortem/monitor-placement-brief/data/model_fields.npz
 *.pkl
 
 # --- Editors and OS ---

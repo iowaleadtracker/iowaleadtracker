@@ -2,7 +2,12 @@
 
 Usage (from the repository root, ``HYSPLIT_DIR`` set; needs the network for the imagery)::
 
-    python aerial_map.py FORECAST_MAPS ANALYSIS_MAPS HYSPLIT_RUN ARMY_DIR EPA_DIR OUT.png
+    python aerial_map.py FORECAST_MAPS ANALYSIS_MAPS HYSPLIT_RUN ARMY_DIR EPA_DIR OUT.png \
+        [FIELDS.npz]
+
+With FIELDS.npz the three model fields the figure is drawn from are also saved, cut to
+the map's area, so that the figure can be redrawn without the model runs
+(``monitor-placement-brief/brief.py`` does that).
 
 Outlines where the highest hourly mean air at the ground is 0.18 µg/m³ or more for the
 lowest case (7% of the lead airborne), from the modeled source, for the tracker's forecast,
@@ -24,6 +29,7 @@ import math
 import sys
 import urllib.request
 from pathlib import Path
+from typing import Any
 
 import army_map
 import figure
@@ -99,14 +105,48 @@ def worst(f: lib.Fields) -> np.ndarray:
     return np.max(np.stack([f.air[h] for h in sorted(f.air)]), axis=0)
 
 
+Grid = tuple[np.ndarray, np.ndarray, np.ndarray]  # lon, lat, field on (lat, lon)
+MARGIN = 0.15  # deg kept around BOX in a saved field (reaches AS04, off the map)
+
+
+def low_case(f: lib.Fields) -> Grid:
+    """Return a run's highest hourly mean air for the lowest case, cut to the map's area."""
+    west, east, south, north = BOX
+    i = (f.lon > west - MARGIN) & (f.lon < east + MARGIN)
+    j = (f.lat > south - MARGIN) & (f.lat < north + MARGIN)
+    return f.lon[i], f.lat[j], (worst(f) * LOW)[np.ix_(j, i)]
+
+
+def save_fields(grids: dict[str, Grid], path: Path) -> None:
+    """Save the fields the figure is drawn from."""
+    parts: dict[str, Any] = {}
+    for key, grid in grids.items():
+        for name, array in zip(("lon", "lat", "air"), grid, strict=True):
+            parts[f"{key}_{name}"] = array.astype(np.float32 if name == "air" else np.float64)
+    np.savez_compressed(path, **parts)
+
+
+def load_fields(path: Path) -> dict[str, Grid]:
+    """Read fields saved by ``save_fields``."""
+    z = np.load(path)
+    return {k: (z[f"{k}_lon"], z[f"{k}_lat"], z[f"{k}_air"].astype(float)) for k in STYLE}
+
+
 def main(args: list[str]) -> None:
-    """Draw the figure."""
-    fc_dir, an_dir, hy_run, army_dir, epa, out = (Path(a) for a in args)
-    runs = {
-        "forecast": lib.tracker(fc_dir / "permit-0900.html"),
-        "analysis": lib.tracker(an_dir / "an_permit.html"),
-        "hysplit": lib.hysplit(hy_run),
+    """Read the model runs, draw the figure and, if asked, save its fields."""
+    fc_dir, an_dir, hy_run, army_dir, epa, out = (Path(a) for a in args[:6])
+    grids = {
+        "forecast": low_case(lib.tracker(fc_dir / "permit-0900.html")),
+        "analysis": low_case(lib.tracker(an_dir / "an_permit.html")),
+        "hysplit": low_case(lib.hysplit(hy_run)),
     }
+    if len(args) > 6:
+        save_fields(grids, Path(args[6]))
+    draw(grids, army_dir, epa, out)
+
+
+def draw(grids: dict[str, Grid], army_dir: Path, epa: Path, out: Path) -> None:
+    """Draw the figure from the three fields, the Army's map and EPA's sites."""
     with (epa / "epa_air_stations.csv").open() as fh:
         rows = list(csv.DictReader(fh))
     west, east, south, north = BOX
@@ -123,9 +163,9 @@ def main(args: list[str]) -> None:
     for key in ("dep5", "dep100"):
         edge = ax.contour(plon, plat, zones[key], [0.5], colors=[green])
         edge.set(linewidths=2, path_effects=HALO)
-    for key, f in runs.items():
-        field = gaussian_filter(worst(f), 1.5) if key == "hysplit" else worst(f)
-        cs = ax.contour(f.lon, f.lat, field * LOW, levels=[lib.ARMY_AIR], colors=[figure.C[key]])
+    for key, (lon, lat, air) in grids.items():
+        field = gaussian_filter(air, 1.5) if key == "hysplit" else air
+        cs = ax.contour(lon, lat, field, levels=[lib.ARMY_AIR], colors=[figure.C[key]])
         cs.set(linewidths=2.4, linestyles=[STYLE[key]], path_effects=HALO)
     for r in rows:
         name, la, lo = r["station_id"].replace("-", ""), float(r["lat"]), float(r["lon"])
@@ -190,7 +230,7 @@ def main(args: list[str]) -> None:
     handles = [
         *[
             Line2D([], [], color=figure.C[k], lw=2.4, ls=STYLE[k], label=figure.NAMES[k])
-            for k in runs
+            for k in grids
         ],
         Patch(fc=green, ec=green, alpha=0.5, label=ARMY_LABEL),
         Line2D(
