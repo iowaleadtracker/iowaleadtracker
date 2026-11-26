@@ -771,15 +771,26 @@ that method in 2008 it wrote that "ingestion pathways are important to air-relat
 exposures and that Pb particles contributing to these pathways include ultra-coarse
 particles," its term for particles larger than 10 µm, and that measuring all sizes "is
 necessary to provide sufficient public health protection from the range of particle
-sizes of ambient air Pb, including ultra-coarse particles" (EPA 2008). Two events show
-the same thing on the ground. In the dust that settled east of the World Trade Center in
-2001, particles finer than 2.5 µm were 0.9% to 2% of the mass, the largest share was
-coarser than 53 µm, and the dust held 101 to 625 µg/g of lead (Lioy et al. 2002). After
-the 2019 fire at Notre-Dame cathedral in Paris, whose roof was covered in lead, soil
-within 1 km downwind held about 200 mg/kg more lead than soil elsewhere around it (van
-Geen et al. 2020). Neither was a detonation, and neither shows what happened in Iowa.
-They show that lead from a single event can settle on particles that fine-particle
-monitors don't count, and that EPA's own lead standard is built around that.
+sizes of ambient air Pb, including ultra-coarse particles" (EPA 2008).
+
+Two events show how air sampling and the ground can differ. In the dust that settled
+east of the World Trade Center in 2001, particles finer than 2.5 µm were 0.9% to 2% of
+the mass, the largest share was coarser than 53 µm, and the dust held 101 to 625 µg/g of
+lead (Lioy et al. 2002). A fine-particle monitor counts little of a dust like that. In
+the 2019 fire at Notre-Dame cathedral in Paris, the roof and spire were covered with
+460 t of lead. The regional health agency reported that no air sample taken around the
+cathedral exceeded the limit for lead in airborne particles, without saying when the
+samples were taken. Soil collected eight to ten months later within 1 km held about
+200 mg/kg more lead downwind than in other directions, an excess of about 1 t, some six
+times what was estimated to have traveled beyond 1 km. The authors write that the
+exposure is hard to confirm "because too few soil, dust, and blood samples were
+collected immediately after the fire" (van Geen et al. 2020). They do not attribute the
+difference to particle size.
+
+Neither event was a detonation, and neither shows what happened in Iowa. They show that
+lead from a single event can end up on the ground near its source while air sampling
+finds little, and EPA's own lead standard is built around the coarse-particle part of
+that.
 
 Limits of this calculation: single sizes of spherical particles; a cloud that starts
 mixed to the ground, as everywhere here; the tracker's map values are stored in steps
@@ -1086,9 +1097,8 @@ corrected here:
 - U.S. Army, 2026c: Public advisory maps, "Mitigated 0.26", earlier issue. Issued Nov.
   24, 2026, a/o 240630NOV26 (two JPEG images supplied by the maintainer; in `data/army/`).
 - van Geen, A., Y. Yao, T. Ellis, and A. Gelman, 2020: Fallout of lead over Paris from
-  the 2019 Notre-Dame cathedral fire. *GeoHealth*, doi:10.1029/2020GH000279 (cited from
-  the paper's published key points; the full text sat behind a browser check and was not
-  read for this draft).
+  the 2019 Notre-Dame cathedral fire. *GeoHealth*, **4**, e2020GH000279,
+  doi:10.1029/2020GH000279.
 - Zhang, L., S. Gong, J. Padro, and L. Barrie, 2001: A size-segregated particle dry
   deposition scheme for an atmospheric aerosol module. *Atmos. Environ.*, **35**, 549–560,
   doi:10.1016/S1352-2310(00)00326-5.
