@@ -57,17 +57,17 @@ NOT_SAFE = "Don't use it to decide if you're safe."
 #: When the blasts could happen: the government's Nov. 22 court filing ({url}), then the
 #: Army's announcement later that day ({army}).
 WHEN_HTML = (
-    "The Army planned the detonation for Monday, Nov. 23. In a "
+    "The Army carried out the detonation on Wednesday morning, Nov. 25; the Thursday and "
+    "Friday runs are kept for reference only. The Army had planned it for Monday, Nov. 23. In a "
     '<a href="{url}">court filing on Nov. 22</a>, the government said the Army postponed it '
-    'to Tuesday, Nov. 24; later that day, <a href="{army}">the Army said</a> it is now '
+    'to Tuesday, Nov. 24; later that day, <a href="{army}">the Army said</a> it was now '
     "scheduled for Wednesday, Nov. 25. On Monday, Nov. 23, "
     '<a href="{trump}">President Trump said</a> he has ordered the military not to proceed '
     "until the Eighth Circuit agrees and Governor-elect Rob Sand agrees to the operation. "
     'Later that day, <a href="{ruling}">the 8th Circuit cleared the way</a> for the '
     'detonation. That evening, <a href="{secarmy}">the Acting Secretary of the Army said</a> '
-    "the detonation will be Wednesday morning, as previously scheduled. On Nov. 24, a FEMA "
-    "emergency alert set it for 9 a.m. Wednesday. Thursday and Friday haven&rsquo;t been "
-    "announced."
+    "the detonation would be Wednesday morning, as previously scheduled. On Nov. 24, a FEMA "
+    "emergency alert set it for 9 a.m. Wednesday."
 )
 
 
@@ -288,7 +288,7 @@ def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
     <label>Lead in the air <select id="c">{case_opts}</select></label>
   </div>
 </header>
-<iframe id="map" title="Map of where lead from the blast could travel and settle"></iframe>
+<iframe id="map" title="Map of where lead from the blast could have traveled and settled"></iframe>
 <script>
 const FILES = {json.dumps(files)};
 const TIMES_BY_DAY = {json.dumps(times_by_day)};

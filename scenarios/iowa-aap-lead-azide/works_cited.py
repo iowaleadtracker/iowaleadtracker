@@ -206,6 +206,13 @@ REFERENCES = [
     f"Department of Health and Human Services, {ACCESSED}, "
     + _a("https://hhs.iowa.gov/media/19822/download?inline=")
     + ".",
+    "Iowa&rsquo;s News Now, 2026: Middletown officials say normal activities can resume "
+    "following lead azide detonation. CBS2 Iowa, 25 November 2026, accessed 25 November 2026, "
+    + _a(
+        "https://cbs2iowa.com/news/local/"
+        "middletown-officials-say-normal-activities-can-resume-following-lead-azide-detonation"
+    )
+    + ".",
     "KCCI, 2026: Court records: Army plans to detonate lead azide by Tuesday. KCCI 8 News, "
     "22 November 2026, accessed 22 November 2026, "
     + _a("https://www.kcci.com/article/lead-azide-bomb-detonation-iowa-tuesday/74499570")
@@ -618,6 +625,27 @@ CHANGES = [
     (
         "Nov. 25",
         (
+            "After the blast: the page now says Middletown&rsquo;s city clerk reported that the "
+            "Army, CDC, EPA and FEMA had confirmed normal activities could resume (CBS2 Iowa, "
+            "Nov. 25), and the FEMA evacuation is shown as Nov. 24 advice. Text written before "
+            "the blast is now in the past tense: what the map shows, how sure it is, the "
+            "forecast winds, the release point, the mitigation, and how to cite the map. The "
+            "Wednesday to Friday page says the Thursday and Friday runs are for reference, and "
+            "its forecast refresh stops. The maps did not change."
+        ),
+    ),
+    (
+        "Nov. 25",
+        (
+            "The &ldquo;When&rdquo; paragraph no longer repeats the planned 9 a.m. time (from "
+            "the Army&rsquo;s Nov. 24 advisory and FEMA&rsquo;s alert); the "
+            "Army&rsquo;s Nov. 24 advisory is now cited on its evacuation and shelter advice. "
+            "The maps did not change."
+        ),
+    ),
+    (
+        "Nov. 25",
+        (
             "The Army&rsquo;s 3 p.m. update: air sensors report no lead detection, ground "
             "sampling is underway, and people should wait for its all-clear. EPA&rsquo;s "
             "real-time readings through 4 p.m. were all below the 0.18 &micro;g/m&sup3; "
@@ -787,9 +815,8 @@ def render(ctx: dict[str, Any], site_url: str, built_txt: str) -> str:
     {ASSUME_HEAD}
     <tbody>{rows}</tbody></table></div>
   <h3>Citing this map</h3>
-  <p>Iowa Lead Tracker, 2026: Unofficial estimate of lead dispersal from the planned
-    detonation at the Iowa Army Ammunition Plant (25 November 2026, per the Army on
-    22 November). Interactive map, accessed
+  <p>Iowa Lead Tracker, 2026: Unofficial estimate of lead dispersal from the 25 November
+    2026 detonation at the Iowa Army Ammunition Plant. Interactive map, accessed
     {today.day} {today.strftime("%B %Y")}, {_a(site_url)}.</p>
   <p class="meta">{CONTACT_HTML}</p>
   <p class="meta">Model code: puff_dispersal.py ({_a(SOURCE_URL)}), a Gaussian puff
