@@ -52,6 +52,11 @@ def test_page_carries_the_warnings(page: str) -> None:
     assert "Don\u2019t use it to decide if you\u2019re safe; follow official instructions." in flat
     assert "model estimates, not measurements" in flat.lower()
     assert flat.index("unofficial estimate") < flat.index("<h1>")  # the warning comes first
+    # the header points to the agencies' own information
+    header = flat.split("</header>")[0]
+    assert "<b>Official information:</b>" in header
+    assert f'href="{fs.EPA_VIEWER_URL}"' in header
+    assert f'href="{fs.ARMY_MAPS_URL}"' in header
     assert not staged.links_to_staged(page)
 
 
@@ -139,4 +144,5 @@ def test_mirror_page_gets_the_policy(tmp_path: Path) -> None:
 
 def test_landing_page_links_to_the_analysis() -> None:
     assert f'<a href="/{brief_page.SLUG}/">preliminary analysis</a>' in fs.EARLY_AIR_HTML
+    assert brief_page.SLUG == "monitor-placement"  # the page's public address
     assert "safe" not in fs.EARLY_AIR_HTML.lower()  # still no verdicts about anyone's safety

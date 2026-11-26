@@ -19,13 +19,14 @@ import shutil
 from pathlib import Path
 from string import Template
 
+from forecast_summary import ANALYSIS_PATH, ARMY_MAPS_URL, EPA_VIEWER_URL
 from works_cited import CONTACT_EMAIL, SOURCE_URL
 
 HERE = Path(__file__).resolve().parent
 BRIEF = HERE / "postmortem" / "monitor-placement-brief"
 README = BRIEF / "README.md"
 #: The page's folder in the site, and so its address.
-SLUG = "monitor-placement"
+SLUG = ANALYSIS_PATH.strip("/")
 #: The map as the page shows it (a smaller copy of the README's PNG; brief.py writes both).
 MAP_FILE = "monitor_placement_map.jpg"
 MAP_SIZE = (1760, 1376)  # pixels, for the page to reserve the space
@@ -40,6 +41,12 @@ DESCRIPTION = (
 WARNING = (
     "<b>This is an unofficial estimate, not from the Army or any government agency. "
     "Don't use it to decide if you're safe.</b> Follow official instructions."
+)
+#: Where readers find the agencies' own information, shown in the header.
+OFFICIAL = (
+    f'<b>Official information:</b> <a href="{EPA_VIEWER_URL}" rel="noopener">EPA&rsquo;s '
+    "response data viewer</a> (air monitoring) &middot; "
+    f'<a href="{ARMY_MAPS_URL}" rel="noopener">Army updates and maps</a> (army.mil/asc).'
 )
 FAQ_HEADING = "Questions and answers"
 _FENCE = "```"
@@ -79,6 +86,10 @@ PAGE = Template("""<!doctype html><html lang="en-US"><head><meta charset="utf-8"
   header .back { margin-left: auto; color: #9fd3ff; font-size: 13px; }
   header .warn { margin: 0; flex-basis: 100%; color: #fde8c8; font-size: 12.5px; line-height: 1.4; }
   header .warn b { color: #fff; }
+  header .official { margin: 0; flex-basis: 100%; color: #f5f7fa; font-size: 12.5px;
+                     line-height: 1.4; }
+  header .official b { color: #fff; }
+  header .official a { color: #9fd3ff; }
   .doc { max-width: 46rem; margin: 0 auto; padding: 24px 16px 48px; line-height: 1.55; }
   .doc h1 { font-size: 24px; line-height: 1.25; margin: 0 0 8px; }
   .doc h2 { font-size: 20px; margin: 28px 0 8px; }
@@ -117,6 +128,7 @@ PAGE = Template("""<!doctype html><html lang="en-US"><head><meta charset="utf-8"
     <p>Preliminary analysis</p></div>
   <a class="back" href="/">&lsaquo; Back to the map</a>
   <p class="warn" role="note">$warning</p>
+  <p class="official" role="note">$official</p>
 </header>
 <main class="doc">
 $body
@@ -323,6 +335,7 @@ def render(site_name: str, site_url: str, built_txt: str) -> str:
         url=page_url(site_url),
         map_file=MAP_FILE,
         warning=WARNING,
+        official=OFFICIAL,
         body=body,
         built_txt=built_txt,
         source_folder=SOURCE_FOLDER_URL,

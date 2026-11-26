@@ -19,7 +19,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, TypeAlias
 
-import brief_page
 import numpy as np
 import numpy.typing as npt
 from works_cited import CONTACT_TEXT, INSTAGRAM_HANDLE, INSTAGRAM_URL, SOURCE_URL
@@ -480,6 +479,8 @@ ARMY_3PM_CITE = "Army maps, Nov. 25, 3 p.m."
 # AS-40) collect samples for lab analysis, none posted yet.
 EPA_VIEWER_URL = "https://experience.arcgis.com/experience/1ddcf8b9d8314971b00dac8893ae9cd6"
 EPA_VIEWER_CITE = "EPA response data viewer, Nov. 25"
+# The page of the monitor-placement analysis, built by brief_page.py from the brief's README.
+ANALYSIS_PATH = "/monitor-placement/"
 EARLY_AIR = (
     "Every reading from EPA\u2019s four real-time lead monitors southwest of the plant, "
     "through 4 p.m. CST, was below the 0.18 micrograms per cubic meter detection limit the "
@@ -515,7 +516,7 @@ EARLY_AIR_HTML = (
     f'(<a href="{EPA_VIEWER_URL}" rel="noopener">{EPA_VIEWER_CITE}</a>). These are early '
     "readings only: <b>lab results from EPA&rsquo;s other air samples, and soil and water "
     "sampling, are still pending and are needed</b> before anyone knows where lead settled. "
-    f'A <a href="/{brief_page.SLUG}/">preliminary analysis</a> looks at whether those four '
+    f'A <a href="{ANALYSIS_PATH}">preliminary analysis</a> looks at whether those four '
     "monitors were on the cloud&rsquo;s path."
 )
 # FEMA and the Army's advice, for the page header (Army public safety advisory, Nov. 24).
