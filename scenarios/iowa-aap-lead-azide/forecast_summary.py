@@ -481,6 +481,13 @@ EPA_VIEWER_URL = "https://experience.arcgis.com/experience/1ddcf8b9d8314971b00da
 EPA_VIEWER_CITE = "EPA response data viewer, Nov. 25"
 # The page of the monitor-placement analysis, built by brief_page.py from the brief's README.
 ANALYSIS_PATH = "/monitor-placement/"
+# Where readers find the agencies' own information: a line in the header of the landing
+# page and of the analysis page.
+OFFICIAL_HTML = (
+    f'<b>Official information:</b> <a href="{EPA_VIEWER_URL}" rel="noopener">EPA&rsquo;s '
+    "response data viewer</a> (air monitoring) &middot; "
+    f'<a href="{ARMY_MAPS_URL}" rel="noopener">Army updates and maps</a> (army.mil/asc).'
+)
 EARLY_AIR = (
     "Every reading from EPA\u2019s four real-time lead monitors southwest of the plant, "
     "through 4 p.m. CST, was below the 0.18 micrograms per cubic meter detection limit the "

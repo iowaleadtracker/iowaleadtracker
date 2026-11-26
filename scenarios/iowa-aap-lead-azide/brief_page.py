@@ -19,7 +19,7 @@ import shutil
 from pathlib import Path
 from string import Template
 
-from forecast_summary import ANALYSIS_PATH, ARMY_MAPS_URL, EPA_VIEWER_URL
+from forecast_summary import ANALYSIS_PATH, OFFICIAL_HTML
 from works_cited import CONTACT_EMAIL, SOURCE_URL
 
 HERE = Path(__file__).resolve().parent
@@ -41,12 +41,6 @@ DESCRIPTION = (
 WARNING = (
     "<b>This is an unofficial estimate, not from the Army or any government agency. "
     "Don't use it to decide if you're safe.</b> Follow official instructions."
-)
-#: Where readers find the agencies' own information, shown in the header.
-OFFICIAL = (
-    f'<b>Official information:</b> <a href="{EPA_VIEWER_URL}" rel="noopener">EPA&rsquo;s '
-    "response data viewer</a> (air monitoring) &middot; "
-    f'<a href="{ARMY_MAPS_URL}" rel="noopener">Army updates and maps</a> (army.mil/asc).'
 )
 FAQ_HEADING = "Questions and answers"
 _FENCE = "```"
@@ -335,7 +329,7 @@ def render(site_name: str, site_url: str, built_txt: str) -> str:
         url=page_url(site_url),
         map_file=MAP_FILE,
         warning=WARNING,
-        official=OFFICIAL,
+        official=OFFICIAL_HTML,
         body=body,
         built_txt=built_txt,
         source_folder=SOURCE_FOLDER_URL,

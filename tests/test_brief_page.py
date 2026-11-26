@@ -142,6 +142,17 @@ def test_mirror_page_gets_the_policy(tmp_path: Path) -> None:
     assert (out / brief_page.SLUG / brief_page.MAP_FILE).exists()
 
 
+def test_landing_page_header_has_the_official_links() -> None:
+    """The landing page and the analysis page carry the same official-information line."""
+    template = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    assert '<p class="fema" role="note">$official</p>' in template
+    assert template.index("$official") < template.index("$blast_status")
+    assert f'href="{fs.EPA_VIEWER_URL}"' in fs.OFFICIAL_HTML
+    assert f'href="{fs.ARMY_MAPS_URL}"' in fs.OFFICIAL_HTML
+    assert fs.ARMY_MAPS_URL == "https://www.army.mil/asc#org-iowa-army-ammunition-plant"
+    assert "safe" not in fs.OFFICIAL_HTML.lower()
+
+
 def test_landing_page_links_to_the_analysis() -> None:
     assert f'<a href="/{brief_page.SLUG}/">preliminary analysis</a>' in fs.EARLY_AIR_HTML
     assert brief_page.SLUG == "monitor-placement"  # the page's public address

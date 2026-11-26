@@ -1018,6 +1018,7 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "advisory_url": forecast_summary.ADVISORY_URL,
         "advisory_nov24_url": forecast_summary.ADVISORY_NOV24_URL,
         "army_maps_pdf": forecast_summary.ARMY_MAPS_PDF,
+        "official": forecast_summary.OFFICIAL_HTML,
         "blast_status": forecast_summary.BLAST_STATUS_HTML,
         "early_air": forecast_summary.EARLY_AIR_HTML,
         "fema_header": forecast_summary.FEMA_HEADER_HTML,
