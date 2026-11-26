@@ -9,9 +9,10 @@ analyzed weather, NOAA's HYSPLIT and the U.S. Army's map against EPA's real-time
 > are not official NOAA products. The model maps below are estimates for assumed releases.
 > They are not measurements, and nothing here says how much lead reached any place.
 
-**Status.** Preliminary analysis, pending peer review. Second draft, updated Nov. 26, 2026, about midnight CST, fifteen hours after the
-detonation. It replaces a first draft that an independent review found wrong in
-several places ([what changed](#what-changed-since-the-first-draft)). The model comparison
+**Status.** Preliminary analysis, pending peer review. Third draft, updated Nov. 26, 2026, about 1:30 a.m. CST, sixteen hours after the
+detonation. The first draft was rewritten after an independent review, and this one was
+corrected after a second review of its summary
+([what changed](#what-changed-since-the-first-draft)). The model comparison
 now covers all eight modeled hours (9 a.m. to 5 p.m.) on NOAA's archived weather; the
 Army's results and all lab sampling are still to come. It was drafted with an AI coding assistant, and the
 first draft was reviewed by a separate AI referee; the maintainer has not yet checked every
@@ -36,38 +37,31 @@ place. The rest of this comparison (the weather, the models, the Army's map) ser
 question.
 
 1. **EPA's four real-time lead monitors read almost nothing.** They sit 4.5 to 28 miles
-   southwest of the plant. Through 6:23 p.m. they posted 244 readings after the
-   detonation; 227 were zero and the highest was 0.010 µg/m³, about the size of readings
-   the same instruments posted before the detonation (up to 0.006) and of the published
-   detection limit for this kind of instrument at short sampling times. After 1:55 p.m.
-   the public layer holds only eight readings.
-2. **They were placed to catch a cloud of fine dust at the ground.** Turning the modeled cloud through
-   every direction it could plausibly have taken, the monitors would have read an hourly
-   mean above the Army's 0.18 µg/m³ line for a release as small as 1% of the lead on any
-   heading from 213° to 234°. Every estimate of the cloud's direction here falls
-   inside that: 215° for both models on analyzed weather, 229–230° for the tracker's
-   forecast and the Army's map. At the nearest monitor, 4.5 miles out, about 0.2% of the
-   lead (some 14 lb) would have been enough, and the lowest case the tracker published
-   (7%) gives 5.5 to 7.6 µg/m³ there, roughly 3,000 times the highest reading.
-3. **That coverage is thinner than four monitors suggests, and it is two-dimensional.**
-   The three farther monitors lie along the forecast path. On analyzed weather the cloud
-   passes south of them, so south of about 225° the coverage rests on the nearest monitor
-   alone. And all of this assumes the cloud was at the ground. A cloud that rose above
-   the shallow morning mixed layer and came down miles later would have missed the nearest
-   monitor and, on the analyzed path, the other three. HYSPLIT, now run for all eight
-   hours on the archived weather, agrees with the tracker here: it gives AS02 only the
-   cloud's edge and AS03 and AS04 nothing. EPA's filter samplers at 211° to
-   221° (sites AS06, AS12, AS13, AS14 and AS18) are on that path in both models; their
-   lab results, with soil and surface samples, are what can settle it. None were public
-   by 7 p.m.
-4. **Four explanations fit the near-zero reading at the nearest monitor** (section 6.6):
-   little fine lead got out; the cloud passed overhead; a small, shallow cloud passed
-   just south; or the lead was on coarse particles. The last was calculated. Coarse
-   particles fall out before the monitor only at about 100 µm or larger. But monitors of
-   this kind sample through a size-selective inlet. If these have the PM10 inlet, lead
-   on anything coarser than about 10 µm could pass the monitor in quantity and not be
-   measured. EPA's own lead standard samples particles of all sizes for that reason.
-   EPA hasn't published the monitors' model, inlet or detection limit.
+   southwest of the plant. Through 8:40 p.m. they posted 253 readings from the
+   detonation on; 236 were zero and the highest was 0.010 µg/m³, about the size of readings
+   the same instruments posted before the detonation (up to 0.006). EPA hasn't published
+   their model, inlet or detection limit.
+2. **Whether they were placed to catch a cloud depends on where the detonation was, and
+   that is not public.** Every distance here is measured from one point taken for the
+   whole plant. From that point the nearest monitor, AS01, is inside the modeled cloud in
+   every run, and 1% of the lead as fine dust would have read hundreds of times above what
+   it posted. But if the source was 2 km east or south of that point, the cloud on
+   analyzed weather passes every real-time monitor unseen, even in the lowest published
+   case (7%). If it was 2 km north or west, they still catch it (Table 13).
+3. **From the assumed point the coverage is thin.** The three farther monitors lie along
+   the forecast path. On analyzed weather the cloud passes south of them, so the answer
+   rests on AS01 alone, 7° off the analyzed path. A cloud that stayed in the lowest 150 m
+   and followed the wind there, toward 204° to 207°, would have missed all four in the
+   tracker's runs even at 7%.
+4. **Several explanations fit the near-zero readings, and the data can't rank them**
+   (section 6.6). Little fine lead got out. The lead was on coarse particles, which fall
+   out or don't pass a PM10 inlet. The cloud went over or to the south of AS01. The
+   source was somewhere else. Or the public feed doesn't show what the instruments
+   measured. We calculated three. Coarse particles fall out before AS01 only at about
+   100 µm. A cloud released twice as high as modeled still reaches AS01 in HYSPLIT. A
+   source 2 km away can move the cloud off every monitor. EPA's filter samples at sites
+   AS06, AS12, AS13, AS14 and AS18, and soil and surface samples, are what can settle it.
+   None were public by midnight on Nov. 25.
 
 The supporting results:
 
@@ -92,14 +86,18 @@ The supporting results:
   tracker's forecast: 229–231°) and has the cloud 6, 27, 43 and 79 miles out at half an
   hour, 2, 3 and 5 hours (the tracker: 6, 31, 48 and 85). HYSPLIT on analyzed weather
   has it 5, 28, 44 and 83 miles out, so the runs differ from the Army's marks
-  in direction, not speed. Both rest on forecasts, and both point 10° to 15°
-  west of the analyzed wind. The Army's 100 µg/ft² zone covers 29 sq mi and reaches 12
+  in direction, not speed. Both rest on forecasts, and both point 7° to 14°
+  west of the runs on analyzed weather. The Army's 100 µg/ft² zone covers 29 sq mi and reaches 12
   miles; the tracker's, for the same 26%, covers 2 sq mi and reaches 4. A coarse share
   of particles in the tracker gives 11 to 18 sq mi, so it could explain much of the
   gap. The Army hasn't published its model's inputs.
 
 ## 1. What this can and can't say
 
+- **The source point is assumed.** Every distance and bearing is from one point,
+  40.8255° N, 91.2665° W, taken for the whole plant. It is not the magazines; their
+  location is not public (the [scenario README](../README.md) explains). A shift of 2 km
+  moves AS01's bearing by about 15°. Section 6.8 tests what that does.
 - **One event.** The HYSPLIT reference runs cover the eight modeled hours, 9 a.m. to
   5 p.m., on NOAA's archived weather. Agreement between the models on this day says
   nothing about other weather, and it is agreement between two models, not with
@@ -271,7 +269,7 @@ leading edge.
 ### 3.8 EPA's data
 
 The two public layers behind EPA's "Iowa Army Ammunition Plant Response Data Viewer"
-(EPA 2026c), downloaded at 7:14 p.m. CST ([`data/epa/`](data/epa/README.md)): 329
+(EPA 2026c), downloaded at 1:00 a.m. CST on Nov. 26 ([`data/epa/`](data/epa/README.md)): 335
 records from four stations labeled "Xact" (the name of a commercial instrument that
 measures metals in air in near-real time), with a time, a concentration in µg/m³ and a
 station; and 43 sampling sites with the instruments at each (dust monitors, gas monitors,
@@ -295,9 +293,12 @@ compound it is in. What is published for that instrument:
   reading about every five minutes.
 - **Detection limit for lead**, at 68% confidence (one standard deviation): 1.8 ng/m³
   for 15-minute samples, 0.63 for 30 minutes, 0.22 for an hour and 0.027 for four hours
-  (CARB 2018, Appendix 2). The table's formula makes the limit fall as the sampling time
+  (CARB 2018, Appendix 2). These are the maker's figures for counting noise on a clean
+  deposit, not a field detection limit. The table's formula makes the limit fall as the sampling time
   to the power 1.5, and its values follow that. Carried down to 5 minutes it gives about
-  9 ng/m³, or 0.009 µg/m³. That figure is our extrapolation, not a published one.
+  9 ng/m³, or 0.009 µg/m³. That figure is our extrapolation below the table's shortest
+  time, for a 5-minute mode the procedure doesn't describe. It is not a published value,
+  and the posted readings are quieter than it implies (section 6.4).
 - **Accuracy.** In EPA's 80-day test of the earlier Xact 625 in Ohio, hourly lead averaged
   over a day tracked lab filters with a slope of 1.1, r² of 0.94 and an offset of
   +1.6 ng/m³; a blank stretch of filter tape alone read about 1 ng/m³ of lead (EPA 2012).
@@ -499,16 +500,16 @@ difference that the archived weather removes.
 
 ### 6.1 What they read
 
-*Table 6. EPA's four real-time monitors, as posted through 7:14 p.m. CST, and the models'
+*Table 6. EPA's four real-time monitors, as posted through 1:00 a.m. CST on Nov. 26, and the models'
 hourly mean air (µg/m³) at each for the lowest case (7% of the lead airborne) in hours 1
 and 2. Multiply model values by 3.7 for the 26% case and by 14 for 100%.*
 
 <!-- table:monitors -->
 | Monitor | From the plant | Readings after 9 a.m. | Not zero | Highest (µg/m³) | Highest before 9 a.m. | Tracker, forecast (h1 / h2) | Tracker, analyzed (h1 / h2) | HYSPLIT, ARL archive (h1 / h2) |
 |---|---|---|---|---|---|---|---|---|
-| AS01 | 4.5 mi at 221° | 62 | 2 | 0.0021 | 0 | 7.6 / 0 | 6.7 / 0 | 5.5 / 0 |
-| AS02 | 12.5 mi at 230° | 62 | 2 | 0.0043 | 0.0030 | 5.0 / 0.19 | 0 / 0 | 0.17 / 0 |
-| AS03 | 19.9 mi at 232° | 60 | 4 | 0.0043 | 0 | 0 / 2.6 | 0 / 0 | 0 / 0 |
+| AS01 | 4.5 mi at 221° | 63 | 2 | 0.0021 | 0 | 7.6 / 0 | 6.7 / 0 | 5.5 / 0 |
+| AS02 | 12.5 mi at 230° | 66 | 2 | 0.0043 | 0.0030 | 5.0 / 0.19 | 0 / 0 | 0.17 / 0 |
+| AS03 | 19.9 mi at 232° | 64 | 4 | 0.0043 | 0 | 0 / 2.6 | 0 / 0 | 0 / 0 |
 | AS04 | 28.1 mi at 233° | 60 | 9 | 0.0102 | 0.0063 | 0 / 1.2 | 0 / 0 | 0 / 0 |
 <!-- /table:monitors -->
 
@@ -517,15 +518,15 @@ and 2. Multiply model values by 3.7 for the 26% case and by 14 for 100%.*
 *Figure 3. EPA's readings (dots; zeros on the bottom line) and the models' hourly means
 for the 7% case at each monitor, on a logarithmic scale.*
 
-The readings are flat. Of 244 readings after the detonation, 227 are zero. The seventeen
+The readings are flat. Of 253 readings from the detonation on, 236 are zero. The seventeen
 that aren't range from 0.00001 to 0.010 µg/m³, and two of the four monitors posted readings
 of 0.003 to 0.006 µg/m³ before the detonation. Nothing in the series marks a cloud
 arriving or leaving. AS01, the nearest, posted a reading every five minutes through the
 first hour; its only non-zero values, 0.0021 µg/m³, came at 9:10 and 9:11 a.m.
 
 All four posted about every five minutes until 1:55 p.m. After that the public layer
-holds eight more readings, one to three per monitor between 4:00 and 6:23 p.m.: seven
-zeros and one of 0.00001 µg/m³ (AS04 at 4:28 p.m.). EPA hasn't said why the postings
+holds fourteen more readings, between 4:00 and 8:40 p.m.: thirteen zeros and one of
+0.00001 µg/m³ (AS04 at 4:28 p.m.). A few time stamps appear twice. EPA hasn't said why the postings
 thinned. By then the modeled cloud is well past the monitors in every run: at 2 p.m. its
 trailing edge is 48 to 72 miles out, and the farthest monitor is at 28.
 
@@ -601,34 +602,44 @@ For the lowest published case the monitors respond over 30° to 40° of arc, fro
 to 238°–244°, and over the middle of it, about 213° to 233°, they would read 5 to
 18 µg/m³. For 1% of the lead airborne the window is still 213° to 234° in every run. Every direction estimated here
 falls inside: 215° (both models on analyzed weather), 222° (HYSPLIT on pressure-level
-data), 229°–230° (the tracker's forecast and the Army's map). Only a cloud that followed
-the surface wind exactly, toward 204°–211°, would be at the window's edge.
+data), 229°–230° (the tracker's forecast and the Army's map). The analyzed path, 215°, is
+inside by 2° to 7°, depending on the run, and section 4 puts the direction's uncertainty
+near 10°. A cloud that followed the surface wind, toward 204°–211°, is at or past the
+edge: from 204° to 207° the tracker's cloud gives 0 to 0.02 µg/m³ at every real-time
+monitor in the 7% case, and only HYSPLIT's wider cloud is caught (0.19 to 0.83). All of
+this is from the assumed source point (section 6.8).
 
 Sensitivity at AS01 is high. With the cloud as modeled, an hourly mean of 0.18 µg/m³ there
 needs 0.17% to 0.23% of the lead airborne as fine dust, about 11 to 16 lb of the 6,900;
 0.01 µg/m³ needs about 0.01%, under a pound. A 5-minute reading during the cloud's passage
 would run above the hourly mean, so these are conservative.
 
-So for a cloud at the ground, the monitors were placed to catch it. The coverage is
+So for a cloud of fine dust at the ground, starting from the assumed source point, the
+monitors were placed to catch it. Section 6.8 tests the source point. The coverage is
 thinner than four monitors suggests: south of about 225° it is AS01 alone, because the
 other three sit within 3° of each other on the forecast axis.
 
 ### 6.4 What they could not see
 
 - **A cloud above the ground.** Both models start the cloud mixed from the ground to
-  251 m. The analysis has a stable layer between 40 and 240 m at 9 a.m., and the
-  forecast's mixing height was 285 m then and 590 m an hour later. A hot cloud that rose
-  into or above that layer could pass over AS01, 4.5 miles out, and reach the ground only
-  as the mixed layer grew, 10 or more miles downwind. On the analyzed path the monitors
-  there, AS02 to AS04, are 3 to 7 miles to the side. News video showed plumes that
-  "quickly dissipated" (KCRG 2026a), which says nothing about height.
-- **Anything below their detection limit.** The layer gives no detection limit, sampling
-  interval or status flags. Zeros are posted as exact zeros and no value is negative,
-  which suggests small or negative values are set to zero. If these are Xact 625i units
-  sampling for 5 minutes, the published limits put one standard deviation near
-  0.009 µg/m³ (section 3.8). Every non-zero reading posted, 0.00001 to 0.010 µg/m³, is at
-  or below that, so the readings are what the instrument's noise would look like, and a
-  zero means less than about 0.01 to 0.03 µg/m³, not none.
+  251 m. That height is half of what the cloud-rise formula gives for an open-air charge,
+  a screening assumption for earth cover that has not been validated
+  ([`MODEL.md`](../../../MODEL.md)). NOAA ARL's archived weather has the air well mixed to
+  about 150 m at 9 a.m. (the same potential temperature, 272.0 K, at its lowest levels),
+  warmer air above (273.4 K at about 270 m), and a boundary layer 261 m deep that grew to
+  424 m by 10 a.m. and 673 m by 11. An earlier version of this section put a stable layer
+  "between 40 and 240 m"; that came from the pressure-level file, which has only those
+  two levels there and can't show where the stable air starts. Section 6.6 tests a
+  higher cloud. News video showed plumes that "quickly dissipated" (KCRG 2026a), which
+  says nothing about height.
+- **Anything the feed doesn't show.** The layer gives no detection limit, sampling
+  interval or status flags. Zeros are posted as exact zeros and no value is negative, yet
+  values as small as 0.00001 µg/m³ are posted. If the noise were the 0.009 µg/m³ that the
+  maker's table implies at 5 minutes (section 3.8) and negative values were posted as
+  zero, about half the readings would be above zero. Seventeen of about 250 are. So
+  either the noise is far smaller than that or the feed is processed in a way EPA hasn't
+  described. Until EPA states the limit and how small values are treated, a posted zero
+  can't be turned into an upper bound.
 - **Particles too coarse for the inlet.** A monitor with a PM10 inlet measures little
   that is larger than 10 µm in aerodynamic diameter, however much of it passes
   (section 6.6).
@@ -665,32 +676,71 @@ speed as steady over the first half hour) the cloud's front reaches AS01's dista
 roughly 15 minutes after the detonation and its center at 22 to 27, so the two readings
 at 9:10 and 9:11 a.m. come a little before the modeled cloud. Two other monitors posted values that size before the detonation.
 
-Four explanations fit a near-zero reading there. They are not exclusive, and the data
-so far can't choose among them. In my judgment the first and the fourth are the
-likeliest, and air monitors alone can't tell those two apart.
+Several explanations fit a near-zero reading there. They can overlap, there may be
+others, and the data so far can't rank them. The first two agree that almost no fine lead
+reached AS01 at the ground; they differ on whether much coarse lead left the site. The
+next three would mean a cloud of fine lead missed the monitors, which matters more for
+exposure.
 
 1. **Little fine lead became airborne.** If the barriers, water and foam worked as the
-   Army says, the fine airborne share was far below any case the tracker published.
-   For fine dust at the ground, AS01's readings fit about 0.01% of the lead or less,
-   under a pound (Table 11).
-2. **The cloud passed over AS01.** Both models start the cloud mixed from the ground to
-   251 m. The 9 a.m. analysis has a stable layer between 40 and 240 m (section 6.4). A
-   hot cloud that rose into or above it could cross AS01 aloft and come down 10 or more
-   miles out, where on the analyzed path the real-time monitors are 3 to 7 miles to the
-   side. Nothing public says how high the cloud went.
-3. **A small, shallow cloud passed just south of AS01.** AS01 is at 222°. On analyzed
-   weather the cloud's center is at 215° and its highest value at AS01's distance is near
-   210°; the surface wind alone points to 204°–211°. This can't hide a large release: at
-   1% of the lead the monitors respond on any heading from 213° to 234° (Table 10). It
-   can hide a small one: at 0.1% the window is a few degrees around 225°.
-4. **The lead was on coarse particles.** They either fell before reaching AS01 or
-   reached it and were too large for its inlet. Both can be calculated, below.
+   Army says, the fine airborne share was far below any case the tracker published. From
+   the assumed source point, the highest value AS01 posted corresponds to about 0.002% of
+   the lead as fine dust at the ground (Table 11). In field tests of buried and
+   metal-cased detonations, most of the data put the share of a munition's metal reaching
+   the air near 1% or less, with a range of 0.3% to 22% (Aurell et al. 2015). Those were
+   tests of military munitions, not of a stockpile under barriers, water and foam.
+2. **The lead was on coarse particles.** They either fell before reaching AS01 or
+   reached it and were too large for its inlet. Both are calculated below. In the same
+   field tests, soil-covered detonations put about 30 times as much particle mass in
+   PM10 as in PM2.5, against about 1 to 1 for open detonations, because of the soil
+   thrown up (Aurell et al. 2015).
+3. **The cloud passed over AS01.** Whether the cloud topped out inside or above the
+   morning's mixed layer turns on the untested factor of two in its height (section 6.4).
+   This is calculated below: in HYSPLIT, a cloud released twice as high still reaches
+   AS01 at the ground.
+4. **A shallow cloud passed south of AS01.** The archived weather has the wind below
+   about 150 m from 24° to 31° at 9 a.m., and from 51° at about 270 m. A cloud that
+   stayed in the lowest layer would head toward 204° to 211°. AS01 is at 222°. From about
+   208° on, every run still puts the 7% case above 0.18 µg/m³ at a monitor, and a 1%
+   release is caught from 208° to 213° on, depending on the run (Table 10). From 204° to
+   207° the tracker's cloud misses every real-time monitor even at 7%; only HYSPLIT's
+   wider cloud is caught. A shallow cloud would also be narrower than the modeled one.
+5. **The detonation was not at the assumed point.** Tested in section 6.8.
+6. **The public feed doesn't show what the instruments measured.** The layer doesn't name
+   the substance, EPA's list of instruments at these sites doesn't include this kind of
+   monitor (section 3.8), and the posted values don't behave like raw readings
+   (section 6.4).
 
-The detection limit matters only at the low end. With one standard deviation near
-0.009 µg/m³ for a 5-minute sample (section 3.8), fine dust from about 0.01% to 0.03% of
-the lead, one to two pounds, could pass AS01 unseen. That is the floor on what "zero"
-means there. It could not hide 1%, which gives 0.8 to 1.1 µg/m³ at AS01 as fine dust,
-about a hundred times that limit.
+**The cloud-overhead explanation, calculated.** We ran HYSPLIT on NOAA ARL's archived
+weather with the cloud released between 251 and 502 m, from the modeled cloud top up to
+the open-air value of the cloud-rise formula, for four hours.
+
+*Table 14. HYSPLIT, lowest case (7% airborne): the highest hourly mean air at the ground
+(µg/m³) with the cloud released as modeled and released above the modeled top.*
+
+<!-- table:lofted -->
+| Site | From the plant | Instrument | Released at 10–251 m (as modeled) | Released at 251–502 m |
+|---|---|---|---|---|
+| AS01 | 4.5 mi at 222° | real-time lead | 5.5 | 6.5 |
+| AS02 | 12.5 mi at 230° | real-time lead | 0.17 | 1.6 |
+| AS03 | 19.9 mi at 232° | real-time lead | 0 | 0 |
+| AS04 | 28.1 mi at 233° | real-time lead | 0 | 0 |
+| AS06 | 6.8 mi at 211° | filter | 5.3 | 1.2 |
+| AS12 | 9.8 mi at 211° | filter | 2.8 | 0.94 |
+| AS13 | 13.8 mi at 221° | filter | 0.99 | 2.2 |
+| AS14 | 21.4 mi at 220° | filter | 1.1 | 2.3 |
+| AS18 | 25.6 mi at 218° | filter | 1.1 | 1.1 |
+<!-- /table:lofted -->
+
+The higher cloud does not pass over AS01. It reads 6.5 µg/m³ there against 5.5 for the
+standard run, and 1.6 against 0.17 at AS02. Two things do it. The boundary layer grows
+past the cloud's height within the first hour and mixes it down. And the wind at that
+height carries it along 223°, straight at AS01, where the standard run's cloud is
+centered at 215°. So in HYSPLIT's weather a cloud twice as high as modeled is easier for
+the monitors to catch, not harder. This doesn't close the question. A cloud that rose
+well above 500 m, or air that mixed more slowly than HYSPLIT has it, could still carry
+lead over AS01, and nothing public says how high the cloud went. It is one run of one
+model.
 
 **The coarse-particle explanation, calculated.** We reran the tracker on analyzed weather
 with all of the lead airborne in one particle size at a time: the four fine sizes of the
@@ -764,7 +814,9 @@ and the readings. That is a possibility, not a finding: the inlet, the Army's pa
 sizes and the amount released are all unknown. Soil and wipe samples along 205° to 245°,
 and the filter cassettes if they collect every particle size, would show it.
 
-**It has happened before.** EPA does not measure lead against its national air standard
+**Prior work.** The closest published measurements are field tests of open and buried
+detonations of military munitions, sampled by flying instruments through the plumes
+(Aurell et al. 2015). Its findings are quoted under explanations 1 and 2 above. EPA does not measure lead against its national air standard
 with PM10 samplers. It uses samplers that collect particles of all sizes. When it kept
 that method in 2008 it wrote that "ingestion pathways are important to air-related Pb
 exposures and that Pb particles contributing to these pathways include ultra-coarse
@@ -841,6 +893,41 @@ On the ground a 1% release leaves no 100 µg/ft² zone. The 5 µg/ft² zone cove
 1.7 sq mi and ends within 4 miles of the plant, and 9 to 10 lb of lead lands in eight
 hours. Hourly air of 0.18 µg/m³ or more reaches 28 to 34 miles. No hourly value reaches
 PAC-1 (32 µg/m³) in any run.
+
+### 6.8 If the detonation was somewhere else
+
+Every distance and bearing in this paper is from one point for the whole plant. The
+magazines' location is not public. To see how much that matters, we moved the modeled
+cloud, without turning it, so that it starts 1, 2 and 3 km from the assumed point in each
+of 24 directions, and read the four real-time monitors again. This ignores how the wind
+differs a few kilometers away, so it is a sensitivity test.
+
+*Table 13. In how many of 24 directions of source shift at least one real-time monitor
+would read an hourly mean of 0.18 µg/m³ or more, and the directions (from the assumed
+point toward the moved source) in which none would.*
+
+<!-- table:source_shift -->
+| Source moved by | Share of the lead airborne | Tracker, forecast | Tracker, analyzed weather | HYSPLIT, ARL archive |
+|---|---|---|---|---|
+| 1 km | 7% | 24 of 24 | 22 of 24; missed toward 120°–135° | 24 of 24 |
+| 1 km | 1% | 24 of 24 | 20 of 24; missed toward 90°–135° | 22 of 24; missed toward 135°–150° |
+| 2 km | 7% | 24 of 24 | 16 of 24; missed toward 90°–195° | 18 of 24; missed toward 105°–180° |
+| 2 km | 1% | 23 of 24; missed toward 150°–150° | 15 of 24; missed toward 75°–195° | 16 of 24; missed toward 90°–195° |
+| 3 km | 7% | 24 of 24 | 15 of 24; missed toward 75°–195° | 16 of 24; missed toward 90°–195° |
+| 3 km | 1% | 19 of 24; missed toward 120°–180° | 13 of 24; missed toward 60°–210° | 14 of 24; missed toward 75°–210° |
+<!-- /table:source_shift -->
+
+On the forecast path the monitors catch the 7% case wherever the source is put within
+3 km. On analyzed weather they don't. With the source 2 km to the east, southeast or
+south, the tracker's cloud misses every real-time monitor in a third of the directions
+tried, and HYSPLIT's in a quarter, even for the 7% case. With the source to the north or
+west they still catch it. At 1 km the monitors catch nearly everything.
+
+So the statement that the monitors were placed to catch a cloud holds for the assumed
+point and for a source north or west of it. It does not hold for a source 2 km or more to
+the east or south. The plant covers many square miles, so shifts larger than 3 km are
+possible, and they could put the source closer to AS01 as well as farther from it. The
+Army knows where the magazines are. EPA's permit redacts it.
 
 ## 7. The Army's map
 
@@ -927,7 +1014,7 @@ modeled cloud in every run.
 Both are forecasts, and both miss the analyzed wind the same way. On analyzed weather the
 tracker's cloud runs along 215°–220°, as HYSPLIT's does, and its 5 µg/ft² zone shares
 almost nothing with the Army's. If the analysis is closer to the truth than the two forecasts (section 4), the
-Army's map pointed 10° to 15° too far west, as the tracker's did. EPA's three farther
+Army's map pointed 7° to 14° too far west, as the tracker's did. EPA's three farther
 real-time monitors sit on that forecast axis.
 
 The earlier issue of the Army's map, stamped 6:30 a.m. Nov. 24, pointed 241° and moved
@@ -968,10 +1055,10 @@ The Army hasn't published its model's inputs, and these runs don't identify them
 
 ## 8. What it means for the tracker
 
-- **Direction.** The published map pointed about 15° too far west of where the analyzed
-  wind and the nearby stations put the low-level flow. The Army's final map pointed the
-  same way as the tracker's, so this was an error in the weather forecasts, not in one
-  model. The site showed a ±5° direction spread and three other weather models; whether
+- **Direction.** The published map pointed 8° to 14° west of the path the runs on
+  analyzed weather give. The Army's final map pointed the same way as the tracker's, so
+  the difference lies in the weather forecasts, not in one model. The analyzed weather is
+  itself a model product, and HYSPLIT's path differs by up to 7° between its two forms. The site showed a ±5° direction spread and three other weather models; whether
   those covered the analyzed path is not yet checked. In the back-test the tracker's path
   matched HYSPLIT's within about 5° in daytime, but both models ran on archived weather
   there, so it never tested the forecast. A forecast error of this size should be expected
@@ -996,6 +1083,8 @@ The Army hasn't published its model's inputs, and these runs don't identify them
 
 ## 9. Next steps
 
+- Ask the Army or EPA where the detonation was, or bound it from the permit and imagery,
+  and rerun section 6 from that point.
 - Check whether the site's direction spread and other weather models covered the
   analyzed path.
 - Add EPA's filter, soil and wipe results, the Army's samples, balloons and its final
@@ -1022,20 +1111,20 @@ runs HYSPLIT for 8 hours (`blast-day/2026-11-25-9am-{zhang,emerson}.CONTROL` on 
 `2026-11-25-9am-coarse-early2h.CONTROL` for the coarse sizes), and writes
 `data/compare.json`, `data/army_map.json`, `data/forecast_vs_analysis.json`,
 `data/station_vs_hrrr.json` and the figures. `scripts/tables.py` then rewrites Tables 1 and
-4–12 in this file from those data, so every number in them is in those files.
+4–14 in this file from those data, so every number in them is in those files.
 
 | Script | Does |
 |---|---|
 | `lib.py` | readers for the tracker's maps and HYSPLIT's output; zones, centers, overlap |
 | `compare.py` | the numbers for Tables 4–6 and 8 |
 | `snapshots.py` | the cloud at the Army's time marks from the tracker's time steps and HYSPLIT's 30-minute snapshots; Table 7b |
-| `tables.py` | writes Tables 1 and 4–12 into this file from the data |
+| `tables.py` | writes Tables 1 and 4–14 into this file from the data |
 | `army_map.py` | traces and measures both issues of the Army's maps; Table 7 |
 | `forecast_vs_analysis.py` | Table 1 |
 | `station_vs_hrrr.py` | Table 2 and the 21-station comparison |
 | `vad_decode.py`, `airnow_extract.py`, `epa_fetch.py` | the radar, AirNow and EPA downloads |
 | `run_tracker.sh` | the tracker on analyzed weather and Table 8's runs |
-| `monitor_coverage.py` | EPA sites in the modeled cloud, the direction sweep and the 1% case; Tables 9, 10 and 12 |
+| `monitor_coverage.py` | EPA sites in the modeled cloud, the direction sweep, the 1% case, the source-shift test and the higher-cloud run; Tables 9, 10 and 12–14 |
 | `coarse.py` | one particle size at a time in the tracker and HYSPLIT: air at AS01 and lead on the ground; Table 11 |
 | `figure.py` | Figures 1–6 |
 
@@ -1070,8 +1159,34 @@ corrected here:
   point 11° farther south and move the cloud faster, and agree with the tracker's
   forecast on both.
 
+### After the second review
+
+A separate AI referee reviewed the summary of this paper on Nov. 26
+([`reviews/initial-findings-review-1.md`](reviews/initial-findings-review-1.md)). It found
+the numbers right and several conclusions too strong. Changed here:
+
+- Every distance and bearing is from one point taken for the whole plant, and the
+  detonation site is not public. The paper now says so and tests it (section 6.8). The
+  statement that the monitors were placed to catch a cloud is limited to that point.
+- A cloud heading 204° to 207° misses every real-time monitor in the tracker's runs even
+  for the 7% case. Earlier text said such a cloud could only hide a small release.
+- The explanations for the near-zero readings are no longer ranked, and two were added:
+  a source somewhere else, and a public feed that doesn't show what was measured.
+- The "stable layer between 40 and 240 m" came from a weather file with only two levels
+  there. The archived weather has the air mixed to about 150 m at 9 a.m. A higher-cloud
+  run was added (Table 14).
+- The 0.009 µg/m³ detection limit is an extrapolation the posted readings don't fit. The
+  paper no longer says what a posted zero means.
+- "10° to 15°" for the difference in path was the top of the range. It is 7° to 14°.
+- The field study of detonation emissions (Aurell et al. 2015) was read in full and its
+  findings are used.
+
 ## References
 
+- Aurell, J., B. K. Gullett, D. Tabor, R. K. Williams, W. Mitchell, and M. R. Kemme, 2015:
+  Aerostat-based sampling of emissions from open burning and open detonation of military
+  ordnance. *J. Hazard. Mater.*, **284**, 108–120, doi:10.1016/j.jhazmat.2014.10.029
+  (read at https://www.epa.gov/sites/default/files/2015-03/documents/9546011.pdf).
 - Benjamin, S. G., and Coauthors, 2016: A North American hourly assimilation and model
   forecast cycle: The Rapid Refresh. *Mon. Wea. Rev.*, **144**, 1669–1694,
   doi:10.1175/MWR-D-15-0242.1.
@@ -1100,7 +1215,7 @@ corrected here:
 - EPA, 2026c: Iowa Army Ammunition Plant Response Data Viewer (public layers
   `IAAAP_Xact_Data_Public_Viewer` and `Air_Sampling_and_Monitoring_Location`),
   https://experience.arcgis.com/experience/1ddcf8b9d8314971b00dac8893ae9cd6 (retrieved
-  Nov. 26, 2026, 01:14 UTC; preliminary data).
+  Nov. 26, 2026, 07:00 UTC; preliminary data).
 - EPA, 2026d: IAAAP Lead Azide, site profile and documents. EPA On-Scene Coordinator
   response site, https://response.epa.gov/site/site_profile.aspx?site_id=17211 (retrieved
   Nov. 26, 2026, about 01:00 UTC).

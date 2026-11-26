@@ -201,7 +201,16 @@ def legend(
             ms=4,
             label="EPA sampling site, no results posted",
         ),
-        Line2D([], [], marker="*", ls="", mfc=INK, mec="white", ms=11, label="Detonation site"),
+        Line2D(
+            [],
+            [],
+            marker="*",
+            ls="",
+            mfc=INK,
+            mec="white",
+            ms=11,
+            label="Assumed source point (the plant)",
+        ),
     ]
     ax.legend(handles=h, fontsize=7, loc=loc, framealpha=0.95, edgecolor="#cccccc")
 

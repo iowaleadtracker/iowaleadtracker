@@ -15,12 +15,12 @@
    "lon": -91.32317,
    "miles": 4.5,
    "bearing": 221.0,
-   "n_before": 22,
-   "n_after": 62,
+   "n_before": 21,
+   "n_after": 63,
    "max_before_ugm3": 0.0,
    "max_after_ugm3": 0.002084,
    "nonzero_after": 2,
-   "mean_after_ugm3": 6.72258064516129e-05,
+   "mean_after_ugm3": 6.615873015873016e-05,
    "last_reading_utc": "2026-11-26 00:01"
   },
   "AS02": {
@@ -29,25 +29,25 @@
    "miles": 12.5,
    "bearing": 230.0,
    "n_before": 20,
-   "n_after": 62,
+   "n_after": 66,
    "max_before_ugm3": 0.003,
    "max_after_ugm3": 0.00427,
    "nonzero_after": 2,
-   "mean_after_ugm3": 7.20483870967742e-05,
-   "last_reading_utc": "2026-11-25 22:30"
+   "mean_after_ugm3": 6.768181818181819e-05,
+   "last_reading_utc": "2026-11-26 02:40"
   },
   "AS03": {
    "lat": 40.646668,
    "lon": -91.563951,
    "miles": 19.9,
    "bearing": 232.0,
-   "n_before": 23,
-   "n_after": 60,
+   "n_before": 21,
+   "n_after": 64,
    "max_before_ugm3": 0.0,
    "max_after_ugm3": 0.004292,
    "nonzero_after": 4,
-   "mean_after_ugm3": 0.00015065,
-   "last_reading_utc": "2026-11-26 00:23"
+   "mean_after_ugm3": 0.000141234375,
+   "last_reading_utc": "2026-11-26 02:39"
   },
   "AS04": {
    "lat": 40.583555,

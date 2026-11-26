@@ -2,7 +2,13 @@
 
 Usage (from the repository root, ``HYSPLIT_DIR`` set)::
 
-    python monitor_coverage.py FORECAST_MAPS ANALYSIS_MAPS HYSPLIT_RUN EPA_DIR > coverage.json
+    python monitor_coverage.py FORECAST_MAPS ANALYSIS_MAPS HYSPLIT_RUN EPA_DIR HYSPLIT_LOFTED \
+        > coverage.json
+
+HYSPLIT_LOFTED is a 4-hour HYSPLIT run with the cloud released between the modeled cloud
+top (251 m) and twice that height, the open-air value of the cloud-rise formula
+(``blast-day/2026-11-25-9am-zhang-lofted.CONTROL``). It tests a cloud that started above
+the morning mixed layer.
 
 For each model run (with all of the lead airborne; other releases scale in proportion):
 
@@ -14,6 +20,11 @@ For each model run (with all of the lead airborne; other releases scale in propo
   real-time monitors are sampled again, giving the highest hourly mean any of them would
   read for each cloud direction. Turning the cloud rigidly ignores how its shape would
   change with a different wind, so this is a sensitivity test, not a forecast;
+- a source-shift test: every distance and bearing here is from one point taken for the
+  whole plant, and the site of the detonation is not public. The modeled cloud is moved,
+  without turning it, so that it starts 1, 2 and 3 km from that point in each of 24
+  directions, and the real-time monitors are sampled again. Moving the cloud rigidly
+  ignores how the wind differs a few kilometers away, so this too is a sensitivity test;
 - a 1% case: the ground zones, the lead on the ground and the reach of hourly air at or
   above 0.18 µg/m³ if 1% of the lead became airborne (the 100% run scaled, which is exact).
 """
@@ -33,6 +44,9 @@ import numpy as np
 LEVELS = {"army_line_0.18": 0.18e-9, "highest_reading_0.01": 0.01e-9}  # kg/m3
 SWEEP = range(-30, 31)
 SMALL_CASE = 0.01  # a release of 1% of the lead
+SHIFT_KM = (1.0, 2.0, 3.0)  # how far the true source might be from the assumed point
+SHIFT_DIRECTIONS = range(0, 360, 15)
+LOW_CASE = 0.07  # the lowest published release
 DEP_LEVELS = (100, 40, 5)  # µg/ft²
 XACT = ("AS01", "AS02", "AS03", "AS04")
 
@@ -54,6 +68,48 @@ def sample(f: lib.Fields, field: np.ndarray, miles: float, bearing: float) -> fl
     if 0 <= j < len(f.lat) and 0 <= i < len(f.lon):
         return float(field[j, i])
     return 0.0
+
+
+def shifted(f: lib.Fields, field: np.ndarray, s: dict[str, Any], km: float, toward: float) -> float:
+    """Return the field at a site when the source sits ``km`` away in direction ``toward``."""
+    north = s["miles"] * lib.KM_PER_MI * math.cos(math.radians(s["bearing"]))
+    east = s["miles"] * lib.KM_PER_MI * math.sin(math.radians(s["bearing"]))
+    north -= km * math.cos(math.radians(toward))  # the site as seen from the moved source
+    east -= km * math.sin(math.radians(toward))
+    bearing = math.degrees(math.atan2(east, north)) % 360
+    return sample(f, field, math.hypot(north, east) / lib.KM_PER_MI, bearing)
+
+
+def source_shift(f: lib.Fields, field: np.ndarray, monitors: list[dict[str, Any]]) -> list[Any]:
+    """Return what the real-time monitors read for each assumed error in the source point."""
+    out = []
+    for km in SHIFT_KM:
+        best, nearest = [], []
+        for toward in SHIFT_DIRECTIONS:
+            reads = {m["site"]: shifted(f, field, m, km, toward) * 1e9 for m in monitors}
+            best.append(max(reads.values()))
+            nearest.append(reads[XACT[0]])
+        out.append(
+            {
+                "shift_km": km,
+                "directions": len(best),
+                "nearest_monitor_100pct_ugm3": {"lowest": min(nearest), "highest": max(nearest)},
+                "best_monitor_100pct_ugm3": {"lowest": min(best), "highest": max(best)},
+                "directions_caught": {
+                    f"{share:g}": sum(b * share >= LEVELS["army_line_0.18"] * 1e9 for b in best)
+                    for share in (LOW_CASE, SMALL_CASE)
+                },
+                "missed_toward": {
+                    f"{share:g}": [
+                        t
+                        for t, b in zip(SHIFT_DIRECTIONS, best, strict=True)
+                        if b * share < LEVELS["army_line_0.18"] * 1e9
+                    ]
+                    for share in (LOW_CASE, SMALL_CASE)
+                },
+            }
+        )
+    return out
 
 
 def sites(epa: Path) -> list[dict[str, Any]]:
@@ -78,11 +134,12 @@ def sites(epa: Path) -> list[dict[str, Any]]:
 
 def main(args: list[str]) -> None:
     """Build and print the JSON."""
-    fc_dir, an_dir, hy_run, epa = (Path(a) for a in args)
+    fc_dir, an_dir, hy_run, epa, hy_lofted = (Path(a) for a in args)
     runs = {
         "tracker forecast": lib.tracker(fc_dir / "permit-0900.html"),
         "tracker analysis": lib.tracker(an_dir / "an_permit.html"),
         "hysplit analysis": lib.hysplit(hy_run),
+        "hysplit lofted": lib.hysplit(hy_lofted),
     }
     all_sites = sites(epa)
     out: dict[str, Any] = {"levels_ugm3": {k: v * 1e9 for k, v in LEVELS.items()}, "runs": {}}
@@ -128,6 +185,7 @@ def main(args: list[str]) -> None:
             "sites": rows,
             "sweep": sweep,
             "case_1pct": small,
+            "source_shift": source_shift(f, field, [s for s in all_sites if s["real_time_lead"]]),
         }
     json.dump(out, sys.stdout, indent=1)
     sys.stdout.write("\n")

@@ -42,6 +42,7 @@ about half the size. `api2arl_v4` needs ecCodes (`apt-get install libeccodes0`).
 |---|---|---|
 | `2026-11-25-9am-zhang-early2h`, `-emerson-early2h` | 2 | Zhang, Emerson; on the first archive file (the comparison's reference runs until the second file was posted) |
 | `2026-11-25-9am-coarse-early2h` | 2 | 10, 30 and 100 µm at soil density (2.65 g/cm³), each carrying all of the lead, with the tracker's Zhang speeds for those sizes; on the first archive file |
+| `2026-11-25-9am-zhang-lofted` | 4 | Zhang; on both archive files, with the cloud released from 250.9 to 501.8 m instead of 10 to 250.9 m (a test of a cloud that rose above the modeled top) |
 | `2026-11-25-9am-zhang-analyses` | 8 | Zhang; on the hourly pressure-level analyses, 0.005° grid shifted southwest |
 | `2026-11-25-9am-zhang` | 8 | Zhang; on both archive files (the comparison's reference run) |
 | `2026-11-25-9am-emerson` | 8 | Emerson; on both archive files |

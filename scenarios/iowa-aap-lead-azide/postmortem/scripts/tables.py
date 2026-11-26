@@ -387,6 +387,42 @@ def one_percent(c: dict[str, Any], d: dict[str, Any]) -> str:
     return table(head, rows)
 
 
+def source_shift(c: dict[str, Any]) -> str:
+    """Table 13: what the monitors read if the source is not at the assumed point."""
+    runs = {
+        "Tracker, forecast": "tracker forecast",
+        "Tracker, analyzed weather": "tracker analysis",
+        "HYSPLIT, ARL archive": "hysplit analysis",
+    }
+    rows = []
+    for k in range(len(c["runs"]["tracker analysis"]["source_shift"])):
+        first = c["runs"]["tracker analysis"]["source_shift"][k]
+        for share, label in (("0.07", "7%"), ("0.01", "1%")):
+            cells = []
+            for run in runs.values():
+                s = c["runs"][run]["source_shift"][k]
+                missed = s["missed_toward"][share]
+                where = f"; missed toward {missed[0]}°{DASH}{missed[-1]}°" if missed else ""
+                cells.append(f"{s['directions_caught'][share]} of {s['directions']}{where}")
+            rows.append([f"{first['shift_km']:g} km", label, *cells])
+    return table(["Source moved by", "Share of the lead airborne", *runs], rows)
+
+
+def lofted(c: dict[str, Any]) -> str:
+    """Table 14: HYSPLIT with the cloud released above the modeled top, 7% case."""
+    as_modeled = f"Released at 10{DASH}251 m (as modeled)"
+    higher = f"Released at 251{DASH}502 m"
+    runs = {as_modeled: "hysplit analysis", higher: "hysplit lofted"}
+    by = {k: {s["site"]: s for s in c["runs"][v]["sites"]} for k, v in runs.items()}
+    rows = []
+    for n in ("AS01", "AS02", "AS03", "AS04", *ONE_PCT_FILTERS):
+        s = by[higher][n]
+        kind = "real-time lead" if s["real_time_lead"] else "filter"
+        air = [num(b[n]["air_100pct_ugm3"] * LOW) for b in by.values()]
+        rows.append([n, f"{s['miles']:.1f} mi at {s['bearing']:.0f}°", kind, *air])
+    return table(["Site", "From the plant", "Instrument", *runs], rows)
+
+
 def coarse(c: dict[str, Any]) -> str:
     """Table 11: one particle size at a time, air at AS01 and the lead left on the ground."""
     hy = {(r["diameter_um"], r["density_kg_m3"]): r for r in c["hysplit"]}
@@ -456,6 +492,8 @@ def main() -> None:
         "windows": windows(cov),
         "coarse": coarse(sizes),
         "one_percent": one_percent(cov, d),
+        "source_shift": source_shift(cov),
+        "lofted": lofted(cov),
     }
     path = HERE / "README.md"
     text = path.read_text()

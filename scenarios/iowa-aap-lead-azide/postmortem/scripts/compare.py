@@ -41,6 +41,7 @@ SENSITIVITY = {
 }
 NEAR_FIELD_MI = 15
 MONITOR_HOURS = 3
+RELEASE_UTC = "2026-11-25 15:00"  # 9 a.m. CST, in the form of the readings' time stamps
 
 
 def summary(f: lib.Fields, hours: list[int]) -> dict[str, Any]:
@@ -82,8 +83,8 @@ def monitors(epa: Path) -> dict[str, dict[str, Any]]:
             )
             s["readings"].append((r["time_utc"], float(r["concentration"])))
     for s in out.values():
-        after = [v for t, v in s["readings"] if t[11:] >= "15:00"]
-        before = [v for t, v in s["readings"] if t[11:] < "15:00"]
+        after = [v for t, v in s["readings"] if t >= RELEASE_UTC]  # full timestamps, so
+        before = [v for t, v in s["readings"] if t < RELEASE_UTC]  # the next UTC day counts
         s["n_before"], s["n_after"] = len(before), len(after)
         s["max_before_ugm3"], s["max_after_ugm3"] = max(before), max(after)
         s["nonzero_after"] = sum(v > 0 for v in after)
