@@ -19,8 +19,14 @@ import shutil
 from pathlib import Path
 from string import Template
 
-from forecast_summary import ANALYSIS_PATH, OFFICIAL_HTML
-from works_cited import CONTACT_EMAIL, SOURCE_URL
+from forecast_summary import OFFICIAL_HTML
+from works_cited import (
+    ANALYSIS_FOLDER,
+    ANALYSIS_FOLDER_URL,
+    ANALYSIS_PATH,
+    CONTACT_EMAIL,
+    SOURCE_URL,
+)
 
 HERE = Path(__file__).resolve().parent
 BRIEF = HERE / "postmortem" / "monitor-placement-brief"
@@ -30,8 +36,8 @@ SLUG = ANALYSIS_PATH.strip("/")
 #: The map as the page shows it (a smaller copy of the README's PNG; brief.py writes both).
 MAP_FILE = "monitor_placement_map.jpg"
 MAP_SIZE = (1760, 1376)  # pixels, for the page to reserve the space
-REPO_FOLDER = "scenarios/iowa-aap-lead-azide/postmortem/monitor-placement-brief"
-SOURCE_FOLDER_URL = f"{SOURCE_URL}/tree/main/{REPO_FOLDER}"
+REPO_FOLDER = ANALYSIS_FOLDER
+SOURCE_FOLDER_URL = ANALYSIS_FOLDER_URL
 DESCRIPTION = (
     "A preliminary, unofficial analysis: EPA's four real-time lead monitors for the Nov. 25, "
     "2026 detonation at the Iowa Army Ammunition Plant sat along the forecast path, and "

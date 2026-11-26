@@ -21,7 +21,14 @@ from typing import Any, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
-from works_cited import CONTACT_TEXT, INSTAGRAM_HANDLE, INSTAGRAM_URL, SOURCE_URL
+from works_cited import (
+    ANALYSIS_PATH,
+    ANALYSIS_URL,
+    CONTACT_TEXT,
+    INSTAGRAM_HANDLE,
+    INSTAGRAM_URL,
+    SOURCE_URL,
+)
 
 Facts: TypeAlias = dict[str, Any]
 FloatArray: TypeAlias = npt.NDArray[np.float64]
@@ -479,8 +486,28 @@ ARMY_3PM_CITE = "Army maps, Nov. 25, 3 p.m."
 # AS-40) collect samples for lab analysis, none posted yet.
 EPA_VIEWER_URL = "https://experience.arcgis.com/experience/1ddcf8b9d8314971b00dac8893ae9cd6"
 EPA_VIEWER_CITE = "EPA response data viewer, Nov. 25"
-# The page of the monitor-placement analysis, built by brief_page.py from the brief's README.
-ANALYSIS_PATH = "/monitor-placement/"
+# What this site's analysis after the blast found (the page at ANALYSIS_PATH, built by
+# brief_page.py from the brief's README; the numbers are in that brief's tables). Every
+# place that reports it uses these words, with the caveat that it is unofficial.
+ANALYSIS_HEAD = "EPA\u2019s monitors and the cloud\u2019s path."
+ANALYSIS_QUESTION = "Were EPA\u2019s real-time lead monitors on the cloud\u2019s path?"
+ANALYSIS = (
+    "After the blast, this site checked where EPA\u2019s four real-time lead monitors sat. "
+    "The forecasts, including the Army\u2019s, pointed the cloud to the southwest (toward "
+    "about 230\u00b0), and the four monitors lined up along that path. Models rerun on "
+    "NOAA\u2019s analysis of that morning\u2019s weather put the cloud farther south (toward "
+    "about 215\u00b0). On that path, three of the monitors were outside the modeled cloud and "
+    "the nearest was on its edge. So the near-zero readings can\u2019t show, by themselves, "
+    "whether little lead got out or a cloud passed just south of the monitors. Lab results "
+    "from EPA\u2019s filter samplers on the more southerly path, and from soil sampling, can. "
+    "This is a preliminary, unofficial analysis of model estimates, not measurements, and no "
+    "one outside the project has reviewed it."
+)
+ANALYSIS_TEXT = f"{ANALYSIS} The analysis: {ANALYSIS_URL}"
+ANALYSIS_HTML = (
+    html.escape(ANALYSIS, quote=False)
+    + f' <a href="{ANALYSIS_PATH}">Read the preliminary analysis</a>.'
+)
 # Where readers find the agencies' own information: a line in the header of the landing
 # page and of the analysis page.
 OFFICIAL_HTML = (
@@ -523,8 +550,10 @@ EARLY_AIR_HTML = (
     f'(<a href="{EPA_VIEWER_URL}" rel="noopener">{EPA_VIEWER_CITE}</a>). These are early '
     "readings only: <b>lab results from EPA&rsquo;s other air samples, and soil and water "
     "sampling, are still pending and are needed</b> before anyone knows where lead settled. "
-    f'A <a href="{ANALYSIS_PATH}">preliminary analysis</a> looks at whether those four '
-    "monitors were on the cloud&rsquo;s path."
+    f'A <a href="{ANALYSIS_PATH}">preliminary analysis</a> by this site finds those four '
+    "monitors sat along the forecast path, and that models rerun on NOAA&rsquo;s weather "
+    "analysis put the cloud south of them. Those are unofficial model estimates, not "
+    "measurements."
 )
 # FEMA and the Army's advice, for the page header (Army public safety advisory, Nov. 24).
 FEMA_HEADER_HTML = (
@@ -1194,6 +1223,8 @@ below it is
   <p>{ARMY_COMPARE} Sources: <a href="{PERMIT_URL}" rel="noopener">{PERMIT_CITE}</a>; \
 <a href="{ARMY_MAPS_PDF}" rel="noopener">{ARMY_MAPS_CITE}</a>.</p>
   <p>{t.weather}</p>{"".join(_day_html(m, ctx, lead) for m in more)}
+  <h3>{ANALYSIS_QUESTION}</h3>
+  <p>{ANALYSIS_HTML}</p>
   <h3>How sure is this?</h3>
   <p>Not very. The Army estimates that 26% of the lead gets into the air with its mitigation
     (an emission factor of 0.26), but no one has measured a blast like this, and the actual
@@ -1291,6 +1322,7 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
             ),
         ),
         ("How does this compare with the Army's official maps?", ARMY_COMPARE + " " + t.weather),
+        (ANALYSIS_QUESTION, f"{ANALYSIS_TEXT} {CAVEAT}"),
         ("What should I do?", SAFETY_ANSWER),
     ]
 
@@ -1353,6 +1385,10 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
                 "all in breathable sizes."
             ),
             f"- Army comparison: {ARMY_COMPARE}",
+            (
+                "- EPA\u2019s monitors and the cloud\u2019s path (preliminary analysis): "
+                f"{ANALYSIS_TEXT}"
+            ),
             f"- {mon}{t.weather}",
             f"- {mon}{t.forecast_line}",
             f"- {mon}"
@@ -1376,6 +1412,10 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             "## Pages",
             "",
             f"- [Map]({ctx['site_url']}): interactive map by blast time and case",
+            (
+                f"- [Preliminary analysis]({ANALYSIS_URL}): where EPA\u2019s real-time lead "
+                "monitors sat, compared with the forecast and analyzed-weather paths"
+            ),
             f"- [Source code]({SOURCE_URL}): the model, saved forecasts, assumptions and tests",
             f"- [Instagram @{INSTAGRAM_HANDLE}]({INSTAGRAM_URL}): updates",
             "",
