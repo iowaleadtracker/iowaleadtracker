@@ -102,6 +102,9 @@ bad.
 - Detroit Free Press, Nov. 23, 2026, "Army's munition explosion plans delayed. How it
   could change the risks":
   <https://www.freep.com/story/news/local/michigan/2026/11/23/army-lead-azide-munitions-michigan-explosion/92924794007/>
+- Snopes, Nov. 25, 2026, "Did Army detonate lead azide stockpile in crucial area for US
+  food supply? Here's context":
+  <https://www.snopes.com/fact-check/army-lead-azide-food-supply/>
 
 ## License
 

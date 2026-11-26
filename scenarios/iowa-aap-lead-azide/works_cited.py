@@ -74,6 +74,13 @@ MENTIONS = [
             "army-lead-azide-munitions-michigan-explosion/92924794007/"
         ),
     ),
+    # J. Esposito, "Did Army detonate lead azide stockpile in crucial area for US food
+    # supply? Here's context," Snopes, published Nov. 25, 2026; read in full Nov. 26. It
+    # says: "For up-to-date information on the spread of the plume, the U.S. Army is
+    # releasing lead azide deposition maps. In addition, the open-source tracking
+    # alternative Iowa Lead Tracker, which is independent of the Army, is also tracking the
+    # plume."
+    ("Snopes", "Nov. 25, 2026", "https://www.snopes.com/fact-check/army-lead-azide-food-supply/"),
 ]
 MENTIONS_HTML = (
     "; ".join(
@@ -653,6 +660,10 @@ ANALYSIS_METHOD = (
 #: entry for every change to the model, its settings or its sources.
 CHANGES_HEAD = "Change log"
 CHANGES = [
+    (
+        "Nov. 26",
+        "Snopes (Nov. 25) added to the mentions of the Iowa Lead Tracker. The maps did not change.",
+    ),
     (
         "Nov. 26",
         (
