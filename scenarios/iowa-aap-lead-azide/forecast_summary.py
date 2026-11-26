@@ -19,6 +19,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, TypeAlias
 
+import brief_page
 import numpy as np
 import numpy.typing as npt
 from works_cited import CONTACT_TEXT, INSTAGRAM_HANDLE, INSTAGRAM_URL, SOURCE_URL
@@ -513,7 +514,9 @@ EARLY_AIR_HTML = (
     "detection limit the Army cites "
     f'(<a href="{EPA_VIEWER_URL}" rel="noopener">{EPA_VIEWER_CITE}</a>). These are early '
     "readings only: <b>lab results from EPA&rsquo;s other air samples, and soil and water "
-    "sampling, are still pending and are needed</b> before anyone knows where lead settled."
+    "sampling, are still pending and are needed</b> before anyone knows where lead settled. "
+    f'A <a href="/{brief_page.SLUG}/">preliminary analysis</a> looks at whether those four '
+    "monitors were on the cloud&rsquo;s path."
 )
 # FEMA and the Army's advice, for the page header (Army public safety advisory, Nov. 24).
 FEMA_HEADER_HTML = (

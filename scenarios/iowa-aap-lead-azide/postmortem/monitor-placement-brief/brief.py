@@ -8,7 +8,8 @@ Reads, all from ``data/`` (see ``data/README.md``): the three modeled fields the
 drawn from, EPA's public site list and real-time readings, where the release is modeled
 from, and the Army's final ground map with where it sits on the ground.
 
-Writes ``monitor_placement_map.png`` and ``numbers.json``, and rewrites the tables between
+Writes ``monitor_placement_map.png`` (and a smaller ``.jpg`` copy for the site's page) and
+``numbers.json``, and rewrites the tables between
 the ``<!-- table:NAME -->`` markers in ``README.md``. Pass ``--no-map`` to skip the map
 (then no network is needed).
 """
@@ -180,8 +181,14 @@ def tables(n: dict[str, Any]) -> dict[str, str]:
     for k, label in RUNS.items():
         cells = [f"{b:.0f}°" if b is not None else "below 0.18" for b in n["paths"][k].values()]
         paths.append(f"| {label} | " + " | ".join(cells) + " |")
-    by = [f"{s['miles']:.0f} mi: {s['bearing']:.0f}°" for k, s in n["sites"].items() if k in XACT]
-    paths.append("| EPA's real-time monitors | " + ", ".join(by) + " | | |")
+    near = []  # the real-time monitor nearest each distance
+    for m in RINGS_MI:
+        name, s = min(
+            ((k, s) for k, s in n["sites"].items() if k in XACT),
+            key=lambda ks: abs(ks[1]["miles"] - m),
+        )
+        near.append(f"{s['bearing']:.0f}° ({name}, {s['miles']:.1f} mi)")
+    paths.append("| EPA's real-time monitor nearest that distance | " + " | ".join(near) + " |")
     read = ["| Monitor | Readings posted | Zero | Highest, µg/m³ | Highest before, µg/m³ |"]
     read.append("|---|---|---|---|---|")
     for name, r in n["readings"].items():

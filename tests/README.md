@@ -19,6 +19,7 @@ pytest                 # everything, including full model runs (about 10 s)
 | `test_output.py` | packed fields and safe embedding in the HTML |
 | `test_cli.py` | `--help` and option checks |
 | `test_site.py` | the site's safety wording, headers and defaults |
+| `test_brief_page.py` | the monitor-placement page: warnings, no outside files, all of the README shown, written into the site and the mirror |
 
 ## Rules
 
