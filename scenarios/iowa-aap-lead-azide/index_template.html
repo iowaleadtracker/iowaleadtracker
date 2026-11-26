@@ -109,10 +109,12 @@
     <p>$header_lead, $header_days</p></div>
   <label for="d"$day_hidden>Day
     <select id="d">$day_options</select></label>
-  <label for="t">Blast time (CST)
+  <label for="t"$time_hidden>Blast time (CST)
     <select id="t">$time_options</select></label>
-  <button id="prev" type="button">&lsaquo; Earlier</button>
-  <button id="next" type="button">Later &rsaquo;</button>
+  <button id="prev" type="button"$time_hidden>&lsaquo; Earlier</button>
+  <button id="next" type="button"$time_hidden>Later &rsaquo;</button>
+  <label for="w"$source_hidden>Weather
+    <select id="w">$source_options</select></label>
   <label for="c">Lead in the air
     <select id="c">$case_options</select></label>
   <span class="sys" id="sys" role="group" aria-label="Units">
@@ -120,9 +122,9 @@
     <button type="button" data-v="metric" aria-pressed="false">Metric</button></span>
   <p class="warn" role="note"><b>This is an unofficial estimate, not from the Army or any government
     agency. Don't use it to decide if you're safe.</b>
-    <span class="long">Follow official instructions. Weather forecast from $got_txt.</span>
+    <span class="long">Follow official instructions. $weather_line</span>
     <button id="about" type="button">About this map</button> &middot;
-    <button id="tosummary" type="button">What the forecast shows</button> &middot;
+    <button id="tosummary" type="button">What the maps show</button> &middot;
     <button id="cites" type="button" aria-haspopup="dialog">Methodology and References</button></p>
   <p class="fema" role="note">$official</p>
   <p class="fema" role="note">$blast_status</p>
@@ -140,8 +142,8 @@
     azide could have traveled and settled, for four guesses of how much of the lead got into the air:
     Low ($pct_low), U.S. Army mitigated ($pct_mid, the Army&rsquo;s own estimate), High
     ($pct_high), and EPA permit ($pct_permit, what EPA requires the Army to assume). No one has
-    measured a blast like this, and different numbers would give a very different map. The
-    winds come from $n_models weather forecasts, current as of $got_txt. If the actual
+    measured a blast like this, and different numbers would give a very different map.
+    $about_weather If the actual
     winds differed, the cloud went somewhere else. The shaded areas show where the cloud
     <i>could</i> have gone, not where it <i>did</i> go.</p>
   <p><b>$analysis_head</b> $analysis</p>
@@ -222,6 +224,12 @@
 <script>
 const sel = document.getElementById('t'), cas = document.getElementById('c'), frame = document.getElementById('map');
 const day = document.getElementById('d');
+// Weather behind the maps: archived (after the blast) or the forecast (before it). The page
+// opens on OPEN_SOURCE; a link names the other one (#0900-low-forecast).
+const src = document.getElementById('w'), OPEN_SOURCE = $open_source;
+// Every weather source the site can have, built or not, so a link naming one this update
+// lacks isn't read as a day.
+const ALL_SOURCES = $all_sources;
 // Short codes for the days in links (#1200-permit-tue). A link without one means LINK_DAY
 // (the first planned day, as links always have); the page opens on OPEN_DAY.
 const DAY_CODES = $day_codes, LINK_DAY = $link_day, OPEN_DAY = $open_day;
@@ -246,15 +254,18 @@ function mapH() {
 }
 function show() {
   const t = sel.value.replace(':', '');
-  const f = MAP_FILES[day.value + '-' + cas.value + '-' + t];
+  // Forecast maps keep their old keys; another weather source goes in front of the key.
+  const f = MAP_FILES[(src.value === 'forecast' ? '' : src.value + '-') + day.value + '-' + cas.value + '-' + t];
   if (!f) return;
   frame.src = f + EXT + '#u=' + sys + (narrow.matches ? '&h=' + mapH() : '');
   history.replaceState(null, '', '#' + t + '-' + cas.value +
-    (day.value === LINK_DAY ? '' : '-' + DAY_CODES[day.value]));
+    (day.value === LINK_DAY ? '' : '-' + DAY_CODES[day.value]) +
+    (src.value === OPEN_SOURCE ? '' : '-' + src.value));
 }
 function step(d) { const i = sel.selectedIndex + d; if (i >= 0 && i < sel.options.length) { sel.selectedIndex = i; show(); } }
 sel.addEventListener('change', show);
 cas.addEventListener('change', show);
+src.addEventListener('change', show);
 day.addEventListener('change', () => { dayNote.hidden = true; show(); });
 document.getElementById('prev').onclick = () => step(-1);
 document.getElementById('next').onclick = () => step(1);
@@ -329,8 +340,12 @@ frame.addEventListener('load', () => { if (frame.contentWindow) frame.contentWin
 setSys(sys, false);
 // #HHMM-case picks the time and case, on load and when the hash changes
 function applyHash() {
-  const [ht, hc, hd] = location.hash.slice(1).split('-');
+  const [ht, hc, ...rest] = location.hash.slice(1).split('-');
+  // After the time and case, in any order: a weather source and a day code.
+  const hs = rest.find((x) => [...src.options].some((o) => o.value === x));
+  const hd = rest.find((x) => !ALL_SOURCES.includes(x));
   let changed = false;
+  for (const o of src.options) if (o.value === (hs || OPEN_SOURCE) && !o.selected) { o.selected = true; changed = true; }
   const found = Object.keys(DAY_CODES).find((k) => DAY_CODES[k] === hd);
   // No link: OPEN_DAY. A link without a day: LINK_DAY. A day this update doesn't have:
   // OPEN_DAY, and a note saying so.

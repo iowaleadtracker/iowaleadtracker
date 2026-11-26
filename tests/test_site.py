@@ -23,6 +23,7 @@ import works_cited
 
 from dispersal import met
 from dispersal.output import load_template, write_html
+from tools import compare_site
 
 from .conftest import run_puff
 
@@ -138,6 +139,81 @@ def test_analysis_after_the_blast_is_reported_with_its_caveat(
     assert f"- [Preliminary analysis]({works_cited.ANALYSIS_URL})" in llms
 
 
+@pytest.mark.slow
+def test_summary_questions_and_llms_describe_the_default_view(
+    facts_ctx: tuple[dict[str, Any], dict[str, Any]],
+) -> None:
+    """With archived maps built, the text leads with what the map opens on.
+
+    The same maps stand in for the archived ones here. The archived section comes before
+    the forecast sections, which are labeled as the forecast from before the blast, and
+    every list of towns keeps its caveat.
+    """
+    facts, ctx = facts_ctx
+    summary, faq, llms = fs.render(facts, {**ctx, "archived": facts})
+    view = fs.default_view(ctx["pct"]["low"])
+    assert f"<h3>{fs.DEFAULT_VIEW_HEAD}</h3>\n  <p>{view}</p>" in summary
+    order = [
+        fs.DEFAULT_VIEW_HEAD,
+        fs.ARCHIVED_HEAD,
+        fs.FORECAST_HEAD,
+        "Where the cloud goes",
+        "How sure is this?",
+    ]
+    spots = [summary.index(f"<h3>{h}") for h in order]
+    assert spots == sorted(spots)
+    assert summary.index("When was the detonation?") < spots[0]
+    assert "In the archived weather, winds near the ground at blast time were from the" in summary
+    assert summary.count(fs.TOWN_CAVEAT) == 2  # the archived towns and the forecast towns
+    assert "(the map\u2019s default)" not in summary  # the permit case no longer is
+    answers = dict(faq)
+    opens = answers[fs.DEFAULT_VIEW_QUESTION]
+    assert opens.startswith(fs.default_view(ctx["pct"]["low"]))
+    assert fs.TOWN_CAVEAT in opens
+    assert opens.endswith(fs.CAVEAT)
+    assert answers["Where could the lead go?"].startswith(fs.FORECAST_PREFIX)
+    assert answers["How far could lead on the ground reach?"].startswith(fs.FORECAST_PREFIX)
+    assert "- Default view and archived weather: " + fs.default_view(ctx["pct"]["low"]) in llms
+    # llms.txt labels its forecast lines too: an answer engine quotes single lines
+    for line in llms.splitlines():
+        if line.startswith("- ") and ("yellow area" in line or "were forecast" in line):
+            assert line.startswith("- " + fs.FORECAST_PREFIX) or "archived weather" in line, line
+    assert "blast-time menu" not in summary
+    assert "each case and blast time" not in summary
+    # without archived maps the text is as before
+    plain_summary, plain_faq, plain_llms = fs.render(facts, ctx)
+    assert fs.DEFAULT_VIEW_HEAD not in plain_summary
+    assert fs.DEFAULT_VIEW_QUESTION not in dict(plain_faq)
+    assert "Default view and archived weather" not in plain_llms
+    assert not dict(plain_faq)["Where could the lead go?"].startswith(fs.FORECAST_PREFIX)
+
+
+def test_header_and_about_box_name_the_weather() -> None:
+    page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    assert "Follow official instructions. $weather_line</span>" in page
+    assert "$about_weather If the actual" in " ".join(page.split())
+    line = fs.weather_line("X", archived=True)
+    assert (
+        line
+        == "Weather: archived (NOAA HRRR, saved Nov. 25, 6:51 p.m. CST), or the forecast from X."
+    )
+    assert fs.weather_line("X", archived=False) == "Weather forecast from X."
+    about = fs.about_weather("four", "X", archived=True)
+    assert about.startswith(
+        "The map opens on the low case, the smallest of the four; that is not a finding that "
+        "little lead got out. It opens on archived weather: NOAA\u2019s HRRR weather model"
+    )
+    assert "from four weather forecasts, current as of X" in about
+    assert "not a measurement" in about
+    assert fs.about_weather("four", "X", archived=False) == (
+        "The winds come from four weather forecasts, current as of X."
+    )
+    newest = works_cited.CHANGES[0]
+    assert newest[0] == "Nov. 26"
+    assert "opens on a 9 a.m. blast, the low case, and archived weather" in newest[1]
+    assert "Opening on the low case is not a finding that little lead got out." in newest[1]
+
+
 def test_analysis_in_the_header_about_box_and_methodology() -> None:
     page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
     about = " ".join(dialog(page, "note").split())
@@ -159,8 +235,7 @@ def test_analysis_in_the_header_about_box_and_methodology() -> None:
     assert body.index(method) < body.index(f"<h3>{works_cited.CHANGES_HEAD}</h3>")
     assert "no official source confirms that location" in works_cited.ANALYSIS_METHOD
     assert works_cited.ANALYSIS_FOLDER_URL in works_cited.ANALYSIS_METHOD
-    when, what = works_cited.CHANGES[0]
-    assert when == "Nov. 26"
+    what = next(w for d, w in works_cited.CHANGES if d == "Nov. 26" and "analysis" in w)
     assert works_cited.ANALYSIS_PATH in what
     assert "The maps did not change." in what
     # the two papers the method names are in the reference list
@@ -208,10 +283,149 @@ def test_pulled_label_for_the_legend() -> None:
     assert site.pulled_label(morning) == "Nov. 21, 8:08 a.m. CST"
 
 
-def test_default_case_is_the_conservative_one() -> None:
-    """Showing the EPA permit case first avoids a false sense of security."""
-    assert site.DEFAULT_CASE == "permit"
+def test_page_opens_on_the_low_case_and_says_it_is_not_a_finding() -> None:
+    """Since Nov. 26 the page opens on the low case (maintainer's choice, after the blast).
+
+    Before the blast it opened on the EPA permit case, to avoid a false sense of security.
+    The larger cases stay in the menu, and wherever the page says what it opens on, it
+    also says that this is not a finding that little lead got out.
+    """
+    assert site.DEFAULT_CASE == "low"
     assert {c: r for c, r, _ in site.CASES}["permit"] == "permit-100"
+    assert [c for c, _, _ in site.CASES] == ["low", "mid", "high", "permit"]
+    view = fs.default_view("7%")
+    assert "the low case (7% of the lead in the air)" in view
+    assert "is not a finding that little lead got out" in view
+    assert "up to the EPA permit case, which assumes all of the lead got into the air" in view
+    assert "not a measurement of where the cloud went" in view
+    assert "safe" not in view.lower()
+
+
+def test_weather_menu_opens_on_archived_weather(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Archived weather first, the pre-blast forecast second; forecast maps keep their names."""
+    assert [s for s, _ in site.SOURCES] == ["archived", "forecast"]
+    assert site.ARCHIVED_CACHE.exists()  # saved in the repository: a build never downloads it
+    assert site.map_name("low", "09:00") == "low-0900.html"
+    assert site.map_name("low", "09:00", site.DATE, "archived") == "archived-low-0900.html"
+    assert site.map_key(site.DATE, "low", "09:00") == f"{site.DATE}-low-0900"
+    assert site.map_key(site.DATE, "low", "09:00", "archived") == f"archived-{site.DATE}-low-0900"
+    page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    assert '<label for="w"$source_hidden>Weather' in page
+    assert '<select id="w">$source_options</select>' in page
+    assert '<label for="t"$time_hidden>' in page  # one blast time: the time menu is hidden
+    assert "(src.value === OPEN_SOURCE ? '' : '-' + src.value)" in page
+    # with only the forecast maps built, the page opens on them and hides the menu
+    monkeypatch.setattr(site, "MAPS", tmp_path)
+    for c, _, _ in site.CASES:
+        (tmp_path / site.map_name(c, "09:00")).write_text("x", encoding="utf-8")
+    only = site.source_values(
+        site.Maps([], {}, ["09:00"], "09:00", sources=site.sources_built(["09:00"]))
+    )
+    assert only["open_source"] == '"forecast"'
+    assert only["source_hidden"] == " hidden"
+    assert only["time_hidden"] == " hidden"
+    for c, _, _ in site.CASES:
+        (tmp_path / site.map_name(c, "09:00", site.DATE, "archived")).write_text(
+            "x", encoding="utf-8"
+        )
+    both = site.source_values(
+        site.Maps([], {}, ["09:00"], "09:00", sources=site.sources_built(["09:00"]))
+    )
+    assert both["open_source"] == '"archived"'
+    assert both["source_hidden"] == ""
+    assert both["source_options"].index("Archived weather") < both["source_options"].index(
+        "Forecast"
+    )
+    assert '<option value="archived" selected>' in both["source_options"]
+
+
+def test_archived_map_runs_offline_from_the_new_release_point(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The archived weather, saved around the plant point, serves a run from the magazines.
+
+    A quick, coarse run with the site's own archived settings and downloads off. Without
+    --weather-at the same run would need weather centered on the new point, which isn't
+    saved, so it stops instead of downloading.
+    """
+    monkeypatch.setenv(site.CACHE_ONLY_ENV, "1")
+    cmd = site.archived_runs("python")[0].cmd
+    argv = cmd[2 : cmd.index("-o")]  # the options, without the interpreter and the output
+    for flag, value in (("--grid", "60"), ("--dt", "300")):
+        argv[argv.index(flag) + 1] = value
+    _, out = run_puff(argv)
+    meta = out["meta"]
+    assert (meta["lat"], meta["lon"]) == (site.ARCHIVED_LAT, site.ARCHIVED_LON)
+    assert meta["weather"] == site.ARCHIVED_LABEL  # not "Open-Meteo forecast"
+    assert "sky" not in out["hours"][0]
+    spread = meta["ensemble"]
+    assert not spread["models"]  # one weather source: the template's deposition-only wording
+    assert not spread["spread"]
+    assert len(spread["deposition"]) == 2
+    assert out["hours"][0]["ws"] > 0
+    i = argv.index("--weather-at")
+    with pytest.raises(met.NotSaved):
+        run_puff(argv[:i] + argv[i + 2 :])
+
+
+def test_hashed_names_cover_both_weather_sets(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Archived maps get their own keys and hashed files; the comparison tool reads past both."""
+    monkeypatch.setattr(site, "MAPS", tmp_path / "maps")
+    monkeypatch.setattr(site, "HASHED", tmp_path / "m")
+    site.MAPS.mkdir()
+    for source in ("forecast", "archived"):
+        for c, _, _ in site.CASES:
+            name = site.map_name(c, "09:00", site.DATE, source)
+            (site.MAPS / name).write_text(f"<html><head></head>{name}</html>", encoding="utf-8")
+    files = site.write_hashed_maps({site.DATE: ["09:00"]}, ["archived", "forecast"])
+    assert sorted(files) == sorted(
+        site.map_key(site.DATE, c, "09:00", s)
+        for s in ("forecast", "archived")
+        for c, _, _ in site.CASES
+    )
+    assert re.fullmatch(
+        r"m/archived-low-0900-[0-9a-f]{10}", files[f"archived-{site.DATE}-low-0900"]
+    )
+    assert re.fullmatch(r"m/low-0900-[0-9a-f]{10}", files[f"{site.DATE}-low-0900"])
+    page = 'rel="canonical"' in (site.MAPS / "archived-low-0900.html").read_text(encoding="utf-8")
+    assert page  # a map opened on its own points search engines at the home page
+    (tmp_path / "index.html").write_text(json.dumps(files), encoding="utf-8")
+    cleaned = compare_site.normalized_index(tmp_path)
+    assert not re.search(r"-[0-9a-f]{10}", cleaned)  # no hash left to differ between builds
+    assert '"archived-low-0900"' in cleaned  # the tool keeps the name and drops "m/" and the hash
+    assert '"low-0900"' in cleaned
+
+
+def test_staged_page_keeps_the_permit_case_first() -> None:
+    """The Wednesday-to-Friday forecasts from before the blast open as they did then."""
+    assert staged.DEFAULT_CASE == "permit"
+    assert site.DEFAULT_CASE == "low"
+
+
+def test_archived_runs_use_only_the_saved_weather() -> None:
+    runs = site.archived_runs("python")
+    assert [r.which for r in runs] == [f"archived {c} 09:00" for c, _, _ in site.CASES]
+    for r in runs:
+        cmd = r.cmd
+        assert cmd[cmd.index("--weather-model") + 1] == site.ARCHIVED_MODEL
+        assert cmd[cmd.index("--met-cache") + 1] == str(site.ARCHIVED_CACHE)
+        assert cmd[cmd.index("--as-of") + 1] == site.ARCHIVED_AS_OF
+        assert "--sky-grid" not in cmd  # the sky grid is a forecast
+        assert "--no-sky-layer" in cmd  # and so is the map's own sky layer, by its label
+        assert cmd[cmd.index("--weather-label") + 1].startswith("archived NOAA HRRR")
+        # from midway between the two magazines, on the weather saved around the plant point
+        assert cmd[cmd.index("--lat") + 1] == "40.8096"
+        assert cmd[cmd.index("--lon") + 1] == "-91.2692"
+        assert cmd[cmd.index("--weather-at") + 1] == f"{site.LAT},{site.LON}"
+        assert (
+            "archived weather (NOAA HRRR, saved Nov. 25, 6:51 p.m. CST)"
+            in cmd[cmd.index("--legend-note") + 1]
+        )
+        assert r.out.name.startswith("archived-")
 
 
 def test_references_are_alphabetical() -> None:
@@ -474,7 +688,7 @@ def test_page_has_a_day_menu() -> None:
     page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
     assert '<select id="d">$day_options</select>' in page
     assert "$header_days" in page
-    assert "MAP_FILES[day.value + '-' + cas.value + '-' + t]" in page
+    assert "day.value + '-' + cas.value + '-' + t]" in page
 
 
 @pytest.mark.slow
@@ -638,12 +852,20 @@ def test_early_air_readings_say_lab_results_are_pending() -> None:
 
 
 def test_window_words_match_the_blast_times() -> None:
-    """The page's blast-time words match the times both sites build."""
-    for times in (site.TIMES, staged.TIMES):
-        assert [site.label(t) for t in (times[0], times[-1])] == ["8:30 a.m.", "9:30 a.m."]
-        assert fs.WINDOW == "8:30 to 9:30 a.m."
-        assert fs.WINDOW_HOURLY == "at 8:30, 9:00 and 9:30 a.m."
-        assert times == ["08:30", "09:00", "09:30"]
+    """The page's blast-time words match the times each site builds.
+
+    The main site models 9 a.m. only since Nov. 26; the staged page keeps its window.
+    """
+    assert site.TIMES == ["09:00"]
+    assert fs.BLAST_TIME == "9 a.m."
+    assert f"a blast at {fs.BLAST_TIME}, the time the Army had set." in fs.time_note("X")
+    assert [site.label(t) for t in (staged.TIMES[0], staged.TIMES[-1])] == [
+        "8:30 a.m.",
+        "9:30 a.m.",
+    ]
+    assert fs.WINDOW == "8:30 to 9:30 a.m."
+    assert fs.WINDOW_HOURLY == "at 8:30, 9:00 and 9:30 a.m."
+    assert staged.TIMES == ["08:30", "09:00", "09:30"]
     assert site.DEFAULT in site.TIMES
     assert staged.DEFAULT_TIME in staged.TIMES
 
@@ -923,7 +1145,8 @@ def test_one_model_order_per_day(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
         stdout = stderr = ""
 
     def fake_run(cmd: list[str], **_: object) -> Done:
-        orders.add(cmd[cmd.index("--weather-model") + 1])
+        if "archived" not in cmd[cmd.index("-o") + 1]:  # the forecast maps
+            orders.add(cmd[cmd.index("--weather-model") + 1])
         return Done()
 
     monkeypatch.setattr(site.subprocess, "run", fake_run)

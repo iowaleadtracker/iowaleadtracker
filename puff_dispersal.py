@@ -323,6 +323,26 @@ def _add_run_args(p: argparse.ArgumentParser) -> None:
         "later runs (reproducible, and spares the API)",
     )
     p.add_argument(
+        "--weather-at",
+        default=None,
+        metavar="LAT,LON",
+        help="center the weather grid on this point instead of the release point, so a run "
+        "can use weather saved (--met-cache) for a nearby release point; the grid is in "
+        "map coordinates, so the cloud still gets the weather where it is",
+    )
+    p.add_argument(
+        "--weather-label",
+        default=None,
+        metavar="TEXT",
+        help="describe the weather on the map with this text instead of the source's own "
+        "name, e.g. for weather saved after the fact, which is no longer a forecast",
+    )
+    p.add_argument(
+        "--no-sky-layer",
+        action="store_true",
+        help="leave the sky cover and rain layer off the map (it is labeled as a forecast)",
+    )
+    p.add_argument(
         "--as-of",
         default=None,
         metavar="TIME",
@@ -632,6 +652,10 @@ def _resolve_run(a: argparse.Namespace, p: argparse.ArgumentParser) -> None:
     a.as_of = parse_time(a.as_of)[0] if a.as_of else None
     if 3600 % a.dt:
         p.error("--dt must divide 3600")
+    try:  # refuse a bad --weather-at here, before any weather model is tried
+        weather_point(a)
+    except ValueError as e:
+        p.error(str(e))
     if not (-90 < a.lat < 90 and -180 <= a.lon <= 360):
         p.error("lat/lon out of range")
     if a.hours < 1 or a.hours > 240:
@@ -796,12 +820,33 @@ def _particle_bins(a: argparse.Namespace, log: TextIO) -> list[Bin]:
     return bins
 
 
+def weather_point(a: argparse.Namespace) -> tuple[float, float]:
+    """Return where the weather grid is centered: ``--weather-at``, else the release point.
+
+    Raises
+    ------
+    ValueError
+        If ``--weather-at`` isn't a latitude and longitude on Earth.
+    """
+    at = getattr(a, "weather_at", None)
+    if not at:
+        return a.lat, a.lon
+    try:
+        lat, lon = (float(x) for x in at.split(","))
+    except ValueError:
+        msg = f"--weather-at needs LAT,LON, not {at!r}"
+        raise ValueError(msg) from None
+    if not (-90 < lat < 90 and -180 <= lon <= 360):
+        msg = f"--weather-at is not a place on Earth: {at!r}"
+        raise ValueError(msg)
+    return lat, lon
+
+
 def _try_model(a: argparse.Namespace, m: str, log: TextIO, *, use_levels: bool) -> MetRun | None:
     """Return weather from one named model, or None (logged) if it doesn't cover the run."""
     try:
         nm, mt, el = build_met(
-            a.lat,
-            a.lon,
+            *weather_point(a),
             a.start,
             a.hours,
             a.wind_grid,
@@ -835,8 +880,7 @@ def _load_weather(a: argparse.Namespace, log: TextIO) -> list[MetRun]:
                 mets.append(got)
     if not mets:
         nm, mt, el = build_met(
-            a.lat,
-            a.lon,
+            *weather_point(a),
             a.start,
             a.hours,
             a.wind_grid,
@@ -1040,6 +1084,9 @@ def _hours_output(
                 ],
             }
         )
+    if getattr(a, "no_sky_layer", False):  # the page then hides its sky cover and rain layer
+        for hour in hours_out:
+            hour.pop("sky", None)
     return hours_out
 
 
@@ -1264,7 +1311,9 @@ def simulate(a: argparse.Namespace, log: TextIO = sys.stderr) -> Json:
         h["skyGrid"] = sh
     bins_out = _bins_output(a, bins)
     payload: Json = {
-        "meta": _meta(a, met, src_name, elev, bins_out, ensemble),
+        "meta": _meta(
+            a, met, getattr(a, "weather_label", None) or src_name, elev, bins_out, ensemble
+        ),
         "grid": {
             "nx": conc.shape[2],
             "ny": conc.shape[1],

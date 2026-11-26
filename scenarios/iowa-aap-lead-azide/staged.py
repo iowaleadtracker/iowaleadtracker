@@ -41,7 +41,10 @@ CACHE = HERE / "met_cache" / "staged_forecasts.json"
 TZ = ZoneInfo("America/Chicago")
 #: Wednesday (the Army's announced date, Nov. 22) through Friday.
 DAYS = ["2026-11-25", "2026-11-26", "2026-11-27"]
-TIMES = ["08:30", "09:00", "09:30"]  # site.TIMES; every day has these
+TIMES = ["08:30", "09:00", "09:30"]  # every day has these (the main site kept 9:00 only)
+#: The case this page opens on: the most conservative, as before the blast. The main site
+#: opens on the low case since Nov. 26; these forecasts from before the blast don't.
+DEFAULT_CASE = "permit"
 #: Later blast times for some days only. Wednesday's in case the blast is pushed back from
 #: 9 a.m. (maintainer's choice, Nov. 25). Each start hour costs its own forecast download.
 EXTRA_TIMES = {"2026-11-25": ["10:00", "11:00", "12:00"]}
@@ -249,7 +252,7 @@ def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
         for t in days[first_day]
     )
     case_opts = "".join(
-        f'<option value="{c}"{" selected" if c == site.DEFAULT_CASE else ""}>{n}</option>'
+        f'<option value="{c}"{" selected" if c == DEFAULT_CASE else ""}>{n}</option>'
         for c, _, n in site.CASES
     )
     labels = [day_label(d) for d in days]

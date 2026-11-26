@@ -53,3 +53,15 @@ def test_bad_options_are_refused(argv: list[str]) -> None:
     with pytest.raises(SystemExit) as done:
         puff.parse_args(argv)
     assert done.value.code == 2
+
+
+def test_weather_at_centers_the_weather_grid_elsewhere() -> None:
+    """--weather-at lets a run reuse weather saved for a nearby release point."""
+    base = ["--lat", "40.8096", "--lon", "-91.2692", "--time", "2026-11-25T09:00-06:00"]
+    assert puff.weather_point(puff.parse_args(base)) == (40.8096, -91.2692)
+    moved = puff.parse_args([*base, "--weather-at", "40.825518,-91.266502"])
+    assert puff.weather_point(moved) == (40.825518, -91.266502)
+    assert (moved.lat, moved.lon) == (40.8096, -91.2692)  # the release point is untouched
+    for bad in ("40.8", "north,west", "95,-91"):
+        with pytest.raises(SystemExit):
+            puff.weather_point(puff.parse_args([*base, "--weather-at", bad]))
