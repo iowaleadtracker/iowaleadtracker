@@ -65,6 +65,7 @@ FLOOR = 1e-4  # µg/m³, where zero readings and zero predictions are drawn in f
 MI_PER_DEG_LAT = lib.KM_PER_DEG / lib.KM_PER_MI
 HOUR_LABEL = {1: "9 to 10 a.m.", 2: "10 to 11 a.m.", 3: "11 a.m. to noon", 4: "noon to 1 p.m."}
 WIDE_MAP_DEG = 2
+AIR_MAP_HOURS = 2  # figure 2 maps the hours the cloud is among EPA's sites
 STAMP = "Iowa Lead Tracker (iowaleadtracker.com) \u00b7 Preliminary analysis, pending peer review"
 STAMP_NOTE = "Unofficial analysis, not from the Army or any government agency"
 STAMP_BAND = 0.045  # share of the figure height kept for the source line
@@ -230,9 +231,7 @@ def fig_ground(
         outline(ax, runs["analysis"], runs["analysis"].dep[8], level * lib.UG_FT2, "analysis")
         outline(ax, runs["hysplit"], runs["hysplit"].dep[n], level * lib.UG_FT2, "hysplit")
         ax.set_title(f"Modeled lead on the ground: {name}", fontsize=10, color=INK, loc="left")
-    legend(
-        axes[0], ["forecast", "analysis", "hysplit", "army"], {"hysplit": f" (first {n} h only)"}
-    )
+    legend(axes[0], ["forecast", "analysis", "hysplit", "army"])
     title(
         fig,
         "Model estimates if 26% of the lead became airborne as fine dust. "
@@ -613,7 +612,7 @@ def main(args: list[str]) -> None:
     }
     path = army_map.to_fields(air, army_map.air_anchor(ARMY_MAP, air), px)
     fig_ground(runs, army, epa, hours[-1], out / "fig1_ground.png")
-    fig_air(runs, epa, hours, out / "fig2_air_hourly.png")
+    fig_air(runs, epa, hours[:AIR_MAP_HOURS], out / "fig2_air_hourly.png")
     snaps = {
         "forecast": snapshots.tracker_snaps(fc_cache),
         "analysis": snapshots.tracker_snaps(an_cache),

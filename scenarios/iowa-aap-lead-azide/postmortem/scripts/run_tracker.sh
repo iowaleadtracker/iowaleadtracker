@@ -3,9 +3,9 @@
 #
 #   scripts/run_tracker.sh OUT_DIR            (from the repository root)
 #
-# Uses the weather saved in data/met_hrrr_asof_20261125_2215Z.json: Open-Meteo's HRRR
-# as served at 4:15 p.m. CST on Nov. 25, when the hours through 3 p.m. had been run
-# and later hours were forecasts from the newest run. No network is used. Settings are
+# Uses the weather saved in data/met_hrrr_asof_20261126_0051Z.json: Open-Meteo's HRRR
+# as served at 6:51 p.m. CST on Nov. 25, after all eight modeled hours (9 a.m. to 5 p.m.)
+# had passed. No network is used. Settings are
 # the site's (make_map_picker.py MODEL_ARGS), with HRRR only and no deposition spread.
 set -euo pipefail
 OUT=${1:?output folder}
@@ -17,8 +17,8 @@ run() {
     --time 2026-11-25T09:00-06:00 --material lead-azide --explosive-mass 9700lb \
     --specific-energy 1.64 --shots 2 --confinement earth-covered --land-use crops \
     --spread turbulence --hours 8 --dt 60 --grid 360 --scale-min 0.15ug --decades 4 \
-    --weather-model ncep_hrrr_conus --as-of 2026-11-25T22:15:02+00:00 \
-    --met-cache "$HERE/../data/met_hrrr_asof_20261125_2215Z.json" "$@" -o "$OUT/$name.html" 2>&1 |
+    --weather-model ncep_hrrr_conus --as-of 2026-11-26T00:51:31+00:00 \
+    --met-cache "$HERE/../data/met_hrrr_asof_20261126_0051Z.json" "$@" -o "$OUT/$name.html" 2>&1 |
     grep -E "Error|Traceback" || true
 }
 run an_low --release-case ap42-floor

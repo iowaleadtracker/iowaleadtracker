@@ -14,9 +14,6 @@ For each model run (with all of the lead airborne; other releases scale in propo
   real-time monitors are sampled again, giving the highest hourly mean any of them would
   read for each cloud direction. Turning the cloud rigidly ignores how its shape would
   change with a different wind, so this is a sensitivity test, not a forecast.
-
-HYSPLIT's reference run ends two hours after the detonation, so it is used only for
-sites the cloud has passed by then (within ``HYSPLIT_MAX_MI`` miles).
 """
 
 from __future__ import annotations
@@ -33,7 +30,6 @@ import numpy as np
 
 LEVELS = {"army_line_0.18": 0.18e-9, "highest_reading_0.01": 0.01e-9}  # kg/m3
 SWEEP = range(-30, 31)
-HYSPLIT_MAX_MI = 13.0
 XACT = ("AS01", "AS02", "AS03", "AS04")
 
 
@@ -80,19 +76,17 @@ def main(args: list[str]) -> None:
     """Build and print the JSON."""
     fc_dir, an_dir, hy_run, epa = (Path(a) for a in args)
     runs = {
-        "tracker forecast": (lib.tracker(fc_dir / "permit-0900.html"), math.inf),
-        "tracker analysis": (lib.tracker(an_dir / "an_permit.html"), math.inf),
-        "hysplit analysis": (lib.hysplit(hy_run), HYSPLIT_MAX_MI),
+        "tracker forecast": lib.tracker(fc_dir / "permit-0900.html"),
+        "tracker analysis": lib.tracker(an_dir / "an_permit.html"),
+        "hysplit analysis": lib.hysplit(hy_run),
     }
     all_sites = sites(epa)
     out: dict[str, Any] = {"levels_ugm3": {k: v * 1e9 for k, v in LEVELS.items()}, "runs": {}}
-    for name, (f, max_mi) in runs.items():
+    for name, f in runs.items():
         field = worst_hour(f)
         axis = lib.center(f, f.air[1])["center_bearing"]
         rows = []
         for s in all_sites:
-            if s["miles"] > max_mi:
-                continue
             c = sample(f, field, s["miles"], s["bearing"])
             row = {**s, "air_100pct_ugm3": c * 1e9}
             for key, level in LEVELS.items():
@@ -103,7 +97,7 @@ def main(args: list[str]) -> None:
             reads = {
                 s["site"]: sample(f, field, s["miles"], s["bearing"] - turn) * 1e9
                 for s in all_sites
-                if s["real_time_lead"] and s["miles"] <= max_mi
+                if s["real_time_lead"]
             }
             best = max(reads, key=lambda k: reads[k])
             sweep.append(

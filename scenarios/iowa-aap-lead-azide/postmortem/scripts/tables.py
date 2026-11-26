@@ -313,10 +313,7 @@ def sites(c: dict[str, Any]) -> str:
             if s["real_time_lead"]
             else ("filter, dust monitor" if "Dust" in s["instruments"] else "filter")
         )
-        air = [
-            num(b[n]["air_100pct_ugm3"] * LOW) if n in b else "not reached in 2 h"
-            for b in by.values()
-        ]
+        air = [num(b[n]["air_100pct_ugm3"] * LOW) if n in b else "not reached" for b in by.values()]
         rows.append([n, f"{s['miles']:.1f} mi at {s['bearing']:.0f}°", kind, *air])
     return table(["Site", "From the plant", "Instruments", *runs], rows)
 

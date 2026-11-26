@@ -25,24 +25,26 @@ FC=$WORK/forecast/scenarios/iowa-aap-lead-azide/outputs/site/maps
 # 2. The tracker on analyzed weather, and the sensitivity runs (no network)
 [[ -f $WORK/maps/an_mid_low_cloud.html ]] || "$P/scripts/run_tracker.sh" "$WORK/maps"
 
-# 3. HYSPLIT. Reference runs: NOAA ARL's archived HRRR on native levels (9 to 11 a.m.).
-#    Sensitivity run: the raw hourly analyses on pressure levels (9 a.m. to noon).
-ARCHIVE=20261125_12-17_hrrr
-[[ -f $WORK/$ARCHIVE ]] || curl -fL --retry 5 -C - -o "$WORK/$ARCHIVE" \
-  "https://noaa-oar-arl-hysplit-pds.s3.amazonaws.com/hrrr/2026/11/$ARCHIVE"
-[[ -f $WORK/$ARL ]] || WORK=$WORK "$BD/nowcast_hrrr.sh" 15 18
-hysplit() {  # hysplit RUN_NAME CONTROL_NAME WEATHER_FILE
+# 3. HYSPLIT, 9 a.m. to 5 p.m. Reference runs: NOAA ARL's archived HRRR on native levels.
+#    Sensitivity run: the raw hourly analyses on pressure levels.
+ARCHIVE=(20261125_12-17_hrrr 20261125_18-23_hrrr)
+for f in "${ARCHIVE[@]}"; do
+  [[ -f $WORK/$f ]] || curl -fL --retry 5 -C - -o "$WORK/$f" \
+    "https://noaa-oar-arl-hysplit-pds.s3.amazonaws.com/hrrr/2026/11/$f"
+done
+[[ -f $WORK/$ARL ]] || WORK=$WORK "$BD/nowcast_hrrr.sh" 15 23
+hysplit() {  # hysplit RUN_NAME CONTROL_NAME WEATHER_FILE...
   local r=$WORK/$1
   [[ -s $r/cdump ]] && return
   mkdir -p "$r"
   cp "$BD/$2.CONTROL" "$r/CONTROL"
   cp "$BD/SETUP.CFG" "$r/"
   for f in ASCDATA.CFG LANDUSE.ASC ROUGLEN.ASC; do ln -sf "$HYSPLIT_DIR/bdyfiles/$f" "$r/$f"; done
-  ln -sf "$WORK/$3" "$r/$3"
+  for f in "${@:3}"; do ln -sf "$WORK/$f" "$r/$f"; done
   (cd "$r" && "$HYSPLIT_DIR/exec/hycs_std" > hycs_std.log 2>&1)
 }
-hysplit run_arl_zhang 2026-11-25-9am-zhang-early2h "$ARCHIVE" &
-hysplit run_arl_emerson 2026-11-25-9am-emerson-early2h "$ARCHIVE" &
+hysplit run_arl_zhang 2026-11-25-9am-zhang "${ARCHIVE[@]}" &
+hysplit run_arl_emerson 2026-11-25-9am-emerson "${ARCHIVE[@]}" &
 hysplit run_analyses_zhang 2026-11-25-9am-zhang-analyses "$ARL" &
 wait
 

@@ -167,14 +167,14 @@ All retrieved Nov. 25 and saved in [`data/obs/`](data/obs):
 
 ### 3.4 The tracker on analyzed weather
 
-To separate forecast error from model differences, we reran the tracker at 4:15 p.m. on
-the HRRR that Open-Meteo then served, in which the hours through 3 p.m. come from runs
-started at or after those hours and later hours are forecasts from the newest run. The
-weather is saved in `data/met_hrrr_asof_20261125_2215Z.json`, so the reruns need no
-network. Settings are the site's, with HRRR only. This is HRRR at the tracker's 25 points
-with its 10 m, 80 m and eight pressure-level winds. It is close to NOAA's analyses but not
-identical: at the plant its 10 m wind direction is within 2° of the analysis from 9 a.m.
-to 1 p.m. and 5° off at 2 p.m., and Open-Meteo revised some hours between earlier pulls.
+To separate forecast error from model differences, we reran the tracker at 6:51 p.m. on
+the HRRR that Open-Meteo then served, after all eight modeled hours (9 a.m. to 5 p.m.)
+had passed. The weather is saved in `data/met_hrrr_asof_20261126_0051Z.json`, so the
+reruns need no network. Settings are the site's, with HRRR only. This is HRRR at the
+tracker's 25 points with its 10 m, 80 m and eight pressure-level winds. It is close to
+NOAA's analyses but not identical: at the plant its 10 m wind is within 2° and 0.1 m/s
+of the analysis at every hour from 9 a.m. to 4 p.m. Open-Meteo revised some hours
+between earlier pulls; a pull at 4:15 p.m. was 5° off at 2 p.m.
 
 ### 3.5 HYSPLIT
 
