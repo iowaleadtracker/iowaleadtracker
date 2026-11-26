@@ -96,6 +96,11 @@ def tracker_snaps(cache: Path) -> Snaps:
     return out
 
 
+def lines_in(run: Path) -> int:
+    """Return the number of starting locations in a run's CONTROL (two per line source)."""
+    return int((run / "CONTROL").read_text().split("\n")[1])
+
+
 def hysplit_snaps(run: Path) -> Snaps:
     """Read a HYSPLIT run's snapshot grid (csnap) at the marks it covers."""
     base = lib.hysplit(run, SCALE)  # for the grid geometry
@@ -121,7 +126,7 @@ def hysplit_snaps(run: Path) -> Snaps:
         air = np.zeros((len(base.lat), len(base.lon)))
         j = np.rint((v[:, lat_i] - base.lat[0]) / dx).astype(int)
         k = np.rint((v[:, lon_i] - base.lon[0]) / dx).astype(int)
-        air[j, k] = v[:, cols].sum(1) * SCALE
+        air[j, k] = v[:, cols].sum(1) * SCALE * 2 / lines_in(run)
         out[f"{mark:g}"] = (base, air)
     return out
 
@@ -143,4 +148,5 @@ def main(args: list[str]) -> None:
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    with lib.nominal_origin():  # distances along the path; the runs from the nominal point
+        main(sys.argv[1:])

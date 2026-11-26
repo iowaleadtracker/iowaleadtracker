@@ -210,8 +210,8 @@ def main(args: list[str]) -> None:
     """Measure both issues of the map under each anchor and print JSON."""
     army_dir = Path(args[0])
     models = {
-        "tracker forecast": lib.tracker(Path(args[1])),
-        "tracker analysis": lib.tracker(Path(args[2])),
+        "tracker forecast": lib.tracker(Path(args[1]), moved=False),
+        "tracker analysis": lib.tracker(Path(args[2]), moved=False),
     }
     out: dict[str, Any] = {}
     for name, m in MAPS.items():
@@ -251,4 +251,5 @@ def main(args: list[str]) -> None:
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    with lib.nominal_origin():  # a comparison of shapes, placed at the Army plume's own tip
+        main(sys.argv[1:])

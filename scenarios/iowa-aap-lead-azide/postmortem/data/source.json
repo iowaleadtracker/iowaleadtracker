@@ -1,0 +1,8 @@
+{
+ "note": "Where the release is modeled from. The nominal point is the one the site used (a point for the whole plant). The sources are the two barricaded magazines, about 1.8 km south of it, from a reader's tip checked against published imagery; positions are given as offsets from the nominal point and are good to about 15 m. Half of the lead is released from each.",
+ "nominal_point": {"lat": 40.825518, "lon": -91.266502},
+ "sources": [
+  {"name": "A", "north_km": -1.66, "east_km": -0.18, "share": 0.5},
+  {"name": "B", "north_km": -1.89, "east_km": -0.28, "share": 0.5}
+ ]
+}

@@ -34,10 +34,12 @@ for f in "${ARCHIVE[@]}"; do
 done
 [[ -f $WORK/$ARL ]] || WORK=$WORK "$BD/nowcast_hrrr.sh" 15 23
 hysplit() {  # hysplit RUN_NAME CONTROL_NAME WEATHER_FILE...
+  # Runs named src_* release from the modeled sources; the others from the nominal point.
   local r=$WORK/$1
   [[ -s $r/cdump ]] && return
   mkdir -p "$r"
   cp "$BD/$2.CONTROL" "$r/CONTROL"
+  if [[ $1 == src_* ]]; then (cd "$P/scripts" && python3 place_sources.py "$r/CONTROL"); fi
   cp "$BD/SETUP.CFG" "$r/"
   for f in ASCDATA.CFG LANDUSE.ASC ROUGLEN.ASC; do ln -sf "$HYSPLIT_DIR/bdyfiles/$f" "$r/$f"; done
   for f in "${@:3}"; do ln -sf "$WORK/$f" "$r/$f"; done
@@ -46,8 +48,13 @@ hysplit() {  # hysplit RUN_NAME CONTROL_NAME WEATHER_FILE...
 hysplit run_arl_zhang 2026-11-25-9am-zhang "${ARCHIVE[@]}" &
 hysplit run_arl_emerson 2026-11-25-9am-emerson "${ARCHIVE[@]}" &
 hysplit run_analyses_zhang 2026-11-25-9am-zhang-analyses "$ARL" &
-hysplit run_arl_coarse 2026-11-25-9am-coarse-early2h "${ARCHIVE[0]}" &  # coarse sizes, 2 hours
-hysplit run_arl_lofted 2026-11-25-9am-zhang-lofted "${ARCHIVE[@]}" &  # released at 251-502 m, 4 hours
+wait
+hysplit src_arl_zhang 2026-11-25-9am-zhang "${ARCHIVE[@]}" &
+hysplit src_arl_emerson 2026-11-25-9am-emerson "${ARCHIVE[@]}" &
+hysplit src_analyses_zhang 2026-11-25-9am-zhang-analyses "$ARL" &
+wait
+hysplit src_arl_coarse 2026-11-25-9am-coarse-early2h "${ARCHIVE[0]}" &  # coarse sizes, 2 hours
+hysplit src_arl_lofted 2026-11-25-9am-zhang-lofted "${ARCHIVE[@]}" &  # released at 251-502 m, 4 hours
 wait
 
 # 4. EPA's public layers
@@ -56,18 +63,20 @@ if [[ ${FETCH_EPA:-0} == 1 ]]; then python3 "$P/scripts/epa_fetch.py" "$P/data/e
 # 5. Numbers
 cache=$WORK/forecast/scenarios/iowa-aap-lead-azide/met_cache/map_met_all.json
 (cd "$P/scripts" && python3 compare.py "$FC" "$WORK/maps" "$WORK/run_arl_zhang" "$WORK/run_arl_emerson" \
-  "$WORK/run_analyses_zhang" ../data/epa) > "$P/data/compare.json"
+  "$WORK/run_analyses_zhang" ../data/epa "$WORK/src_arl_zhang" "$WORK/src_arl_emerson" \
+  "$WORK/src_analyses_zhang") > "$P/data/compare.json"
 (cd "$P/scripts" && python3 army_map.py ../data/army "$FC/mid-0900.html" "$WORK/maps/an_mid.html") > "$P/data/army_map.json"
 python3 "$P/scripts/forecast_vs_analysis.py" "$cache" "$WORK" "$ARL" > "$P/data/forecast_vs_analysis.json"
 python3 "$P/scripts/station_vs_hrrr.py" "$WORK" "$ARL" "$P/data/obs" > "$P/data/station_vs_hrrr.json"
-(cd "$P/scripts" && python3 monitor_coverage.py "$FC" "$WORK/maps" "$WORK/run_arl_zhang" ../data/epa "$WORK/run_arl_lofted") > "$P/data/monitor_coverage.json"
+(cd "$P/scripts" && python3 monitor_coverage.py "$FC" "$WORK/maps" "$WORK/src_arl_zhang" ../data/epa "$WORK/src_arl_lofted") > "$P/data/monitor_coverage.json"
 AN_CACHE=$(ls "$PWD/$P"/data/met_hrrr_asof_*.json)
-(cd "$P/scripts" && python3 coarse.py "$AN_CACHE" ../data/epa "$WORK/run_arl_coarse") > "$P/data/coarse.json"
+(cd "$P/scripts" && python3 coarse.py "$AN_CACHE" ../data/epa "$WORK/src_arl_coarse") > "$P/data/coarse.json"
 (cd "$P/scripts" && python3 snapshots.py "$cache" "$AN_CACHE" "$WORK/run_arl_zhang" "$WORK/run_analyses_zhang") > "$P/data/snapshots.json"
 
 # 6. Figures
-(cd "$P/scripts" && python3 figure.py "$FC" "$WORK/maps" "$WORK/run_arl_zhang" ../data/army ../data/epa \
+(cd "$P/scripts" && python3 figure.py "$FC" "$WORK/maps" "$WORK/src_arl_zhang" ../data/army ../data/epa \
   ../data/monitor_coverage.json "$cache" "$AN_CACHE" ../figures)
+(cd "$P/scripts" && python3 aerial_map.py "$FC" "$WORK/maps" "$WORK/src_arl_zhang" ../data/epa ../figures/fig7_aerial.png)
 # 7. Tables in README.md
 python3 "$P/scripts/tables.py"
 echo "done: $P/data, $P/figures, tables in $P/README.md"

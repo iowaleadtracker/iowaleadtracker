@@ -44,7 +44,7 @@ import numpy as np
 LEVELS = {"army_line_0.18": 0.18e-9, "highest_reading_0.01": 0.01e-9}  # kg/m3
 SWEEP = range(-30, 31)
 SMALL_CASE = 0.01  # a release of 1% of the lead
-SHIFT_KM = (1.0, 2.0, 3.0)  # how far the true source might be from the assumed point
+SHIFT_KM = (0.5, 1.0, 2.0)  # how far the true source might be from the modeled one
 SHIFT_DIRECTIONS = range(0, 360, 15)
 LOW_CASE = 0.07  # the lowest published release
 DEP_LEVELS = (100, 40, 5)  # µg/ft²

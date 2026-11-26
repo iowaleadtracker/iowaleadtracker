@@ -12,6 +12,8 @@ not an hourly mean.
 
 from __future__ import annotations
 
+import contextlib
+import json
 import math
 import os
 import subprocess
@@ -21,15 +23,26 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
+from scipy import ndimage
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import forecast_summary as fs
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from numpy.typing import ArrayLike
 
-LAT0, LON0 = 40.825518, -91.266502
 KM_PER_DEG = 111.195
+# The release is modeled from the sources in data/source.json (two magazines, half of the
+# lead each), given as offsets from the nominal point the site used. LAT0, LON0 is their
+# share-weighted midpoint; every distance and bearing is measured from it.
+_SRC = json.loads((Path(__file__).resolve().parents[1] / "data/source.json").read_text())
+NOMINAL_LAT, NOMINAL_LON = _SRC["nominal_point"]["lat"], _SRC["nominal_point"]["lon"]
+SOURCES = [(s["north_km"], s["east_km"], s["share"]) for s in _SRC["sources"]]
+_KM_PER_DEG_LON = KM_PER_DEG * math.cos(math.radians(NOMINAL_LAT))
+LAT0 = NOMINAL_LAT + sum(n * w for n, _, w in SOURCES) / KM_PER_DEG
+LON0 = NOMINAL_LON + sum(e * w for _, e, w in SOURCES) / _KM_PER_DEG_LON
 KM_PER_MI = 1.609344
 KG_PER_LB = 0.45359237
 UG_FT2 = fs.KG_M2_PER_UG_FT2  # kg/m2 per µg/ft²
@@ -71,13 +84,57 @@ class Fields:
         return float(field.flat[int(np.argmin(d))])
 
 
-def tracker(path: Path, scale: float = 1.0) -> Fields:
-    """Read a tracker map page. ``scale`` multiplies the fields (the model is linear)."""
+@contextlib.contextmanager
+def nominal_origin() -> Iterator[None]:
+    """Measure distances from the nominal point, for runs that start there.
+
+    Comparisons of one model with another, or with the Army's map placed at its own plume
+    tip, don't depend on where the source is. They use the runs from the nominal point,
+    unmoved, so that moving the tracker's fields can't blur them.
+    """
+    global LAT0, LON0
+    saved = LAT0, LON0
+    LAT0, LON0 = NOMINAL_LAT, NOMINAL_LON
+    try:
+        yield
+    finally:
+        LAT0, LON0 = saved
+
+
+def source_coordinates() -> list[tuple[float, float]]:
+    """Return the latitude and longitude of each modeled source."""
+    return [
+        (NOMINAL_LAT + n / KM_PER_DEG, NOMINAL_LON + e / _KM_PER_DEG_LON) for n, e, _ in SOURCES
+    ]
+
+
+def _to_sources(stack: np.ndarray, dlat: float, dlon: float) -> np.ndarray:
+    """Move fields modeled from the nominal point to each source and add them by share.
+
+    The tracker's runs start at the nominal point. Over the 2 km to the sources its weather
+    (25 points about 115 miles apart) barely changes, so the cloud is moved without
+    rerunning. Bilinear interpolation, which smooths the sharpest edges by under a cell.
+    """
+    out = np.zeros_like(stack)
+    for north, east, share in SOURCES:
+        rows, cols = north / (dlat * KM_PER_DEG), east / (dlon * _KM_PER_DEG_LON)
+        out += share * ndimage.shift(stack, (0, rows, cols), order=1, mode="constant")
+    return out
+
+
+def tracker(path: Path, scale: float = 1.0, *, moved: bool = True) -> Fields:
+    """Read a tracker map page, moved to the modeled sources unless ``moved`` is false.
+
+    ``scale`` multiplies the fields (the model is linear).
+    """
     d = fs.load_map(path)
     g = d["grid"]
     lon = g["west"] + (np.arange(g["nx"]) + 0.5) / g["nx"] * (g["east"] - g["west"])
     lat = g["north"] - (np.arange(g["ny"]) + 0.5) / g["ny"] * (g["north"] - g["south"])
+    dlat, dlon = (g["north"] - g["south"]) / g["ny"], (g["east"] - g["west"]) / g["nx"]
     conc, snap, dep = (fs.field(d, n)[:, ::-1, :] * scale for n in ("conc", "snap", "dep"))
+    if moved:
+        conc, snap, dep = (_to_sources(a, dlat, dlon) for a in (conc, snap, dep))
     hours = range(1, len(conc) + 1)
     cell = np.full(len(lat), (g["dx"] / 1000 / KM_PER_MI) ** 2)
     return Fields(
@@ -107,6 +164,7 @@ def hysplit(run: Path, scale: float = 1.0, level: str = "00010", species: str = 
     lat = clat - span[0] / 2 + np.arange(nlat) * dx
     lon = clon - span[1] / 2 + np.arange(nlon) * dx
     n_src = int(lines[1])
+    scale *= 2 / n_src  # HYSPLIT gives each vertical line source the full emission rate
     n_met = int(lines[5 + n_src])
     k0 = 6 + n_src + 2 * n_met
     n_pol = int(lines[k0])
@@ -139,7 +197,13 @@ def hysplit(run: Path, scale: float = 1.0, level: str = "00010", species: str = 
         air[h], dep[h] = a, total.copy()
     cell = (dx * KM_PER_DEG / KM_PER_MI) ** 2 * np.cos(np.radians(lat))
     return Fields(
-        lat=lat, lon=lon, air=air, dep=dep, snap={}, cell_mi2=cell, released_kg=released * scale
+        lat=lat,
+        lon=lon,
+        air=air,
+        dep=dep,
+        snap={},
+        cell_mi2=cell,
+        released_kg=released * scale * n_src / 2,
     )
 
 

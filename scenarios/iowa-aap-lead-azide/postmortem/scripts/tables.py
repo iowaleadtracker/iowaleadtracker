@@ -185,7 +185,7 @@ def monitors(d: dict[str, Any]) -> str:
         rows.append(row)
     head = [
         "Monitor",
-        "From the plant",
+        "From the modeled source",
         "Readings after 9 a.m.",
         "Not zero",
         "Highest (µg/m³)",
@@ -319,7 +319,7 @@ def sites(c: dict[str, Any]) -> str:
         )
         air = [num(b[n]["air_100pct_ugm3"] * LOW) if n in b else "not reached" for b in by.values()]
         rows.append([n, f"{s['miles']:.1f} mi at {s['bearing']:.0f}°", kind, *air])
-    return table(["Site", "From the plant", "Instruments", *runs], rows)
+    return table(["Site", "From the modeled source", "Instruments", *runs], rows)
 
 
 def windows(c: dict[str, Any]) -> str:
@@ -420,24 +420,23 @@ def lofted(c: dict[str, Any]) -> str:
         kind = "real-time lead" if s["real_time_lead"] else "filter"
         air = [num(b[n]["air_100pct_ugm3"] * LOW) for b in by.values()]
         rows.append([n, f"{s['miles']:.1f} mi at {s['bearing']:.0f}°", kind, *air])
-    return table(["Site", "From the plant", "Instrument", *runs], rows)
+    return table(["Site", "From the modeled source", "Instrument", *runs], rows)
 
 
 def coarse(c: dict[str, Any]) -> str:
-    """Table 11: one particle size at a time, air at AS01 and the lead left on the ground."""
+    """Table 11: one particle size at a time, air at two sites and the lead left on the ground."""
     hy = {(r["diameter_um"], r["density_kg_m3"]): r for r in c["hysplit"]}
+    near = c["sites_miles_bearing"]["AS01"][0]
 
     def pct(x: float) -> str:
         return f"{min(x, 1) * HUNDRED:.0f}%"
 
-    def need(air_per_pct: float) -> str:
-        share = NOISE / air_per_pct if air_per_pct else HUNDRED
-        if share >= HUNDRED:
-            return "all of it or more"
-        return f"{share:.3f}%" if share < 0.1 else f"{num(share)}%"
-
     def small(x: float) -> str:
         return num(x) if num(x) != "0" else "under 0.0001"
+
+    def air(r: dict[str, Any], h: dict[str, Any] | None, site: str) -> str:
+        mine = small(r["air_100pct_ugm3"][site] / HUNDRED)  # per 1% of the lead
+        return mine + (f" / {small(h['air_100pct_ugm3'][site] / HUNDRED)}" if h else "")
 
     def both(r: dict[str, Any], h: dict[str, Any] | None, key: str) -> str:
         return pct(r[key]) + (f" / {pct(h[key])}" if h else "")
@@ -445,16 +444,14 @@ def coarse(c: dict[str, Any]) -> str:
     rows = []
     for r in c["tracker"]:
         h = hy.get((r["diameter_um"], r["density_kg_m3"]))
-        air = r["air_100pct_ugm3"]["AS01"] / HUNDRED  # per 1% of the lead
-        air_h = h["air_100pct_ugm3"]["AS01"] / HUNDRED if h else None
         kind = "lead" if r["density_kg_m3"] > SOIL_MAX else "soil"
         rows.append(
             [
                 f"{r['diameter_um']:g} µm, {kind} density",
                 f"{num(r['diameter_um'] * (r['density_kg_m3'] / WATER) ** 0.5)} µm",
                 f"{num(r['settling_cm_s'])} cm/s",
-                small(air) + (f" / {small(air_h)}" if air_h is not None else ""),
-                need(air) + (f" / {need(air_h)}" if air_h is not None else ""),
+                air(r, h, "AS06"),
+                air(r, h, "AS01"),
                 both(r, h, "share_on_ground_within_as01_distance"),
                 both(r, h, "share_on_ground_within_15mi"),
             ]
@@ -463,9 +460,9 @@ def coarse(c: dict[str, Any]) -> str:
         "Particle size",
         "Aerodynamic diameter",
         "Settling speed",
+        "Air at AS06 per 1% of the lead (µg/m³)",
         "Air at AS01 per 1% of the lead (µg/m³)",
-        "Share of the lead for AS01 to read 0.01 µg/m³",
-        "On the ground within 4.5 mi",
+        f"On the ground within {near:.1f} mi",
         "On the ground within 15 mi",
     ]
     return table(head, rows)

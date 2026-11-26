@@ -11,7 +11,10 @@ field study of that kind of monitor, and details from the Army's permit applicat
 > instructions. The maps and charts are model estimates for assumed releases. They are not
 > measurements, and nothing here says how much lead reached any place.
 
-This replaces the [first version](initial_findings_20261126_0626Z.md), written 50 minutes
+> **Superseded.** A [third version](initial_findings_20261126_0915Z.md) replaces this
+> file. It models the release from the two magazines a reader's tip points to.
+
+This replaced the [first version](initial_findings_20261126_0626Z.md), written 50 minutes
 earlier. An independent review ([report](reviews/initial-findings-review-1.md)) found its
 numbers right and several of its conclusions too strong. This version makes those
 corrections and adds three tests the review called for. It summarizes the

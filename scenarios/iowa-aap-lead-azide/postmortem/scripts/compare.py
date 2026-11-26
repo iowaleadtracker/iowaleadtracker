@@ -3,7 +3,7 @@
 Usage (from the repository root, ``HYSPLIT_DIR`` set)::
 
     python compare.py FORECAST_MAPS ANALYSIS_MAPS HYSPLIT_ZHANG HYSPLIT_EMERSON \
-        HYSPLIT_PRESSURE EPA_DIR > out.json
+        HYSPLIT_PRESSURE EPA_DIR SOURCES_ZHANG SOURCES_EMERSON SOURCES_PRESSURE > out.json
 
 FORECAST_MAPS holds the site's maps rebuilt from the forecast it showed at 9 a.m.
 (``low-0900.html``, ``mid-0900.html``, ``permit-0900.html``). ANALYSIS_MAPS holds the
@@ -13,6 +13,12 @@ HYSPLIT_EMERSON are the run directories on NOAA ARL's archived HRRR (native leve
 reference runs, keyed ``hysplit analysis``; HYSPLIT_PRESSURE is the run on the raw
 pressure-level analyses, keyed ``hysplit pressure levels``. EPA_DIR holds ``epa_fetch.py``
 output.
+
+The model-with-model numbers (zones, overlap, centers, the sensitivity runs) don't depend
+on where the source is, so they use the runs from the nominal point, unmoved. The values
+at EPA's monitors do. They use the tracker's fields moved to the modeled sources
+(``data/source.json``) and the SOURCES_* runs, which are the same HYSPLIT cases released
+from those sources.
 """
 
 from __future__ import annotations
@@ -76,8 +82,8 @@ def monitors(epa: Path) -> dict[str, dict[str, Any]]:
                 {
                     "lat": float(r["lat"]),
                     "lon": float(r["lon"]),
-                    "miles": float(r["miles_from_plant"]),
-                    "bearing": float(r["bearing_from_plant"]),
+                    "miles": float(lib.dist_brg(float(r["lat"]), float(r["lon"]))[0]),
+                    "bearing": float(lib.dist_brg(float(r["lat"]), float(r["lon"]))[1]),
                     "readings": [],
                 },
             )
@@ -110,33 +116,35 @@ def at_monitors(
     return out
 
 
-def main(args: list[str]) -> None:
-    """Build and print the JSON."""
-    fc_dir, an_dir, hz, he, hp, epa = (Path(a) for a in args)
-    stations = monitors(epa)
-    hy = lib.hysplit(hz)
-    hy_hours = sorted(hy.air)
-    last = hy_hours[-1]
-    out: dict[str, Any] = {
-        "hysplit_hours": hy_hours,
-        "epa_monitors": stations,
-        "runs": {},
-        "at_monitors": {},
-    }
+def load(
+    maps: tuple[Path, Path], runs: tuple[Path, Path, Path], *, moved: bool
+) -> dict[str, lib.Fields]:
+    """Read every model run for every release case."""
+    fc_dir, an_dir = maps
+    hz, he, hp = runs
     fields: dict[str, lib.Fields] = {}
     for label, (case, scale) in CASES.items():
-        fields[f"tracker forecast {label}"] = lib.tracker(fc_dir / f"{case}-0900.html")
-        fields[f"tracker analysis {label}"] = lib.tracker(an_dir / f"an_{case}.html")
+        fields[f"tracker forecast {label}"] = lib.tracker(fc_dir / f"{case}-0900.html", moved=moved)
+        fields[f"tracker analysis {label}"] = lib.tracker(an_dir / f"an_{case}.html", moved=moved)
         fields[f"hysplit analysis {label}"] = lib.hysplit(hz, scale)
         fields[f"hysplit analysis emerson {label}"] = lib.hysplit(he, scale)
         fields[f"hysplit pressure levels {label}"] = lib.hysplit(hp, scale)
+    return fields
+
+
+def hours_of(name: str, f: lib.Fields) -> list[int]:
+    """Return the hours summarized for a run."""
+    return sorted(f.air) if name.startswith("hysplit") else [1, 2, 3, 4, 5, 8]
+
+
+def model_comparison(maps: tuple[Path, Path], runs: tuple[Path, Path, Path]) -> dict[str, Any]:
+    """Compare the models with each other, on the runs from the nominal point."""
+    out: dict[str, Any] = {"runs": {}, "overlap": {}, "sensitivity_26pct_8h": {}}
+    fields = load(maps, runs, moved=False)
+    last = max(fields["hysplit analysis 26%"].air)
+    out["hysplit_hours"] = sorted(fields["hysplit analysis 26%"].air)
     for name, f in fields.items():
-        hours = sorted(f.air) if name.startswith("hysplit") else [1, 2, 3, 4, 5, 8]
-        out["runs"][name] = summary(f, hours)
-        out["at_monitors"][name] = at_monitors(
-            f, stations, [h for h in hours if h <= MONITOR_HOURS]
-        )
-    out["overlap"] = {}
+        out["runs"][name] = summary(f, hours_of(name, f))
     for label in CASES:
         pairs = {
             "tracker forecast vs tracker analysis": ("tracker forecast", "tracker analysis"),
@@ -149,9 +157,8 @@ def main(args: list[str]) -> None:
                 str(u): lib.overlap(fa, fa.dep[last], fb, fb.dep[last], u * lib.UG_FT2)
                 for u in DEP_LEVELS
             }
-    out["sensitivity_26pct_8h"] = {}
     for name, file in SENSITIVITY.items():
-        f = lib.tracker(an_dir / file)
+        f = lib.tracker(maps[1] / file, moved=False)
         la, lo = f.mesh()
         d, _ = lib.dist_brg(la, lo)
         near = float(
@@ -163,6 +170,24 @@ def main(args: list[str]) -> None:
             "deposited_lb": lib.deposited_lb(f, 8),
             "deposited_within_15mi_lb": near / lib.KG_PER_LB,
         }
+    return out
+
+
+def main(args: list[str]) -> None:
+    """Build and print the JSON."""
+    paths = [Path(a) for a in args]
+    maps = (paths[0], paths[1])
+    nominal_runs = (paths[2], paths[3], paths[4])
+    epa = paths[5]
+    source_runs = (paths[6], paths[7], paths[8])
+    with lib.nominal_origin():
+        out = model_comparison(maps, nominal_runs)
+    stations = monitors(epa)
+    out["epa_monitors"] = stations
+    out["at_monitors"] = {}
+    for name, f in load(maps, source_runs, moved=True).items():
+        hours = [h for h in hours_of(name, f) if h <= MONITOR_HOURS]
+        out["at_monitors"][name] = at_monitors(f, stations, hours)
     json.dump(out, sys.stdout, indent=1)
     sys.stdout.write("\n")
 

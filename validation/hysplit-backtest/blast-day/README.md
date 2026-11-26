@@ -59,6 +59,13 @@ The three Zhang inputs also write a second grid, `csnap`: a snapshot of the 0–
 every 30 minutes, for comparing the cloud's position with the time marks on the Army's
 map. Adding it does not change the hourly output (`cdump` is byte-identical).
 
+These inputs start at the scenario's nominal point. The first comparison's monitor section
+models the release from two magazines about 1.8 km south of it, from a reader's tip
+checked against published imagery. For those runs its `scripts/place_sources.py` rewrites
+the starting locations of a copy of the input (one vertical line per magazine, same
+heights), and the results are halved, because HYSPLIT gives each line the full emission
+rate. The inputs here are not changed.
+
 The fixed dry deposition speeds are the tracker's values at its 5 m/s reference wind (the
 back-test's "Method"); they are the same on every day, while the tracker itself varies them
 with the hourly wind.

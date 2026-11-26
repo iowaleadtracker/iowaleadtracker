@@ -209,7 +209,7 @@ def legend(
             mfc=INK,
             mec="white",
             ms=11,
-            label="Assumed source point (the plant)",
+            label="Modeled source (two magazines)",
         ),
     ]
     ax.legend(handles=h, fontsize=7, loc=loc, framealpha=0.95, edgecolor="#cccccc")
