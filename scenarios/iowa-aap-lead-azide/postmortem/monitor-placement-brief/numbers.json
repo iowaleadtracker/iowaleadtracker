@@ -137,6 +137,89 @@
    "20": 217.0
   }
  },
+ "in_rerun_path": {
+  "AS01": {
+   "miles": 3.6252950221138494,
+   "bearing": 231.9561999167017,
+   "air_ugm3": {
+    "analysis": 1.2566702123351092,
+    "hysplit": 0.44066050808311275
+   },
+   "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister"
+  },
+  "AS06": {
+   "miles": 5.784809935262096,
+   "bearing": 215.53108481885542,
+   "air_ugm3": {
+    "analysis": 5.874895681046155,
+    "hysplit": 6.406399855052314
+   },
+   "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister"
+  },
+  "AS12": {
+   "miles": 8.825519428447476,
+   "bearing": 213.9362537706147,
+   "air_ugm3": {
+    "analysis": 6.844252720128452,
+    "hysplit": 3.980165086403531
+   },
+   "instruments": "Air Cassette, Summa Cannister"
+  },
+  "AS13": {
+   "miles": 12.846160314321656,
+   "bearing": 223.83025119408123,
+   "air_ugm3": {
+    "analysis": 0.5824440374446738,
+    "hysplit": 1.0410400319571522
+   },
+   "instruments": "Air Cassette, Summa Cannister"
+  },
+  "AS35": {
+   "miles": 13.256775209094975,
+   "bearing": 203.30377465124883,
+   "air_ugm3": {
+    "analysis": 0.011377941123991153,
+    "hysplit": 0.6787200246272107
+   },
+   "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister"
+  },
+  "AS14": {
+   "miles": 20.469769015600935,
+   "bearing": 222.11860480943062,
+   "air_ugm3": {
+    "analysis": 0.7240076316250565,
+    "hysplit": 0.8066800005757102
+   },
+   "instruments": "Air Cassette, Summa Cannister"
+  },
+  "AS18": {
+   "miles": 24.682071115844195,
+   "bearing": 219.00842879136727,
+   "air_ugm3": {
+    "analysis": 1.8725725414725503,
+    "hysplit": 1.03554498309677
+   },
+   "instruments": "Air Cassette, Summa Cannister"
+  },
+  "AS36": {
+   "miles": 28.781946844831744,
+   "bearing": 212.81431595185813,
+   "air_ugm3": {
+    "analysis": 0.5233806166238253,
+    "hysplit": 0.1625399953519846
+   },
+   "instruments": "Air Cassette, Summa Cannister"
+  },
+  "AS37": {
+   "miles": 30.46545350910636,
+   "bearing": 224.56108028502595,
+   "air_ugm3": {
+    "analysis": 0.17217878511832652,
+    "hysplit": 0.2949379906969085
+   },
+   "instruments": "Air Cassette, Summa Cannister"
+  }
+ },
  "readings": {
   "AS01": {
    "posted": 63,

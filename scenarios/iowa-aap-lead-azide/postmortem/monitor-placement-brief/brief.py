@@ -119,6 +119,27 @@ def sites() -> dict[str, dict[str, Any]]:
     return dict(sorted(out.items()))
 
 
+def in_rerun_path(grids: dict[str, aerial_map.Grid]) -> dict[str, dict[str, Any]]:
+    """Return EPA's sites where either rerun on analyzed weather reaches the Army's air line.
+
+    Covers the saved area only, about 30 miles from the source. Values are for the 7% case.
+    """
+    out = {}
+    with (HERE / "data/epa/epa_air_stations.csv").open() as fh:
+        for r in csv.DictReader(fh):
+            la, lo = float(r["lat"]), float(r["lon"])
+            air = {k: nearest(grids[k], la, lo) * UG for k in ("analysis", "hysplit")}
+            if max(air.values()) >= lib.ARMY_AIR * UG:
+                d, b = lib.dist_brg(la, lo)
+                out[r["station_id"].replace("-", "")] = {
+                    "miles": float(d),
+                    "bearing": float(b),
+                    "air_ugm3": air,
+                    "instruments": r["instruments"],
+                }
+    return dict(sorted(out.items(), key=lambda kv: kv[1]["miles"]))
+
+
 def readings() -> dict[str, dict[str, Any]]:
     """Summarize EPA's posted real-time readings, by station, from the detonation on."""
     with (HERE / "data/epa/epa_xact_public_viewer.csv").open() as fh:
@@ -144,6 +165,7 @@ def numbers(grids: dict[str, aerial_map.Grid]) -> dict[str, Any]:
         "source": {"lat": lib.LAT0, "lon": lib.LON0, "magazines": lib.source_coordinates()},
         "sites": sites(),
         "paths": {k: {str(m): ring_peak(g, m) for m in RINGS_MI} for k, g in grids.items()},
+        "in_rerun_path": in_rerun_path(grids),
         "readings": readings(),
         "army_map": json.loads((POST / "data/army_georef.json").read_text())["ground"],
     }
@@ -191,7 +213,26 @@ def tables(n: dict[str, Any]) -> dict[str, str]:
             f"| {label} | {r['posted']} | {r['zero']} | {r['highest']:.3f} | "
             f"{r['highest_before']:.3f} |"
         )
-    return {"sites": "\n".join(rows), "paths": "\n".join(paths), "readings": "\n".join(read)}
+    need = [
+        "| Site | From the modeled source | Tracker, analyzed weather | HYSPLIT, archived weather "
+        "| Instruments EPA lists there | Results public |",
+        "|---|---|---|---|---|---|",
+    ]
+    for name, s in n["in_rerun_path"].items():
+        air = " | ".join(num(s["air_ugm3"][k]) for k in ("analysis", "hysplit"))
+        kit = s["instruments"].replace("Dust Trak", "DustTrak").replace("Cannister", "canister")
+        if name in XACT:
+            kit = "Xact real-time lead monitor, " + kit
+        public = "real-time lead only" if name in XACT else "none"
+        need.append(
+            f"| {name} | {s['miles']:.1f} mi at {s['bearing']:.0f}° | {air} | {kit} | {public} |"
+        )
+    return {
+        "sites": "\n".join(rows),
+        "paths": "\n".join(paths),
+        "readings": "\n".join(read),
+        "needed": "\n".join(need),
+    }
 
 
 def main(args: list[str]) -> None:

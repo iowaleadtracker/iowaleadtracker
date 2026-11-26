@@ -42,16 +42,67 @@ has detected zero lead." Because the monitors were lined up along the forecast p
 not spread across it, those readings fit more than one account, and the public data
 can't tell them apart: little fine lead got out, or a cloud passed south of the monitors.
 
-Measurements that could tell them apart exist but are not public. EPA lists filter
-samplers at two sites in the reruns' path, AS06 and AS12, about 6 and 9 miles from the
-magazines. No lab results from them, or from soil and surface sampling, had been posted
-when this was written.
+The measurements that can tell them apart are the ones not yet public: lab results from
+samples of the ground, and from the other instruments EPA set out along the
+analyzed-weather path. EPA lists filter samplers at eight sites in that path within
+about 30 miles, among them AS06 and AS12, about 6 and 9 miles from the magazines and in the body
+of the rerun cloud. No results from them, or from soil and surface sampling, had been
+posted when this was written. Until they are, the real-time readings can't settle what
+reached the ground or the air south of the monitors.
 
 These are model estimates, not measurements. Nothing here shows that lead reached any
 place, or how much. Where the magazines are comes from a reader's tip checked against
 published satellite imagery; no official source confirms it. The analysis has not been
 peer reviewed. The code and data to redraw the map and recompute every number are in
 this folder.
+
+## What is needed now
+
+**The four real-time monitors can't answer this. Two other kinds of measurement can, and
+neither is public yet.**
+
+**1. Lab results from the ground.** Soil, surface-wipe and water samples don't depend on
+an instrument having been in the right place at the right minute. Lead that came down
+stays where it fell, and a sample taken afterward finds it. Ground samples also catch
+lead on particles too coarse for an air monitor's inlet. EPA says it collected more than
+1,200 air, land and water samples before the detonation (EPA 2026c), so there is a
+baseline to compare with. Sampling between about 205° and 245° from the magazines, out
+to 15 miles, would span every model run here; the reruns' path runs along 210° to 217°.
+
+**2. Results from the instruments already in the analyzed-weather path.** EPA's site list
+has 43 sites. Besides the nearest real-time monitor, eight of them are places where a
+rerun on analyzed weather reaches 0.18 µg/m³ for the 7% case:
+
+*Table A. EPA sites within about 30 miles where either rerun on analyzed weather gives a
+highest hourly mean of 0.18 µg/m³ or more for the 7% case, nearest first, with the modeled
+values (µg/m³) and the instruments EPA lists. Model estimates, not measurements.*
+
+<!-- table:needed -->
+| Site | From the modeled source | Tracker, analyzed weather | HYSPLIT, archived weather | Instruments EPA lists there | Results public |
+|---|---|---|---|---|---|
+| AS01 | 3.6 mi at 232° | 1.3 | 0.44 | Xact real-time lead monitor, DustTrak, AreaRAE, Air Cassette, Summa canister | real-time lead only |
+| AS06 | 5.8 mi at 216° | 5.9 | 6.4 | DustTrak, AreaRAE, Air Cassette, Summa canister | none |
+| AS12 | 8.8 mi at 214° | 6.8 | 4.0 | Air Cassette, Summa canister | none |
+| AS13 | 12.8 mi at 224° | 0.58 | 1.0 | Air Cassette, Summa canister | none |
+| AS35 | 13.3 mi at 203° | 0.011 | 0.68 | DustTrak, AreaRAE, Air Cassette, Summa canister | none |
+| AS14 | 20.5 mi at 222° | 0.72 | 0.81 | Air Cassette, Summa canister | none |
+| AS18 | 24.7 mi at 219° | 1.9 | 1.0 | Air Cassette, Summa canister | none |
+| AS36 | 28.8 mi at 213° | 0.52 | 0.16 | Air Cassette, Summa canister | none |
+| AS37 | 30.5 mi at 225° | 0.17 | 0.29 | Air Cassette, Summa canister | none |
+<!-- /table:needed -->
+
+- **Filter cassettes** are at every one of these sites. A lab measures the lead on the
+  filter. AS06 and AS12 matter most: they are in the body of the rerun cloud and read
+  almost nothing on the forecast path, so a result there separates the two paths.
+- **DustTrak particle monitors** are at AS06 and AS35. They record airborne particles
+  continuously, not lead. A record from AS06 for 9 to 11 a.m. on Nov. 25 would show
+  whether a particle cloud passed, and when, without waiting for a lab.
+- **The Army's own samplers.** Its permit application describes 24-hour filter samples at
+  ten locations and five response samples during the event (U.S. Army 2026b). Their locations are not
+  public.
+
+If these come back clean along 210° to 220°, that supports little lead having become
+airborne. If they don't, the real-time monitors were beside the cloud, not in it.
 
 ## The map
 
@@ -149,7 +200,7 @@ the southern edge of the first range and outside the second.
    (Stein et al. 2015) run on NOAA ARL's archive of HRRR. HYSPLIT is run from the two
    magazines. The tracker's fields are moved to them, because its saved weather can't be
    pulled again for a new point.
-4. **Army map.** The Army's final "Mitigated 0.26" ground map (U.S. Army 2026) is a small
+4. **Army map.** The Army's final "Mitigated 0.26" ground map (U.S. Army 2026a) is a small
    picture, 0.6 mile per pixel. It is placed by fitting public county boundaries to the
    county lines printed on it. About two thirds of the boundary points land within a
    pixel and a half of a line, and the placement is good to about a pixel.
@@ -271,9 +322,11 @@ a cloud passed south of or over the monitors; the detonation was somewhere else;
 public feed doesn't show what the instruments measured.
 
 **What would settle it?**
-Lab results from EPA's filter samplers at AS06 and AS12, then AS13, AS14 and AS18. Soil
-and surface samples southwest and south-southwest of the plant. An official statement of
-where the detonation was. The monitors' model, inlet and detection limit.
+Lab results from the ground and from the instruments in the analyzed-weather path; see
+"What is needed now." Above all, EPA's filter samples at AS06 and AS12, its DustTrak
+record at AS06 for the morning of Nov. 25, and soil and surface samples between about
+205° and 245° from the magazines out to 15 miles. Also an official statement of where
+the detonation was, and the monitors' model, inlet and detection limit.
 
 **Has anyone checked this?**
 No one outside the project. It has had AI referee reviews, which found and led to
@@ -299,6 +352,9 @@ Iowa Lead Tracker, an unofficial public project by a private citizen
   detonation, Nov. 25, 2026,
   https://www.facebook.com/story.php?story_fbid=1424138166543295&id=100068413763562.
   Source of "Xact stations monitoring for lead."
+- EPA, 2026c: EPA collects over 1,200 air, land, and water samples ahead of Iowa Army
+  Ammunition Plant controlled detonation. News release, Nov. 25, 2026,
+  https://www.epa.gov/newsreleases/epa-collects-over-1200-air-land-and-water-samples-ahead-iowa-army-ammunition-plant.
 - Esri: World Imagery (Esri, Maxar, Earthstar Geographics), and USA Counties Generalized
   Boundaries, from the Census Bureau's county boundaries.
 - Iowa's News Now, 2026: Understanding the lead plume: What the Army's projected
@@ -313,8 +369,11 @@ Iowa Lead Tracker, an unofficial public project by a private citizen
 - Stein, A. F., and Coauthors, 2015: NOAA's HYSPLIT atmospheric transport and dispersion
   modeling system. *Bull. Amer. Meteor. Soc.*, **96**, 2059–2077,
   doi:10.1175/BAMS-D-14-00110.1.
-- U.S. Army, 2026: Public advisory maps, "Mitigated 0.26" dispersion and deposition,
+- U.S. Army, 2026a: Public advisory maps, "Mitigated 0.26" dispersion and deposition,
   detonation 25 Nov 2026 0900 CST, issued Nov. 25, 2026, a/o 250700NOV26 (in
   `../data/army/`).
+- U.S. Army, 2026b: Emergency permit application for treatment of lead azide, Quality
+  Assurance Project Plan (redacted). Posted by EPA at
+  https://response.epa.gov/site/site_profile.aspx?site_id=17211.
 - WVLT, 2026: Video of the detonation shot from a plane, credited "WGEM Viewer,
   Middletown, Iowa". Posted on Instagram, Nov. 25, 2026 (one frame seen).
