@@ -124,20 +124,21 @@ def in_rerun_path(grids: dict[str, aerial_map.Grid]) -> dict[str, dict[str, Any]
 
     Covers the saved area only, about 30 miles from the source. Values are for the 7% case.
     """
-    out = {}
+    found: list[tuple[float, str, dict[str, Any]]] = []
     with (HERE / "data/epa/epa_air_stations.csv").open() as fh:
         for r in csv.DictReader(fh):
             la, lo = float(r["lat"]), float(r["lon"])
             air = {k: nearest(grids[k], la, lo) * UG for k in ("analysis", "hysplit")}
             if max(air.values()) >= lib.ARMY_AIR * UG:
                 d, b = lib.dist_brg(la, lo)
-                out[r["station_id"].replace("-", "")] = {
+                site = {
                     "miles": float(d),
                     "bearing": float(b),
                     "air_ugm3": air,
                     "instruments": r["instruments"],
                 }
-    return dict(sorted(out.items(), key=lambda kv: kv[1]["miles"]))
+                found.append((float(d), r["station_id"].replace("-", ""), site))
+    return {name: site for _, name, site in sorted(found, key=lambda f: f[0])}
 
 
 def readings() -> dict[str, dict[str, Any]]:
@@ -213,11 +214,10 @@ def tables(n: dict[str, Any]) -> dict[str, str]:
             f"| {label} | {r['posted']} | {r['zero']} | {r['highest']:.3f} | "
             f"{r['highest_before']:.3f} |"
         )
-    need = [
-        "| Site | From the modeled source | Tracker, analyzed weather | HYSPLIT, archived weather "
-        "| Instruments EPA lists there | Results public |",
-        "|---|---|---|---|---|---|",
-    ]
+    head = (
+        "| Site | From the modeled source | Tracker, analyzed weather | HYSPLIT, archived weather"
+    )
+    need = [head + " | Instruments EPA lists there | Results public |", "|---|---|---|---|---|---|"]
     for name, s in n["in_rerun_path"].items():
         air = " | ".join(num(s["air_ugm3"][k]) for k in ("analysis", "hysplit"))
         kit = s["instruments"].replace("Dust Trak", "DustTrak").replace("Cannister", "canister")
