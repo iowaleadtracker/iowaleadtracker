@@ -1113,7 +1113,7 @@
    ]
   },
   "tracker analysis": {
-   "cloud_bearing_hour1": 214.81045874388,
+   "cloud_bearing_hour1": 214.77140319818932,
    "sites": [
     {
      "site": "AS01",
@@ -1121,9 +1121,9 @@
      "miles": 4.485511225254946,
      "bearing": 221.92956588762283,
      "real_time_lead": true,
-     "air_100pct_ugm3": 87.92243113833669,
-     "smallest_share_army_line_0.18": 0.0020472591313676135,
-     "smallest_share_highest_reading_0.01": 0.00011373661840931186
+     "air_100pct_ugm3": 95.84821589673899,
+     "smallest_share_army_line_0.18": 0.001877969227866703,
+     "smallest_share_highest_reading_0.01": 0.00010433162377037239
     },
     {
      "site": "AS02",
@@ -1131,9 +1131,9 @@
      "miles": 12.546292981822225,
      "bearing": 229.815360233776,
      "real_time_lead": true,
-     "air_100pct_ugm3": 3.995581588015616e-05,
-     "smallest_share_army_line_0.18": 4504.976210219149,
-     "smallest_share_highest_reading_0.01": 250.27645612328607
+     "air_100pct_ugm3": 1.7754177963825954e-05,
+     "smallest_share_army_line_0.18": 10138.458697820257,
+     "smallest_share_highest_reading_0.01": 563.2477054344587
     },
     {
      "site": "AS03",
@@ -1141,9 +1141,9 @@
      "miles": 19.861693616750653,
      "bearing": 231.52319285346945,
      "real_time_lead": true,
-     "air_100pct_ugm3": 0.0010444865162321903,
-     "smallest_share_army_line_0.18": 172.3334836808806,
-     "smallest_share_highest_reading_0.01": 9.574082426715588
+     "air_100pct_ugm3": 0.0006978928642441744,
+     "smallest_share_army_line_0.18": 257.9192440876179,
+     "smallest_share_highest_reading_0.01": 14.32884689375655
     },
     {
      "site": "AS04",
@@ -1151,9 +1151,9 @@
      "miles": 28.05313161334452,
      "bearing": 233.42106520454317,
      "real_time_lead": true,
-     "air_100pct_ugm3": 0.0018489890274194759,
-     "smallest_share_army_line_0.18": 97.35049658526925,
-     "smallest_share_highest_reading_0.01": 5.408360921403847
+     "air_100pct_ugm3": 0.002372929419854759,
+     "smallest_share_army_line_0.18": 75.85560636313294,
+     "smallest_share_highest_reading_0.01": 4.214200353507385
     },
     {
      "site": "AS05",
@@ -1161,9 +1161,9 @@
      "miles": 36.58637952005532,
      "bearing": 220.2884183685649,
      "real_time_lead": false,
-     "air_100pct_ugm3": 13.462913589252612,
-     "smallest_share_army_line_0.18": 0.01337006278816892,
-     "smallest_share_highest_reading_0.01": 0.0007427812660093844
+     "air_100pct_ugm3": 12.466865146169583,
+     "smallest_share_army_line_0.18": 0.014438272804715834,
+     "smallest_share_highest_reading_0.01": 0.0008021262669286575
     },
     {
      "site": "AS06",
@@ -1171,9 +1171,9 @@
      "miles": 6.785327837268274,
      "bearing": 211.09082253377574,
      "real_time_lead": false,
-     "air_100pct_ugm3": 168.87456959654764,
-     "smallest_share_army_line_0.18": 0.0010658798446091186,
-     "smallest_share_highest_reading_0.01": 5.921554692272881e-05
+     "air_100pct_ugm3": 156.3804500281626,
+     "smallest_share_army_line_0.18": 0.0011510390203352385,
+     "smallest_share_highest_reading_0.01": 6.394661224084658e-05
     },
     {
      "site": "AS07",
@@ -1201,9 +1201,9 @@
      "miles": 16.837751798826343,
      "bearing": 229.59875988550885,
      "real_time_lead": false,
-     "air_100pct_ugm3": 0.0011332765665969585,
-     "smallest_share_army_line_0.18": 158.8314850103273,
-     "smallest_share_highest_reading_0.01": 8.823971389462626
+     "air_100pct_ugm3": 0.0025746481777579075,
+     "smallest_share_army_line_0.18": 69.91246476120486,
+     "smallest_share_highest_reading_0.01": 3.8840258200669364
     },
     {
      "site": "AS10",
@@ -1211,9 +1211,9 @@
      "miles": 27.959065412053164,
      "bearing": 241.32541294024503,
      "real_time_lead": false,
-     "air_100pct_ugm3": 0.0,
-     "smallest_share_army_line_0.18": null,
-     "smallest_share_highest_reading_0.01": null
+     "air_100pct_ugm3": 1.535707279322988e-06,
+     "smallest_share_army_line_0.18": 117209.83707217462,
+     "smallest_share_highest_reading_0.01": 6511.657615120812
     },
     {
      "site": "AS11",
@@ -1221,9 +1221,9 @@
      "miles": 7.368704633264161,
      "bearing": 228.77160913408525,
      "real_time_lead": false,
-     "air_100pct_ugm3": 0.8402618556777928,
-     "smallest_share_army_line_0.18": 0.214218935185156,
-     "smallest_share_highest_reading_0.01": 0.011901051954730889
+     "air_100pct_ugm3": 0.19438853537506184,
+     "smallest_share_army_line_0.18": 0.9259805350799112,
+     "smallest_share_highest_reading_0.01": 0.05144336305999506
     },
     {
      "site": "AS12",
@@ -1231,9 +1231,9 @@
      "miles": 9.832329488347408,
      "bearing": 211.03216290091518,
      "real_time_lead": false,
-     "air_100pct_ugm3": 112.30495051824491,
-     "smallest_share_army_line_0.18": 0.0016027788549780578,
-     "smallest_share_highest_reading_0.01": 8.90432697210032e-05
+     "air_100pct_ugm3": 95.84821589673899,
+     "smallest_share_army_line_0.18": 0.001877969227866703,
+     "smallest_share_highest_reading_0.01": 0.00010433162377037239
     },
     {
      "site": "AS13",
@@ -1241,9 +1241,9 @@
      "miles": 13.75525248858564,
      "bearing": 221.07064797122618,
      "real_time_lead": false,
-     "air_100pct_ugm3": 38.883824972248014,
-     "smallest_share_army_line_0.18": 0.0046291742164889585,
-     "smallest_share_highest_reading_0.01": 0.00025717634536049765
+     "air_100pct_ugm3": 36.0070202547582,
+     "smallest_share_army_line_0.18": 0.004999025154718645,
+     "smallest_share_highest_reading_0.01": 0.0002777236197065914
     },
     {
      "site": "AS14",
@@ -1251,9 +1251,9 @@
      "miles": 21.39097372528453,
      "bearing": 220.4144417568667,
      "real_time_lead": false,
-     "air_100pct_ugm3": 18.65826864265418,
-     "smallest_share_army_line_0.18": 0.00964719736045105,
-     "smallest_share_highest_reading_0.01": 0.0005359554089139473
+     "air_100pct_ugm3": 20.340221920236456,
+     "smallest_share_army_line_0.18": 0.008849460969790023,
+     "smallest_share_highest_reading_0.01": 0.0004916367205438901
     },
     {
      "site": "AS15",
@@ -1271,9 +1271,9 @@
      "miles": 25.67171926179398,
      "bearing": 229.36706810230052,
      "real_time_lead": false,
-     "air_100pct_ugm3": 0.04833449312093884,
-     "smallest_share_army_line_0.18": 3.72404857023364,
-     "smallest_share_highest_reading_0.01": 0.20689158723520223
+     "air_100pct_ugm3": 0.041251742781922666,
+     "smallest_share_army_line_0.18": 4.363452011023388,
+     "smallest_share_highest_reading_0.01": 0.24241400061241042
     },
     {
      "site": "AS17",
@@ -1281,9 +1281,9 @@
      "miles": 27.491434457576055,
      "bearing": 233.76019768967404,
      "real_time_lead": false,
-     "air_100pct_ugm3": 0.0011332765665969585,
-     "smallest_share_army_line_0.18": 158.8314850103273,
-     "smallest_share_highest_reading_0.01": 8.823971389462626
+     "air_100pct_ugm3": 0.0015780453014136082,
+     "smallest_share_army_line_0.18": 114.06516646813407,
+     "smallest_share_highest_reading_0.01": 6.336953692674114
     },
     {
      "site": "AS18",
@@ -1291,9 +1291,9 @@
      "miles": 25.633413507058922,
      "bearing": 217.698316797841,
      "real_time_lead": false,
-     "air_100pct_ugm3": 25.858517655447457,
-     "smallest_share_army_line_0.18": 0.006960955859822092,
-     "smallest_share_highest_reading_0.01": 0.0003867197699901162
+     "air_100pct_ugm3": 25.980942368258194,
+     "smallest_share_army_line_0.18": 0.006928155162682326,
+     "smallest_share_highest_reading_0.01": 0.00038489750903790697
     },
     {
      "site": "AS19",
@@ -1301,9 +1301,1117 @@
      "miles": 31.236079100914743,
      "bearing": 236.7040947645232,
      "real_time_lead": false,
-     "air_100pct_ugm3": 0.0003071897884439897,
-     "smallest_share_army_line_0.18": 585.9569776448466,
-     "smallest_share_highest_reading_0.01": 32.5531654247137
+     "air_100pct_ugm3": 0.00030864414952259966,
+     "smallest_share_army_line_0.18": 583.1958917038211,
+     "smallest_share_highest_reading_0.01": 32.39977176132339
+    },
+    {
+     "site": "AS20",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 17.667549600755134,
+     "bearing": 275.56387067270913,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS21",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 9.816204947718886,
+     "bearing": 264.9369874185329,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS22",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 15.561895850106357,
+     "bearing": 268.8684089221863,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS23",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 17.81705085123692,
+     "bearing": 260.90812131667155,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS24",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 18.699942266165582,
+     "bearing": 254.9870045090148,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS25",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 22.844029725444706,
+     "bearing": 262.2407578545352,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS26",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 24.623634643804927,
+     "bearing": 253.79655346912148,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS27",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 15.642020322392415,
+     "bearing": 243.9337160054161,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS28",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 26.902416542905893,
+     "bearing": 261.69687625231364,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS29",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 21.71235672970912,
+     "bearing": 251.61991291895794,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS30",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 23.127284569521873,
+     "bearing": 271.67122433074064,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS31",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 3.8368959406194385,
+     "bearing": 318.17554065909616,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS32",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 3.956346186932126,
+     "bearing": 77.72693743193463,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS33",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 0.6259744646781238,
+     "bearing": 89.35492273515587,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 6.147105228094088e-06,
+     "smallest_share_army_line_0.18": 29282.075598339652,
+     "smallest_share_highest_reading_0.01": 1626.781977685536
+    },
+    {
+     "site": "AS34",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 8.124796212029944,
+     "bearing": 166.49064652730988,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS35",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 14.329043702660467,
+     "bearing": 202.0791981384518,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0673039768171893,
+     "smallest_share_army_line_0.18": 2.6744333472138657,
+     "smallest_share_highest_reading_0.01": 0.1485796304007703
+    },
+    {
+     "site": "AS36",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 29.788181162550927,
+     "bearing": 211.88959467744408,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 5.081518162921866,
+     "smallest_share_army_line_0.18": 0.03542248482223278,
+     "smallest_share_highest_reading_0.01": 0.0019679158234573763
+    },
+    {
+     "site": "AS37",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 31.35524954088654,
+     "bearing": 223.32621280808624,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 5.081518162921866,
+     "smallest_share_army_line_0.18": 0.03542248482223278,
+     "smallest_share_highest_reading_0.01": 0.0019679158234573763
+    },
+    {
+     "site": "AS38",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 34.76859389348497,
+     "bearing": 233.1982509009681,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.013163740398087348,
+     "smallest_share_army_line_0.18": 13.673925081821992,
+     "smallest_share_highest_reading_0.01": 0.7596625045456661
+    },
+    {
+     "site": "AS39",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 42.723599085102904,
+     "bearing": 241.0849336127269,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 2.896669816842819e-05,
+     "smallest_share_army_line_0.18": 6214.032367561596,
+     "smallest_share_highest_reading_0.01": 345.22402042008866
+    },
+    {
+     "site": "AS40",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 41.21903210602105,
+     "bearing": 231.27821656027763,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0673039768171893,
+     "smallest_share_army_line_0.18": 2.6744333472138657,
+     "smallest_share_highest_reading_0.01": 0.1485796304007703
+    },
+    {
+     "site": "AS41",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 5.563322752317402,
+     "bearing": 92.99570036055621,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS42",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 8.74952888900546,
+     "bearing": 108.11712995901706,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS43",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 4.7940518021758445,
+     "bearing": 183.7317987238936,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    }
+   ],
+   "sweep": [
+    {
+     "cloud_bearing": 184.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 0.0,
+     "by_monitor": {
+      "AS01": 0.0,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 185.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 0.0,
+     "by_monitor": {
+      "AS01": 0.0,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 186.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 0.0,
+     "by_monitor": {
+      "AS01": 0.0,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 187.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 0.0,
+     "by_monitor": {
+      "AS01": 0.0,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 188.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 0.0,
+     "by_monitor": {
+      "AS01": 0.0,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 189.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 0.0,
+     "by_monitor": {
+      "AS01": 0.0,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 190.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 0.0,
+     "by_monitor": {
+      "AS01": 0.0,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 191.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 0.0,
+     "by_monitor": {
+      "AS01": 0.0,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 192.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 0.0,
+     "by_monitor": {
+      "AS01": 0.0,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 193.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 0.0,
+     "by_monitor": {
+      "AS01": 0.0,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 194.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 0.0,
+     "by_monitor": {
+      "AS01": 0.0,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 195.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 0.0,
+     "by_monitor": {
+      "AS01": 0.0,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 196.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 0.0,
+     "by_monitor": {
+      "AS01": 0.0,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 197.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 0.0,
+     "by_monitor": {
+      "AS01": 0.0,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 198.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 8.366212960798106e-05,
+     "by_monitor": {
+      "AS01": 8.366212960798106e-05,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 199.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 8.366212960798106e-05,
+     "by_monitor": {
+      "AS01": 8.366212960798106e-05,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 200.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 8.366212960798106e-05,
+     "by_monitor": {
+      "AS01": 8.366212960798106e-05,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 201.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 8.366212960798106e-05,
+     "by_monitor": {
+      "AS01": 8.366212960798106e-05,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 202.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 8.366212960798106e-05,
+     "by_monitor": {
+      "AS01": 8.366212960798106e-05,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 203.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 0.26940331229455194,
+     "by_monitor": {
+      "AS01": 0.26940331229455194,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 204.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 0.26940331229455194,
+     "by_monitor": {
+      "AS01": 0.26940331229455194,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 205.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 0.26940331229455194,
+     "by_monitor": {
+      "AS01": 0.26940331229455194,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
+     }
+    },
+    {
+     "cloud_bearing": 206.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 0.26940331229455194,
+     "by_monitor": {
+      "AS01": 0.26940331229455194,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 1.535707279322988e-06
+     }
+    },
+    {
+     "cloud_bearing": 207.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 18.746604455656257,
+     "by_monitor": {
+      "AS01": 18.746604455656257,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 3.4724751901667497e-06
+     }
+    },
+    {
+     "cloud_bearing": 208.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 18.746604455656257,
+     "by_monitor": {
+      "AS01": 18.746604455656257,
+      "AS02": 0.0,
+      "AS03": 1.108092867343909e-06,
+      "AS04": 1.0029264216826452e-05
+     }
+    },
+    {
+     "cloud_bearing": 209.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 81.41752415317075,
+     "by_monitor": {
+      "AS01": 81.41752415317075,
+      "AS02": 0.0,
+      "AS03": 3.767664493459574e-06,
+      "AS04": 2.896669816842819e-05
+     }
+    },
+    {
+     "cloud_bearing": 210.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 81.41752415317075,
+     "by_monitor": {
+      "AS01": 81.41752415317075,
+      "AS02": 0.0,
+      "AS03": 6.669660353811643e-06,
+      "AS04": 6.036658830338706e-05
+     }
+    },
+    {
+     "cloud_bearing": 211.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 81.41752415317075,
+     "by_monitor": {
+      "AS01": 81.41752415317075,
+      "AS02": 0.0,
+      "AS03": 2.267774050267582e-05,
+      "AS04": 0.00016069171366347678
+     }
+    },
+    {
+     "cloud_bearing": 212.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 81.41752415317075,
+     "by_monitor": {
+      "AS01": 81.41752415317075,
+      "AS02": 1.6662551844970145e-06,
+      "AS03": 0.00012580394776793964,
+      "AS04": 0.0004641126474709931
+     }
+    },
+    {
+     "cloud_bearing": 213.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 81.41752415317075,
+     "by_monitor": {
+      "AS01": 81.41752415317075,
+      "AS02": 1.6662551844970145e-06,
+      "AS03": 0.0003942368914406379,
+      "AS04": 0.0008914314876332375
+     }
+    },
+    {
+     "cloud_bearing": 214.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 95.84821589673899,
+     "by_monitor": {
+      "AS01": 95.84821589673899,
+      "AS02": 1.7754177963825954e-05,
+      "AS03": 0.0006978928642441744,
+      "AS04": 0.002372929419854759
+     }
+    },
+    {
+     "cloud_bearing": 215.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 95.84821589673899,
+     "by_monitor": {
+      "AS01": 95.84821589673899,
+      "AS02": 9.07741072027833e-05,
+      "AS03": 0.002015666505080633,
+      "AS04": 0.005821683624898719
+     }
+    },
+    {
+     "cloud_bearing": 216.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 95.84821589673899,
+     "by_monitor": {
+      "AS01": 95.84821589673899,
+      "AS02": 0.004200648253439934,
+      "AS03": 0.0038715355011065744,
+      "AS04": 0.011181837259881726
+     }
+    },
+    {
+     "cloud_bearing": 217.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 103.99611228849406,
+     "by_monitor": {
+      "AS01": 103.99611228849406,
+      "AS02": 0.16512183482944737,
+      "AS03": 0.021477203599955932,
+      "AS04": 0.02528388905113421
+     }
+    },
+    {
+     "cloud_bearing": 218.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 103.99611228849406,
+     "by_monitor": {
+      "AS01": 103.99611228849406,
+      "AS02": 0.16512183482944737,
+      "AS03": 0.062030839025862566,
+      "AS04": 0.0571708414898558
+     }
+    },
+    {
+     "cloud_bearing": 219.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 103.99611228849406,
+     "by_monitor": {
+      "AS01": 103.99611228849406,
+      "AS02": 1.6215505434156399,
+      "AS03": 0.14026146287298513,
+      "AS04": 0.10120595810504654
+     }
+    },
+    {
+     "cloud_bearing": 220.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 103.99611228849406,
+     "by_monitor": {
+      "AS01": 103.99611228849406,
+      "AS02": 12.466865146169583,
+      "AS03": 0.3733663846751065,
+      "AS04": 0.1791585656086223
+     }
+    },
+    {
+     "cloud_bearing": 221.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 156.3804500281626,
+     "by_monitor": {
+      "AS01": 156.3804500281626,
+      "AS02": 12.466865146169583,
+      "AS03": 2.071236556853153,
+      "AS04": 0.4769078017205858
+     }
+    },
+    {
+     "cloud_bearing": 222.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 156.3804500281626,
+     "by_monitor": {
+      "AS01": 156.3804500281626,
+      "AS02": 28.18953878913246,
+      "AS03": 2.071236556853153,
+      "AS04": 1.1700332578931556
+     }
+    },
+    {
+     "cloud_bearing": 223.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 156.3804500281626,
+     "by_monitor": {
+      "AS01": 156.3804500281626,
+      "AS02": 42.38901498261687,
+      "AS03": 7.641151959023014,
+      "AS04": 2.438348878074406
+     }
+    },
+    {
+     "cloud_bearing": 224.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 156.3804500281626,
+     "by_monitor": {
+      "AS01": 156.3804500281626,
+      "AS02": 39.06791677397624,
+      "AS03": 12.466865146169583,
+      "AS04": 4.68339093880555
+     }
+    },
+    {
+     "cloud_bearing": 225.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 156.3804500281626,
+     "by_monitor": {
+      "AS01": 156.3804500281626,
+      "AS02": 42.38901498261687,
+      "AS03": 18.746604455656257,
+      "AS04": 8.290713496431772
+     }
+    },
+    {
+     "cloud_bearing": 226.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 255.14137036579504,
+     "by_monitor": {
+      "AS01": 255.14137036579504,
+      "AS02": 42.38901498261687,
+      "AS03": 25.980942368258194,
+      "AS04": 10.589881978044373
+     }
+    },
+    {
+     "cloud_bearing": 227.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 144.12834101671385,
+     "by_monitor": {
+      "AS01": 144.12834101671385,
+      "AS02": 63.7409715936616,
+      "AS03": 36.0070202547582,
+      "AS04": 11.490110118451032
+     }
+    },
+    {
+     "cloud_bearing": 228.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 144.12834101671385,
+     "by_monitor": {
+      "AS01": 144.12834101671385,
+      "AS02": 63.7409715936616,
+      "AS03": 36.0070202547582,
+      "AS04": 15.924157865417891
+     }
+    },
+    {
+     "cloud_bearing": 229.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 144.12834101671385,
+     "by_monitor": {
+      "AS01": 144.12834101671385,
+      "AS02": 63.7409715936616,
+      "AS03": 39.06791677397624,
+      "AS04": 17.277843869893506
+     }
+    },
+    {
+     "cloud_bearing": 230.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 144.12834101671385,
+     "by_monitor": {
+      "AS01": 144.12834101671385,
+      "AS02": 75.03861693563017,
+      "AS03": 42.38901498261687,
+      "AS04": 18.746604455656257
+     }
+    },
+    {
+     "cloud_bearing": 231.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 144.12834101671385,
+     "by_monitor": {
+      "AS01": 144.12834101671385,
+      "AS02": 58.74698844346258,
+      "AS03": 39.06791677397624,
+      "AS04": 18.746604455656257
+     }
+    },
+    {
+     "cloud_bearing": 232.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 144.12834101671385,
+     "by_monitor": {
+      "AS01": 144.12834101671385,
+      "AS02": 45.99243419074275,
+      "AS03": 36.0070202547582,
+      "AS04": 15.924157865417891
+     }
+    },
+    {
+     "cloud_bearing": 233.77140319818932,
+     "best_monitor": "AS02",
+     "air_100pct_ugm3": 45.99243419074275,
+     "by_monitor": {
+      "AS01": 10.589881978044373,
+      "AS02": 45.99243419074275,
+      "AS03": 25.980942368258194,
+      "AS04": 15.924157865417891
+     }
+    },
+    {
+     "cloud_bearing": 234.77140319818932,
+     "best_monitor": "AS03",
+     "air_100pct_ugm3": 20.340221920236456,
+     "by_monitor": {
+      "AS01": 10.589881978044373,
+      "AS02": 13.526652483791018,
+      "AS03": 20.340221920236456,
+      "AS04": 12.466865146169583
+     }
+    },
+    {
+     "cloud_bearing": 235.77140319818932,
+     "best_monitor": "AS03",
+     "air_100pct_ugm3": 15.924157865417891,
+     "by_monitor": {
+      "AS01": 10.589881978044373,
+      "AS02": 13.526652483791018,
+      "AS03": 15.924157865417891,
+      "AS04": 8.290713496431772
+     }
+    },
+    {
+     "cloud_bearing": 236.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 10.589881978044373,
+     "by_monitor": {
+      "AS01": 10.589881978044373,
+      "AS02": 4.68339093880555,
+      "AS03": 10.589881978044373,
+      "AS04": 7.042482325074938
+     }
+    },
+    {
+     "cloud_bearing": 237.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 10.589881978044373,
+     "by_monitor": {
+      "AS01": 10.589881978044373,
+      "AS02": 4.68339093880555,
+      "AS03": 5.081518162921866,
+      "AS04": 4.68339093880555
+     }
+    },
+    {
+     "cloud_bearing": 238.77140319818932,
+     "best_monitor": "AS01",
+     "air_100pct_ugm3": 10.589881978044373,
+     "by_monitor": {
+      "AS01": 10.589881978044373,
+      "AS02": 0.43954298806236675,
+      "AS03": 5.081518162921866,
+      "AS04": 2.6456288346143
+     }
+    },
+    {
+     "cloud_bearing": 239.77140319818932,
+     "best_monitor": "AS03",
+     "air_100pct_ugm3": 2.870529313290924,
+     "by_monitor": {
+      "AS01": 0.002372929419854759,
+      "AS02": 0.43954298806236675,
+      "AS03": 2.870529313290924,
+      "AS04": 1.908959136123827
+     }
+    },
+    {
+     "cloud_bearing": 240.77140319818932,
+     "best_monitor": "AS03",
+     "air_100pct_ugm3": 0.9938756829564552,
+     "by_monitor": {
+      "AS01": 0.002372929419854759,
+      "AS02": 0.43954298806236675,
+      "AS03": 0.9938756829564552,
+      "AS04": 0.9938756829564552
+     }
+    },
+    {
+     "cloud_bearing": 241.77140319818932,
+     "best_monitor": "AS04",
+     "air_100pct_ugm3": 0.7171331217470768,
+     "by_monitor": {
+      "AS01": 0.002372929419854759,
+      "AS02": 0.08596861674858544,
+      "AS03": 0.4769078017205858,
+      "AS04": 0.7171331217470768
+     }
+    },
+    {
+     "cloud_bearing": 242.77140319818932,
+     "best_monitor": "AS04",
+     "air_100pct_ugm3": 0.3171531818079641,
+     "by_monitor": {
+      "AS01": 0.002372929419854759,
+      "AS02": 0.08596861674858544,
+      "AS03": 0.21091317937769374,
+      "AS04": 0.3171531818079641
+     }
+    },
+    {
+     "cloud_bearing": 243.77140319818932,
+     "best_monitor": "AS03",
+     "air_100pct_ugm3": 0.14026146287298513,
+     "by_monitor": {
+      "AS01": 0.002372929419854759,
+      "AS02": 0.008068278556925003,
+      "AS03": 0.14026146287298513,
+      "AS04": 0.11914401258676825
+     }
+    },
+    {
+     "cloud_bearing": 244.77140319818932,
+     "best_monitor": "AS03",
+     "air_100pct_ugm3": 0.0526916154607465,
+     "by_monitor": {
+      "AS01": 0.0,
+      "AS02": 0.008068278556925003,
+      "AS03": 0.0526916154607465,
+      "AS04": 0.048563328219610465
+     }
+    }
+   ]
+  },
+  "hysplit analysis": {
+   "cloud_bearing_hour1": 214.9193395364128,
+   "sites": [
+    {
+     "site": "AS01",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 4.485511225254946,
+     "bearing": 221.92956588762283,
+     "real_time_lead": true,
+     "air_100pct_ugm3": 78.33,
+     "smallest_share_army_line_0.18": 0.002297970126388357,
+     "smallest_share_highest_reading_0.01": 0.00012766500702157538
+    },
+    {
+     "site": "AS02",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 12.546292981822225,
+     "bearing": 229.815360233776,
+     "real_time_lead": true,
+     "air_100pct_ugm3": 2.3674,
+     "smallest_share_army_line_0.18": 0.07603277857565262,
+     "smallest_share_highest_reading_0.01": 0.004224043254202923
+    },
+    {
+     "site": "AS03",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 19.861693616750653,
+     "bearing": 231.52319285346945,
+     "real_time_lead": true,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS04",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 28.05313161334452,
+     "bearing": 233.42106520454317,
+     "real_time_lead": true,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS05",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 36.58637952005532,
+     "bearing": 220.2884183685649,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 11.0909,
+     "smallest_share_army_line_0.18": 0.016229521499607786,
+     "smallest_share_highest_reading_0.01": 0.0009016400833115436
+    },
+    {
+     "site": "AS06",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 6.785327837268274,
+     "bearing": 211.09082253377574,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 75.72099999999999,
+     "smallest_share_army_line_0.18": 0.002377147686903237,
+     "smallest_share_highest_reading_0.01": 0.00013206376038351315
+    },
+    {
+     "site": "AS07",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 13.801587236025144,
+     "bearing": 253.44759098767673,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS08",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 13.243889242105931,
+     "bearing": 191.86170457090392,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.03408,
+     "smallest_share_army_line_0.18": 5.28169014084507,
+     "smallest_share_highest_reading_0.01": 0.2934272300469483
+    },
+    {
+     "site": "AS09",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 16.837751798826343,
+     "bearing": 229.59875988550885,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.9435999999999999,
+     "smallest_share_army_line_0.18": 0.1907587961000424,
+     "smallest_share_highest_reading_0.01": 0.0105977108944468
+    },
+    {
+     "site": "AS10",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 27.959065412053164,
+     "bearing": 241.32541294024503,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS11",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 7.368704633264161,
+     "bearing": 228.77160913408525,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 8.978,
+     "smallest_share_army_line_0.18": 0.020049008687903765,
+     "smallest_share_highest_reading_0.01": 0.0011138338159946536
+    },
+    {
+     "site": "AS12",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 9.832329488347408,
+     "bearing": 211.03216290091518,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 40.178000000000004,
+     "smallest_share_army_line_0.18": 0.004480063716461744,
+     "smallest_share_highest_reading_0.01": 0.0002488924286923191
+    },
+    {
+     "site": "AS13",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 13.75525248858564,
+     "bearing": 221.07064797122618,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 14.126,
+     "smallest_share_army_line_0.18": 0.012742460710746143,
+     "smallest_share_highest_reading_0.01": 0.0007079144839303412
+    },
+    {
+     "site": "AS14",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 21.39097372528453,
+     "bearing": 220.4144417568667,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 15.273,
+     "smallest_share_army_line_0.18": 0.011785503830288745,
+     "smallest_share_highest_reading_0.01": 0.0006547502127938191
+    },
+    {
+     "site": "AS15",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 21.529444806773128,
+     "bearing": 241.16770235384269,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS16",
+     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
+     "miles": 25.67171926179398,
+     "bearing": 229.36706810230052,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.1842,
+     "smallest_share_army_line_0.18": 0.9771986970684039,
+     "smallest_share_highest_reading_0.01": 0.054288816503800214
+    },
+    {
+     "site": "AS17",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 27.491434457576055,
+     "bearing": 233.76019768967404,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
+    },
+    {
+     "site": "AS18",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 25.633413507058922,
+     "bearing": 217.698316797841,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 15.889000000000001,
+     "smallest_share_army_line_0.18": 0.011328592107747497,
+     "smallest_share_highest_reading_0.01": 0.0006293662282081942
+    },
+    {
+     "site": "AS19",
+     "instruments": "Air Cassette, Summa Cannister",
+     "miles": 31.236079100914743,
+     "bearing": 236.7040947645232,
+     "real_time_lead": false,
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
     },
     {
      "site": "AS20",
@@ -1461,9 +2569,9 @@
      "miles": 14.329043702660467,
      "bearing": 202.0791981384518,
      "real_time_lead": false,
-     "air_100pct_ugm3": 0.03487585674374542,
-     "smallest_share_army_line_0.18": 5.16116353277202,
-     "smallest_share_highest_reading_0.01": 0.2867313073762233
+     "air_100pct_ugm3": 5.1367,
+     "smallest_share_army_line_0.18": 0.03504195300484747,
+     "smallest_share_highest_reading_0.01": 0.0019467751669359705
     },
     {
      "site": "AS36",
@@ -1471,9 +2579,9 @@
      "miles": 29.788181162550927,
      "bearing": 211.88959467744408,
      "real_time_lead": false,
-     "air_100pct_ugm3": 4.2961166617296405,
-     "smallest_share_army_line_0.18": 0.041898303554804076,
-     "smallest_share_highest_reading_0.01": 0.0023276835308224486
+     "air_100pct_ugm3": 5.4245,
+     "smallest_share_army_line_0.18": 0.03318278182320951,
+     "smallest_share_highest_reading_0.01": 0.0018434878790671951
     },
     {
      "site": "AS37",
@@ -1481,9 +2589,9 @@
      "miles": 31.35524954088654,
      "bearing": 223.32621280808624,
      "real_time_lead": false,
-     "air_100pct_ugm3": 5.487509420173218,
-     "smallest_share_army_line_0.18": 0.03280176601397399,
-     "smallest_share_highest_reading_0.01": 0.0018223203341096663
+     "air_100pct_ugm3": 6.2408,
+     "smallest_share_army_line_0.18": 0.028842456095372386,
+     "smallest_share_highest_reading_0.01": 0.0016023586719651325
     },
     {
      "site": "AS38",
@@ -1491,9 +2599,9 @@
      "miles": 34.76859389348497,
      "bearing": 233.1982509009681,
      "real_time_lead": false,
-     "air_100pct_ugm3": 0.010257199962294605,
-     "smallest_share_army_line_0.18": 17.54864881855465,
-     "smallest_share_highest_reading_0.01": 0.9749249343641471
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
     },
     {
      "site": "AS39",
@@ -1501,9 +2609,9 @@
      "miles": 42.723599085102904,
      "bearing": 241.0849336127269,
      "real_time_lead": false,
-     "air_100pct_ugm3": 3.995581588015616e-05,
-     "smallest_share_army_line_0.18": 4504.976210219149,
-     "smallest_share_highest_reading_0.01": 250.27645612328607
+     "air_100pct_ugm3": 0.0,
+     "smallest_share_army_line_0.18": null,
+     "smallest_share_highest_reading_0.01": null
     },
     {
      "site": "AS40",
@@ -1511,9 +2619,9 @@
      "miles": 41.21903210602105,
      "bearing": 231.27821656027763,
      "real_time_lead": false,
-     "air_100pct_ugm3": 0.07885978591691949,
-     "smallest_share_army_line_0.18": 2.2825321918783037,
-     "smallest_share_highest_reading_0.01": 0.12680734399323906
+     "air_100pct_ugm3": 0.39929999999999993,
+     "smallest_share_army_line_0.18": 0.4507888805409467,
+     "smallest_share_highest_reading_0.01": 0.02504382669671926
     },
     {
      "site": "AS41",
@@ -1548,7 +2656,7 @@
    ],
    "sweep": [
     {
-     "cloud_bearing": 184.81045874388,
+     "cloud_bearing": 184.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 0.0,
      "by_monitor": {
@@ -1559,7 +2667,7 @@
      }
     },
     {
-     "cloud_bearing": 185.81045874388,
+     "cloud_bearing": 185.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 0.0,
      "by_monitor": {
@@ -1570,7 +2678,7 @@
      }
     },
     {
-     "cloud_bearing": 186.81045874388,
+     "cloud_bearing": 186.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 0.0,
      "by_monitor": {
@@ -1581,7 +2689,7 @@
      }
     },
     {
-     "cloud_bearing": 187.81045874388,
+     "cloud_bearing": 187.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 0.0,
      "by_monitor": {
@@ -1592,7 +2700,7 @@
      }
     },
     {
-     "cloud_bearing": 188.81045874388,
+     "cloud_bearing": 188.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 0.0,
      "by_monitor": {
@@ -1603,7 +2711,7 @@
      }
     },
     {
-     "cloud_bearing": 189.81045874388,
+     "cloud_bearing": 189.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 0.0,
      "by_monitor": {
@@ -1614,7 +2722,7 @@
      }
     },
     {
-     "cloud_bearing": 190.81045874388,
+     "cloud_bearing": 190.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 0.0,
      "by_monitor": {
@@ -1625,7 +2733,7 @@
      }
     },
     {
-     "cloud_bearing": 191.81045874388,
+     "cloud_bearing": 191.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 0.0,
      "by_monitor": {
@@ -1636,7 +2744,7 @@
      }
     },
     {
-     "cloud_bearing": 192.81045874388,
+     "cloud_bearing": 192.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 0.0,
      "by_monitor": {
@@ -1647,7 +2755,7 @@
      }
     },
     {
-     "cloud_bearing": 193.81045874388,
+     "cloud_bearing": 193.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 0.0,
      "by_monitor": {
@@ -1658,7 +2766,7 @@
      }
     },
     {
-     "cloud_bearing": 194.81045874388,
+     "cloud_bearing": 194.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 0.0,
      "by_monitor": {
@@ -1669,7 +2777,7 @@
      }
     },
     {
-     "cloud_bearing": 195.81045874388,
+     "cloud_bearing": 195.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 0.0,
      "by_monitor": {
@@ -1680,7 +2788,7 @@
      }
     },
     {
-     "cloud_bearing": 196.81045874388,
+     "cloud_bearing": 196.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 0.0,
      "by_monitor": {
@@ -1691,7 +2799,7 @@
      }
     },
     {
-     "cloud_bearing": 197.81045874388,
+     "cloud_bearing": 197.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 0.0,
      "by_monitor": {
@@ -1702,7 +2810,7 @@
      }
     },
     {
-     "cloud_bearing": 198.81045874388,
+     "cloud_bearing": 198.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 0.0,
      "by_monitor": {
@@ -1713,1195 +2821,509 @@
      }
     },
     {
-     "cloud_bearing": 199.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 0.0,
-     "by_monitor": {
-      "AS01": 0.0,
-      "AS02": 0.0,
-      "AS03": 0.0,
-      "AS04": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 200.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 0.0021767095147402853,
-     "by_monitor": {
-      "AS01": 0.0021767095147402853,
-      "AS02": 0.0,
-      "AS03": 0.0,
-      "AS04": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 201.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 0.0021767095147402853,
-     "by_monitor": {
-      "AS01": 0.0021767095147402853,
-      "AS02": 0.0,
-      "AS03": 0.0,
-      "AS04": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 202.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 0.0021767095147402853,
-     "by_monitor": {
-      "AS01": 0.0021767095147402853,
-      "AS02": 0.0,
-      "AS03": 0.0,
-      "AS04": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 203.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 1.8999639360770029,
-     "by_monitor": {
-      "AS01": 1.8999639360770029,
-      "AS02": 0.0,
-      "AS03": 0.0,
-      "AS04": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 204.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 1.8999639360770029,
-     "by_monitor": {
-      "AS01": 1.8999639360770029,
-      "AS02": 0.0,
-      "AS03": 0.0,
-      "AS04": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 205.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 1.8999639360770029,
-     "by_monitor": {
-      "AS01": 1.8999639360770029,
-      "AS02": 0.0,
-      "AS03": 0.0,
-      "AS04": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 206.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 1.8999639360770029,
-     "by_monitor": {
-      "AS01": 1.8999639360770029,
-      "AS02": 0.0,
-      "AS03": 0.0,
-      "AS04": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 207.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 1.8999639360770029,
-     "by_monitor": {
-      "AS01": 1.8999639360770029,
-      "AS02": 0.0,
-      "AS03": 0.0,
-      "AS04": 2.9357680212128164e-06
-     }
-    },
-    {
-     "cloud_bearing": 208.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 1.8999639360770029,
-     "by_monitor": {
-      "AS01": 1.8999639360770029,
-      "AS02": 0.0,
-      "AS03": 1.7993817454117449e-06,
-      "AS04": 6.638232269264648e-06
-     }
-    },
-    {
-     "cloud_bearing": 209.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 45.77571339334213,
-     "by_monitor": {
-      "AS01": 45.77571339334213,
-      "AS02": 0.0,
-      "AS03": 2.9357680212128164e-06,
-      "AS04": 1.9172659764322628e-05
-     }
-    },
-    {
-     "cloud_bearing": 210.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 87.92243113833669,
-     "by_monitor": {
-      "AS01": 87.92243113833669,
-      "AS02": 0.0,
-      "AS03": 1.0830558920131046e-05,
-      "AS04": 5.537481478923842e-05
-     }
-    },
-    {
-     "cloud_bearing": 211.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 87.92243113833669,
-     "by_monitor": {
-      "AS01": 87.92243113833669,
-      "AS02": 0.0,
-      "AS03": 6.008213510181888e-05,
-      "AS04": 0.0001154010936048516
-     }
-    },
-    {
-     "cloud_bearing": 212.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 87.92243113833669,
-     "by_monitor": {
-      "AS01": 87.92243113833669,
-      "AS02": 3.749910894031143e-06,
-      "AS03": 6.008213510181888e-05,
-      "AS04": 0.00033330347815046455
-     }
-    },
-    {
-     "cloud_bearing": 213.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 87.92243113833669,
-     "by_monitor": {
-      "AS01": 87.92243113833669,
-      "AS02": 3.749910894031143e-06,
-      "AS03": 0.0003616370489068293,
-      "AS04": 0.0008872309762615896
-     }
-    },
-    {
-     "cloud_bearing": 214.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 87.92243113833669,
-     "by_monitor": {
-      "AS01": 87.92243113833669,
-      "AS02": 3.995581588015616e-05,
-      "AS03": 0.0010444865162321903,
-      "AS04": 0.0018489890274194759
-     }
-    },
-    {
-     "cloud_bearing": 215.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 87.92243113833669,
-     "by_monitor": {
-      "AS01": 87.92243113833669,
-      "AS02": 0.0003923792090852448,
-      "AS03": 0.0020061684895926225,
-      "AS04": 0.00453626182619634
-     }
-    },
-    {
-     "cloud_bearing": 216.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 103.50607255090905,
-     "by_monitor": {
-      "AS01": 103.50607255090905,
-      "AS02": 0.0003923792090852448,
-      "AS03": 0.005794251288698155,
-      "AS04": 0.011129147361423333
-     }
-    },
-    {
-     "cloud_bearing": 217.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 103.50607255090905,
-     "by_monitor": {
-      "AS01": 103.50607255090905,
-      "AS02": 0.014215466150707092,
-      "AS03": 0.03487585674374542,
-      "AS04": 0.021376000939735504
-     }
-    },
-    {
-     "cloud_bearing": 218.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 95.39656983485823,
-     "by_monitor": {
-      "AS01": 95.39656983485823,
-      "AS02": 0.4374718189985675,
-      "AS03": 0.03487585674374542,
-      "AS04": 0.04833449312093884
-     }
-    },
-    {
-     "cloud_bearing": 219.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 95.39656983485823,
-     "by_monitor": {
-      "AS01": 95.39656983485823,
-      "AS02": 0.4374718189985675,
-      "AS03": 0.22776422745447336,
-      "AS04": 0.12866310233774522
-     }
-    },
-    {
-     "cloud_bearing": 220.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 95.39656983485823,
-     "by_monitor": {
-      "AS01": 95.39656983485823,
-      "AS02": 18.65826864265418,
-      "AS03": 0.6062927365872659,
-      "AS04": 0.37160704616578055
-     }
-    },
-    {
-     "cloud_bearing": 221.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 95.39656983485823,
-     "by_monitor": {
-      "AS01": 95.39656983485823,
-      "AS02": 18.65826864265418,
-      "AS03": 1.263513839516188,
-      "AS04": 0.9116911095032577
-     }
-    },
-    {
-     "cloud_bearing": 222.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 95.39656983485823,
-     "by_monitor": {
-      "AS01": 95.39656983485823,
-      "AS02": 35.837351693418924,
-      "AS03": 5.487509420173218,
-      "AS04": 0.9116911095032577
-     }
-    },
-    {
-     "cloud_bearing": 223.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 234.04347547475473,
-     "by_monitor": {
-      "AS01": 234.04347547475473,
-      "AS02": 42.189273844977485,
-      "AS03": 5.487509420173218,
-      "AS04": 2.061476689907544
-     }
-    },
-    {
-     "cloud_bearing": 224.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 234.04347547475473,
-     "by_monitor": {
-      "AS01": 234.04347547475473,
-      "AS02": 42.189273844977485,
-      "AS03": 15.84912169368116,
-      "AS04": 4.2961166617296405
-     }
-    },
-    {
-     "cloud_bearing": 225.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 234.04347547475473,
-     "by_monitor": {
-      "AS01": 234.04347547475473,
-      "AS02": 49.66703016432343,
-      "AS03": 15.84912169368116,
-      "AS04": 7.009297467347261
-     }
-    },
-    {
-     "cloud_bearing": 226.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 234.04347547475473,
-     "by_monitor": {
-      "AS01": 234.04347547475473,
-      "AS02": 49.66703016432343,
-      "AS03": 28.056706956414065,
-      "AS04": 11.43596760847286
-     }
-    },
-    {
-     "cloud_bearing": 227.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 234.04347547475473,
-     "by_monitor": {
-      "AS01": 234.04347547475473,
-      "AS02": 49.66703016432343,
-      "AS03": 35.837351693418924,
-      "AS04": 13.462913589252612
-     }
-    },
-    {
-     "cloud_bearing": 228.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 234.04347547475473,
-     "by_monitor": {
-      "AS01": 234.04347547475473,
-      "AS02": 63.44061797172503,
-      "AS03": 38.883824972248014,
-      "AS04": 17.196428998801505
-     }
-    },
-    {
-     "cloud_bearing": 229.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 63.44061797172503,
-     "by_monitor": {
-      "AS01": 63.44061797172503,
-      "AS02": 63.44061797172503,
-      "AS03": 42.189273844977485,
-      "AS04": 18.65826864265418
-     }
-    },
-    {
-     "cloud_bearing": 230.81045874388,
-     "best_monitor": "AS02",
-     "air_100pct_ugm3": 68.83359871139159,
-     "by_monitor": {
-      "AS01": 63.44061797172503,
-      "AS02": 68.83359871139159,
-      "AS03": 38.883824972248014,
-      "AS04": 17.196428998801505
-     }
-    },
-    {
-     "cloud_bearing": 231.81045874388,
-     "best_monitor": "AS02",
-     "air_100pct_ugm3": 68.83359871139159,
-     "by_monitor": {
-      "AS01": 63.44061797172503,
-      "AS02": 68.83359871139159,
-      "AS03": 38.883824972248014,
-      "AS04": 18.65826864265418
-     }
-    },
-    {
-     "cloud_bearing": 232.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 63.44061797172503,
-     "by_monitor": {
-      "AS01": 63.44061797172503,
-      "AS02": 35.837351693418924,
-      "AS03": 33.029563766281534,
-      "AS04": 17.196428998801505
-     }
-    },
-    {
-     "cloud_bearing": 233.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 63.44061797172503,
-     "by_monitor": {
-      "AS01": 63.44061797172503,
-      "AS02": 35.837351693418924,
-      "AS03": 28.056706956414065,
-      "AS04": 13.462913589252612
-     }
-    },
-    {
-     "cloud_bearing": 234.81045874388,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 63.44061797172503,
-     "by_monitor": {
-      "AS01": 63.44061797172503,
-      "AS02": 35.837351693418924,
-      "AS03": 21.965317414418458,
-      "AS04": 12.408120072048073
-     }
-    },
-    {
-     "cloud_bearing": 235.81045874388,
-     "best_monitor": "AS02",
-     "air_100pct_ugm3": 18.65826864265418,
-     "by_monitor": {
-      "AS01": 1.8999639360770029,
-      "AS02": 18.65826864265418,
-      "AS03": 17.196428998801505,
-      "AS04": 8.953105539126286
-     }
-    },
-    {
-     "cloud_bearing": 236.81045874388,
-     "best_monitor": "AS03",
-     "air_100pct_ugm3": 8.953105539126286,
-     "by_monitor": {
-      "AS01": 1.8999639360770029,
-      "AS02": 8.251646852720018,
-      "AS03": 8.953105539126286,
-      "AS04": 5.953993410365804
-     }
-    },
-    {
-     "cloud_bearing": 237.81045874388,
-     "best_monitor": "AS03",
-     "air_100pct_ugm3": 5.487509420173218,
-     "by_monitor": {
-      "AS01": 1.8999639360770029,
-      "AS02": 2.6331623757118194,
-      "AS03": 5.487509420173218,
-      "AS04": 4.661322347815393
-     }
-    },
-    {
-     "cloud_bearing": 238.81045874388,
-     "best_monitor": "AS03",
-     "air_100pct_ugm3": 5.487509420173218,
-     "by_monitor": {
-      "AS01": 1.8999639360770029,
-      "AS02": 2.6331623757118194,
-      "AS03": 5.487509420173218,
-      "AS04": 2.6331623757118194
-     }
-    },
-    {
-     "cloud_bearing": 239.81045874388,
-     "best_monitor": "AS03",
-     "air_100pct_ugm3": 2.061476689907544,
-     "by_monitor": {
-      "AS01": 1.8999639360770029,
-      "AS02": 0.6062927365872659,
-      "AS03": 2.061476689907544,
-      "AS04": 2.061476689907544
-     }
-    },
-    {
-     "cloud_bearing": 240.81045874388,
-     "best_monitor": "AS03",
-     "air_100pct_ugm3": 1.0732820385254027,
-     "by_monitor": {
-      "AS01": 0.0032731494091950784,
-      "AS02": 0.2099193360810436,
-      "AS03": 1.0732820385254027,
-      "AS04": 1.0732820385254027
-     }
-    },
-    {
-     "cloud_bearing": 241.81045874388,
-     "best_monitor": "AS04",
-     "air_100pct_ugm3": 0.7137539211302304,
-     "by_monitor": {
-      "AS01": 0.0032731494091950784,
-      "AS02": 0.03784059494636227,
-      "AS03": 0.3424923452026777,
-      "AS04": 0.7137539211302304
-     }
-    },
-    {
-     "cloud_bearing": 242.81045874388,
-     "best_monitor": "AS03",
-     "air_100pct_ugm3": 0.3424923452026777,
-     "by_monitor": {
-      "AS01": 9.034637083173757e-05,
-      "AS02": 0.03784059494636227,
-      "AS03": 0.3424923452026777,
-      "AS04": 0.3424923452026777
-     }
-    },
-    {
-     "cloud_bearing": 243.81045874388,
-     "best_monitor": "AS03",
-     "air_100pct_ugm3": 0.13960053729656682,
-     "by_monitor": {
-      "AS01": 9.034637083173757e-05,
-      "AS02": 0.005794251288698155,
-      "AS03": 0.13960053729656682,
-      "AS04": 0.12866310233774522
-     }
-    },
-    {
-     "cloud_bearing": 244.81045874388,
-     "best_monitor": "AS03",
-     "air_100pct_ugm3": 0.05244332747338719,
-     "by_monitor": {
-      "AS01": 9.034637083173757e-05,
-      "AS02": 0.005794251288698155,
-      "AS03": 0.05244332747338719,
-      "AS04": 0.04833449312093884
-     }
-    }
-   ]
-  },
-  "hysplit analysis": {
-   "cloud_bearing_hour1": 214.91938147712577,
-   "sites": [
-    {
-     "site": "AS01",
-     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
-     "miles": 4.485511225254946,
-     "bearing": 221.92956588762283,
-     "real_time_lead": true,
-     "air_100pct_ugm3": 78.336,
-     "smallest_share_army_line_0.18": 0.002297794117647059,
-     "smallest_share_highest_reading_0.01": 0.00012765522875816994
-    },
-    {
-     "site": "AS02",
-     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
-     "miles": 12.546292981822225,
-     "bearing": 229.815360233776,
-     "real_time_lead": true,
-     "air_100pct_ugm3": 2.3674,
-     "smallest_share_army_line_0.18": 0.07603277857565262,
-     "smallest_share_highest_reading_0.01": 0.004224043254202923
-    },
-    {
-     "site": "AS06",
-     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
-     "miles": 6.785327837268274,
-     "bearing": 211.09082253377574,
-     "real_time_lead": false,
-     "air_100pct_ugm3": 75.913,
-     "smallest_share_army_line_0.18": 0.0023711353786571468,
-     "smallest_share_highest_reading_0.01": 0.00013172974325873039
-    },
-    {
-     "site": "AS11",
-     "instruments": "Air Cassette, Summa Cannister",
-     "miles": 7.368704633264161,
-     "bearing": 228.77160913408525,
-     "real_time_lead": false,
-     "air_100pct_ugm3": 9.1013,
-     "smallest_share_army_line_0.18": 0.019777394438157188,
-     "smallest_share_highest_reading_0.01": 0.001098744135453177
-    },
-    {
-     "site": "AS12",
-     "instruments": "Air Cassette, Summa Cannister",
-     "miles": 9.832329488347408,
-     "bearing": 211.03216290091518,
-     "real_time_lead": false,
-     "air_100pct_ugm3": 40.282000000000004,
-     "smallest_share_army_line_0.18": 0.004468497095476888,
-     "smallest_share_highest_reading_0.01": 0.00024824983863760486
-    },
-    {
-     "site": "AS21",
-     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
-     "miles": 9.816204947718886,
-     "bearing": 264.9369874185329,
-     "real_time_lead": false,
-     "air_100pct_ugm3": 0.0,
-     "smallest_share_army_line_0.18": null,
-     "smallest_share_highest_reading_0.01": null
-    },
-    {
-     "site": "AS31",
-     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
-     "miles": 3.8368959406194385,
-     "bearing": 318.17554065909616,
-     "real_time_lead": false,
-     "air_100pct_ugm3": 0.0,
-     "smallest_share_army_line_0.18": null,
-     "smallest_share_highest_reading_0.01": null
-    },
-    {
-     "site": "AS32",
-     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
-     "miles": 3.956346186932126,
-     "bearing": 77.72693743193463,
-     "real_time_lead": false,
-     "air_100pct_ugm3": 0.0,
-     "smallest_share_army_line_0.18": null,
-     "smallest_share_highest_reading_0.01": null
-    },
-    {
-     "site": "AS33",
-     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
-     "miles": 0.6259744646781238,
-     "bearing": 89.35492273515587,
-     "real_time_lead": false,
-     "air_100pct_ugm3": 0.0,
-     "smallest_share_army_line_0.18": null,
-     "smallest_share_highest_reading_0.01": null
-    },
-    {
-     "site": "AS34",
-     "instruments": "Dust Trak, AreaRAE, Air Cassette, Summa Cannister",
-     "miles": 8.124796212029944,
-     "bearing": 166.49064652730988,
-     "real_time_lead": false,
-     "air_100pct_ugm3": 0.0,
-     "smallest_share_army_line_0.18": null,
-     "smallest_share_highest_reading_0.01": null
-    },
-    {
-     "site": "AS41",
-     "instruments": "Air Cassette, Summa Cannister",
-     "miles": 5.563322752317402,
-     "bearing": 92.99570036055621,
-     "real_time_lead": false,
-     "air_100pct_ugm3": 0.0,
-     "smallest_share_army_line_0.18": null,
-     "smallest_share_highest_reading_0.01": null
-    },
-    {
-     "site": "AS42",
-     "instruments": "Air Cassette, Summa Cannister",
-     "miles": 8.74952888900546,
-     "bearing": 108.11712995901706,
-     "real_time_lead": false,
-     "air_100pct_ugm3": 0.0,
-     "smallest_share_army_line_0.18": null,
-     "smallest_share_highest_reading_0.01": null
-    },
-    {
-     "site": "AS43",
-     "instruments": "Air Cassette, Summa Cannister",
-     "miles": 4.7940518021758445,
-     "bearing": 183.7317987238936,
-     "real_time_lead": false,
-     "air_100pct_ugm3": 0.0,
-     "smallest_share_army_line_0.18": null,
-     "smallest_share_highest_reading_0.01": null
-    }
-   ],
-   "sweep": [
-    {
-     "cloud_bearing": 184.91938147712577,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 0.0,
-     "by_monitor": {
-      "AS01": 0.0,
-      "AS02": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 185.91938147712577,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 0.0,
-     "by_monitor": {
-      "AS01": 0.0,
-      "AS02": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 186.91938147712577,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 0.0,
-     "by_monitor": {
-      "AS01": 0.0,
-      "AS02": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 187.91938147712577,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 0.0,
-     "by_monitor": {
-      "AS01": 0.0,
-      "AS02": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 188.91938147712577,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 0.0,
-     "by_monitor": {
-      "AS01": 0.0,
-      "AS02": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 189.91938147712577,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 0.0,
-     "by_monitor": {
-      "AS01": 0.0,
-      "AS02": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 190.91938147712577,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 0.0,
-     "by_monitor": {
-      "AS01": 0.0,
-      "AS02": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 191.91938147712577,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 0.0,
-     "by_monitor": {
-      "AS01": 0.0,
-      "AS02": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 192.91938147712577,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 0.0,
-     "by_monitor": {
-      "AS01": 0.0,
-      "AS02": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 193.91938147712577,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 0.0,
-     "by_monitor": {
-      "AS01": 0.0,
-      "AS02": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 194.91938147712577,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 0.0,
-     "by_monitor": {
-      "AS01": 0.0,
-      "AS02": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 195.91938147712577,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 0.0,
-     "by_monitor": {
-      "AS01": 0.0,
-      "AS02": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 196.91938147712577,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 0.0,
-     "by_monitor": {
-      "AS01": 0.0,
-      "AS02": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 197.91938147712577,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 0.0,
-     "by_monitor": {
-      "AS01": 0.0,
-      "AS02": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 198.91938147712577,
-     "best_monitor": "AS01",
-     "air_100pct_ugm3": 0.0,
-     "by_monitor": {
-      "AS01": 0.0,
-      "AS02": 0.0
-     }
-    },
-    {
-     "cloud_bearing": 199.91938147712577,
+     "cloud_bearing": 199.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 0.17809999999999998,
      "by_monitor": {
       "AS01": 0.17809999999999998,
-      "AS02": 0.0
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
      }
     },
     {
-     "cloud_bearing": 200.91938147712577,
+     "cloud_bearing": 200.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 0.17809999999999998,
      "by_monitor": {
       "AS01": 0.17809999999999998,
-      "AS02": 0.0
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
      }
     },
     {
-     "cloud_bearing": 201.91938147712577,
+     "cloud_bearing": 201.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 0.17809999999999998,
      "by_monitor": {
       "AS01": 0.17809999999999998,
-      "AS02": 0.0
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
      }
     },
     {
-     "cloud_bearing": 202.91938147712577,
+     "cloud_bearing": 202.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 2.6834999999999996,
      "by_monitor": {
       "AS01": 2.6834999999999996,
-      "AS02": 0.0
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
      }
     },
     {
-     "cloud_bearing": 203.91938147712577,
+     "cloud_bearing": 203.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 2.6834999999999996,
      "by_monitor": {
       "AS01": 2.6834999999999996,
-      "AS02": 0.0
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
      }
     },
     {
-     "cloud_bearing": 204.91938147712577,
+     "cloud_bearing": 204.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 2.6834999999999996,
      "by_monitor": {
       "AS01": 2.6834999999999996,
-      "AS02": 0.0
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
      }
     },
     {
-     "cloud_bearing": 205.91938147712577,
+     "cloud_bearing": 205.9193395364128,
      "best_monitor": "AS01",
      "air_100pct_ugm3": 10.5387,
      "by_monitor": {
       "AS01": 10.5387,
-      "AS02": 0.0
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
      }
     },
     {
-     "cloud_bearing": 206.91938147712577,
+     "cloud_bearing": 206.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 12.225999999999997,
+     "air_100pct_ugm3": 11.815999999999999,
      "by_monitor": {
-      "AS01": 12.225999999999997,
-      "AS02": 0.0
+      "AS01": 11.815999999999999,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
      }
     },
     {
-     "cloud_bearing": 207.91938147712577,
+     "cloud_bearing": 207.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 12.225999999999997,
+     "air_100pct_ugm3": 11.815999999999999,
      "by_monitor": {
-      "AS01": 12.225999999999997,
-      "AS02": 0.0
+      "AS01": 11.815999999999999,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
      }
     },
     {
-     "cloud_bearing": 208.91938147712577,
+     "cloud_bearing": 208.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 12.225999999999997,
+     "air_100pct_ugm3": 11.815999999999999,
      "by_monitor": {
-      "AS01": 12.225999999999997,
-      "AS02": 0.24480000000000002
+      "AS01": 11.815999999999999,
+      "AS02": 0.24480000000000002,
+      "AS03": 0.0,
+      "AS04": 0.0
      }
     },
     {
-     "cloud_bearing": 209.91938147712577,
+     "cloud_bearing": 209.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 38.5,
+     "air_100pct_ugm3": 38.806000000000004,
      "by_monitor": {
-      "AS01": 38.5,
-      "AS02": 0.0
+      "AS01": 38.806000000000004,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
      }
     },
     {
-     "cloud_bearing": 210.91938147712577,
+     "cloud_bearing": 210.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 38.5,
+     "air_100pct_ugm3": 38.806000000000004,
      "by_monitor": {
-      "AS01": 38.5,
-      "AS02": 0.0
+      "AS01": 38.806000000000004,
+      "AS02": 0.0,
+      "AS03": 0.0,
+      "AS04": 0.0
      }
     },
     {
-     "cloud_bearing": 211.91938147712577,
+     "cloud_bearing": 211.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 38.5,
+     "air_100pct_ugm3": 38.806000000000004,
      "by_monitor": {
-      "AS01": 38.5,
-      "AS02": 0.24649999999999997
+      "AS01": 38.806000000000004,
+      "AS02": 0.24649999999999997,
+      "AS03": 0.0,
+      "AS04": 0.0
      }
     },
     {
-     "cloud_bearing": 212.91938147712577,
+     "cloud_bearing": 212.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 69.04700000000001,
+     "air_100pct_ugm3": 69.035,
      "by_monitor": {
-      "AS01": 69.04700000000001,
-      "AS02": 0.24347
+      "AS01": 69.035,
+      "AS02": 0.24347,
+      "AS03": 0.0,
+      "AS04": 0.0
      }
     },
     {
-     "cloud_bearing": 213.91938147712577,
+     "cloud_bearing": 213.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 69.04700000000001,
+     "air_100pct_ugm3": 69.035,
      "by_monitor": {
-      "AS01": 69.04700000000001,
-      "AS02": 1.59942
+      "AS01": 69.035,
+      "AS02": 1.59942,
+      "AS03": 0.0,
+      "AS04": 0.0
      }
     },
     {
-     "cloud_bearing": 214.91938147712577,
+     "cloud_bearing": 214.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 78.336,
+     "air_100pct_ugm3": 78.33,
      "by_monitor": {
-      "AS01": 78.336,
-      "AS02": 2.3674
+      "AS01": 78.33,
+      "AS02": 2.3674,
+      "AS03": 0.0,
+      "AS04": 0.0
      }
     },
     {
-     "cloud_bearing": 215.91938147712577,
+     "cloud_bearing": 215.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 78.336,
+     "air_100pct_ugm3": 78.33,
      "by_monitor": {
-      "AS01": 78.336,
-      "AS02": 4.8702
+      "AS01": 78.33,
+      "AS02": 4.8702,
+      "AS03": 0.0,
+      "AS04": 0.2863
      }
     },
     {
-     "cloud_bearing": 216.91938147712577,
+     "cloud_bearing": 216.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 95.822,
+     "air_100pct_ugm3": 96.015,
      "by_monitor": {
-      "AS01": 95.822,
-      "AS02": 7.270599999999999
+      "AS01": 96.015,
+      "AS02": 7.270599999999999,
+      "AS03": 0.0,
+      "AS04": 0.0
      }
     },
     {
-     "cloud_bearing": 217.91938147712577,
+     "cloud_bearing": 217.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 118.7,
+     "air_100pct_ugm3": 118.52,
      "by_monitor": {
-      "AS01": 118.7,
-      "AS02": 6.253900000000001
+      "AS01": 118.52,
+      "AS02": 6.434899999999999,
+      "AS03": 0.0,
+      "AS04": 0.24009999999999998
      }
     },
     {
-     "cloud_bearing": 218.91938147712577,
+     "cloud_bearing": 218.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 118.7,
+     "air_100pct_ugm3": 118.52,
      "by_monitor": {
-      "AS01": 118.7,
-      "AS02": 8.832600000000001
+      "AS01": 118.52,
+      "AS02": 8.6696,
+      "AS03": 1.1609,
+      "AS04": 0.4032
      }
     },
     {
-     "cloud_bearing": 219.91938147712577,
+     "cloud_bearing": 219.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 118.7,
+     "air_100pct_ugm3": 118.52,
      "by_monitor": {
-      "AS01": 118.7,
-      "AS02": 12.623999999999999
+      "AS01": 118.52,
+      "AS02": 12.643,
+      "AS03": 1.5946,
+      "AS04": 0.92874
      }
     },
     {
-     "cloud_bearing": 220.91938147712577,
+     "cloud_bearing": 220.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 134.55999999999997,
+     "air_100pct_ugm3": 135.45000000000002,
      "by_monitor": {
-      "AS01": 134.55999999999997,
-      "AS02": 19.947
+      "AS01": 135.45000000000002,
+      "AS02": 19.947,
+      "AS03": 0.9068,
+      "AS04": 2.3236
      }
     },
     {
-     "cloud_bearing": 221.91938147712577,
+     "cloud_bearing": 221.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 134.55999999999997,
+     "air_100pct_ugm3": 135.45000000000002,
      "by_monitor": {
-      "AS01": 134.55999999999997,
-      "AS02": 19.84
+      "AS01": 135.45000000000002,
+      "AS02": 19.717,
+      "AS03": 5.8309999999999995,
+      "AS04": 2.4314999999999998
      }
     },
     {
-     "cloud_bearing": 222.91938147712577,
+     "cloud_bearing": 222.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 166.62,
+     "air_100pct_ugm3": 165.82999999999998,
      "by_monitor": {
-      "AS01": 166.62,
-      "AS02": 25.756
+      "AS01": 165.82999999999998,
+      "AS02": 25.947,
+      "AS03": 5.699,
+      "AS04": 3.3044499999999997
      }
     },
     {
-     "cloud_bearing": 223.91938147712577,
+     "cloud_bearing": 223.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 166.62,
+     "air_100pct_ugm3": 165.82999999999998,
      "by_monitor": {
-      "AS01": 166.62,
-      "AS02": 29.976000000000003
+      "AS01": 165.82999999999998,
+      "AS02": 29.961,
+      "AS03": 9.332,
+      "AS04": 4.104
      }
     },
     {
-     "cloud_bearing": 224.91938147712577,
+     "cloud_bearing": 224.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 186.97,
+     "air_100pct_ugm3": 187.05,
      "by_monitor": {
-      "AS01": 186.97,
-      "AS02": 25.055000000000003
+      "AS01": 187.05,
+      "AS02": 25.359999999999996,
+      "AS03": 13.239,
+      "AS04": 4.5333
      }
     },
     {
-     "cloud_bearing": 225.91938147712577,
+     "cloud_bearing": 225.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 185.72,
+     "air_100pct_ugm3": 185.63,
      "by_monitor": {
-      "AS01": 185.72,
-      "AS02": 34.212
+      "AS01": 185.63,
+      "AS02": 34.288999999999994,
+      "AS03": 13.718,
+      "AS04": 5.8051
      }
     },
     {
-     "cloud_bearing": 226.91938147712577,
+     "cloud_bearing": 226.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 185.72,
+     "air_100pct_ugm3": 185.63,
      "by_monitor": {
-      "AS01": 185.72,
-      "AS02": 33.889
+      "AS01": 185.63,
+      "AS02": 33.817,
+      "AS03": 21.084,
+      "AS04": 8.2383
      }
     },
     {
-     "cloud_bearing": 227.91938147712577,
+     "cloud_bearing": 227.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 153.46,
+     "air_100pct_ugm3": 153.17000000000002,
      "by_monitor": {
-      "AS01": 153.46,
-      "AS02": 36.605
+      "AS01": 153.17000000000002,
+      "AS02": 36.679,
+      "AS03": 21.712,
+      "AS04": 9.0659
      }
     },
     {
-     "cloud_bearing": 228.91938147712577,
+     "cloud_bearing": 228.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 153.46,
+     "air_100pct_ugm3": 153.17000000000002,
      "by_monitor": {
-      "AS01": 153.46,
-      "AS02": 28.149
+      "AS01": 153.17000000000002,
+      "AS02": 28.174000000000003,
+      "AS03": 23.404,
+      "AS04": 8.8649
      }
     },
     {
-     "cloud_bearing": 229.91938147712577,
+     "cloud_bearing": 229.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 138.71,
+     "air_100pct_ugm3": 139.0,
      "by_monitor": {
-      "AS01": 138.71,
-      "AS02": 23.413
+      "AS01": 139.0,
+      "AS02": 23.43,
+      "AS03": 22.842,
+      "AS04": 10.548300000000001
      }
     },
     {
-     "cloud_bearing": 230.91938147712577,
+     "cloud_bearing": 230.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 138.71,
+     "air_100pct_ugm3": 139.0,
      "by_monitor": {
-      "AS01": 138.71,
-      "AS02": 30.827
+      "AS01": 139.0,
+      "AS02": 30.728,
+      "AS03": 23.484,
+      "AS04": 9.747
      }
     },
     {
-     "cloud_bearing": 231.91938147712577,
+     "cloud_bearing": 231.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 80.744,
+     "air_100pct_ugm3": 80.511,
      "by_monitor": {
-      "AS01": 80.744,
-      "AS02": 26.886999999999997
+      "AS01": 80.511,
+      "AS02": 26.830000000000002,
+      "AS03": 24.813999999999997,
+      "AS04": 12.8968
      }
     },
     {
-     "cloud_bearing": 232.91938147712577,
+     "cloud_bearing": 232.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 80.744,
+     "air_100pct_ugm3": 80.511,
      "by_monitor": {
-      "AS01": 80.744,
-      "AS02": 23.951
+      "AS01": 80.511,
+      "AS02": 23.881,
+      "AS03": 27.474999999999998,
+      "AS04": 10.8001
      }
     },
     {
-     "cloud_bearing": 233.91938147712577,
+     "cloud_bearing": 233.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 56.34,
+     "air_100pct_ugm3": 56.33800000000001,
      "by_monitor": {
-      "AS01": 56.34,
-      "AS02": 23.599
+      "AS01": 56.33800000000001,
+      "AS02": 23.57,
+      "AS03": 23.348,
+      "AS04": 6.1768
      }
     },
     {
-     "cloud_bearing": 234.91938147712577,
+     "cloud_bearing": 234.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 56.34,
+     "air_100pct_ugm3": 56.33800000000001,
      "by_monitor": {
-      "AS01": 56.34,
-      "AS02": 27.919
+      "AS01": 56.33800000000001,
+      "AS02": 28.100000000000005,
+      "AS03": 20.997000000000003,
+      "AS04": 6.2355
      }
     },
     {
-     "cloud_bearing": 235.91938147712577,
+     "cloud_bearing": 235.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 56.34,
+     "air_100pct_ugm3": 56.33800000000001,
      "by_monitor": {
-      "AS01": 56.34,
-      "AS02": 21.813
+      "AS01": 56.33800000000001,
+      "AS02": 21.84,
+      "AS03": 14.99,
+      "AS04": 5.2078
      }
     },
     {
-     "cloud_bearing": 236.91938147712577,
+     "cloud_bearing": 236.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 28.408,
+     "air_100pct_ugm3": 28.296999999999997,
      "by_monitor": {
-      "AS01": 28.408,
-      "AS02": 19.524
+      "AS01": 28.296999999999997,
+      "AS02": 19.511,
+      "AS03": 16.094999999999995,
+      "AS04": 3.3378
      }
     },
     {
-     "cloud_bearing": 237.91938147712577,
+     "cloud_bearing": 237.9193395364128,
      "best_monitor": "AS01",
-     "air_100pct_ugm3": 28.408,
+     "air_100pct_ugm3": 28.296999999999997,
      "by_monitor": {
-      "AS01": 28.408,
-      "AS02": 14.546000000000001
+      "AS01": 28.296999999999997,
+      "AS02": 14.709,
+      "AS03": 7.1168000000000005,
+      "AS04": 1.3697
      }
     },
     {
-     "cloud_bearing": 238.91938147712577,
+     "cloud_bearing": 238.9193395364128,
      "best_monitor": "AS02",
-     "air_100pct_ugm3": 14.030800000000001,
+     "air_100pct_ugm3": 14.045399999999999,
      "by_monitor": {
       "AS01": 9.4531,
-      "AS02": 14.030800000000001
+      "AS02": 14.045399999999999,
+      "AS03": 8.4355,
+      "AS04": 1.48078
      }
     },
     {
-     "cloud_bearing": 239.91938147712577,
+     "cloud_bearing": 239.9193395364128,
      "best_monitor": "AS02",
-     "air_100pct_ugm3": 11.973,
+     "air_100pct_ugm3": 11.934,
      "by_monitor": {
       "AS01": 9.4531,
-      "AS02": 11.973
+      "AS02": 11.934,
+      "AS03": 3.6161999999999996,
+      "AS04": 0.5351899999999999
      }
     },
     {
-     "cloud_bearing": 240.91938147712577,
+     "cloud_bearing": 240.9193395364128,
      "best_monitor": "AS02",
-     "air_100pct_ugm3": 13.1575,
+     "air_100pct_ugm3": 12.9574,
      "by_monitor": {
-      "AS01": 3.51025,
-      "AS02": 13.1575
+      "AS01": 3.42875,
+      "AS02": 12.9574,
+      "AS03": 1.9487,
+      "AS04": 0.3211
      }
     },
     {
-     "cloud_bearing": 241.91938147712577,
+     "cloud_bearing": 241.9193395364128,
      "best_monitor": "AS02",
      "air_100pct_ugm3": 7.1049,
      "by_monitor": {
-      "AS01": 3.51025,
-      "AS02": 7.1049
+      "AS01": 3.42875,
+      "AS02": 7.1049,
+      "AS03": 1.7308000000000003,
+      "AS04": 0.01033
      }
     },
     {
-     "cloud_bearing": 242.91938147712577,
+     "cloud_bearing": 242.9193395364128,
      "best_monitor": "AS02",
-     "air_100pct_ugm3": 7.136000000000001,
+     "air_100pct_ugm3": 7.209699999999999,
      "by_monitor": {
-      "AS01": 1.4326,
-      "AS02": 7.136000000000001
+      "AS01": 1.1883,
+      "AS02": 7.209699999999999,
+      "AS03": 0.71356,
+      "AS04": 0.0
      }
     },
     {
-     "cloud_bearing": 243.91938147712577,
+     "cloud_bearing": 243.9193395364128,
      "best_monitor": "AS02",
      "air_100pct_ugm3": 3.3088,
      "by_monitor": {
-      "AS01": 1.4326,
-      "AS02": 3.3088
+      "AS01": 1.1883,
+      "AS02": 3.3088,
+      "AS03": 0.53936,
+      "AS04": 0.02052
      }
     },
     {
-     "cloud_bearing": 244.91938147712577,
+     "cloud_bearing": 244.9193395364128,
      "best_monitor": "AS02",
      "air_100pct_ugm3": 2.0745,
      "by_monitor": {
       "AS01": 0.03744,
-      "AS02": 2.0745
+      "AS02": 2.0745,
+      "AS03": 0.3552,
+      "AS04": 0.0
      }
     }
    ]

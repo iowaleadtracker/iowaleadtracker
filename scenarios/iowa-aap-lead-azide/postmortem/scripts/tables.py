@@ -321,7 +321,7 @@ def sites(c: dict[str, Any]) -> str:
 def windows(c: dict[str, Any]) -> str:
     """Table 10: cloud directions the real-time monitors would catch, by share of the lead."""
     runs = {"Tracker, forecast": "tracker forecast", "Tracker, analyzed": "tracker analysis"}
-    runs["HYSPLIT, ARL archive (AS01, AS02 only)"] = "hysplit analysis"
+    runs["HYSPLIT, ARL archive"] = "hysplit analysis"
     rows = []
     for share in (0.07, 0.01, 0.001):
         for level, label in ((ARMY_LINE, "0.18"), (NOISE, "0.01")):

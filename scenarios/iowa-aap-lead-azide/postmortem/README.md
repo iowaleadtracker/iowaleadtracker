@@ -9,11 +9,11 @@ analyzed weather, NOAA's HYSPLIT and the U.S. Army's map against EPA's real-time
 > are not official NOAA products. The model maps below are estimates for assumed releases.
 > They are not measurements, and nothing here says how much lead reached any place.
 
-**Status.** Preliminary analysis, pending peer review. Second draft, updated Nov. 25, 2026, about 5:30 p.m. CST, eight and a half
+**Status.** Preliminary analysis, pending peer review. Second draft, updated Nov. 25, 2026, about 7:30 p.m. CST, ten and a half
 hours after the detonation. It replaces a first draft that an independent review found wrong in
 several places ([what changed](#what-changed-since-the-first-draft)). The model comparison
-covers the first two hours on NOAA's archived weather; later hours, the Army's results and
-all lab sampling are still to come. It was drafted with an AI coding assistant, and the
+now covers all eight modeled hours (9 a.m. to 5 p.m.) on NOAA's archived weather; the
+Army's results and all lab sampling are still to come. It was drafted with an AI coding assistant, and the
 first draft was reviewed by a separate AI referee
 ([`reviews/`](reviews/referee-report-1.md)); the maintainer has not yet checked every
 number by hand.
@@ -37,13 +37,14 @@ place. The rest of this comparison (the weather, the models, the Army's map) ser
 question.
 
 1. **EPA's four real-time lead monitors read almost nothing.** They sit 4.5 to 28 miles
-   southwest of the plant. Through 4:00 p.m. they posted 241 readings after the
-   detonation; 225 were zero and the highest was 0.010 µg/m³, about the size of readings
-   the same instruments posted before the detonation (up to 0.006).
+   southwest of the plant. Through 6:23 p.m. they posted 244 readings after the
+   detonation; 227 were zero and the highest was 0.010 µg/m³, about the size of readings
+   the same instruments posted before the detonation (up to 0.006). After 1:55 p.m. the
+   public layer holds only eight readings.
 2. **They were placed to catch a cloud at the ground.** Turning the modeled cloud through
    every direction it could plausibly have taken, the monitors would have read an hourly
    mean above the Army's 0.18 µg/m³ line for a release as small as 1% of the lead on any
-   heading from about 211° to 236°. Every estimate of the cloud's direction here falls
+   heading from 213° to 234°. Every estimate of the cloud's direction here falls
    inside that: 215° for both models on analyzed weather, 229–230° for the tracker's
    forecast and the Army's map. At the nearest monitor, 4.5 miles out, about 0.2% of the
    lead (some 14 lb) would have been enough, and the lowest case the tracker published
@@ -53,9 +54,12 @@ question.
    passes south of them, so south of about 225° the coverage rests on the nearest monitor
    alone. And all of this assumes the cloud was at the ground. A cloud that rose above
    the shallow morning mixed layer and came down miles later would have missed the nearest
-   monitor and, on the analyzed path, the other three. EPA's filter samplers at 211° to
-   221° (sites AS06, AS12, AS13, AS14 and AS18) are on that path; their lab results, with
-   soil and surface samples, are what can settle it. None were public.
+   monitor and, on the analyzed path, the other three. HYSPLIT, now run for all eight
+   hours on the archived weather, agrees with the tracker here: it gives AS02 only the
+   cloud's edge and AS03 and AS04 nothing. EPA's filter samplers at 211° to
+   221° (sites AS06, AS12, AS13, AS14 and AS18) are on that path in both models; their
+   lab results, with soil and surface samples, are what can settle it. None were public
+   by 7 p.m.
 
 The supporting results:
 
@@ -63,34 +67,35 @@ The supporting results:
   Matched hour for hour with NOAA's HRRR analysis, the forecast wind in the lowest 250 m
   came from 9–18° too far east at 9, 10 and 11 a.m. and noon; speeds agreed within
   0.7 m/s. By 1 p.m. the error was 5° or less, and at 2 and 3 p.m. 4° or less; at
-  4 p.m. it was 5–12° the other way. The five surface stations within 16 miles averaged 28° and 31° at 9 and
+  4 and 5 p.m. it was up to 12° again, with no steady sign. The five surface stations within 16 miles averaged 28° and 31° at 9 and
   10 a.m., against the forecast's 42° and 44°. Rerun on the analyzed weather, the
-  tracker's own cloud heads toward 215–218° instead of 229–231°, and the two footprints
-  barely overlap (5–14% by intersection over union).
-- **On the same weather the tracker and HYSPLIT agree.** With HYSPLIT run on NOAA's
-  archived HRRR, both put the cloud along 215–216°, their 100 µg/ft² zones are the same
-  size in the 26% case (2.1 and 2.0 sq mi), and their zones overlap by 52–69%. The
-  tracker runs higher at some distances: its 40 µg/ft² zone is 1.5 times HYSPLIT's, its
-  100 µg/ft² zone 1.7 times with all the lead airborne, and its hourly air beyond 6 miles
-  1.8 times. HYSPLIT itself is sensitive to its weather input: on coarser
+  tracker's own cloud heads toward 215–220° instead of 226–231°, and the two footprints
+  barely overlap (2–14% by intersection over union).
+- **On the same weather the tracker and HYSPLIT agree, for all eight hours.** With
+  HYSPLIT run on NOAA's archived HRRR, both put the cloud along 215–216° in the first two
+  hours and 217–221° from then to 5 p.m. In the 26% case their 100 µg/ft² zones are 2.2
+  and 2.0 sq mi, their 5 µg/ft² zones 107 and 100 sq mi, and the zones overlap by
+  45–66%. The tracker runs higher at some distances: its 40 µg/ft² zone is 1.5 times
+  HYSPLIT's, its 100 µg/ft² zone 1.8 times with all the lead airborne, and its hourly
+  air beyond 6 miles 1.8 times. HYSPLIT itself is sensitive to its weather input: on coarser
   pressure-level data its path shifts 7° and its near-field zones halve.
 - **The Army's final map agrees with the tracker's forecast on direction and speed, and
   puts far more lead near the plant.** Stamped 7 a.m. on Nov. 25, it points 230° (the
   tracker's forecast: 229–231°) and has the cloud 6, 27, 43 and 79 miles out at half an
   hour, 2, 3 and 5 hours (the tracker: 6, 31, 48 and 85). HYSPLIT on analyzed weather
-  has it 5 and 28 miles out at the first two, so the runs differ from the Army's marks
+  has it 5, 28, 44 and 83 miles out, so the runs differ from the Army's marks
   in direction, not speed. Both rest on forecasts, and both point 10° to 15°
   west of the analyzed wind. The Army's 100 µg/ft² zone covers 29 sq mi and reaches 12
   miles; the tracker's, for the same 26%, covers 2 sq mi and reaches 4. A coarse share
-  of particles in the tracker gives 12 to 18 sq mi, so it could explain much of the
+  of particles in the tracker gives 11 to 18 sq mi, so it could explain much of the
   gap. The Army hasn't published its model's inputs.
 
 ## 1. What this can and can't say
 
-- **Two hours of archived weather.** The HYSPLIT reference runs end at 11 a.m., when NOAA's
-  first archive file ends. Later hours are the tracker and, for the cloud's position
-  only, a HYSPLIT run on the pressure-level analyses, the weaker of its two weather
-  inputs.
+- **One event.** The HYSPLIT reference runs cover the eight modeled hours, 9 a.m. to
+  5 p.m., on NOAA's archived weather. Agreement between the models on this day says
+  nothing about other weather, and it is agreement between two models, not with
+  measurements.
 - **No lead measurements beyond four instruments.** EPA lists 43 sampling sites; only the
   four real-time monitors have public results, and the layer names neither the substance
   nor a detection limit. Filter, soil, wipe and water results will be the test of what
@@ -115,7 +120,9 @@ the Army "intentionally blew up the nation's entire stockpile of lead azide ... 
 on Wednesday," 68 barrels in bunkers, and that video "showed two white plumes rolling over
 the detonation site before the clouds quickly dissipated" (KCRG 2026a). Two hours later
 the Army said the detonation was complete and that "the EPA has detected zero lead"
-(KCRG 2026b). We take 9:00 a.m. as the release time. A start a few minutes off would not
+(KCRG 2026b). An emergency alert that evening said "Army, CDC, EPA and FEMA concur that
+it is safe to resume normal activities. Continuous monitoring will be conducted to
+ensure safety" (KCRG 2026b). We take 9:00 a.m. as the release time. A start a few minutes off would not
 change the hourly comparisons; a start an hour off would.
 
 EPA's Nov. 25 release says it collected 1,216 samples beforehand, that "pre-detonation
@@ -124,7 +131,8 @@ monitoring will be reporting data points every 5 minutes" in a public viewer (EP
 2026b). The Army's permit application describes its own air sampling: 24-hour filter
 samples at five on-site and five off-site locations, sent to a lab, and five "response"
 samples during the event, read in the field by X-ray fluorescence (U.S. Army 2026b). None of those
-results were public.
+results were public by 7 p.m. EPA's response site listed no documents newer than Nov. 23
+and, for Nov. 25, only the link to its data viewer (EPA 2026d).
 
 ## 3. Data and methods
 
@@ -139,16 +147,16 @@ The tracker reads HRRR at 25 points about 115 miles apart and interpolates betwe
 
 ### 3.2 The analyzed weather
 
-Two forms of NOAA's HRRR for the morning:
+Two forms of NOAA's HRRR for the day:
 
-- **NOAA ARL's archive** (`20261125_12-17_hrrr`, 6 to 11 a.m., posted about 12:40 p.m.):
-  hourly HRRR on its native levels with surface fluxes, in HYSPLIT's format. This is the
+- **NOAA ARL's archive** (`20261125_12-17_hrrr` and `20261125_18-23_hrrr`, 6 a.m. to
+  5 p.m., posted about 12:40 and 6:43 p.m.): hourly HRRR on its native levels with surface fluxes, in HYSPLIT's format. This is the
   weather the HYSPLIT reference runs use, as in the back-test.
-- **The hourly analyses** for 9 a.m. to 4 p.m. (15 to 22 UTC) on pressure levels every
+- **The hourly analyses** for 9 a.m. to 5 p.m. (15 to 23 UTC) on pressure levels every
   25 hPa, from NOAA's archive on AWS, converted with HYSPLIT's `api2arl_v4`
   ([`blast-day/nowcast_hrrr.sh`](../../../validation/hysplit-backtest/blast-day/README.md)).
   Each is available an hour after its time. They are used for the wind comparison in
-  section 4 and, through 3 p.m., for a second HYSPLIT run.
+  section 4 and for a second HYSPLIT run.
 
 HRRR assimilates surface stations, radar, aircraft, balloons and satellites each hour
 (Benjamin et al. 2016; Dowell et al. 2022).
@@ -172,8 +180,9 @@ the HRRR that Open-Meteo then served, after all eight modeled hours (9 a.m. to 5
 had passed. The weather is saved in `data/met_hrrr_asof_20261126_0051Z.json`, so the
 reruns need no network. Settings are the site's, with HRRR only. This is HRRR at the
 tracker's 25 points with its 10 m, 80 m and eight pressure-level winds. It is close to
-NOAA's analyses but not identical: at the plant its 10 m wind is within 2° and 0.1 m/s
-of the analysis at every hour from 9 a.m. to 4 p.m. Open-Meteo revised some hours
+NOAA's analyses but not identical: at the plant its 10 m wind is within 2° of the
+analysis at every hour from 9 a.m. to 5 p.m., and within 0.1 m/s except at 5 p.m.
+(0.6 m/s). Open-Meteo revised some hours
 between earlier pulls; a pull at 4:15 p.m. was 5° off at 2 p.m.
 
 ### 3.5 HYSPLIT
@@ -194,9 +203,11 @@ assumed sizes.
 
 Two sets of runs:
 
-- **Reference:** NOAA ARL's archived HRRR, 9 to 11 a.m., on a 0.003° grid, with Zhang and
-  with Emerson speeds.
-- **Sensitivity:** the pressure-level analyses, 9 a.m. to 3 p.m., on a 0.005° grid, Zhang
+- **Reference:** NOAA ARL's archived HRRR, 9 a.m. to 5 p.m., on a 0.003° grid, with
+  Zhang and with Emerson speeds. Earlier versions of this draft had only the first
+  archive file and stopped at 11 a.m.; the 8-hour runs reproduce those two hours (every
+  zone within 0.1 sq mi).
+- **Sensitivity:** the pressure-level analyses, 9 a.m. to 5 p.m., on a 0.005° grid, Zhang
   speeds. Without surface fluxes HYSPLIT estimates mixing from the profiles.
 
 Nothing is held fixed in either. The public HYSPLIT build refuses forecast weather without
@@ -251,7 +262,7 @@ leading edge.
 ### 3.8 EPA's data
 
 The two public layers behind EPA's "Iowa Army Ammunition Plant Response Data Viewer"
-(EPA 2026c), downloaded at 4:16 p.m. CST ([`data/epa/`](data/epa/README.md)): 323
+(EPA 2026c), downloaded at 7:14 p.m. CST ([`data/epa/`](data/epa/README.md)): 329
 records from four stations labeled "Xact" (the name of a commercial instrument that
 measures metals in air in near-real time), with a time, a concentration in µg/m³ and a
 station; and 43 sampling sites with the instruments at each (dust monitors, gas monitors,
@@ -278,25 +289,26 @@ The cloud starts between the ground and 251 m.*
 | about 870 m (900 hPa) | 10.1, 63° / 10.5, 65° (−2°) | 10.9, 65° / 10.3, 61° (+4°) | 9.9, 72° / 10.2, 63° (+9°) | 9.4, 70° / 9.3, 63° (+7°) |
 <!-- /table:wind -->
 
-*Table 1b. The same for the afternoon hours analyzed so far. The morning's direction
-error is gone by 2 p.m. At 4 p.m. the forecast is off the other way.*
+*Table 1b. The same for the afternoon. The morning's direction error is gone by 2 p.m.
+At 4 and 5 p.m. the forecast is off again, by up to 12°.*
 
 <!-- table:wind_pm -->
-| Level | 1 p.m. | 2 p.m. | 3 p.m. | 4 p.m. |
-|---|---|---|---|---|
-| 10 m | 6.3, 52° / 6.3, 47° (+5°) | 5.7, 45° / 6.0, 45° (0°) | 5.8, 54° / 5.6, 54° (0°) | 5.2, 43° / 4.9, 48° (−5°) |
-| about 40 m (1000 hPa) | 7.4, 51° / 7.3, 47° (+4°) | 6.7, 45° / 6.8, 47° (−2°) | 7.1, 52° / 7.0, 56° (−4°) | 6.6, 46° / 6.1, 54° (−8°) |
-| about 240 m (975 hPa) | 8.7, 52° / 8.8, 51° (+1°) | 8.1, 46° / 8.4, 49° (−3°) | 9.0, 54° / 9.4, 58° (−4°) | 9.8, 52° / 9.3, 64° (−12°) |
-| about 450 m (950 hPa) | 9.4, 51° / 9.4, 53° (−2°) | 9.1, 52° / 8.9, 51° (+1°) | 9.2, 55° / 10.2, 59° (−4°) | 9.7, 60° / 10.6, 68° (−8°) |
-| about 660 m (925 hPa) | 9.5, 58° / 9.6, 56° (+2°) | 9.2, 51° / 9.3, 53° (−2°) | 10.2, 59° / 10.7, 61° (−2°) | 11.6, 64° / 11.4, 71° (−7°) |
-| about 870 m (900 hPa) | 10.6, 68° / 10.0, 60° (+8°) | 9.8, 61° / 9.5, 57° (+4°) | 10.7, 63° / 11.0, 65° (−2°) | 12.2, 69° / 12.0, 74° (−5°) |
+| Level | 1 p.m. | 2 p.m. | 3 p.m. | 4 p.m. | 5 p.m. |
+|---|---|---|---|---|---|
+| 10 m | 6.3, 52° / 6.3, 47° (+5°) | 5.7, 45° / 6.0, 45° (0°) | 5.8, 54° / 5.6, 54° (0°) | 5.2, 43° / 4.9, 48° (−5°) | 4.1, 35° / 5.2, 44° (−9°) |
+| about 40 m (1000 hPa) | 7.4, 51° / 7.3, 47° (+4°) | 6.7, 45° / 6.8, 47° (−2°) | 7.1, 52° / 7.0, 56° (−4°) | 6.6, 46° / 6.1, 54° (−8°) | 6.0, 36° / 6.7, 42° (−6°) |
+| about 240 m (975 hPa) | 8.7, 52° / 8.8, 51° (+1°) | 8.1, 46° / 8.4, 49° (−3°) | 9.0, 54° / 9.4, 58° (−4°) | 9.8, 52° / 9.3, 64° (−12°) | 10.0, 50° / 10.3, 48° (+2°) |
+| about 450 m (950 hPa) | 9.4, 51° / 9.4, 53° (−2°) | 9.1, 52° / 8.9, 51° (+1°) | 9.2, 55° / 10.2, 59° (−4°) | 9.7, 60° / 10.6, 68° (−8°) | 10.0, 59° / 12.0, 52° (+7°) |
+| about 660 m (925 hPa) | 9.5, 58° / 9.6, 56° (+2°) | 9.2, 51° / 9.3, 53° (−2°) | 10.2, 59° / 10.7, 61° (−2°) | 11.6, 64° / 11.4, 71° (−7°) | 10.8, 67° / 12.9, 57° (+10°) |
+| about 870 m (900 hPa) | 10.6, 68° / 10.0, 60° (+8°) | 9.8, 61° / 9.5, 57° (+4°) | 10.7, 63° / 11.0, 65° (−2°) | 12.2, 69° / 12.0, 74° (−5°) | 10.9, 72° / 13.2, 63° (+9°) |
 <!-- /table:wind_pm -->
 
 Speeds agree within 0.7 m/s at every level and hour. Direction does not: through the
 layer the cloud starts in, the forecast wind came from 9–18° too far east in all four
 morning hours, and from 11 a.m. the error reached up to 870 m. It did not last: at
 1 p.m. the forecast was within 5° below 700 m, and at 2 and 3 p.m. within 4° (Table 1b).
-At 4 p.m. the forecast wind came from 5–12° too far north instead. By then the modeled
+At 4 p.m. the forecast wind came from 5–12° too far north instead, and at 5 p.m. it was
+6–9° too far north below 100 m and 7–10° too far east above 400 m. By then the modeled
 cloud is more than 100 miles from the plant, so the wind over the plant no longer steers
 it.
 The forecast had turned the low-level wind toward the east about three hours before the
@@ -372,81 +384,83 @@ fast as either model assumes is an open question that bears directly on section 
 
 ## 5. The models on the same weather
 
-*Table 4. 26% of the lead airborne (1,794 lb), after 2 hours (11 a.m.). Zones: area /
-farthest distance / bearing of the far end. Air in µg/m³. The tracker's zones at 100 and
-40 µg/ft² are complete by then; its 5 µg/ft² zone grows to 90 sq mi (forecast) and
-107 sq mi (analyzed) by 8 hours.*
+*Table 4. 26% of the lead airborne (1,794 lb), after 8 hours (5 p.m.). Zones: area /
+farthest distance / bearing of the far end. Air in µg/m³.*
 
 <!-- table:models -->
 |  | Tracker, forecast | Tracker, analyzed weather | HYSPLIT, ARL archive | HYSPLIT, ARL archive, Emerson speeds | HYSPLIT, pressure-level analyses |
 |---|---|---|---|---|---|
-| Ground ≥ 100 µg/ft² | 2.2 sq mi / 4.2 mi / 225° | 2.1 sq mi / 3.8 mi / 209° | 2.0 sq mi / 3.9 mi / 211° | 2.6 sq mi / 4.4 mi / 212° | 1.2 sq mi / 2.3 mi / 220° |
-| Ground ≥ 40 µg/ft² | 9.1 sq mi / 9.6 mi / 228° | 8.3 sq mi / 9.4 mi / 213° | 5.4 sq mi / 6.0 mi / 211° | 7.4 sq mi / 7.1 mi / 213° | 3.2 sq mi / 4.2 mi / 222° |
-| Ground ≥ 5 µg/ft² | 75 sq mi / 29 mi / 232° | 86 sq mi / 29 mi / 217° | 87 sq mi / 27 mi / 219° | 103 sq mi / 28 mi / 218° | 66 sq mi / 24 mi / 224° |
-| Lead on the ground | 115 lb | 125 lb | 120 lb | 156 lb | 93 lb |
-| Highest hourly air, hour 1: 1.5–3 mi | 170 | 149 | 210 | 214 | 82 |
-| Highest hourly air, hour 1: 3–6 mi | 88 | 84 | 84 | 85 | 38 |
+| Ground ≥ 100 µg/ft² | 2.2 sq mi / 4.2 mi / 225° | 2.2 sq mi / 4.2 mi / 208° | 2.0 sq mi / 3.9 mi / 211° | 2.6 sq mi / 4.4 mi / 212° | 1.2 sq mi / 2.3 mi / 220° |
+| Ground ≥ 40 µg/ft² | 9.1 sq mi / 9.6 mi / 228° | 8.1 sq mi / 9.7 mi / 213° | 5.4 sq mi / 6.0 mi / 211° | 7.4 sq mi / 7.1 mi / 213° | 3.2 sq mi / 4.2 mi / 222° |
+| Ground ≥ 5 µg/ft² | 90 sq mi / 35 mi / 231° | 107 sq mi / 36 mi / 218° | 100 sq mi / 34 mi / 220° | 132 sq mi / 38 mi / 219° | 67 sq mi / 25 mi / 223° |
+| Lead on the ground | 243 lb | 257 lb | 231 lb | 306 lb | 203 lb |
+| Highest hourly air, hour 1: 1.5–3 mi | 170 | 138 | 209 | 214 | 82 |
+| Highest hourly air, hour 1: 3–6 mi | 88 | 100 | 84 | 85 | 38 |
 | Highest hourly air, hour 1: 6–12 mi | 42 | 48 | 26 | 25 | 15 |
-| Highest hourly air, hour 1: 12–25 mi | 20 | 19 | 11 | 11 | 7.7 |
-| Hourly air ≥ 32 µg/m³ (PAC-1), farthest | 8.7 mi | 8.9 mi | 5.3 mi | 5.3 mi | 3.2 mi |
+| Highest hourly air, hour 1: 12–25 mi | 20 | 20 | 11 | 11 | 7.7 |
+| Hourly air ≥ 32 µg/m³ (PAC-1), farthest | 8.7 mi | 8.3 mi | 5.3 mi | 5.3 mi | 3.2 mi |
 | Center of hourly mean air, hour 1 | 5.6 mi at 229° | 5.6 mi at 215° | 5.3 mi at 215° | 5.2 mi at 215° | 6.0 mi at 222° |
 | Center of hourly mean air, hour 2 | 22 mi at 230° | 21 mi at 216° | 19 mi at 216° | 19 mi at 216° | 23 mi at 223° |
 <!-- /table:models -->
 
-*Table 5. Overlap of the zones after 2 hours (intersection over union; 1 = identical,
+*Table 5. Overlap of the zones after 8 hours (intersection over union; 1 = identical,
 0 = no overlap).*
 
 <!-- table:overlap -->
 | Pair | Case | ≥ 100 | ≥ 40 | ≥ 5 µg/ft² |
 |---|---|---|---|---|
-| Tracker forecast vs tracker on analyzed weather | 26% | 0.10 | 0.14 | 0.05 |
-|  | 100% | 0.12 | 0.07 | 0.07 |
-| Tracker on analyzed weather vs HYSPLIT (ARL archive) | 26% | 0.52 | 0.52 | 0.69 |
-|  | 100% | 0.52 | 0.67 | 0.70 |
-| Tracker forecast vs HYSPLIT (ARL archive) | 26% | 0.09 | 0.12 | 0.08 |
-|  | 100% | 0.12 | 0.07 | 0.14 |
+| Tracker forecast vs tracker on analyzed weather | 26% | 0.11 | 0.14 | 0.04 |
+|  | 100% | 0.12 | 0.06 | 0.02 |
+| Tracker on analyzed weather vs HYSPLIT (ARL archive) | 26% | 0.45 | 0.52 | 0.66 |
+|  | 100% | 0.49 | 0.68 | 0.66 |
+| Tracker forecast vs HYSPLIT (ARL archive) | 26% | 0.07 | 0.13 | 0.07 |
+|  | 100% | 0.09 | 0.07 | 0.06 |
 <!-- /table:overlap -->
 
 ![Figure 1](figures/fig1_ground.png)
 
 *Figure 1. Modeled lead on the ground for the 26% case: 5 µg/ft² (left) and 100 µg/ft²
-(right, enlarged). Tracker zones are after 8 hours; HYSPLIT's (on NOAA ARL's archived
-weather) after 2. The Army's zones are traced from its final map and placed from the
+(right, enlarged), after 8 hours. HYSPLIT is the run on NOAA ARL's archived weather.
+The Army's zones are traced from its final map and placed from the
 plume's tip. Diamonds are EPA's four real-time monitors; open squares are EPA's other
 sampling sites, with no public results.*
 
 ![Figure 2](figures/fig2_air_hourly.png)
 
 *Figure 2. Modeled hourly mean lead in air at the ground, 0.18 µg/m³ or more, 26% case,
-for the two hours of archived weather. HYSPLIT's outline is smoothed by about 1 km for
+for the first two hours, while the cloud is among EPA's sites. HYSPLIT's outline is smoothed by about 1 km for
 display; at this level it rests on a handful of particles per cell.*
 
 The forecast error moved the tracker's own map. On analyzed weather its cloud leaves
-along 209°–215° and bends to about 218°, 14° to 16° south of the forecast map's
-225°–232°. The zones keep their size and length but not their place: the forecast and
-analyzed-weather footprints share 5% to 14% of their combined area. At 15 miles a 15°
+along 208°–215° and bends to about 218°–220°, 13° to 17° south of the forecast map's
+225°–231°. The zones keep their size and length but not their place: the forecast and
+analyzed-weather footprints share 2% to 14% of their combined area. At 15 miles a 15°
 shift is 4 miles, wider than the 5 µg/ft² zone.
 
 On the same weather the tracker and HYSPLIT agree. With HYSPLIT on NOAA ARL's archived
-HRRR, both models' clouds are centered at 215° in the first hour and 216° in the second.
-In the 26% case the 100 µg/ft² zones are 2.1 and 2.0 sq mi and reach 3.8 and 3.9 miles;
-the 5 µg/ft² zones are 86 and 87 sq mi; the lead on the ground after two hours is 125 and
-120 lb. The zones overlap by 52% to 69% of their combined area (52% to 70% with all the
-lead airborne), against 5% to 14% between the forecast and analyzed-weather maps. For
-this event the weather forecast mattered far more than the choice of model.
+HRRR, both models' clouds are centered at 215° in the first hour, 216° in the second and
+217°–221° from then to 5 p.m., when both have the center 123 to 125 miles out. In the
+26% case the 100 µg/ft² zones are 2.2 and 2.0 sq mi and reach 4.2 and 3.9 miles; the
+5 µg/ft² zones are 107 and 100 sq mi and reach 36 and 34 miles; the lead on the ground
+after eight hours is 257 and 231 lb. The zones overlap by 45% to 66% of their combined
+area (49% to 68% with all the lead airborne), against 2% to 14% between the forecast and
+analyzed-weather maps. For this event the weather forecast mattered far more than the
+choice of model.
 
 Where they differ, the tracker is the higher one. Its 40 µg/ft² zone is 1.5 times
-HYSPLIT's (8.3 against 5.4 sq mi). With all the lead airborne its 100 µg/ft² zone is 1.7
-times HYSPLIT's (16 against 9.4 sq mi), though HYSPLIT with Emerson deposition speeds
-gives 15. Its highest hourly air is 0.7 to 1.0 times HYSPLIT's within 6 miles and 1.8
-times from 6 to 25 miles, and PAC-1 reaches 8.9 miles against 5.3. This is the
+HYSPLIT's (8.1 against 5.4 sq mi). With all the lead airborne its 100 µg/ft² zone is 1.8
+times HYSPLIT's (17 against 9.3 sq mi), though HYSPLIT with Emerson deposition speeds
+gives 15. Its highest hourly air is 0.7 to 1.2 times HYSPLIT's within 6 miles and 1.8
+times from 6 to 25 miles, and PAC-1 reaches 8.3 miles against 5.3. This is the
 moderate high bias the back-tests found in neutral daytime air (tracker distances 0.8 to
 1.9 times HYSPLIT's; [`TURBULENCE.md`](../../../TURBULENCE.md)).
 
 HYSPLIT's own answer depends on its weather file. On the pressure-level analyses, which
 have levels near 40 and 240 m with nothing between and no surface fluxes, its cloud runs along
-222°–223°, 7° west of the run on archived weather; its 100 µg/ft² zone is 1.2 sq mi
-instead of 2.0, and its highest hourly air within 6 miles is about 40% as high. An earlier
+222°–223° for the first five hours, 7° west of the run on archived weather at first and
+2° by the fifth hour; its 100 µg/ft² zone is 1.2 sq mi instead of 2.0, its 5 µg/ft² zone
+67 sq mi instead of 100, and its highest hourly air within 6 miles is about 40% as
+high. An earlier
 version of this draft compared the tracker with that run and found a 1.7- to 3.6-fold
 difference that the archived weather removes.
 
@@ -454,17 +468,17 @@ difference that the archived weather removes.
 
 ### 6.1 What they read
 
-*Table 6. EPA's four real-time monitors, as posted through 4:16 p.m. CST, and the models'
+*Table 6. EPA's four real-time monitors, as posted through 7:14 p.m. CST, and the models'
 hourly mean air (µg/m³) at each for the lowest case (7% of the lead airborne) in hours 1
 and 2. Multiply model values by 3.7 for the 26% case and by 14 for 100%.*
 
 <!-- table:monitors -->
 | Monitor | From the plant | Readings after 9 a.m. | Not zero | Highest (µg/m³) | Highest before 9 a.m. | Tracker, forecast (h1 / h2) | Tracker, analyzed (h1 / h2) | HYSPLIT, ARL archive (h1 / h2) |
 |---|---|---|---|---|---|---|---|---|
-| AS01 | 4.5 mi at 221° | 61 | 2 | 0.0021 | 0 | 7.6 / 0 | 6.2 / 0 | 5.5 / 0 |
-| AS02 | 12.5 mi at 230° | 61 | 2 | 0.0043 | 0.0030 | 5.0 / 0.19 | 0 / 0 | 0.17 / 0 |
+| AS01 | 4.5 mi at 221° | 62 | 2 | 0.0021 | 0 | 7.6 / 0 | 6.7 / 0 | 5.5 / 0 |
+| AS02 | 12.5 mi at 230° | 62 | 2 | 0.0043 | 0.0030 | 5.0 / 0.19 | 0 / 0 | 0.17 / 0 |
 | AS03 | 19.9 mi at 232° | 60 | 4 | 0.0043 | 0 | 0 / 2.6 | 0 / 0 | 0 / 0 |
-| AS04 | 28.1 mi at 233° | 59 | 8 | 0.0102 | 0.0063 | 0 / 1.2 | 0 / 0 | 0 / 0 |
+| AS04 | 28.1 mi at 233° | 60 | 9 | 0.0102 | 0.0063 | 0 / 1.2 | 0 / 0 | 0 / 0 |
 <!-- /table:monitors -->
 
 ![Figure 3](figures/fig3_epa_monitors.png)
@@ -472,36 +486,41 @@ and 2. Multiply model values by 3.7 for the 26% case and by 14 for 100%.*
 *Figure 3. EPA's readings (dots; zeros on the bottom line) and the models' hourly means
 for the 7% case at each monitor, on a logarithmic scale.*
 
-The readings are flat. Of 241 readings after the detonation, 225 are zero. The sixteen
-that aren't range from 0.0002 to 0.010 µg/m³, and two of the four monitors posted readings
+The readings are flat. Of 244 readings after the detonation, 227 are zero. The seventeen
+that aren't range from 0.00001 to 0.010 µg/m³, and two of the four monitors posted readings
 of 0.003 to 0.006 µg/m³ before the detonation. Nothing in the series marks a cloud
 arriving or leaving. AS01, the nearest, posted a reading every five minutes through the
-first hour; its only non-zero values, 0.0021 µg/m³, came at 9:10 and 9:11 a.m. AS02 and
-AS04 last posted at 1:55 p.m.; AS01 and AS03 were still posting at 4 p.m.
+first hour; its only non-zero values, 0.0021 µg/m³, came at 9:10 and 9:11 a.m.
+
+All four posted about every five minutes until 1:55 p.m. After that the public layer
+holds eight more readings, one to three per monitor between 4:00 and 6:23 p.m.: seven
+zeros and one of 0.00001 µg/m³ (AS04 at 4:28 p.m.). EPA hasn't said why the postings
+thinned. By then the modeled cloud is well past the monitors in every run: at 2 p.m. its
+trailing edge is 48 to 72 miles out, and the farthest monitor is at 28.
 
 ### 6.2 Where they sit
 
 *Table 9. Modeled highest hourly mean air (µg/m³) for the lowest case (7% airborne) at
 EPA's real-time monitors and at its other sampling sites that fall inside the cloud on
-analyzed weather. HYSPLIT's run ends at 11 a.m., before the cloud reaches the farther
-sites.*
+analyzed weather, over all eight hours.*
 
 <!-- table:sites -->
 | Site | From the plant | Instruments | Tracker, forecast | Tracker, analyzed | HYSPLIT, ARL archive |
 |---|---|---|---|---|---|
-| AS01 | 4.5 mi at 222° | **real-time lead** | 7.6 | 6.2 | 5.5 |
+| AS01 | 4.5 mi at 222° | **real-time lead** | 7.6 | 6.7 | 5.5 |
 | AS02 | 12.5 mi at 230° | **real-time lead** | 5.0 | 0 | 0.17 |
-| AS03 | 19.9 mi at 232° | **real-time lead** | 2.6 | 0 | not reached in 2 h |
-| AS04 | 28.1 mi at 233° | **real-time lead** | 1.2 | 0.0001 | not reached in 2 h |
-| AS06 | 6.8 mi at 211° | filter, dust monitor | 0 | 12 | 5.3 |
-| AS11 | 7.4 mi at 229° | filter | 7.6 | 0.0588 | 0.64 |
-| AS12 | 9.8 mi at 211° | filter | 0 | 7.9 | 2.8 |
-| AS13 | 13.8 mi at 221° | filter | 0.0853 | 2.7 | not reached in 2 h |
-| AS14 | 21.4 mi at 220° | filter | 0.0786 | 1.3 | not reached in 2 h |
-| AS18 | 25.6 mi at 218° | filter | 0.0053 | 1.8 | not reached in 2 h |
-| AS36 | 29.8 mi at 212° | filter | 0 | 0.30 | not reached in 2 h |
-| AS37 | 31.4 mi at 223° | filter | 0.16 | 0.38 | not reached in 2 h |
-| AS05 | 36.6 mi at 220° | filter, dust monitor | 0.0377 | 0.94 | not reached in 2 h |
+| AS03 | 19.9 mi at 232° | **real-time lead** | 2.6 | 0 | 0 |
+| AS04 | 28.1 mi at 233° | **real-time lead** | 1.2 | 0.0002 | 0 |
+| AS06 | 6.8 mi at 211° | filter, dust monitor | 0 | 11 | 5.3 |
+| AS11 | 7.4 mi at 229° | filter | 7.6 | 0.0136 | 0.63 |
+| AS12 | 9.8 mi at 211° | filter | 0 | 6.7 | 2.8 |
+| AS13 | 13.8 mi at 221° | filter | 0.0853 | 2.5 | 0.99 |
+| AS35 | 14.3 mi at 202° | filter, dust monitor | 0 | 0.0047 | 0.36 |
+| AS14 | 21.4 mi at 220° | filter | 0.0786 | 1.4 | 1.1 |
+| AS18 | 25.6 mi at 218° | filter | 0.0053 | 1.8 | 1.1 |
+| AS36 | 29.8 mi at 212° | filter | 0 | 0.36 | 0.38 |
+| AS37 | 31.4 mi at 223° | filter | 0.16 | 0.36 | 0.44 |
+| AS05 | 36.6 mi at 220° | filter, dust monitor | 0.0377 | 0.87 | 0.78 |
 <!-- /table:sites -->
 
 On the forecast, all four real-time monitors are in the cloud: they lie at 222° to 233°,
@@ -509,11 +528,13 @@ along the tracker's forecast path and the axis of the Army's final map (230°). 
 them where the forecasts said the lead would go.
 
 On analyzed weather only AS01 is. Both models put the cloud's first-hour center at 215°,
-and AS01, at 222°, gets 38% of the highest value at its distance, still 5.5 to
-6.2 µg/m³ for the lowest case. The three farther monitors are outside: the tracker gives
-them nothing, and HYSPLIT gives AS02 the cloud's edge (0.17 µg/m³). The sites best placed
+and AS01, at 222°, gets about 40% of the highest value at its distance, still 5.5 to
+6.7 µg/m³ for the lowest case. The three farther monitors are outside. The tracker gives
+them nothing. HYSPLIT, which now runs long enough for the cloud to pass all four, gives
+AS02 the cloud's edge (0.17 µg/m³) and AS03 and AS04 nothing. The sites best placed
 for the analyzed path are filter samplers, not real-time monitors: AS06 and AS12 at 211°,
-7 and 10 miles out, then AS13, AS14 and AS18.
+7 and 10 miles out, then AS13, AS14 and AS18, where the two models give 1.0 to
+2.5 µg/m³ for the lowest case.
 
 ### 6.3 How much they cover
 
@@ -535,25 +556,25 @@ real-time monitor would read an hourly mean at or above two levels: 0.18 µg/m³
 map's air line, and 0.01 µg/m³, the highest reading any of the monitors posted.*
 
 <!-- table:windows -->
-| Share of the lead airborne | Hourly mean at a monitor of at least | Tracker, forecast | Tracker, analyzed | HYSPLIT, ARL archive (AS01, AS02 only) |
+| Share of the lead airborne | Hourly mean at a monitor of at least | Tracker, forecast | Tracker, analyzed | HYSPLIT, ARL archive |
 |---|---|---|---|---|
-| 7% | 0.18 µg/m³ | 208°–238° | 210°–239° | 203°–244° |
+| 7% | 0.18 µg/m³ | 208°–238° | 208°–240° | 203°–244° |
 | 7% | 0.01 µg/m³ | 208°–244° | 204°–243° | 200°–245° |
-| 1% | 0.18 µg/m³ | 213°–234° | 210°–236° | 210°–238° |
-| 1% | 0.01 µg/m³ | 208°–241° | 204°–241° | 203°–245° |
-| 0.1% | 0.18 µg/m³ | 219°–226° | 224°–229° | 225°–227° |
-| 0.1% | 0.01 µg/m³ | 213°–236° | 210°–236° | 206°–241° |
+| 1% | 0.18 µg/m³ | 213°–234° | 208°–235° | 210°–238° |
+| 1% | 0.01 µg/m³ | 208°–241° | 208°–240° | 203°–245° |
+| 0.1% | 0.18 µg/m³ | 219°–226° | 227°–227° | 225°–227° |
+| 0.1% | 0.01 µg/m³ | 213°–236° | 208°–239° | 206°–241° |
 <!-- /table:windows -->
 
-For the lowest published case the monitors respond over about 35° of arc, from 203°–210°
+For the lowest published case the monitors respond over 30° to 40° of arc, from 203°–208°
 to 238°–244°, and over the middle of it, about 213° to 233°, they would read 5 to
-18 µg/m³. For 1% of the lead airborne the window is still about 211° to 236°. Every direction estimated here
+18 µg/m³. For 1% of the lead airborne the window is still 213° to 234° in every run. Every direction estimated here
 falls inside: 215° (both models on analyzed weather), 222° (HYSPLIT on pressure-level
 data), 229°–230° (the tracker's forecast and the Army's map). Only a cloud that followed
 the surface wind exactly, toward 204°–211°, would be at the window's edge.
 
 Sensitivity at AS01 is high. With the cloud as modeled, an hourly mean of 0.18 µg/m³ there
-needs 0.17% to 0.23% of the lead airborne as fine dust, about 12 to 16 lb of the 6,900;
+needs 0.17% to 0.23% of the lead airborne as fine dust, about 11 to 16 lb of the 6,900;
 0.01 µg/m³ needs about 0.01%, under a pound. A 5-minute reading during the cloud's passage
 would run above the hourly mean, so these are conservative.
 
@@ -593,11 +614,11 @@ and wipe sampling between about 205° and 245° within 15 miles, which spans eve
 here and the Army's map.
 
 Regional particle monitors add nothing yet. AirNow has no PM monitor within 39 miles.
-Readings within 160 miles ran 3 to 13 µg/m³ of PM2.5 from 5 a.m. to 4 p.m., an ordinary
+Readings within 160 miles ran 3 to 13 µg/m³ of PM2.5 from 5 a.m. to 5 p.m., an ordinary
 range. All are upwind or off to the side. The one to the southwest, Lake Sugema (40 miles
-at 257°), is roughly 20 miles north of the modeled path at that distance and posted 5 to
-10 µg/m³ in the hours from 8 a.m. to 4 p.m. Lead at the Army map's 0.18 µg/m³
-line would be about 2% of that background, so PM2.5 can't show it.
+at 257°), is roughly 20 miles north of the modeled path at that distance and posted 3 to
+10 µg/m³ in the hours from 8 a.m. to 5 p.m. Lead at the Army map's 0.18 µg/m³
+line would be a few percent of that background, so PM2.5 can't show it.
 
 ## 7. The Army's map
 
@@ -608,8 +629,8 @@ center are in parentheses. Tracker ground zones are after 8 hours.*
 <!-- table:army -->
 |  | Army, final map | Tracker, forecast | Tracker, analyzed weather |
 |---|---|---|---|
-| Ground ≥ 100 µg/ft²: area | 29 sq mi (printed) | 2.2 sq mi | 2.1 sq mi |
-| farthest, bearing | 12 mi (15), 238° (241°) | 4.2 mi, 225° | 3.8 mi, 209° |
+| Ground ≥ 100 µg/ft²: area | 29 sq mi (printed) | 2.2 sq mi | 2.2 sq mi |
+| farthest, bearing | 12 mi (15), 238° (241°) | 4.2 mi, 225° | 4.2 mi, 208° |
 | Ground ≥ 5 µg/ft²: area | 186 sq mi (printed) | 90 sq mi | 107 sq mi |
 | farthest, bearing | 37 mi (40), 232° (233°) | 35 mi, 231° | 36 mi, 218° |
 | Plume axis | 230° on the ground, 227° in air |  |  |
@@ -619,25 +640,25 @@ center are in parentheses. Tracker ground zones are after 8 hours.*
 *Table 7b. The cloud at the Army map's four time marks. Army: distance along its path
 to each mark. Models: where a snapshot of ground-level air is 0.18 µg/m³ or more
 (nearest to farthest distance) and its air-weighted center, 26% case. HYSPLIT on the
-pressure-level analyses is the weaker of its two weather inputs (section 5) and stands in
-at 3 and 5 hours until NOAA ARL's afternoon file is posted.*
+pressure-level analyses is the weaker of its two weather inputs (section 5).*
 
 <!-- table:marks -->
 | Time | Army mark (path 227°) | Tracker, forecast | Tracker, analyzed weather | HYSPLIT, ARL archive | HYSPLIT, pressure-level analyses |
 |---|---|---|---|---|---|
 | T+0.5 h | 6 mi | 5–9 mi, center 6 mi at 228° | 5–8 mi, center 6 mi at 215° | 3–9 mi, center 5 mi at 215° | 3–10 mi, center 6 mi at 222° |
-| T+2 h | 27 mi | 24–37 mi, center 31 mi at 231° | 23–35 mi, center 29 mi at 217° | 19–38 mi, center 28 mi at 219° | 21–45 mi, center 32 mi at 224° |
-| T+3 h | 43 mi | 39–57 mi, center 48 mi at 231° | 37–55 mi, center 46 mi at 219° | not yet run | 30–74 mi, center 50 mi at 223° |
-| T+5 h | 79 mi | 72–98 mi, center 85 mi at 229° | 69–94 mi, center 81 mi at 220° | not yet run | 48–120 mi, center 87 mi at 222° |
+| T+2 h | 27 mi | 24–37 mi, center 31 mi at 231° | 23–35 mi, center 30 mi at 217° | 19–38 mi, center 28 mi at 219° | 21–45 mi, center 32 mi at 224° |
+| T+3 h | 43 mi | 39–57 mi, center 48 mi at 231° | 37–55 mi, center 46 mi at 218° | 32–60 mi, center 44 mi at 220° | 30–74 mi, center 50 mi at 223° |
+| T+5 h | 79 mi | 72–98 mi, center 85 mi at 229° | 69–94 mi, center 81 mi at 219° | 63–99 mi, center 83 mi at 220° | 48–120 mi, center 87 mi at 222° |
 <!-- /table:marks -->
 
 ![Figure 4](figures/fig4_air_snapshots.png)
 
 *Figure 4. Lead in air at one moment, 0.18 µg/m³ or more, 26% case: snapshots half an
 hour, 2, 3 and 5 hours after the detonation from the tracker on the forecast and on
-analyzed weather and, through 2 hours, from HYSPLIT on NOAA ARL's archived weather. The
+analyzed weather and from HYSPLIT on NOAA ARL's archived weather. The
 cloud path from the Army's final air map is shaded and the Army's mark for each time is
-the ring.*
+the ring. HYSPLIT's outline turns ragged at 3 and 5 hours because few of its particles
+are left in each cell at this level.*
 
 ![Figure 6](figures/fig6_time_marks.png)
 
@@ -651,23 +672,25 @@ its two weather inputs.*
 On direction and speed the Army's final map and the tracker's forecast agree. The Army's
 plume lies along 230° on the ground and 227° in air; the tracker's forecast map along
 229°–231°. The 5 µg/ft² zones are the same length (37 and 35 miles) and overlap by 37%
-of their combined area, more than the tracker and HYSPLIT overlap on the same weather.
+of their combined area. That is less than the tracker and HYSPLIT overlap on the same
+weather (66%), in part because the Army's zone is twice the area, and far more than the
+tracker's forecast and analyzed-weather maps overlap (4%).
 All four of the Army's marks fall inside the tracker's forecast cloud at that time
 (Table 7b, Figures 4 and 6). At half an hour the mark and the center of the tracker's cloud are
 both 6 miles out; at 2, 3 and 5 hours the mark is 4 to 6 miles behind the center.
 
 Speed is not where the models and the Army differ. Half an hour after the detonation
-every run has the cloud's center 5 to 6 miles out, and at 2 hours 28 to 32 miles out
-against the Army's 27. That holds for the tracker on either weather and for HYSPLIT on
+every run has the cloud's center 5 to 6 miles out, at 2 hours 28 to 32 miles out
+against the Army's 27, and at 5 hours 81 to 87 against the Army's 79. That holds for the tracker on either weather and for HYSPLIT on
 either weather file. The marks differ from the analyzed-weather runs in direction only:
 the Army's path lies along 227°, and those runs put the center at 215°–222° at half an
-hour and 217°–224° at 2 hours. HYSPLIT's cloud is longer than the tracker's at each time
-(19–38 against 23–35 miles at 2 hours). I haven't tested why. Wind that changes with
-height stretching HYSPLIT's particles along the path is the likely reason. On NOAA
-ARL's archived weather HYSPLIT covers the first two marks. For 3 and 5 hours the only
-HYSPLIT run so far uses the pressure-level analyses, the weaker of its two weather
-inputs, and it puts the center 50 and 87 miles out against the Army's 43 and 79 and the
-tracker's 46 and 81 on analyzed weather.
+hour, 217°–224° at 2 hours and 219°–222° at 5 hours. HYSPLIT's cloud is longer than the
+tracker's at each time (19–38 against 23–35 miles at 2 hours, 63–99 against 69–94 at
+5 hours). I haven't tested why. Wind that changes with height stretching HYSPLIT's
+particles along the path is the likely reason. On NOAA ARL's archived weather HYSPLIT
+has the center 44 and 83 miles out at 3 and 5 hours, against the Army's 43 and 79 and
+the tracker's 46 and 81 on analyzed weather. On the pressure-level analyses, the weaker
+of its two weather inputs, it has 50 and 87.
 
 Figure 6 puts the two halves side by side. In distance the sources sit on top of each
 other at every mark. In direction they split into two groups that stay apart at every
@@ -689,8 +712,8 @@ The earlier issue of the Army's map, stamped 6:30 a.m. Nov. 24, pointed 241° an
 the cloud more slowly (about 41 miles at 4 hours). The final issue turned 11° toward the
 south and moves the cloud a third to a half faster, consistent with a newer forecast.
 
-The amounts differ. The Army's 100 µg/ft² zone is 13 to 14 times the tracker's in area
-(29 sq mi against 2.1–2.2) and reaches 12 miles against 4; its 5 µg/ft² zone is about
+The amounts differ. The Army's 100 µg/ft² zone is 13 times the tracker's in area
+(29 sq mi against 2.2) and reaches 12 miles against 4; its 5 µg/ft² zone is about
 twice the tracker's (186 sq mi against 90–107). Table 8 shows what the tracker gives for
 the same 26% when its assumptions change.
 
@@ -700,19 +723,19 @@ assumptions.*
 <!-- table:sensitivity -->
 | Run | ≥ 100 µg/ft² | ≥ 5 µg/ft² | Lead on the ground within 15 mi |
 |---|---|---|---|
-| As published: fine sizes (0.3–10 µm), Zhang deposition | 2.1 sq mi, 3.8 mi | 107 sq mi, 36 mi | 86 lb |
-| Sizes 1–30 µm (`mixed`) | 12 sq mi, 11 mi | 186 sq mi, 45 mi | 599 lb |
-| Sizes 10–100 µm (`soil-bound`) | 18 sq mi, 13 mi | 247 sq mi, 50 mi | 1,020 lb |
-| Half fine, half 30 and 100 µm | 13 sq mi, 11 mi | 186 sq mi, 44 mi | 767 lb |
-| Fine sizes, deposition speed +1 cm/s | 9.8 sq mi, 11 mi | 352 sq mi, 64 mi | 241 lb |
-| Fine sizes, Emerson deposition | 3.3 sq mi, 5.3 mi | 151 sq mi, 42 mi | 110 lb |
-| Fine sizes, cloud top 151 m instead of 251 m | 3.8 sq mi, 6.8 mi | 86 sq mi, 34 mi | 99 lb |
+| As published: fine sizes (0.3–10 µm), Zhang deposition | 2.2 sq mi, 4.2 mi | 107 sq mi, 36 mi | 86 lb |
+| Sizes 1–30 µm (`mixed`) | 11 sq mi, 11 mi | 198 sq mi, 46 mi | 601 lb |
+| Sizes 10–100 µm (`soil-bound`) | 18 sq mi, 13 mi | 246 sq mi, 50 mi | 1,019 lb |
+| Half fine, half 30 and 100 µm | 13 sq mi, 11 mi | 188 sq mi, 44 mi | 767 lb |
+| Fine sizes, deposition speed +1 cm/s | 10 sq mi, 11 mi | 355 sq mi, 65 mi | 240 lb |
+| Fine sizes, Emerson deposition | 3.2 sq mi, 5.7 mi | 152 sq mi, 43 mi | 110 lb |
+| Fine sizes, cloud top 151 m instead of 251 m | 3.9 sq mi, 6.6 mi | 82 sq mi, 33 mi | 100 lb |
 | **Army, final map** | **29 sq mi, 12 mi** | **186 sq mi, 37 mi** | not given |
 <!-- /table:sensitivity -->
 
 A coarse share of particles moves the tracker most of the way. With half the airborne
 lead in 30 and 100 µm particles, or with sizes spread over 1–30 µm, its 5 µg/ft² zone
-comes to 186 sq mi, matching the Army's 186, and its 100 µg/ft² zone to 12–13 sq mi
+comes to 188–198 sq mi, close to the Army's 186, and its 100 µg/ft² zone to 11–13 sq mi
 and 11 miles, against the Army's 29 sq mi and 12 miles. An all-coarse release reaches
 18 sq mi. A faster deposition speed for fine particles does less for the high zone and
 overshoots the low one. So the Army's map looks like a model with a substantial coarse
@@ -749,9 +772,6 @@ The Army hasn't published its model's inputs, and these runs don't identify them
 
 ## 9. Next steps
 
-- Extend the HYSPLIT reference runs to 8 hours when NOAA ARL posts the noon–5 p.m. file
-  (due about 6:40 p.m.), and rerun the tracker once all 8 hours are analyzed. The monitor
-  question needs about 4 hours; the Army comparison 5 to 8.
 - Check whether the site's direction spread and other weather models covered the
   analyzed path.
 - Add EPA's filter, soil and wipe results, the Army's samples, balloons and its final
@@ -773,7 +793,7 @@ HYSPLIT_DIR=/path/to/hysplit scenarios/iowa-aap-lead-azide/postmortem/scripts/re
 
 It rebuilds the site's maps from the 9 a.m. forecast (`c9f8e59`), reruns the tracker on
 the saved analyzed weather, downloads NOAA ARL's archived HRRR and the hourly analyses,
-runs HYSPLIT (`blast-day/2026-11-25-9am-{zhang,emerson}-early2h.CONTROL` on the archive,
+runs HYSPLIT for 8 hours (`blast-day/2026-11-25-9am-{zhang,emerson}.CONTROL` on the archive,
 `2026-11-25-9am-zhang-analyses.CONTROL` on the analyses), and writes
 `data/compare.json`, `data/army_map.json`, `data/forecast_vs_analysis.json`,
 `data/station_vs_hrrr.json` and the figures. `scripts/tables.py` then rewrites Tables 1 and
@@ -841,7 +861,10 @@ corrected here:
 - EPA, 2026c: Iowa Army Ammunition Plant Response Data Viewer (public layers
   `IAAAP_Xact_Data_Public_Viewer` and `Air_Sampling_and_Monitoring_Location`),
   https://experience.arcgis.com/experience/1ddcf8b9d8314971b00dac8893ae9cd6 (retrieved
-  Nov. 25, 2026, 18:07 UTC; preliminary data).
+  Nov. 26, 2026, 01:14 UTC; preliminary data).
+- EPA, 2026d: IAAAP Lead Azide, site profile and documents. EPA On-Scene Coordinator
+  response site, https://response.epa.gov/site/site_profile.aspx?site_id=17211 (retrieved
+  Nov. 26, 2026, about 01:00 UTC).
 - EPA AirNow, 2026: Hourly data files, Nov. 25, 2026,
   https://files.airnowtech.org/airnow/2026/20261125/ (retrieved Nov. 25, 2026;
   preliminary, unvalidated data).
@@ -852,7 +875,7 @@ corrected here:
   Associated Press reporting). Nov. 25, updated 9:58 a.m. CST,
   https://www.kcrg.com/2026/11/25/happening-today-army-detonate-lead-azide-iowa-ammunition-plant/.
 - KCRG, 2026b: Army says Iowa ammunition plant detonation exceeded expectations for lead
-  containment. Nov. 25, updated 11:38 a.m. CST,
+  containment. Nov. 25, updated 6:28 p.m. CST,
   https://www.kcrg.com/2026/11/25/watch-army-gives-update-after-lead-azide-detonation/.
 - McFate, L., 2026a: Public safety advisory (Iowa Army Ammunition Plant). U.S. Army
   Sustainment Command, Nov. 24, https://www.army.mil/article/297039 (as described in the

@@ -910,5 +910,119 @@
    "dir_error": -4.529571560391389,
    "speed_error_ms": 0.17791927979135025
   }
+ ],
+ "23": [
+  {
+   "level": "10 m",
+   "forecast": {
+    "level": "10 m",
+    "agl_m": 10,
+    "ms": 4.08,
+    "from": 35
+   },
+   "analysis": {
+    "level": "10 m",
+    "agl_m": 10,
+    "ms": 5.2497618993626745,
+    "from": 44.02552994653843
+   },
+   "dir_error": -9.025529946538427,
+   "speed_error_ms": -1.1697618993626744
+  },
+  {
+   "level": "80 m",
+   "forecast": {
+    "level": "80 m",
+    "agl_m": 80,
+    "ms": 7.41,
+    "from": 38
+   },
+   "analysis": null
+  },
+  {
+   "level": "1000 hPa",
+   "forecast": {
+    "level": "1000 hPa",
+    "agl_m": 23.0,
+    "ms": 6.02,
+    "from": 36
+   },
+   "analysis": {
+    "level": "1000 hPa",
+    "agl_m": 24.0,
+    "ms": 6.726812023536855,
+    "from": 41.987212495816664
+   },
+   "dir_error": -5.987212495816664,
+   "speed_error_ms": -0.7068120235368553
+  },
+  {
+   "level": "975 hPa",
+   "forecast": {
+    "level": "975 hPa",
+    "agl_m": 226.0,
+    "ms": 9.97,
+    "from": 50
+   },
+   "analysis": {
+    "level": "975 hPa",
+    "agl_m": 226.0,
+    "ms": 10.339245620450265,
+    "from": 48.136358368332594
+   },
+   "dir_error": 1.8636416316674058,
+   "speed_error_ms": -0.36924562045026477
+  },
+  {
+   "level": "950 hPa",
+   "forecast": {
+    "level": "950 hPa",
+    "agl_m": 435.0,
+    "ms": 9.96,
+    "from": 59
+   },
+   "analysis": {
+    "level": "950 hPa",
+    "agl_m": 434.0,
+    "ms": 11.963277142990545,
+    "from": 51.78897457443878
+   },
+   "dir_error": 7.211025425561218,
+   "speed_error_ms": -2.0032771429905445
+  },
+  {
+   "level": "925 hPa",
+   "forecast": {
+    "level": "925 hPa",
+    "agl_m": 648.0,
+    "ms": 10.79,
+    "from": 67
+   },
+   "analysis": {
+    "level": "925 hPa",
+    "agl_m": 646.0,
+    "ms": 12.870120434556936,
+    "from": 57.05078488340956
+   },
+   "dir_error": 9.949215116590437,
+   "speed_error_ms": -2.080120434556937
+  },
+  {
+   "level": "900 hPa",
+   "forecast": {
+    "level": "900 hPa",
+    "agl_m": 864.0,
+    "ms": 10.9,
+    "from": 72
+   },
+   "analysis": {
+    "level": "900 hPa",
+    "agl_m": 863.0,
+    "ms": 13.19280106724876,
+    "from": 63.434948822922024
+   },
+   "dir_error": 8.565051177077976,
+   "speed_error_ms": -2.29280106724876
+  }
  ]
 }

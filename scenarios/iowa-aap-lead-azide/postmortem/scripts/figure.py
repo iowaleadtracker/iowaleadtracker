@@ -65,6 +65,7 @@ FLOOR = 1e-4  # µg/m³, where zero readings and zero predictions are drawn in f
 MI_PER_DEG_LAT = lib.KM_PER_DEG / lib.KM_PER_MI
 HOUR_LABEL = {1: "9 to 10 a.m.", 2: "10 to 11 a.m.", 3: "11 a.m. to noon", 4: "noon to 1 p.m."}
 WIDE_MAP_DEG = 2
+LABEL_GAP_DEG = 1.1  # least spacing of the line labels in figure 6, in degrees of bearing
 AIR_MAP_HOURS = 2  # figure 2 maps the hours the cloud is among EPA's sites
 STAMP = "Iowa Lead Tracker (iowaleadtracker.com) \u00b7 Preliminary analysis, pending peer review"
 STAMP_NOTE = "Unofficial analysis, not from the Army or any government agency"
@@ -552,10 +553,13 @@ def fig_marks(sn: dict[str, Any], army: dict[str, Any], epa: Sites, out: Path) -
         ax.plot(x, y, color=C[key], lw=2, ls="-" if filled else (0, (4, 2)), zorder=4)
         ax.plot(x, y, "o", ms=8, mfc=C[key] if filled else "white", mec=C[key], mew=2, zorder=6)
         ends[run] = (x[-1], y[-1], name, 11 if x[-1] < hours[-1] else 0)  # clear of other lines
-    for end_x, end_y, name, lift in ends.values():
+    last_y = -math.inf
+    for end_x, end_y, name, lift in sorted(ends.values(), key=lambda e: e[1]):
+        at_y = end_y if end_x < hours[-1] else max(end_y, last_y + LABEL_GAP_DEG)
+        last_y = at_y if end_x == hours[-1] else last_y  # keep the end labels apart
         ax.annotate(
             f"{name}, {end_y:.0f}°",
-            (end_x, end_y),
+            (end_x, at_y),
             fontsize=7.5,
             color=INK,
             va="center",
