@@ -339,6 +339,10 @@ def test_archived_runs_use_only_the_saved_weather() -> None:
         assert cmd[cmd.index("--met-cache") + 1] == str(site.ARCHIVED_CACHE)
         assert cmd[cmd.index("--as-of") + 1] == site.ARCHIVED_AS_OF
         assert "--sky-grid" not in cmd  # the sky grid is a forecast
+        # from midway between the two magazines, on the weather saved around the plant point
+        assert cmd[cmd.index("--lat") + 1] == "40.8096"
+        assert cmd[cmd.index("--lon") + 1] == "-91.2692"
+        assert cmd[cmd.index("--weather-at") + 1] == f"{site.LAT},{site.LON}"
         assert (
             "archived weather (NOAA HRRR, saved Nov. 25, 6:51 p.m. CST)"
             in cmd[cmd.index("--legend-note") + 1]

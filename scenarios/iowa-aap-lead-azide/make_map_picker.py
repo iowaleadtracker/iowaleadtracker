@@ -110,6 +110,13 @@ ARCHIVED_CACHE = HERE / "met_cache" / "archived_hrrr.json"
 ARCHIVED_AS_OF = "2026-11-26T00:51:31+00:00"
 ARCHIVED_MODEL = "ncep_hrrr_conus"
 ARCHIVED_NOTE = "archived weather (NOAA HRRR, saved Nov. 25, 6:51 p.m. CST)"
+# Where the archived-weather maps start the cloud: midway between the two magazines the
+# blasts were in, from a reader's tip checked against published imagery and video (the
+# monitor-placement brief, postmortem/monitor-placement-brief/data/source.json). No official
+# source confirms it. The forecast maps keep LAT, LON, the point for the whole plant the
+# site used before the blast, about 1.1 miles north, so they stay as they were shown. The
+# archived weather was saved for a grid centered on LAT, LON; --weather-at reuses it.
+ARCHIVED_LAT, ARCHIVED_LON = 40.8096, -91.2692
 # The first model with data for the whole run is shown; the rest make up the spread.
 # RRFS first (3 km, gives the mixing height), then GFS (also gives it, reaches farthest),
 # HRRR (when it covers the run) and ECMWF (best global model, but no mixing height, so it
@@ -649,8 +656,9 @@ def archived_runs(py: str) -> list[Run]:
             cmd = [
                 py,
                 str(TOOL / "puff_dispersal.py"),
-                *("--lat", str(LAT)),
-                *("--lon", str(LON)),
+                *("--lat", str(ARCHIVED_LAT)),
+                *("--lon", str(ARCHIVED_LON)),
+                *("--weather-at", f"{LAT},{LON}"),
                 *("--time", f"{DATE}T{t}-06:00"),
                 *("--release-case", release_case),
                 *args,

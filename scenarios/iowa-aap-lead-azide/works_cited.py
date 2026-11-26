@@ -657,8 +657,11 @@ CHANGES = [
             "modeled had passed). A new Weather menu also has the forecast shown before the "
             "blast; those maps did not change. Before, the map opened on the EPA permit case "
             "and showed only the forecast. The 8:30 and 9:30 a.m. blast times are gone, since "
-            "the blast was at 9 a.m. The summary, the questions, and llms.txt describe both "
-            "sets of maps."
+            "the blast was at 9 a.m. The archived-weather maps start the cloud midway between "
+            "the two magazines the blasts were in (40.8096, &minus;91.2692), from a "
+            "reader&rsquo;s tip checked against published imagery and video; the forecast maps "
+            "still start it at the point for the whole plant. The summary, the questions, and "
+            "llms.txt describe both sets of maps."
         ),
     ),
     (

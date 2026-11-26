@@ -424,9 +424,12 @@ PRECEDENT = (
 )
 # README "Release point: sensitivity check" (tools/release_point_sensitivity.py).
 RELEASE_POINT = (
-    "The map starts the cloud at one point for the plant; before the blast the Army hadn\u2019t "
-    "said exactly where the blasts would be, and it planned to vent them across part of the "
-    "plant. Moving "
+    "The archived-weather maps start the cloud midway between the two magazines the blasts "
+    "were in (40.8096, \u221291.2692). That place comes from a reader\u2019s tip checked "
+    "against published imagery and video; no official source confirms it. The forecast maps "
+    "start the cloud where they did before the blast, at one point for the plant about 1.1 "
+    "miles to the north: the Army hadn\u2019t said exactly where the blasts would be, and "
+    "it planned to vent them across part of the plant. Moving "
     "that point 2 or 3 miles changes how far the lead reaches only a little, but it can "
     "change which towns are inside the lines."
 )

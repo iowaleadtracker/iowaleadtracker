@@ -204,6 +204,12 @@ case, the most conservative one, and showed only the forecast.
   analysis. It is saved in `met_cache/archived_hrrr.json` and replayed with
   `--as-of 2026-11-26T00:51:31+00:00`. A build never downloads it. These maps keep the two
   deposition schemes but have no weather-model spread and no sky layer.
+- **Release point.** The archived-weather maps start the cloud midway between the two
+  magazines the blasts were in (`ARCHIVED_LAT`, `ARCHIVED_LON`: 40.8096, −91.2692), from a
+  reader's tip checked against published imagery and video; no official source confirms it.
+  The forecast maps keep the point for the whole plant (`LAT`, `LON`), about 1.1 miles
+  north, so they stay as they were shown. The archived weather was saved for a grid
+  centered on the plant point; `--weather-at` lets the run reuse it from the new point.
 - **Blast time.** Only 9:00 a.m. is built (`TIMES`), so the time menu and its Earlier and
   Later buttons are hidden. The 8:30 and 9:30 maps are gone; an old link to one opens
   9:00.

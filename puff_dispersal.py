@@ -323,6 +323,14 @@ def _add_run_args(p: argparse.ArgumentParser) -> None:
         "later runs (reproducible, and spares the API)",
     )
     p.add_argument(
+        "--weather-at",
+        default=None,
+        metavar="LAT,LON",
+        help="center the weather grid on this point instead of the release point, so a run "
+        "can use weather saved (--met-cache) for a nearby release point; the grid is in "
+        "map coordinates, so the cloud still gets the weather where it is",
+    )
+    p.add_argument(
         "--as-of",
         default=None,
         metavar="TIME",
@@ -796,12 +804,25 @@ def _particle_bins(a: argparse.Namespace, log: TextIO) -> list[Bin]:
     return bins
 
 
+def weather_point(a: argparse.Namespace) -> tuple[float, float]:
+    """Return where the weather grid is centered: ``--weather-at``, else the release point."""
+    at = getattr(a, "weather_at", None)
+    if not at:
+        return a.lat, a.lon
+    try:
+        lat, lon = (float(x) for x in at.split(","))
+    except ValueError:
+        raise SystemExit(f"--weather-at needs LAT,LON, not {at!r}") from None
+    if not (-90 < lat < 90 and -180 <= lon <= 360):
+        raise SystemExit(f"--weather-at is not a place on Earth: {at!r}")
+    return lat, lon
+
+
 def _try_model(a: argparse.Namespace, m: str, log: TextIO, *, use_levels: bool) -> MetRun | None:
     """Return weather from one named model, or None (logged) if it doesn't cover the run."""
     try:
         nm, mt, el = build_met(
-            a.lat,
-            a.lon,
+            *weather_point(a),
             a.start,
             a.hours,
             a.wind_grid,
@@ -835,8 +856,7 @@ def _load_weather(a: argparse.Namespace, log: TextIO) -> list[MetRun]:
                 mets.append(got)
     if not mets:
         nm, mt, el = build_met(
-            a.lat,
-            a.lon,
+            *weather_point(a),
             a.start,
             a.hours,
             a.wind_grid,
