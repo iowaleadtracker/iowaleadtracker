@@ -96,12 +96,16 @@ def test_picker_page(built: Path) -> None:
     assert "November 21, 2026, at 9:08 p.m. CST" in page  # forecast pull time
     # When: the Nov. 22 court filing, then the Army's Wednesday announcement, both linked.
     assert "the government said the Army postponed it to Tuesday, Nov. 24" in page
-    assert "it is now scheduled for Wednesday, Nov. 25. On Monday, Nov. 23," in page
+    assert "it was now scheduled for Wednesday, Nov. 25. On Monday, Nov. 23," in page
+    assert "The Army carried out the detonation on Wednesday morning, Nov. 25" in page
+    assert "Thursday and\n    Friday runs are kept for reference only" in page or (
+        "Thursday and Friday runs are kept for reference only" in page.replace("\n    ", " ")
+    )
     assert f'<a href="{forecast_summary.TRUMP_URL}">President Trump said</a>' in page
     assert "until the Eighth Circuit agrees and Governor-elect Rob Sand agrees" in page
-    assert "the detonation will be Wednesday morning" in page
+    assert "the detonation would be Wednesday morning" in page
     assert "a FEMA emergency alert set it for 9 a.m. Wednesday" in page.replace("\n", " ")
-    assert "Thursday and Friday haven&rsquo;t been announced." in page
+    assert "haven&rsquo;t been announced" not in page  # the blast was Wednesday
     assert f'<a href="{html.escape(forecast_summary.ARMY_WED_URL)}">the Army said</a>' in page
     assert f'<a href="{forecast_summary.RESPONSE_URL}">court filing on Nov. 22</a>' in page
     assert "it hasn&rsquo;t\n    announced these days" not in page
@@ -184,11 +188,11 @@ def test_missing_staged_file_has_no_time(tmp_path: Path) -> None:
 
 
 def test_refreshes_run_through_the_last_day() -> None:
-    """Both refreshes run on a schedule through the last day their maps model."""
+    """Both refreshes run on a schedule through the blast day, Wednesday, Nov. 25."""
     root = Path(__file__).resolve().parent.parent / ".github" / "workflows"
     for name, last in (
         ("refresh-forecast.yml", site.DAYS[-1][0]),  # Thursday, a Day menu option
-        ("refresh-staged.yml", staged.DAYS[-1]),  # Friday
+        ("refresh-staged.yml", site.DATE),  # the blast was Wednesday; no refreshes after
     ):
         text = (root / name).read_text(encoding="utf-8")
         assert f'LAST_DAY: "{last}"' in text, name

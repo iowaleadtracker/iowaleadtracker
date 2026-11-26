@@ -427,7 +427,7 @@ def test_second_day_in_summary_faq_and_llms(rendered_two_days: tuple[str, list, 
     summary, faq, llms = rendered_two_days
     assert "<h3>If the blasts are on Thursday, Nov. 26</h3>" in summary
     assert summary.index("If the blasts are on Thursday") > summary.index("Lead in the air")
-    assert "For noon Thursday the forecast has surface winds" in summary
+    assert "For noon Thursday the forecast had surface winds" in summary
     assert "from two weather models" in summary  # its own model count
     assert summary.count(fs.TOWN_CAVEAT) >= 2  # the caveat after every list of towns
     answers = dict(faq)
@@ -537,17 +537,19 @@ def test_about_box_leads_with_when() -> None:
         "at this time, and that sampling of the ground after the detonation is underway, with "
         "results to be published when available (Army maps, Nov. 25, 3 p.m.). "
     )
-    wait = " Wait for the Army to announce its all-clear determination, and follow official"
-    assert f"{fs.EARLY_AIR}{wait} instructions." in note
+    resume = " On Wednesday evening, Middletown\u2019s city clerk said the Army, CDC, EPA and"
+    assert f"{fs.EARLY_AIR}{resume} FEMA had confirmed normal activities could resume" in note
+    assert note.count("Follow official instructions.") == 1
 
 
 def test_blast_status_says_to_wait_for_the_army() -> None:
     """The reported blast is attributed, linked, and points readers to the Army's results."""
     for text in (fs.BLAST_DONE, fs.BLAST_STATUS_HTML):
-        assert "Wait for the Army to announce its all-clear determination" in text.replace(
-            "<b>", ""
-        ).replace("</b>", "")
-        assert "follow official instructions" in text
+        plain = text.replace("<b>", "").replace("</b>", "")
+        assert "confirmed normal activities could resume" in plain  # attributed, not ours
+        assert "Middletown" in plain
+        assert "city clerk" in plain
+        assert "Follow official instructions." in plain
         assert "no lead detection at this time" in text
         assert "safe" not in text.lower()  # no verdicts about anyone's safety
     assert fs.NYT_BLAST_URL in fs.BLAST_STATUS_HTML
@@ -555,6 +557,11 @@ def test_blast_status_says_to_wait_for_the_army() -> None:
     assert fs.ARMY_3PM_URL in fs.BLAST_STATUS_HTML
     assert fs.ARMY_3PM_URL in fs.time_note_html("X")
     assert any(r.startswith("McFate, L., 2026d:") for r in works_cited.REFERENCES)
+    assert fs.CBS2_RESUME_URL in fs.BLAST_STATUS_HTML
+    assert fs.CBS2_RESUME_URL in fs.time_note_html("X")
+    assert any(r.startswith("Iowa&rsquo;s News Now, 2026:") for r in works_cited.REFERENCES)
+    assert "FEMA evacuation (Nov. 24):" in fs.FEMA_HEADER_HTML  # dated, not current advice
+    assert "Before the blast, FEMA supported relocating" in fs.time_note("X")
     assert "191 square miles" in fs.time_note("X")  # the Army's latest maps, not Nov. 24's
     assert fs.ARMY_NOV25_URL in fs.BLAST_STATUS_HTML
     assert fs.ARMY_NOV25_URL in fs.time_note_html("X")
@@ -614,7 +621,7 @@ def test_two_days_label_monday_and_keep_notes(rendered_two_days: tuple[str, list
     thu = summary[summary.index("If the blasts are on Thursday") :]
     assert fs.REACH_NOTE in thu
     assert fs.SAME_WINDOW in thu
-    assert "change before the blasts" in summary
+    assert "actual\n    winds may have differed from the forecast" in summary
     assert "before Wednesday" not in summary
     answers = dict(faq)
     assert answers["Where could the lead go?"].startswith("For Wednesday, Nov. 25: ")

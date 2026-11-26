@@ -238,7 +238,7 @@ COURT_HOLD = (
     "the EPA\u2019s emergency permit, finding that the Iowa Environmental Council and the "
     "Sierra Club\u2019s Iowa chapter hadn\u2019t proven that the EPA and the Army had not "
     "adequately considered other options, Iowa Public Radio reported. That evening, the "
-    "Acting Secretary of the Army said the detonation will be Wednesday morning, as "
+    "Acting Secretary of the Army said the detonation would be Wednesday morning, as "
     "previously scheduled. "
     "Late on Nov. 22, the Army said the blasts are now scheduled for Wednesday, "
     "Nov. 25. Earlier that day, the government asked the 8th U.S. Circuit Court of Appeals "
@@ -388,7 +388,7 @@ BRIEFING_SOURCES_HTML = (
 )
 BRIEFING_SOURCES_TEXT = f"{BRIEFING_CITE}, {BRIEFING_URL}; {KCCI_BRIEF_CITE}, {KCCI_BRIEF_URL}"
 MISTING = (
-    "The Army says the blasts will be inside earth-covered concrete magazines, with sand "
+    "The Army said the blasts would be inside earth-covered concrete magazines, with sand "
     "barriers about two stories high, a \u201cwater wall\u201d and gel blocks, aqueous foam "
     "barriers, and the soil around the magazines soaked by misters before and during the "
     "blast. At a Nov. 24 news conference, the Army also described a vent in the barriers "
@@ -413,8 +413,9 @@ PRECEDENT = (
 )
 # README "Release point: sensitivity check" (tools/release_point_sensitivity.py).
 RELEASE_POINT = (
-    "The map starts the cloud at one point for the plant; the Army hasn\u2019t said exactly "
-    "where the blasts will be, and it plans to vent them across part of the plant. Moving "
+    "The map starts the cloud at one point for the plant; before the blast the Army hadn\u2019t "
+    "said exactly where the blasts would be, and it planned to vent them across part of the "
+    "plant. Moving "
     "that point 2 or 3 miles changes how far the lead reaches only a little, but it can "
     "change which towns are inside the lines."
 )
@@ -458,6 +459,17 @@ ARMY_NOV25_CITE = "Army update, Nov. 25"
 # "Mitigated 0.26" deposition areas: 27 sq mi above 100 ug/ft2, 191 sq mi above 5 ug/ft2.
 # Both slides: "AWAIT US ARMY TO ANNOUNCE ALL-CLEAR DETERMINATION."
 ARMY_3PM_URL = "https://www.army.mil/article/297109"
+# CBS2 Iowa (Iowa's News Now), "Middletown officials say normal activities can resume
+# following lead azide detonation," published Nov. 25, 2026, 7:28 p.m. CST; read in full on
+# Nov. 25. Middletown City Clerk Brieanna Beck, in a Facebook post, said EPA air monitoring
+# had detected no lead in surrounding areas and that the Army, CDC, EPA and FEMA had confirmed
+# it was safe to resume normal activities. No Army all-clear statement had been posted on
+# army.mil/asc when this was written, so the page attributes this to the city.
+CBS2_RESUME_URL = (
+    "https://cbs2iowa.com/news/local/"
+    "middletown-officials-say-normal-activities-can-resume-following-lead-azide-detonation"
+)
+CBS2_RESUME_CITE = "CBS2 Iowa, Nov. 25"
 ARMY_3PM_CITE = "Army maps, Nov. 25, 3 p.m."
 # EPA Region 7's public "Iowa Army Ammunition Plant Response Data Viewer" (ArcGIS), read on
 # Nov. 25, 2026 at 4 p.m. CST from its public feature layers: four real-time (Xact) lead
@@ -480,8 +492,9 @@ BLAST_DONE = (
     "update, "
     "the Army said air sensors report no lead detection at this time, and that sampling of "
     "the ground after the detonation is underway, with results to be published when "
-    f"available ({ARMY_3PM_CITE}). {EARLY_AIR} Wait for the Army to announce its all-clear "
-    "determination, and follow official instructions."
+    f"available ({ARMY_3PM_CITE}). {EARLY_AIR} On Wednesday evening, Middletown\u2019s city "
+    "clerk said the Army, CDC, EPA and FEMA had confirmed normal activities could resume "
+    f"({CBS2_RESUME_CITE}). Follow official instructions."
 )
 BLAST_STATUS_HTML = (
     "<b>Blast done:</b> the Army carried out the detonation Wednesday morning, Nov. 25 "
@@ -489,8 +502,10 @@ BLAST_STATUS_HTML = (
     f'<a href="{NYT_BLAST_URL}" rel="noopener">{NYT_BLAST_CITE}</a>). At 3 p.m. CST the Army '
     "said air sensors report no lead detection at this time and ground sampling is underway "
     f'(<a href="{ARMY_3PM_URL}" rel="noopener">{ARMY_3PM_CITE}</a>). '
-    "<b>Wait for the Army to announce its all-clear determination</b>, and follow official "
-    "instructions."
+    "On Wednesday evening, Middletown&rsquo;s city clerk said the Army, CDC, EPA and FEMA had "
+    "confirmed normal activities could resume "
+    f'(<a href="{CBS2_RESUME_URL}" rel="noopener">{CBS2_RESUME_CITE}</a>). '
+    "<b>Follow official instructions.</b>"
 )
 EARLY_AIR_HTML = (
     "<b>Early air readings:</b> every reading from EPA&rsquo;s four real-time lead monitors "
@@ -502,8 +517,8 @@ EARLY_AIR_HTML = (
 )
 # FEMA and the Army's advice, for the page header (Army public safety advisory, Nov. 24).
 FEMA_HEADER_HTML = (
-    "<b>FEMA evacuation:</b> Middletown and a 5-mile cone southwest of the plant; outside it, "
-    "the Army advises sheltering in place with windows and doors closed. FEMA Helpline "
+    "<b>FEMA evacuation (Nov. 24):</b> Middletown and a 5-mile cone southwest of the plant; "
+    "outside it, the Army advised sheltering in place with windows and doors closed. FEMA Helpline "
     '<a href="tel:+18006213362">1-800-621-3362</a> (24/7) &middot; '
     '<a href="https://www.disasterassistance.gov/" rel="noopener">DisasterAssistance.gov</a>'
     f' &middot; <a href="{ADVISORY_NOV24_URL}" rel="noopener">Army advisory, Nov. 24</a>'
@@ -521,6 +536,7 @@ NAMED_SOURCES = (
     (ARMY_NOV25_CITE, ARMY_NOV25_URL),
     (EPA_VIEWER_CITE, EPA_VIEWER_URL),
     (ARMY_3PM_CITE, ARMY_3PM_URL),
+    (CBS2_RESUME_CITE, CBS2_RESUME_URL),
     (ADVISORY_NOV24_CITE, ADVISORY_NOV24_URL),
     ("Acting Secretary of the Army on X", SECARMY_URL),
     ("Iowa HHS fact sheet", HHS_URL),
@@ -794,13 +810,13 @@ def _time_parts(built_txt: str) -> dict[str, str]:
     return {
         "when": (f"As of this update ({built_txt}), {BLAST_DONE[0].lower()}{BLAST_DONE[1:]}"),
         "evacuation": (
-            "FEMA supports relocating all residents of Middletown and the immediate surrounding "
-            "areas, starting Nov. 24; the evacuation zone is a 5-mile cone extending southwest "
-            "of the plant, reaching one mile beyond the Army\u2019s modeled dispersion path. "
-            "The Army encourages people outside the zone to shelter in place, closing all "
-            "windows and doors (Army public safety advisory, Nov. 24). Questions about the "
-            "evacuation area or help: FEMA Helpline "
-            "1-800-621-3362 (24/7) or DisasterAssistance.gov."
+            "Before the blast, FEMA supported relocating all residents of Middletown and the "
+            "immediate surrounding areas, starting Nov. 24; the evacuation zone was a 5-mile cone"
+            " extending southwest of the plant, reaching one mile beyond the Army\u2019s modeled "
+            "dispersion path. The Army encouraged people outside the zone to shelter in place, "
+            "closing all windows and doors (Army public safety advisory, Nov. 24). Questions "
+            "about the evacuation area or help: FEMA Helpline 1-800-621-3362 (24/7) or "
+            "DisasterAssistance.gov."
         ),
         "maps": (
             "The Army\u2019s latest maps still show its model estimate for the mitigated "
@@ -913,7 +929,9 @@ def path_sentence(f: Facts, *, html: bool = True) -> str:
     via = f", passing near {join(names)}" if names else ""
     first_dir = WORDS[first["dir"]]
     return (
-        dot(f"For a {f['blast']} blast, the center of the cloud moves {first_dir}{via}")
+        dot(
+            f"For a {f['blast']} blast, the center of the model\u2019s cloud moves {first_dir}{via}"
+        )
         + f" By {first['clock']} it is about {both(first['km'], html=html)} {first_dir} of the "
         f"plant, and by {end['clock']} about {both(end['km'], html=html)} {WORDS[end['dir']]}."
     )
@@ -925,8 +943,8 @@ def wind_sentence(f: Facts) -> str:
         return ""
     ws, wd = f["winds"]
     return (
-        f"Winds near the ground at blast time are forecast from the {WORDS[compass(wd)]} at "
-        f"about {ws * MPH_PER_M_S:.0f} mph ({ws:.1f} m/s), so the cloud heads "
+        f"Winds near the ground at blast time were forecast from the {WORDS[compass(wd)]} at "
+        f"about {ws * MPH_PER_M_S:.0f} mph ({ws:.1f} m/s), which carries the model\u2019s cloud "
         f"{WORDS[compass((wd + 180) % 360)]}."
     )
 
@@ -1030,7 +1048,7 @@ def _permit_weather_text(f: Facts) -> str:
     return (
         "The permit bars the blast with surface winds under 1 or over 15 mph, winds over 30 mph "
         "at 1,000 to 3,000 feet, rain, thunderstorms, fog, a low overcast, or an inversion. "
-        f"For {f['blast']} {f.get('day', PLANNED_DAY).split(',')[0]} the forecast has surface "
+        f"For {f['blast']} {f.get('day', PLANNED_DAY).split(',')[0]} the forecast had surface "
         f"winds of about {w['sfc_mph']:.0f} mph"
         + aloft
         + f", {w['cloud']:.0f}% cloud cover, and {'no rain' if not w['precip'] else 'rain'}, "
@@ -1167,8 +1185,8 @@ below it is
   <p>{t.weather}</p>{"".join(_day_html(m, ctx, lead) for m in more)}
   <h3>How sure is this?</h3>
   <p>Not very. The Army estimates that 26% of the lead gets into the air with its mitigation
-    (an emission factor of 0.26), but no one has measured a blast like this, and the wind
-    forecast will change before the blasts. The four cases show the range. Use the map
+    (an emission factor of 0.26), but no one has measured a blast like this, and the actual
+    winds may have differed from the forecast. The four cases show the range. Use the map
     above to see each case and blast time. Last updated {built}.</p>
   <p>{PRECEDENT} Sources: {BRIEFING_SOURCES_HTML}.</p>
   <p>{RELEASE_POINT}</p>

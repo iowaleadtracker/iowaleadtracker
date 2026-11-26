@@ -161,7 +161,7 @@ SITE_URL = "https://iowaleadtracker.com/"
 SITE_NAME = "Iowa Lead Tracker"
 DESCRIPTION = (
     "Unofficial, open-model map of where lead from the Nov. 25, 2026 blast at the "
-    "Iowa Army Ammunition Plant could travel and settle, with its data, assumptions, and "
+    "Iowa Army Ammunition Plant could have traveled and settled, with its data, assumptions, and "
     "sources published."
 )
 # The same without the date, for an update whose maps don't include the planned day yet.

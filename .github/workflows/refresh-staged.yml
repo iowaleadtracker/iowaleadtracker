@@ -1,6 +1,6 @@
 # Downloads GFS and ECMWF forecasts for the staged Wednesday-Friday maps
 # (scenarios/iowa-aap-lead-azide/staged.py) and proposes them as a pull request. Runs
-# every 6 hours through Friday, Nov. 27, at :10 (the main refresh runs every 3 hours
+# every 6 hours through Wednesday, Nov. 25, the blast day, at :10 (the main refresh runs every 3 hours
 # at :40), and by hand: Actions → "Refresh staged forecast" → Run workflow (optionally on a
 # branch: see the `branch` input). It never deploys;
 # merging the pull request does (.github/workflows/deploy.yml), so check the news first.
@@ -32,7 +32,7 @@ concurrency:
 
 env:
   BRANCH: forecast-refresh-staged
-  LAST_DAY: "2026-11-27" # the last day the staged maps model (Central time)
+  LAST_DAY: "2026-11-25" # the blast was Wednesday, Nov. 25; no refreshes after it (Central time)
 
 jobs:
   refresh:
