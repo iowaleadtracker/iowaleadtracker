@@ -60,8 +60,8 @@ every 30 minutes, for comparing the cloud's position with the time marks on the 
 map. Adding it does not change the hourly output (`cdump` is byte-identical).
 
 These inputs start at the scenario's nominal point. The first comparison's monitor section
-models the release from two magazines about 1.8 km south of it, from a reader's tip
-checked against published imagery. For those runs its `scripts/place_sources.py` rewrites
+models the release from two magazines about 1.8 km south of it (40.8106, −91.2686 and
+40.8085, −91.2698), from a reader's tip checked against published imagery. For those runs its `scripts/place_sources.py` rewrites
 the starting locations of a copy of the input (one vertical line per magazine, same
 heights), and the results are halved, because HYSPLIT gives each line the full emission
 rate. The inputs here are not changed.

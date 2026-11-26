@@ -1,8 +1,9 @@
 {
- "note": "Where the release is modeled from. The nominal point is the one the site used (a point for the whole plant). The sources are the two barricaded magazines, about 1.8 km south of it, from a reader's tip checked against published imagery; positions are given as offsets from the nominal point and are good to about 15 m. Half of the lead is released from each.",
+ "note": "Where the release is modeled from. The nominal point is the one the site used (a point for the whole plant). The sources are the two barricaded magazines, about 1.8 km south of it, from a reader's tip checked against published imagery and estimated from public aerial imagery, good to about 15 m. The models use the offsets from the nominal point; lat and lon give the same positions and scripts/lib.py checks that the two agree. Half of the lead is released from each. No official source confirms the location.",
  "nominal_point": {"lat": 40.825518, "lon": -91.266502},
  "sources": [
-  {"name": "A", "north_km": -1.66, "east_km": -0.18, "share": 0.5},
-  {"name": "B", "north_km": -1.89, "east_km": -0.28, "share": 0.5}
- ]
+  {"name": "A", "lat": 40.8106, "lon": -91.2686, "north_km": -1.66, "east_km": -0.18, "share": 0.5},
+  {"name": "B", "lat": 40.8085, "lon": -91.2698, "north_km": -1.89, "east_km": -0.28, "share": 0.5}
+ ],
+ "midpoint": {"lat": 40.8096, "lon": -91.2692}
 }

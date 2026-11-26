@@ -335,7 +335,8 @@ published for it:
 The site's maps, and sections 5 and 7 here, start the release at one point taken for the
 whole plant. Section 6 asks what specific monitors would read, which depends on where
 the release was. It starts the release at two magazines about 1.8 km south of that point,
-half of the lead from each (section 6.8 gives the evidence).
+at 40.8106, −91.2686 and 40.8085, −91.2698, half of the lead from each (section 6.8
+gives the evidence).
 
 - **Tracker.** Its saved runs start at the plant point and can't be rerun from another
   place on the same weather. Its fields are moved to each magazine and added. Over 2 km
@@ -953,15 +954,28 @@ magazines at the Iowa Army Ammunition Plant containing barrels of degraded lead 
 and a location for it. We checked the image against public aerial imagery of that
 location. The rows of magazines, the roads, the woods and the fields match, and the two
 barricaded magazines can be picked out, about 260 m apart. They are about 1.8 km south of
-the point used before. That fits the Army's application, which says Middletown is "the
+the point used before, at these positions, estimated from the imagery and good to about
+15 m:
+
+| | Latitude | Longitude |
+|---|---|---|
+| Magazine A (north) | 40.8106 | −91.2686 |
+| Magazine B (south) | 40.8085 | −91.2698 |
+| Midpoint | 40.8096 | −91.2692 |
+
+The location fits the Army's application, which says Middletown is "the
 only populated area within the two-kilometer radius" of an event near the magazines and
 that the barricades were "built and designed to vent to the west and southwest" (U.S.
 Army 2026d).
 
 Section 6 now models the release from those two magazines, half of the lead from each.
-[`data/source.json`](data/source.json) gives them as offsets from the old point. The
-news caption is the only source for these being the magazines that held the lead azide.
-No official source confirms it, and we have not checked the video of the detonation.
+[`data/source.json`](data/source.json) holds the positions, with the offsets from the old
+point that the models use. The news caption is the only source for these being the
+magazines that held the lead azide, and no official source confirms it. Video of the
+detonation shot from a plane, credited to a WGEM viewer and posted by WVLT (2026), shows
+two separate clouds side by side along a row of parallel roads with a pond to one side.
+That fits two magazines detonated together at this place. We have seen one frame of it
+and did not match it to the imagery point by point.
 
 The move matters. From the old point AS01 was at 222° and 4.5 miles, 7° off the analyzed
 path and inside the cloud in every run, with 5.5 to 6.7 µg/m³ for the lowest case. From
@@ -1261,7 +1275,8 @@ location. Checked against public aerial imagery, they are about 1.8 km south of 
 this paper had used. Section 6 was rerun from them. The earlier conclusion, that the
 nearest monitor was inside the modeled cloud in every run from the assumed point, no
 longer holds: on analyzed weather it is on the cloud's edge. Sections 5 and 7 are
-unchanged.
+unchanged. The magazines' coordinates were added afterward (section 6.8), once video of
+the detonation had been published.
 
 ## References
 
@@ -1359,6 +1374,9 @@ unchanged.
 - van Geen, A., Y. Yao, T. Ellis, and A. Gelman, 2020: Fallout of lead over Paris from
   the 2019 Notre-Dame cathedral fire. *GeoHealth*, **4**, e2020GH000279,
   doi:10.1029/2020GH000279.
+- WVLT, 2026: Video of the detonation shot from a plane, credited "WGEM Viewer,
+  Middletown, Iowa". Posted on Instagram, Nov. 25, 2026 (one frame seen, in a screenshot
+  supplied by the maintainer; the full video was not checked).
 - Zhang, L., S. Gong, J. Padro, and L. Barrie, 2001: A size-segregated particle dry
   deposition scheme for an atmospheric aerosol module. *Atmos. Environ.*, **35**, 549–560,
   doi:10.1016/S1352-2310(00)00326-5.

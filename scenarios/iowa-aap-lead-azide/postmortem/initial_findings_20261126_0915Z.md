@@ -3,6 +3,7 @@
 **Iowa Lead Tracker (iowaleadtracker.com) · Preliminary analysis, pending peer review**
 
 As of Nov. 26, 2026, 3:15 a.m. CST (09:15 UTC), about 18 hours after the detonation.
+Updated at 3:25 a.m. with the magazines' coordinates and a video of the detonation.
 
 > **Unofficial.** This is a screening analysis by a private citizen, not from the Army or
 > any government agency. Don't use it to decide if you're safe; follow official
@@ -107,9 +108,17 @@ from its map and placed from the tip of its plume. The star is the modeled sourc
 reader sent the tracker a satellite image, published by Iowa's News Now (2026) and
 captioned as showing the barriers around the two magazines that held the lead azide, and
 a location for it. Checked against public aerial imagery, the two barricaded magazines are
-about 260 m apart and about 1.8 km south of the point this analysis used before. This
-section models the release from them, half of the lead from each. No official source
-confirms the location.
+about 260 m apart and about 1.8 km south of the point this analysis used before:
+
+| | Latitude | Longitude |
+|---|---|---|
+| Magazine A (north) | 40.8106 | −91.2686 |
+| Magazine B (south) | 40.8085 | −91.2698 |
+
+The positions are estimated from the imagery and good to about 15 m. This section models
+the release from them, half of the lead from each. A frame of video shot from a plane
+(WVLT 2026) shows two separate clouds side by side, which fits two magazines detonated
+together. No official source confirms the location.
 
 From there EPA's four real-time monitors are 3.6 to 27 miles out, all along 232° to 235°.
 The nearest, AS01, posted a value about every five minutes through the first hour. Its
@@ -290,9 +299,6 @@ Journal papers:
 - Dowell, D. C., and Coauthors, 2022: The High-Resolution Rapid Refresh (HRRR): An hourly
   updating convection-allowing forecast model. Part I. *Wea. Forecasting*, **37**,
   1371–1395, doi:10.1175/WAF-D-21-0151.1.
-- Iowa's News Now, 2026: Understanding the lead plume: What the Army's projected
-  dispersion maps show. Nov. 24, 2026, with a satellite image credited to Airbus (news
-  article, not a journal paper).
 - Lioy, P. J., and Coauthors, 2002: Characterization of the dust/smoke aerosol that settled
   east of the World Trade Center (WTC) in lower Manhattan after the collapse of the WTC
   11 September 2001. *Environ. Health Perspect.*, **110**, 703–714.
@@ -321,6 +327,11 @@ Government documents and other sources, not peer reviewed:
 - EPA, 2012: Environmental Technology Verification report: Xact 625 particulate metals
   monitor. EPA/600/R-12/680. A government test report
   ([copy](data/sources/epa_2012_etv_xact625.pdf)).
+- Iowa's News Now, 2026: Understanding the lead plume: What the Army's projected
+  dispersion maps show. Nov. 24, 2026, with a satellite image credited to Airbus. News
+  article.
+- WVLT, 2026: Video of the detonation shot from a plane, credited "WGEM Viewer,
+  Middletown, Iowa". Posted on Instagram, Nov. 25, 2026 (news video; one frame seen).
 - U.S. Army, 2026: Emergency permit application, controlled detonation of lead azide
   (redacted), Revision 3.0, October 2026, section 6. Posted by EPA at
   https://response.epa.gov/site/site_profile.aspx?site_id=17211.

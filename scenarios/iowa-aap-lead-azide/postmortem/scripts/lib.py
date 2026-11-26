@@ -43,6 +43,14 @@ SOURCES = [(s["north_km"], s["east_km"], s["share"]) for s in _SRC["sources"]]
 _KM_PER_DEG_LON = KM_PER_DEG * math.cos(math.radians(NOMINAL_LAT))
 LAT0 = NOMINAL_LAT + sum(n * w for n, _, w in SOURCES) / KM_PER_DEG
 LON0 = NOMINAL_LON + sum(e * w for _, e, w in SOURCES) / _KM_PER_DEG_LON
+# The file also records each source's latitude and longitude. The models use the offsets;
+# the two must give the same place to within the stated accuracy.
+for _s in _SRC["sources"]:
+    _dn = (_s["lat"] - NOMINAL_LAT) * KM_PER_DEG - _s["north_km"]
+    _de = (_s["lon"] - NOMINAL_LON) * _KM_PER_DEG_LON - _s["east_km"]
+    if math.hypot(_dn, _de) > 0.015:
+        msg = f"data/source.json: source {_s['name']} lat/lon and offsets disagree"
+        raise ValueError(msg)
 KM_PER_MI = 1.609344
 KG_PER_LB = 0.45359237
 UG_FT2 = fs.KG_M2_PER_UG_FT2  # kg/m2 per µg/ft²
