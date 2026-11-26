@@ -335,7 +335,8 @@ At 4 and 5 p.m. the forecast is off again, by up to 12°.*
 | about 870 m (900 hPa) | 10.6, 68° / 10.0, 60° (+8°) | 9.8, 61° / 9.5, 57° (+4°) | 10.7, 63° / 11.0, 65° (−2°) | 12.2, 69° / 12.0, 74° (−5°) | 10.9, 72° / 13.2, 63° (+9°) |
 <!-- /table:wind_pm -->
 
-Speeds agree within 0.7 m/s at every level and hour. Direction does not: through the
+Speeds agree within 0.7 m/s at every level from 9 a.m. to 2 p.m.; later they differ by
+up to 1.1 m/s at 3 p.m. and 2.3 m/s at 5 p.m. Direction does not: through the
 layer the cloud starts in, the forecast wind came from 9–18° too far east in all four
 morning hours, and from 11 a.m. the error reached up to 870 m. It did not last: at
 1 p.m. the forecast was within 5° below 700 m, and at 2 and 3 p.m. within 4° (Table 1b).
@@ -816,8 +817,10 @@ and the filter cassettes if they collect every particle size, would show it.
 
 **Prior work.** The closest published measurements are field tests of open and buried
 detonations of military munitions, sampled by flying instruments through the plumes
-(Aurell et al. 2015). Its findings are quoted under explanations 1 and 2 above. EPA does not measure lead against its national air standard
-with PM10 samplers. It uses samplers that collect particles of all sizes. When it kept
+(Aurell et al. 2015). Its findings are quoted under explanations 1 and 2 above. EPA's national air
+standard for lead is measured as lead in total suspended particles, not in PM10. PM10
+monitors are allowed only where levels are low and sources aren't expected to emit
+particles too coarse for them. When it kept
 that method in 2008 it wrote that "ingestion pathways are important to air-related Pb
 exposures and that Pb particles contributing to these pathways include ultra-coarse
 particles," its term for particles larger than 10 µm, and that measuring all sizes "is

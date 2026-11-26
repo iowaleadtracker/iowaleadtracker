@@ -9,6 +9,9 @@ As of Nov. 26, 2026, 12:26 a.m. CST (06:26 UTC), about 15 hours after the detona
 > instructions. The maps and charts are model estimates for assumed releases. They are not
 > measurements, and nothing here says how much lead reached any place.
 
+> **Superseded.** A [corrected version](initial_findings_20261126_0715Z.md) replaces this
+> file. Use that one.
+>
 > **Under review (added Nov. 26, 2026, 1 a.m. CST).** An independent referee review of this
 > summary ([report](reviews/initial-findings-review-1.md)) recommends major revision. It
 > found that nearly every number matches the data, and that several conclusions in
