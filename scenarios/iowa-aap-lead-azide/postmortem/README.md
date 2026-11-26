@@ -139,7 +139,11 @@ sampling is detecting no lead currently in the air," and that during the event "
 monitoring will be reporting data points every 5 minutes" in a public viewer (EPA 2026a,
 2026b). The Army's permit application describes its own air sampling: 24-hour filter
 samples at five on-site and five off-site locations, sent to a lab, and five "response"
-samples during the event, read in the field by X-ray fluorescence (U.S. Army 2026b). None of those
+samples during the event, read in the field by X-ray fluorescence (U.S. Army 2026b). The
+24-hour samplers have a PM10 inlet; the response samples collect total suspended
+particles. The application assumed the lead "will vaporize and subsequently condense into
+very small particles, primarily in the less than 2.5 micron" range, and chose PM10 for
+the 24-hour samples as the cautious option (U.S. Army 2026d). None of those
 results were public by 7 p.m. EPA's response site listed no documents newer than Nov. 23
 and, for Nov. 25, only the link to its data viewer (EPA 2026d).
 
@@ -296,7 +300,10 @@ published for it:
 - **Inlet.** It draws 16.7 L/min through a size-selective inlet; the options are PM10,
   PM2.5, PM1 and low-volume total particulate (CARB 2018). EPA's own verification test
   used a PM10 inlet (EPA 2012). A PM10 inlet passes about half of the particles of 10 µm
-  aerodynamic diameter and few larger ones.
+  aerodynamic diameter and few larger ones. We could not find which inlet the Iowa units
+  have. It is not in EPA's viewer, its releases, the documents on its response site or
+  the Army's permit application, and the photos with EPA's post don't show enough to
+  tell.
 - **Sampling time.** 15 minutes to 4 hours (CARB 2018). The maker said in 2022 that
   5-minute sampling and analysis was "now available" (Petterson 2022). EPA's layer has a
   reading about every five minutes.
@@ -821,7 +828,10 @@ about 80% of their lead by mass and a PM2.5 inlet about 30%, against readings th
 of times below them.
 
 Lead caught on wet soil, foam and debris could be that coarse. The published cases
-assumed the opposite, a condensed metal fume.
+assumed the opposite, a condensed metal fume, as the Army's application did (section 2).
+The Army's 24-hour lead samplers also have a PM10 inlet, so their lab results would share
+this blind spot. Its short response samples collect all particle sizes but are read with
+a less sensitive handheld instrument (U.S. Army 2026d).
 
 Either way the lead ends up on the ground, which can be checked. With 26% of the lead in
 100 µm particles, both models put 100 µg/ft² or more over about 4 sq mi out to 5 miles,
@@ -949,6 +959,15 @@ point and for a source north or west of it. It does not hold for a source 2 km o
 the east or south. The plant covers many square miles, so shifts larger than 3 km are
 possible, and they could put the source closer to AS01 as well as farther from it. The
 Army knows where the magazines are. EPA's permit redacts it.
+
+The Army's application gives two hints. It says the trajectory analysis "identified a
+radius of two kilometers as the area most likely to be affected by emissions from an
+event occurring near the ECMs" (the earth-covered magazines) and that "Middletown is the
+only populated area within the two-kilometer radius." So the magazines are within about
+2 km of the town, and the assumed point is about 400 m from the town's center. It also
+says the barricades were "built and designed to vent to the west and southwest" (U.S.
+Army 2026d). A shift of about 2 km is therefore a realistic size, and the direction is
+what matters.
 
 ## 7. The Army's map
 
@@ -1288,6 +1307,9 @@ the numbers right and several conclusions too strong. Changed here:
   https://response.epa.gov/site/site_profile.aspx?site_id=17211 (retrieved Nov. 25, 2026).
 - U.S. Army, 2026c: Public advisory maps, "Mitigated 0.26", earlier issue. Issued Nov.
   24, 2026, a/o 240630NOV26 (two JPEG images supplied by the maintainer; in `data/army/`).
+- U.S. Army, 2026d: Emergency permit application, controlled detonation of lead azide
+  (redacted), Revision 3.0, October 2026, section 6. Posted by EPA at
+  https://response.epa.gov/site/site_profile.aspx?site_id=17211 (retrieved Nov. 26, 2026).
 - van Geen, A., Y. Yao, T. Ellis, and A. Gelman, 2020: Fallout of lead over Paris from
   the 2019 Notre-Dame cathedral fire. *GeoHealth*, **4**, e2020GH000279,
   doi:10.1029/2020GH000279.

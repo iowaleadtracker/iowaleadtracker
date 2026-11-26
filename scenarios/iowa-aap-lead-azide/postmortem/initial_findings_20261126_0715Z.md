@@ -3,8 +3,8 @@
 **Iowa Lead Tracker (iowaleadtracker.com) · Preliminary analysis, pending peer review**
 
 As of Nov. 26, 2026, 1:15 a.m. CST (07:15 UTC), about 16 hours after the detonation.
-Updated at 1:30 a.m. with EPA's statement of what its real-time monitors are, and with a
-field study of that kind of monitor.
+Updated through 2:00 a.m. with EPA's statement of what its real-time monitors are, a
+field study of that kind of monitor, and details from the Army's permit application.
 
 > **Unofficial.** This is a screening analysis by a private citizen, not from the Army or
 > any government agency. Don't use it to decide if you're safe; follow official
@@ -134,7 +134,8 @@ AS01, posted a value about every five minutes through the first hour. Its highes
    catch the 7% case every time. On analyzed weather, with the source 2 km to the east,
    southeast or south, the tracker's cloud misses every real-time monitor in 8 of 24
    directions and HYSPLIT's in 6 of 24, even at 7%. With the source to the north or west
-   they still catch it.
+   they still catch it. The Army's permit application puts the magazines within about
+   2 km of Middletown, so a shift of that size is realistic (U.S. Army 2026).
 4. **What if the particles were coarse?** One particle size at a time: particles of 10 and
    30 µm (at the density of soil) still reach AS01. Only at about 100 µm, or 30 µm for
    particles as dense as the lead compound, does most of the lead fall first. Even then
@@ -156,6 +157,8 @@ AS01, posted a value about every five minutes through the first hour. Its highes
    Kingdom used PM10 and PM2.5 (Tremper et al. 2018). A PM10 inlet passes little that is
    larger than 10 µm. That field study measured mean lead of 0.004 to 0.022 µg/m³ at
    roadside and industrial sites, the same size as the highest values EPA posted in Iowa.
+   We could not find which inlet the Iowa units have in any public source. The Army's own
+   24-hour lead samplers have a PM10 inlet (U.S. Army 2026).
 
 ![What the best-placed monitor would read as the cloud's direction changes](figures/fig5_monitor_coverage.png)
 
@@ -284,6 +287,9 @@ Government documents and other sources, not peer reviewed:
 - EPA, 2012: Environmental Technology Verification report: Xact 625 particulate metals
   monitor. EPA/600/R-12/680. A government test report
   ([copy](data/sources/epa_2012_etv_xact625.pdf)).
+- U.S. Army, 2026: Emergency permit application, controlled detonation of lead azide
+  (redacted), Revision 3.0, October 2026, section 6. Posted by EPA at
+  https://response.epa.gov/site/site_profile.aspx?site_id=17211.
 - Frakes (with Klennert), 2011: Containment options for IEDs and RDDs using aqueous foam.
   Sandia National Laboratories, SAND2011-3462C, https://www.osti.gov/servlets/purl/1141006.
   Conference slides.
