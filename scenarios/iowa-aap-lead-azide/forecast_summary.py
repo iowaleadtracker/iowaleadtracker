@@ -484,6 +484,9 @@ CBS2_RESUME_URL = (
     "middletown-officials-say-normal-activities-can-resume-following-lead-azide-detonation"
 )
 CBS2_RESUME_CITE = "CBS2 Iowa, Nov. 25"
+# Airport observations at blast time (OBSERVED_WX).
+IEM_URL = "https://mesonet.agron.iastate.edu/request/download.phtml?network=IA_ASOS"
+IEM_CITE = "Iowa Environmental Mesonet, Nov. 25"
 ARMY_3PM_CITE = "Army maps, Nov. 25, 3 p.m."
 # EPA Region 7's public "Iowa Army Ammunition Plant Response Data Viewer" (ArcGIS), read on
 # Nov. 25, 2026 at 4 p.m. CST from its public feature layers: four real-time (Xact) lead
@@ -529,21 +532,25 @@ EARLY_AIR = (
     "EPA\u2019s other air samples, and soil and water sampling, are still pending and are "
     "needed before anyone knows where lead settled."
 )
+# When the blast happened: the Army's 3 p.m. map slides (ARMY_3PM_URL) give the
+# detonation's date-time group, "DTG: 25NOV2026 0900 CST". Consistent with Iowa Public Radio
+# ("at approximately 9 a.m. Wednesday", read in full Nov. 25), the Army's post quoted by news
+# live blogs ("At 9:00am CT, @USArmy Sustainment Command executed the controlled mitigated
+# detonation"; not read first-hand), and Newsweek's report of two bangs at about 9:01 a.m.
+# on a livestream about 5 miles away (sound takes about 25 seconds to travel that far).
 BLAST_DONE = (
-    f"The Army carried out the controlled detonation on Wednesday morning, Nov. 25 "
-    f"({NYT_BLAST_CITE}); it had set it for 9 a.m. CST ({ARMY_NOV25_CITE}). In its 3 p.m. CST "
-    "update, "
-    "the Army said air sensors report no lead detection at this time, and that sampling of "
-    "the ground after the detonation is underway, with results to be published when "
+    "The Army carried out the controlled detonation at 9:00 a.m. CST on Wednesday, Nov. 25. "
+    "In its 3 p.m. CST update, which gives that time, the Army said air sensors report no "
+    "lead detection at this time, and that sampling of the ground after the detonation is "
+    "underway, with results to be published when "
     f"available ({ARMY_3PM_CITE}). {EARLY_AIR} On Wednesday evening, Middletown\u2019s city "
     "clerk said the Army, CDC, EPA and FEMA had confirmed normal activities could resume "
     f"({CBS2_RESUME_CITE}). Follow official instructions."
 )
 BLAST_STATUS_HTML = (
-    "<b>Blast done:</b> the Army carried out the detonation Wednesday morning, Nov. 25 "
-    f'(<a href="{ARMY_NOV25_URL}" rel="noopener">{ARMY_NOV25_CITE}</a>; '
-    f'<a href="{NYT_BLAST_URL}" rel="noopener">{NYT_BLAST_CITE}</a>). At 3 p.m. CST the Army '
-    "said air sensors report no lead detection at this time and ground sampling is underway "
+    "<b>Blast done:</b> the Army carried out the detonation at 9:00 a.m. CST Wednesday, "
+    "Nov. 25. At 3 p.m. CST the Army said air sensors report no lead detection at this time "
+    "and ground sampling is underway "
     f'(<a href="{ARMY_3PM_URL}" rel="noopener">{ARMY_3PM_CITE}</a>). '
     "On Wednesday evening, Middletown&rsquo;s city clerk said the Army, CDC, EPA and FEMA had "
     "confirmed normal activities could resume "
@@ -584,6 +591,7 @@ NAMED_SOURCES = (
     (EPA_VIEWER_CITE, EPA_VIEWER_URL),
     (ARMY_3PM_CITE, ARMY_3PM_URL),
     (CBS2_RESUME_CITE, CBS2_RESUME_URL),
+    (IEM_CITE, IEM_URL),
     (ADVISORY_NOV24_CITE, ADVISORY_NOV24_URL),
     ("Acting Secretary of the Army on X", SECARMY_URL),
     ("Iowa HHS fact sheet", HHS_URL),
@@ -1100,6 +1108,11 @@ def _permit_weather_text(f: Facts) -> str:
         + aloft
         + f", {w['cloud']:.0f}% cloud cover, and {'no rain' if not w['precip'] else 'rain'}, "
         + ("which is inside those limits." if ok else "which is outside at least one of them.")
+        + (
+            f" {OBSERVED_SKY}"
+            if f["blast"].startswith("9:00") and f.get("day", PLANNED_DAY) == PLANNED_DAY
+            else ""
+        )
     )
 
 
@@ -1157,6 +1170,25 @@ def weather_line(got_txt: str, *, archived: bool) -> str:
         "Weather: archived (NOAA HRRR, saved Nov. 25, 6:51 p.m. CST), or the forecast from "
         f"{got_txt}."
     )
+
+
+# Airport weather at blast time, from the Iowa Environmental Mesonet's ASOS archive (read
+# Nov. 26, 2026 for 8:30-10:30 a.m. CST Nov. 25): Burlington (BRL, about 8 miles
+# east-southeast of the plant) 8:53 a.m., wind 50 deg at 8 kt, clear; Fort Madison (FSW,
+# about 12 miles south-southwest) 8:55 and 9:15 a.m., 10 deg at 8-10 kt, clear; Mount
+# Pleasant (MPZ, about 15 miles west-northwest) 8:55 and 9:15 a.m., 40-50 deg at 6-7 kt,
+# clear. ASOS ceilometers report clouds only up to 12,000 feet.
+OBSERVED_WX = (
+    "Weather observed at blast time: Burlington\u2019s airport, about 8 miles east-southeast "
+    "of the plant, reported wind from the northeast at about 9 mph and clear skies at "
+    "8:53 a.m., and the Fort Madison and Mount Pleasant airports reported north to northeast "
+    f"winds of about 7 to 12 mph and clear skies ({IEM_CITE}). The archived and forecast "
+    "winds are close to that."
+)
+OBSERVED_SKY = (
+    "Airports near the plant reported clear skies at blast time, though their sensors see "
+    f"clouds only up to 12,000 feet ({IEM_CITE})."
+)
 
 
 def archived_wind_sentence(f: Facts) -> str:
@@ -1221,7 +1253,7 @@ def _archived_html(fa: Facts | None, pct: dict[str, str]) -> str:
     return f"""<h3>{DEFAULT_VIEW_HEAD}</h3>
   <p>{default_view(pct["low"])}</p>
   <h3>{ARCHIVED_HEAD}</h3>
-  <p>{archived_wind_sentence(fa)} {path_sentence(fa)}</p>
+  <p>{archived_wind_sentence(fa)} {path_sentence(fa)} {OBSERVED_WX}</p>
   <p>Farthest distance from the plant where lead on the ground reaches each EPA dust-lead
     action level by the end of the 8-hour run, for a blast at {BLAST_TIME} The smaller
     number, where there is one, is the farther of the two dry-deposition schemes.</p>
@@ -1239,7 +1271,7 @@ def _archived_plain(fa: Facts, pct: dict[str, str]) -> str:
     _, rows = _archived_rows(fa, pct)
     return (
         f"{default_view(pct['low'])} {archived_wind_sentence(fa)} "
-        f"{path_sentence(fa, html=False)} {_town_text(fa)} {TOWN_CAVEAT} "
+        f"{path_sentence(fa, html=False)} {OBSERVED_WX} {_town_text(fa)} {TOWN_CAVEAT} "
         "Farthest reach of ground lead with archived weather: " + " ".join(r[2:] for r in rows)
     )
 

@@ -208,10 +208,12 @@ def test_header_and_about_box_name_the_weather() -> None:
     assert fs.about_weather("four", "X", archived=False) == (
         "The winds come from four weather forecasts, current as of X."
     )
-    newest = works_cited.CHANGES[0]
-    assert newest[0] == "Nov. 26"
-    assert "opens on a 9 a.m. blast, the low case, and archived weather" in newest[1]
-    assert "Opening on the low case is not a finding that little lead got out." in newest[1]
+    nov26 = [what for when, what in works_cited.CHANGES if when == "Nov. 26"]
+    assert works_cited.CHANGES[0][0] == "Nov. 26"
+    assert any("opens on a 9 a.m. blast, the low case, and archived weather" in w for w in nov26)
+    assert any(
+        "Opening on the low case is not a finding that little lead got out." in w for w in nov26
+    )
 
 
 def test_analysis_in_the_header_about_box_and_methodology() -> None:
@@ -541,7 +543,7 @@ def test_key_facts_lead_the_summary_and_faq(rendered: tuple[str, list, str]) -> 
     assert fs.COURT_URL in summary
     when = dict(faq)["When was the lead azide blast at the Iowa Army Ammunition Plant?"]
     assert when.startswith("As of this update (")
-    assert when.index("set it for 9 a.m. CST") < when.index(fs.TRUMP_HOLD)
+    assert when.index("at 9:00 a.m. CST on Wednesday, Nov. 25") < when.index(fs.TRUMP_HOLD)
     assert "had planned it for about 9 a.m." not in when  # said once, in the first sentence
     assert fs.ADVISORY_NOV24_URL in when
     assert (
@@ -800,9 +802,9 @@ def test_about_box_leads_with_when() -> None:
     assert fs.TIME_HEAD == "When."
     note = fs.time_note("X")
     assert note.startswith(
-        "As of this update (X), the Army carried out the controlled detonation on Wednesday "
-        "morning, Nov. 25 (New York Times, Nov. 25); it had set it for 9 a.m. CST (Army update, "
-        "Nov. 25). In its 3 p.m. CST update, the Army said air sensors report no lead detection "
+        "As of this update (X), the Army carried out the controlled detonation at 9:00 a.m. "
+        "CST on Wednesday, Nov. 25. In its 3 p.m. CST update, which gives that time, the Army "
+        "said air sensors report no lead detection "
         "at this time, and that sampling of the ground after the detonation is underway, with "
         "results to be published when available (Army maps, Nov. 25, 3 p.m.). "
     )
@@ -821,8 +823,8 @@ def test_blast_status_says_to_wait_for_the_army() -> None:
         assert "Follow official instructions." in plain
         assert "no lead detection at this time" in text
         assert "safe" not in text.lower()  # no verdicts about anyone's safety
-    assert fs.NYT_BLAST_URL in fs.BLAST_STATUS_HTML
-    assert fs.NYT_BLAST_URL in fs.time_note_html("X")
+    for text in (fs.BLAST_DONE, fs.BLAST_STATUS_HTML):
+        assert "9:00 a.m. CST" in text  # the time from the Army's 3 p.m. maps
     assert fs.ARMY_3PM_URL in fs.BLAST_STATUS_HTML
     assert fs.ARMY_3PM_URL in fs.time_note_html("X")
     assert any(r.startswith("McFate, L., 2026d:") for r in works_cited.REFERENCES)
@@ -832,9 +834,16 @@ def test_blast_status_says_to_wait_for_the_army() -> None:
     assert "FEMA evacuation (Nov. 24):" in fs.FEMA_HEADER_HTML  # dated, not current advice
     assert "Before the blast, FEMA supported relocating" in fs.time_note("X")
     assert "191 square miles" in fs.time_note("X")  # the Army's latest maps, not Nov. 24's
-    assert fs.ARMY_NOV25_URL in fs.BLAST_STATUS_HTML
-    assert fs.ARMY_NOV25_URL in fs.time_note_html("X")
     assert any(r.startswith("McFate, L., 2026c:") for r in works_cited.REFERENCES)
+
+
+def test_observed_weather_at_blast_time() -> None:
+    """Airport weather at 9 a.m. is given beside the model's, attributed and linked."""
+    assert "northeast at about 9 mph and clear skies" in fs.OBSERVED_WX
+    assert fs.IEM_CITE in fs.OBSERVED_WX
+    assert "12,000 feet" in fs.OBSERVED_SKY
+    assert (fs.IEM_CITE, fs.IEM_URL) in fs.NAMED_SOURCES
+    assert any(r.startswith("Iowa Environmental Mesonet, 2026:") for r in works_cited.REFERENCES)
 
 
 def test_early_air_readings_say_lab_results_are_pending() -> None:
