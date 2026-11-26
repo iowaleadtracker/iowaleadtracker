@@ -28,6 +28,7 @@ not official guidance.
 | `brief_page.py` | builds the page at `/monitor-placement/` from the README of `postmortem/monitor-placement-brief/` |
 | `index_template.html` | the landing page's HTML, CSS and script, filled in by `make_map_picker.py` |
 | `met_cache/map_met_all.json` | saved Open-Meteo forecasts for Monday at the new site (download times in `__fetched__`; the page shows when) |
+| `met_cache/archived_hrrr.json` | archived weather for the 9 a.m. blast: NOAA's HRRR as Open-Meteo served it at 6:51 p.m. CST on Nov. 25, after the eight modeled hours had passed. The map opens on the maps built from it (see "What the page opens on") |
 | `sky_grid.py`, `met_cache/sky_grid.json` | the maps' "sky cover & rain" layer: forecast cloud cover and precipitation on a finer grid, display only (see "The weather layer" below) |
 | `make_icons.py` | builds the site icons and profile images |
 | `outputs/site/` | the site. The repo holds only the hand-made files (`og.png`, icons, `brand/`); `make_map_picker.py --build` writes the page and the maps |
@@ -96,9 +97,11 @@ everywhere any model puts lead.
 
 ## The site (iowaleadtracker.com)
 
-The home page has a blast-time dropdown (8:30, 9:00 and 9:30 a.m.; opens on 9 a.m., the
-Army's announced time; 10 a.m. to 1 p.m. were dropped on Nov. 24 for faster updates), a
-"Lead in the air" dropdown (Low, U.S. Army mitigated, High, EPA permit), and a U.S./metric switch. It loads
+The home page has a Weather dropdown (archived weather, or the forecast from before the
+blast; see "What the page opens on"), a "Lead in the air" dropdown (Low, U.S. Army
+mitigated, High, EPA permit), and a U.S./metric switch. Since Nov. 26 it models only the
+9 a.m. blast, so the blast-time dropdown is hidden (8:30 and 9:30 a.m. were dropped then;
+10 a.m. to 1 p.m. on Nov. 24). It loads
 one map at a time, so the first visit stays small. The settings for the model runs (place,
 date, mass, weather models, and since Nov. 24 the turbulence-based cloud spread,
 `--spread turbulence`; see `TURBULENCE.md` in the repository root) are at the top of
@@ -108,7 +111,8 @@ date, mass, weather models, and since Nov. 24 the turbulence-based cloud spread,
 python3 make_map_picker.py --build --publish --deploy
 ```
 
-- `--build` runs the model for the 12 main maps (3 times x 4 cases) and the staged maps. With
+- `--build` runs the model for the 8 main maps (4 cases, on the forecast and on archived
+  weather) and the staged maps. With
   the forecasts saved it runs up to 4 at a time with downloads off, and skips any blast
   time whose forecast isn't saved yet (a time added since the last refresh) until the next
   refresh downloads it, so a deploy never downloads. Without them (a refresh), the first map
@@ -184,6 +188,34 @@ Third parties: map tiles load from Esri, and Cloudflare Web Analytics (cookieles
 injected by Cloudflare. Both are named in the page's privacy note and allowed in the CSP.
 Settings in the Cloudflare dashboard, not in this repo: **Always Use HTTPS**, and a
 redirect from `www` to the bare domain.
+
+### What the page opens on
+
+Since Nov. 26, after the blast, the page opens on a 9 a.m. blast, the **low** case, and
+**archived weather** (maintainer's choice). Before the blast it opened on the EPA permit
+case, the most conservative one, and showed only the forecast.
+
+- **Weather menu** (`SOURCES` in `make_map_picker.py`). "Archived weather (after the
+  blast)" is first and is what the page opens on. "Forecast (before the blast)" is the set
+  of maps the site showed before the blast; those maps are unchanged and keep their file
+  names, so old links to `maps/permit-0900.html` still open them.
+- **Archived weather** is one source: NOAA's HRRR model as Open-Meteo served it at
+  6:51 p.m. CST on Nov. 25, when every modeled hour had passed, so each hour is an
+  analysis. It is saved in `met_cache/archived_hrrr.json` and replayed with
+  `--as-of 2026-11-26T00:51:31+00:00`. A build never downloads it. These maps keep the two
+  deposition schemes but have no weather-model spread and no sky layer.
+- **Blast time.** Only 9:00 a.m. is built (`TIMES`), so the time menu and its Earlier and
+  Later buttons are hidden. The 8:30 and 9:30 maps are gone; an old link to one opens
+  9:00.
+- **Links.** `#0900-low` is archived weather; `#0900-low-forecast` is the forecast. A
+  link without a weather name opens archived weather.
+- **Text.** The summary, the questions, and `llms.txt` first say what the page opens on and
+  what the archived-weather maps show, then describe the forecast maps under "What the
+  forecast showed before the blast". Wherever the text says the page opens on the low
+  case, it also says this is not a finding that little lead got out
+  (`forecast_summary.default_view`; `tests/test_site.py` checks).
+- Archived weather is a weather model's account of the day, not a measurement. The page
+  says so in the About box and the summary.
 
 ### Search and AI-readable text
 

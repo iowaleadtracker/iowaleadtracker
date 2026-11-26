@@ -80,7 +80,9 @@ LAT, LON = 40.825518, -91.266502
 # weather model and day (README "Open-Meteo limits"); other minutes within an hour are free
 # (9:30 uses 9:00's). A time whose forecast isn't saved yet is skipped until the next refresh
 # (run_maps), so adding one never makes a deploy download.
-TIMES = ["08:30", "09:00", "09:30"]
+# Since Nov. 26 only 9:00 a.m., when the blast was carried out (maintainer's choice); 8:30
+# and 9:30 were alternatives while the time was uncertain.
+TIMES = ["09:00"]
 DEFAULT = "09:00"  # FEMA's Nov. 24 emergency alert: "Wed, Nov 25 at 9 AM"
 NOON_HOUR = 12
 # (id used in file names and the URL, --release-case, label). See README "Release cases".
@@ -90,7 +92,24 @@ CASES = [
     ("high", "tnt-fine", "High"),
     ("permit", "permit-100", "EPA permit"),
 ]
-DEFAULT_CASE = "permit"  # most conservative by default: better than a false sense of security
+# The page opens on the low case since Nov. 26, after the blast (maintainer's choice): EPA's
+# real-time monitors read near zero, and the analysis at /monitor-placement/ uses this case.
+# Before the blast it opened on the EPA permit case, the most conservative one.
+DEFAULT_CASE = "low"
+# Weather behind the maps, as (id in file names and links, label in the Weather menu). The
+# page opens on the first one that is built.
+# - archived: NOAA's HRRR as Open-Meteo served it at 6:51 p.m. CST on Nov. 25, after all eight
+#   modeled hours had passed, so every hour is an analysis and none a forecast. It is saved
+#   in ARCHIVED_CACHE and replayed with ARCHIVED_AS_OF; nothing is downloaded.
+# - forecast: the forecasts the site showed before the blast (MET_CACHE, four models).
+SOURCES = [
+    ("archived", "Archived weather (after the blast)"),
+    ("forecast", "Forecast (before the blast)"),
+]
+ARCHIVED_CACHE = HERE / "met_cache" / "archived_hrrr.json"
+ARCHIVED_AS_OF = "2026-11-26T00:51:31+00:00"
+ARCHIVED_MODEL = "ncep_hrrr_conus"
+ARCHIVED_NOTE = "archived weather (NOAA HRRR, saved Nov. 25, 6:51 p.m. CST)"
 # The first model with data for the whole run is shown; the rest make up the spread.
 # RRFS first (3 km, gives the mixing height), then GFS (also gives it, reaches farthest),
 # HRRR (when it covers the run) and ECMWF (best global model, but no mixing height, so it
@@ -283,15 +302,22 @@ def cf_account_id() -> str:
 # Names and times
 
 
-def map_name(case: str, t: str, day: str = DATE) -> str:
-    """Return a map's file name: 'permit-1200.html' (Monday), '2026-11-24-permit-1200.html'."""
+def map_name(case: str, t: str, day: str = DATE, source: str = "forecast") -> str:
+    """Return a map's file name: 'permit-0900.html', or 'archived-permit-0900.html'.
+
+    A forecast map of another day has the day in front ('2026-11-24-permit-1200.html').
+    Forecast maps keep the names they always had, so old links to them still work.
+    """
     base = f"{case}-{t.replace(':', '')}.html"
+    if source != "forecast":
+        return f"{source}-{base}"
     return base if day == DATE else f"{day}-{base}"
 
 
-def map_key(day: str, case: str, t: str) -> str:
-    """Return the page's key for a map: '2026-11-23-permit-1200'."""
-    return f"{day}-{case}-{t.replace(':', '')}"
+def map_key(day: str, case: str, t: str, source: str = "forecast") -> str:
+    """Return the page's key for a map: '2026-11-25-permit-0900', 'archived-2026-11-25-...'."""
+    key = f"{day}-{case}-{t.replace(':', '')}"
+    return key if source == "forecast" else f"{source}-{key}"
 
 
 def day_label(day: str) -> str:
@@ -607,6 +633,46 @@ def _run(
     return missing
 
 
+def archived_runs(py: str) -> list[Run]:
+    """Return the runs for the archived-weather maps: every case and time on DATE.
+
+    Same settings as the forecast maps, with one weather source (ARCHIVED_MODEL as saved in
+    ARCHIVED_CACHE) instead of four forecasts, and without the forecast's sky grid.
+    """
+    args = list(MODEL_ARGS) + temperature_args(ARCHIVED_CACHE)
+    args[args.index("--weather-model") + 1] = ARCHIVED_MODEL
+    args[args.index("--met-cache") + 1] = str(ARCHIVED_CACHE)
+    runs = []
+    for case, release_case, name in CASES:
+        for t in TIMES:
+            out = MAPS / map_name(case, t, DATE, "archived")
+            cmd = [
+                py,
+                str(TOOL / "puff_dispersal.py"),
+                *("--lat", str(LAT)),
+                *("--lon", str(LON)),
+                *("--time", f"{DATE}T{t}-06:00"),
+                *("--release-case", release_case),
+                *args,
+                *("--as-of", ARCHIVED_AS_OF),
+                *("--home-url", SITE_URL),
+                *("--legend-note", f"{name} case, blast {blast_label(t, DATE)}, {ARCHIVED_NOTE}"),
+                *("-o", str(out)),
+            ]
+            runs.append(Run(f"archived {case} {t}", cmd, out))
+    return runs
+
+
+def build_archived(py: str) -> None:
+    """Run the model on the archived weather; it is all saved, so nothing downloads."""
+    if not ARCHIVED_CACHE.exists():
+        print(f"no archived weather in {ARCHIVED_CACHE}; leaving those maps out")
+        return
+    skipped = run_maps(archived_runs(py), saved=True)
+    if skipped:
+        raise SystemExit(f"archived weather is missing for: {', '.join(skipped)}")
+
+
 def build() -> None:
     """Run the model for every day, case and time (see run_maps)."""
     MAPS.mkdir(parents=True, exist_ok=True)
@@ -647,6 +713,7 @@ def build() -> None:
     if skipped:
         print(f"skipped {len(skipped)} maps without saved forecasts: {', '.join(skipped)}")
         check_skipped(runs, skipped)
+    build_archived(py)
     if staged.CACHE.exists():  # the staged Wednesday-Friday maps, from their own file
         staged.build()
 
@@ -665,11 +732,27 @@ class Maps:
     default: str
     days: dict[str, list[str]] = field(default_factory=dict)  # every built day's times
     pages_by_day: dict[str, list[str]] = field(default_factory=dict)
+    sources: list[str] = field(default_factory=lambda: ["forecast"])  # weather sets built
 
 
-def complete_times(day: str) -> list[str]:
+def complete_times(day: str, source: str = "forecast") -> list[str]:
     """Return the blast times on ``day`` with a map for every case."""
-    return [t for t in TIMES if all((MAPS / map_name(c, t, day)).exists() for c, _, _ in CASES)]
+    return [
+        t for t in TIMES if all((MAPS / map_name(c, t, day, source)).exists() for c, _, _ in CASES)
+    ]
+
+
+def sources_built(times: list[str]) -> list[str]:
+    """Return the weather sets with a map for every case and time, in the menu's order.
+
+    The forecast maps are always there (read_maps stops without them). The archived maps
+    are shown only when they cover every time the forecast maps do, so the Weather menu
+    always has a map for the time chosen.
+    """
+    built = ["forecast"]
+    if complete_times(DATE, "archived") == times:
+        built.append("archived")
+    return [s for s, _ in SOURCES if s in built]
 
 
 def lead_day(maps: Maps) -> str:
@@ -707,6 +790,22 @@ def day_values(maps: Maps, lead: str) -> dict[str, str]:
         + (f" (also modeled: {', '.join(others)})" if others else ""),
         "pending_note": html.escape(note),
         "pending_hidden": "" if note else " hidden",
+    }
+
+
+def source_values(maps: Maps) -> dict[str, str]:
+    """Return the page template's values for the Weather menu and the time controls."""
+    opens = maps.sources[0]
+    labels = dict(SOURCES)
+    return {
+        "source_options": "".join(
+            f'<option value="{s}"{" selected" if s == opens else ""}>{labels[s]}</option>'
+            for s in maps.sources
+        ),
+        "open_source": json.dumps(opens),
+        "source_hidden": "" if len(maps.sources) > 1 else " hidden",
+        # one blast time: nothing to choose, so the time menu and its buttons are hidden
+        "time_hidden": "" if len(maps.times) > 1 else " hidden",
     }
 
 
@@ -751,7 +850,13 @@ def read_maps() -> Maps:
     pct = {c: f"{share.get(c, 0) * 100:.0f}%" for c, _, _ in CASES}
     default = DEFAULT if DEFAULT in times else times[0]
     return Maps(
-        pages=pages, pct=pct, times=times, default=default, days=days, pages_by_day=pages_by_day
+        pages=pages,
+        pct=pct,
+        times=times,
+        default=default,
+        days=days,
+        pages_by_day=pages_by_day,
+        sources=sources_built(times),
     )
 
 
@@ -818,19 +923,28 @@ def json_ld(faq: list[tuple[str, str]], now: dt.datetime, description: str = DES
     return json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
 
 
-def write_hashed_maps(days: dict[str, list[str]]) -> dict[str, str]:
-    """Copy each map to m/ under a content-hashed name; return {day-case-HHMM: path}.
+def write_hashed_maps(
+    days: dict[str, list[str]], sources: Iterable[str] = ("forecast",)
+) -> dict[str, str]:
+    """Copy each map to m/ under a content-hashed name; return {map_key: path}.
 
     The plain maps/ files stay for old links. A map opened on its own points search
-    engines at the home page.
+    engines at the home page. Every day has forecast maps; the archived weather covers
+    the blast day (DATE) only.
     """
     shutil.rmtree(HASHED, ignore_errors=True)
     HASHED.mkdir(parents=True)
     map_files = {}
-    for day, times in days.items():
+    wanted = [
+        (source, day, times)
+        for source in sources
+        for day, times in days.items()
+        if source == "forecast" or day == DATE
+    ]
+    for source, day, times in wanted:
         for case, _, _ in CASES:
             for t in times:
-                mp = MAPS / map_name(case, t, day)
+                mp = MAPS / map_name(case, t, day, source)
                 txt = mp.read_text(encoding="utf-8")
                 add = (
                     "" if 'name="robots"' in txt else '\n<meta name="robots" content="noindex">'
@@ -845,7 +959,7 @@ def write_hashed_maps(days: dict[str, list[str]]) -> dict[str, str]:
                 stem = mp.name.removesuffix(".html")
                 h = hashlib.sha256(txt.encode("utf-8")).hexdigest()[:10]
                 shutil.copyfile(mp, HASHED / f"{stem}-{h}.html")
-                map_files[map_key(day, case, t)] = f"m/{stem}-{h}"
+                map_files[map_key(day, case, t, source)] = f"m/{stem}-{h}"
     return map_files
 
 
@@ -924,6 +1038,18 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
     # (not the menu-only days, which are only in the Day menu).
     f_facts = by_day[lead]
     n_models = f_facts["n_models"]
+    # The archived-weather maps, when built: what the page opens on.
+    archived = "archived" in maps.sources
+    f_archived = (
+        forecast_summary.facts(
+            {(c, t): MAPS / map_name(c, t, DATE, "archived") for c, _, _ in CASES for t in times},
+            CASES,
+            times,
+            maps.default,
+        )
+        if archived
+        else None
+    )
     more = [f for day, f in by_day.items() if day != lead and day not in MENU_ONLY_DAYS]
     told = [d for d in maps.days if d not in MENU_ONLY_DAYS]  # the days the text names
     summary_html, faq, llms_txt = forecast_summary.render(
@@ -939,6 +1065,7 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
             "pending_note": pending_note(lead),
             "lat": LAT,
             "lon": LON,
+            "archived": f_archived,
         },
         more,
     )
@@ -1000,6 +1127,10 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         ),
         "got_txt": got_txt,
         "n_models": n_models,
+        "weather_line": forecast_summary.weather_line(got_txt, archived=archived),
+        "about_weather": html.escape(
+            forecast_summary.about_weather(n_models, got_txt, archived=archived), quote=False
+        ),
         "built_txt": built_txt,
         "built_json": json.dumps(built_txt),
         "pct_low": pct["low"],
@@ -1047,7 +1178,8 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "cite_html": cite_html,
         "summary_html": summary_html,
         "faq_html": faq_html(faq),
-        "map_files": json.dumps(write_hashed_maps(maps.days), separators=(",", ":")),
+        "map_files": json.dumps(write_hashed_maps(maps.days, maps.sources), separators=(",", ":")),
+        **source_values(maps),
     }
     template = Template(PAGE_TEMPLATE.read_text(encoding="utf-8").removesuffix("\n"))
     return template.substitute(values), llms_txt

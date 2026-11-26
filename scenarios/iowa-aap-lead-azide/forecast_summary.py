@@ -268,6 +268,10 @@ PLANNED_DAY = "Wednesday, Nov. 25"
 #: staged.TIMES (tests/test_site.py checks).
 WINDOW = "8:30 to 9:30 a.m."
 WINDOW_HOURLY = "at 8:30, 9:00 and 9:30 a.m."
+#: The blast time the site's own maps model since Nov. 26, in words; must match
+#: make_map_picker.TIMES (tests/test_site.py checks). WINDOW and WINDOW_HOURLY above are
+#: still the staged Wednesday-to-Friday page's times.
+BLAST_TIME = "9 a.m."
 HHS_DAY = "Monday, Nov. 23"
 
 
@@ -866,7 +870,7 @@ def _time_parts(built_txt: str) -> dict[str, str]:
             f"same 0.26 ({ARMY_MAPS_CITE}). The Army\u2019s maps and updates are at "
             f"{ARMY_MAPS_URL}."
         ),
-        "window": (f"These maps model blasts {WINDOW_HOURLY}, around the planned time."),
+        "window": (f"These maps model a blast at {BLAST_TIME}, when the Army carried it out."),
     }
 
 
@@ -1029,10 +1033,10 @@ def _order(f: Facts) -> list[str]:
 def _town_text(f: Facts) -> str:
     """Say which listed towns fall in the yellow area, case by case."""
     c = f["cases"]
-    # Lead with the most conservative case (the map's default), then the smaller ones.
+    # Lead with the most conservative case, then the smaller ones.
     lead = "permit" if "permit" in c else "high"
     first = c[lead]["towns"]["yellow"]
-    opening = f"In the {CASE_WORD[lead]} case (the map\u2019s default), "
+    opening = f"In the {CASE_WORD[lead]} case (the largest of the four), "
     town_txt = dot(
         opening + f"the model\u2019s yellow area reaches {join(first)}"
         if first
@@ -1093,6 +1097,144 @@ def _permit_weather_text(f: Facts) -> str:
         + aloft
         + f", {w['cloud']:.0f}% cloud cover, and {'no rain' if not w['precip'] else 'rain'}, "
         + ("which is inside those limits." if ok else "which is outside at least one of them.")
+    )
+
+
+#: Where the archived weather comes from, for every place that names it.
+ARCHIVED_SOURCE = (
+    "NOAA\u2019s HRRR weather model as Open-Meteo served it at 6:51 p.m. CST on Nov. 25, "
+    "after the eight hours the maps cover had passed"
+)
+DEFAULT_VIEW_HEAD = "What the map opens on"
+DEFAULT_VIEW_QUESTION = "What does the map show when it opens?"
+ARCHIVED_HEAD = "With archived weather"
+FORECAST_HEAD = "What the forecast showed before the blast"
+FORECAST_NOTE = (
+    "The sections from here to \u201cHow sure is this?\u201d describe the forecast maps: "
+    "choose \u201cForecast (before the blast)\u201d in the Weather menu to see them."
+)
+#: Starts the two answers that describe the forecast maps once the page opens on archived
+#: weather.
+FORECAST_PREFIX = "With the forecast from before the blast: "
+
+
+def default_view(pct_low: str) -> str:
+    """Say what the page shows when it opens, and that this is not a finding."""
+    return (
+        f"The map opens on a blast at {BLAST_TIME}, the low case ({pct_low} of the lead in "
+        f"the air), and archived weather: {ARCHIVED_SOURCE}. The Weather menu also has the "
+        "forecast the site showed before the blast, and the \u201cLead in the air\u201d menu "
+        "has the three larger cases, up to the EPA permit case, which assumes all of the lead "
+        "got into the air. Opening on the low case is not a finding that little lead got "
+        "out: no one has published how much did. Archived weather is a weather model\u2019s "
+        "account of the day, not a measurement of where the cloud went."
+    )
+
+
+def about_weather(n_models: str, got_txt: str, *, archived: bool) -> str:
+    """Say in the About box which weather the maps use."""
+    forecast = f"{n_models} weather forecasts, current as of {got_txt}"
+    if not archived:
+        return f"The winds come from {forecast}."
+    return (
+        f"The map opens on archived weather: {ARCHIVED_SOURCE}. The Weather menu also has "
+        f"the forecast shown before the blast, from {forecast}. Archived weather is a weather "
+        "model\u2019s account of the day, not a measurement."
+    )
+
+
+def weather_line(got_txt: str, *, archived: bool) -> str:
+    """Say in the header which weather the maps use."""
+    if not archived:
+        return f"Weather forecast from {got_txt}."
+    return (
+        "Weather: archived (NOAA HRRR, saved Nov. 25, 6:51 p.m. CST), or the forecast from "
+        f"{got_txt}."
+    )
+
+
+def archived_wind_sentence(f: Facts) -> str:
+    """Describe the surface wind at blast time in the archived weather."""
+    if not f["winds"]:
+        return ""
+    ws, wd = f["winds"]
+    return (
+        f"In the archived weather, winds near the ground at blast time were from the "
+        f"{WORDS[compass(wd)]} at about {ws * MPH_PER_M_S:.0f} mph ({ws:.1f} m/s), which carries "
+        f"the model\u2019s cloud {WORDS[compass((wd + 180) % 360)]}."
+    )
+
+
+def _archived_rows(f: Facts, pct: dict[str, str]) -> tuple[list[str], list[str]]:
+    """Return the archived-weather ground-lead rows as HTML and as text lines.
+
+    These maps have one weather source, so the smaller number is the farther of the two
+    dry-deposition schemes, not the farthest forecast.
+    """
+    c = f["cases"]
+    rows_html, rows_txt = [], []
+    for case in _order(f):
+        x = c[case]
+        more = {k: x["dep_env"][k] > x["dep"][k][0] * SPREAD_SHOWN for k in DEP_COLORS}
+        cells = [
+            both(x["dep"][k][0])
+            + (
+                f"<br><small>up to {both(x['dep_env'][k])} with the other deposition scheme</small>"
+                if more[k]
+                else ""
+            )
+            for k in DEP_COLORS
+        ]
+        rows_html.append(
+            f'<tr><th scope="row">{x["label"]} ({pct[case]}, about '
+            f"{lb(x['lead_lb'])} lb of lead)</th>"
+            + "".join(f"<td>{v}</td>" for v in cells)
+            + "</tr>"
+        )
+        rows_txt.append(
+            f"- {x['label']} ({pct[case]} of the lead airborne, about {lb(x['lead_lb'])} lb): "
+            + ", ".join(
+                f"{k} up to {both(x['dep'][k][0], html=False)}"
+                + (
+                    f" ({both(x['dep_env'][k], html=False)} with the other deposition scheme)"
+                    if more[k]
+                    else ""
+                )
+                for k in DEP_COLORS
+            )
+            + "."
+        )
+    return rows_html, rows_txt
+
+
+def _archived_html(fa: Facts | None, pct: dict[str, str]) -> str:
+    """Return the summary's sections on the default view and the archived-weather maps."""
+    if not fa:
+        return ""
+    rows, _ = _archived_rows(fa, pct)
+    return f"""<h3>{DEFAULT_VIEW_HEAD}</h3>
+  <p>{default_view(pct["low"])}</p>
+  <h3>{ARCHIVED_HEAD}</h3>
+  <p>{archived_wind_sentence(fa)} {path_sentence(fa)}</p>
+  <p>Farthest distance from the plant where lead on the ground reaches each EPA dust-lead
+    action level by the end of the 8-hour run, for a blast at {BLAST_TIME} The smaller
+    number, where there is one, is the farther of the two dry-deposition schemes.</p>
+  <div class="tablewrap"><table>
+    {DEP_TABLE_HEAD}
+    <tbody>{"".join(rows)}</tbody></table></div>
+  <p>{_town_text(fa)} Town checks use approximate town centers. {TOWN_CAVEAT}</p>
+  <h3>{FORECAST_HEAD}</h3>
+  <p>{FORECAST_NOTE}</p>
+  """
+
+
+def _archived_plain(fa: Facts, pct: dict[str, str]) -> str:
+    """Return the default view and the archived-weather facts as one plain paragraph."""
+    _, rows = _archived_rows(fa, pct)
+    return (
+        f"{default_view(pct['low'])} {archived_wind_sentence(fa)} "
+        f"{path_sentence(fa, html=False)} {_town_text(fa)} {TOWN_CAVEAT} "
+        "Farthest reach of ground lead with archived weather: " + " ".join(r[2:] for r in rows)
     )
 
 
@@ -1193,17 +1335,17 @@ def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) ->
     note = window_note(lead)
     no_time = time_note_html(built)
     return f"""<section id="summary" aria-labelledby="summary-h">
-  <h2 id="summary-h">What the forecast shows</h2>
+  <h2 id="summary-h">What the maps show</h2>
   <p class="caveat"><b>{CAVEAT}</b></p>
   <h3>When was the detonation?</h3>
   <p>{no_time}</p>
   {f'<p class="caveat">{ctx["pending_note"]}</p>' if ctx.get("pending_note") else ""}
-  <h3>Where the cloud goes{on}</h3>
+  {_archived_html(ctx.get("archived"), ctx["pct"])}<h3>Where the cloud goes{on}</h3>
   <p>{note + " " if note else ""}{wind_sentence(f)} {path_sentence(f)} The path can shift with \
 the blast time; use the blast-time menu to compare. {t.forecast_line}</p>
   <h3>How far lead on the ground could reach{on}</h3>
   <p>Farthest distance from the plant where lead on the ground reaches each EPA dust-lead action
-    level by the end of the 8-hour run, for any blast time from {WINDOW} The
+    level by the end of the 8-hour run, for a blast at {BLAST_TIME} The
     levels are 5 \u00b5g/ft\u00b2 (floors), 40 \u00b5g/ft\u00b2 (window sills), and \
 100 \u00b5g/ft\u00b2
     (window troughs). They are for indoor dust, so outdoor lead is only a rough comparison. The
@@ -1262,6 +1404,9 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
         )
         for m in more
     ]
+    fa = ctx.get("archived")
+    before = FORECAST_PREFIX if fa else ""
+    opens = [(DEFAULT_VIEW_QUESTION, f"{_archived_plain(fa, pct)} {CAVEAT}")] if fa else []
     return [
         (
             "Is the Iowa Lead Tracker official?",
@@ -1285,16 +1430,17 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
             + f" Earlier dates: {WHY_TUESDAY} (Sources: {TUESDAY_SOURCES_TEXT}.) "
             f"{WHY_MONDAY} (Source: {ARMY_CITE}, {ARMY_URL}.)",
         ),
+        *opens,
         (
             "Where could the lead go?",
             (
-                f"{mon}{wind_sentence(f)} {path_sentence(f, html=False)} {t.town} "
+                f"{before}{mon}{wind_sentence(f)} {path_sentence(f, html=False)} {t.town} "
                 f"{TOWN_CAVEAT} {CAVEAT}"
             ),
         ),
         (
             "How far could lead on the ground reach?",
-            f"{mon}Farthest distance where ground lead reaches EPA dust-lead action levels "
+            f"{before}{mon}Farthest distance where ground lead reaches EPA dust-lead action levels "
             "(yellow 5, orange 40, red 100 \u00b5g/ft\u00b2) by the end of an 8-hour run: "
             + " ".join(r[2:] for r in t.rows_txt)
             + " "
@@ -1330,6 +1476,7 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
 def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
     lead = f.get("day", PLANNED_DAY)
     mon = f"{lead}: " if more else ""  # the lead day's lines say so
+    fa = ctx.get("archived")
     modeled = sorted({lead, *(m["day"] for m in more)}, key=day_num)
     return "\n".join(
         [
@@ -1358,7 +1505,7 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
                 "Monday, Nov. 23 and Tuesday, Nov. 24 (Nov. 22 court filing); the court lifted its "
                 "hold on the permit on Nov. 23 (see Court case), Iowa Army Ammunition "
                 f"Plant, Middletown, Iowa ({ctx['lat']:.4f}, {ctx['lon']:.4f}). Blast times "
-                f"modeled: {WINDOW_HOURLY} CST, on " + ", ".join(modeled) + "."
+                f"modeled: {BLAST_TIME} CST, on " + ", ".join(modeled) + "."
             ),
             (
                 f"- Time and official advice: {time_note(ctx['built_txt'])} Sources: "
@@ -1385,6 +1532,11 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
                 "all in breathable sizes."
             ),
             f"- Army comparison: {ARMY_COMPARE}",
+            *(
+                [f"- Default view and archived weather: {_archived_plain(fa, ctx['pct'])}"]
+                if fa
+                else []
+            ),
             (
                 "- EPA\u2019s monitors and the cloud\u2019s path (preliminary analysis): "
                 f"{ANALYSIS_TEXT}"
