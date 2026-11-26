@@ -37,6 +37,7 @@ TILES = (
 )
 BOX = (-91.62, -91.19, 40.60, 40.865)  # west, east, south, north
 ZOOM = 13
+WEB_QUALITY = 82  # JPEG quality of the copy the site's page shows
 XACT = ("AS01", "AS02", "AS03", "AS04")
 NAMED = ("AS06", "AS12", "AS13")
 COLOR = {"forecast": "#f47230", "analysis": "#257de0", "hysplit": "#6a4ce2", "army": "#00b894"}
@@ -224,3 +225,6 @@ def draw(grids: dict[str, brief_lib.Grid], out: Path) -> None:
     )
     fig.savefig(out, dpi=160)
     plt.close(fig)
+    # a smaller copy for the site's page (scenarios/iowa-aap-lead-azide/brief_page.py)
+    web = Image.open(out).convert("RGB")
+    web.save(out.with_suffix(".jpg"), quality=WEB_QUALITY, optimize=True)

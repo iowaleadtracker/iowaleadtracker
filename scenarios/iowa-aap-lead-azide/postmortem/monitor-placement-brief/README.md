@@ -53,19 +53,19 @@ reached the ground or the air south of the monitors.
 These are model estimates, not measurements. Nothing here shows that lead reached any
 place, or how much. Where the magazines are comes from a reader's tip checked against
 published satellite imagery; no official source confirms it. The analysis has not been
-peer reviewed. The code and data to redraw the map and recompute every number are in
-this folder.
+peer reviewed. The code and data to redraw the map and recompute every number are
+public.
 
 ## What is needed now
 
 **The four real-time monitors can't answer this. Two other kinds of measurement can, and
 neither is public yet.**
 
-**1. Lab results from the ground.** Soil, surface-wipe and water samples don't depend on
+**1. Lab results from the ground.** Soil, surface-wipe, and water samples don't depend on
 an instrument having been in the right place at the right minute. Lead that came down
 stays where it fell, and a sample taken afterward finds it. Ground samples also catch
 lead on particles too coarse for an air monitor's inlet. EPA says it collected more than
-1,200 air, land and water samples before the detonation (EPA 2026c), so there is a
+1,200 air, land, and water samples before the detonation (EPA 2026c), so there is a
 baseline to compare with. Sampling between about 205° and 245° from the magazines, out
 to 15 miles, would span every model run here; the reruns' path runs along 210° to 217°.
 
@@ -106,7 +106,7 @@ airborne. If they don't, the real-time monitors were beside the cloud, not in it
 
 ## The map
 
-![Modeled cloud outlines, the Army's ground zones and EPA's sites over aerial imagery](monitor_placement_map.png)
+![Modeled cloud outlines, the Army's ground zones, and EPA's sites over aerial imagery](monitor_placement_map.png)
 
 *Lines: where the highest hourly mean lead in air at the ground would be 0.18 µg/m³ or
 more if 7% of the lead became airborne as fine dust (the lowest of the tracker's published
@@ -125,7 +125,8 @@ Imagery: Esri World Imagery.*
 path at every distance, and three are in the Army's ground zone.
 
 *Table 1. Direction from the modeled source at which each run's modeled air is highest,
-at three distances, and the monitors' directions.*
+at three distances, and the direction of the real-time monitor nearest each distance. The
+fourth monitor, AS04, is 27 miles out at 235°.*
 
 <!-- table:paths -->
 | Run | 5 miles out | 10 miles out | 20 miles out |
@@ -133,7 +134,7 @@ at three distances, and the monitors' directions.*
 | Tracker, forecast | 227° | 229° | 231° |
 | Tracker, analyzed weather | 212° | 214° | 216° |
 | HYSPLIT, archived weather | 210° | 216° | 217° |
-| EPA's real-time monitors | 4 mi: 232°, 12 mi: 233°, 19 mi: 234°, 27 mi: 235° | | |
+| EPA's real-time monitor nearest that distance | 232° (AS01, 3.6 mi) | 233° (AS02, 11.8 mi) | 234° (AS03, 19.1 mi) |
 <!-- /table:paths -->
 
 **2. On analyzed weather the modeled cloud passes south of them.** Both reruns are 17° to
@@ -179,7 +180,7 @@ measurements. The last column says where the site falls on the Army's final grou
 <!-- /table:readings -->
 
 EPA calls these "Xact stations monitoring for lead." It has not published their model,
-inlet size or detection limit, or how the public feed treats small values.
+inlet size, or detection limit, or how the public feed treats small values.
 
 **4. So the readings alone can't say what happened.** A line of monitors along one
 direction sees a cloud only over a narrow range of directions. In the full analysis the
@@ -210,8 +211,8 @@ the southern edge of the first range and outside the second.
 The full analysis behind this brief, with the weather checks and the sensitivity tests,
 is a longer paper that is still being revised. It is on the working branch
 [`claude/fervent-turing-led5z2`](https://github.com/iowaleadtracker/iowaleadtracker/tree/claude/fervent-turing-led5z2/scenarios/iowa-aap-lead-azide/postmortem)
-and is not part of this folder. Statements here marked "the full analysis" come from it
-and are not recomputed by this folder's code.
+and is not part of the brief's folder. Statements here marked "the full analysis" come from it
+and are not recomputed by the brief's code.
 
 ## Limits
 
@@ -239,10 +240,10 @@ pip install numpy scipy matplotlib pillow
 python3 scenarios/iowa-aap-lead-azide/postmortem/monitor-placement-brief/brief.py
 ```
 
-That redraws `monitor_placement_map.png`, rewrites `numbers.json` and rewrites the four
-tables above from the files in [`data/`](data/README.md). It needs the
-network only for the aerial imagery; `--no-map` skips the map. The run takes under a
-minute.
+That redraws `monitor_placement_map.png` (and the smaller `.jpg` the site's page shows),
+rewrites `numbers.json`, and rewrites the four tables above from the files in
+[`data/`](data/README.md). It needs the network only for the aerial imagery; `--no-map`
+skips the map. The run takes under a minute.
 
 | To check | Run | Needs |
 |---|---|---|
@@ -252,7 +253,7 @@ minute.
 | The model fields themselves | the full analysis's `scripts/reproduce.sh`, on the working branch | HYSPLIT 5.4, NOAA ARL's HRRR archive files, about an hour |
 
 The code is four short files: `brief.py` (the numbers and tables), `brief_map.py` (the
-map), `brief_lib.py` (the source, distances and the Army's map) and `place_army_map.py`.
+map), `brief_lib.py` (the source, distances, and the Army's map) and `place_army_map.py`.
 The inputs are described in [`data/README.md`](data/README.md).
 
 ## Questions and answers
@@ -314,7 +315,7 @@ actually released, and it may have been much less.
 
 **What can the monitors detect?**
 EPA says they are Xact monitors, which measure metals on a filter tape by X-ray
-fluorescence. It hasn't said which model, what inlet size or what detection limit. The
+fluorescence. It hasn't said which model, what inlet size, or what detection limit. The
 full analysis covers what is published for this kind of instrument.
 
 **What other explanations fit the near-zero readings?**
@@ -328,7 +329,7 @@ Lab results from the ground and from the instruments in the analyzed-weather pat
 "What is needed now." Above all, EPA's filter samples at AS06 and AS12, its DustTrak
 record at AS06 for the morning of Nov. 25, and soil and surface samples between about
 205° and 245° from the magazines out to 15 miles. Also an official statement of where
-the detonation was, and the monitors' model, inlet and detection limit.
+the detonation was, and the monitors' model, inlet, and detection limit.
 
 **Has anyone checked this?**
 No one outside the project. It has had AI referee reviews, which found and led to

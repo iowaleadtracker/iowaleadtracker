@@ -36,6 +36,7 @@ from string import Template
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
+import brief_page
 import forecast_summary
 import mirror
 import staged
@@ -1017,8 +1018,11 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "advisory_url": forecast_summary.ADVISORY_URL,
         "advisory_nov24_url": forecast_summary.ADVISORY_NOV24_URL,
         "army_maps_pdf": forecast_summary.ARMY_MAPS_PDF,
+        "official": forecast_summary.OFFICIAL_HTML,
         "blast_status": forecast_summary.BLAST_STATUS_HTML,
         "early_air": forecast_summary.EARLY_AIR_HTML,
+        "analysis_head": forecast_summary.ANALYSIS_HEAD,
+        "analysis": forecast_summary.ANALYSIS_HTML,
         "fema_header": forecast_summary.FEMA_HEADER_HTML,
         "court_pause": forecast_summary.court_pause([day_label(d) for d in told]),
         "court_url": forecast_summary.COURT_URL,
@@ -1089,7 +1093,7 @@ def not_found_page() -> str:
 
 
 def write_site(page: str, llms_txt: str, now: dt.datetime) -> Path:
-    """Write index.html and the small site files; return the index path."""
+    """Write index.html, the brief's page and the small site files; return the index path."""
     (SITE / "_headers").write_text(HEADERS, encoding="utf-8")
     (SITE / "404.html").write_text(not_found_page(), encoding="utf-8")
     (SITE / "llms.txt").write_text(llms_txt, encoding="utf-8")
@@ -1100,9 +1104,12 @@ def write_site(page: str, llms_txt: str, now: dt.datetime) -> Path:
         '<?xml version="1.0" encoding="UTF-8"?>\n'
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
         f"  <url><loc>{SITE_URL}</loc><lastmod>{now.date().isoformat()}</lastmod></url>\n"
+        f"  <url><loc>{brief_page.page_url(SITE_URL)}</loc>"
+        f"<lastmod>{now.date().isoformat()}</lastmod></url>\n"
         "</urlset>\n",
         encoding="utf-8",
     )
+    brief_page.write(SITE, SITE_NAME, SITE_URL, fmt_time(now))
     dest = SITE / "index.html"
     dest.write_text(page, encoding="utf-8")
     return dest
@@ -1118,7 +1125,7 @@ def publish() -> None:
     for name in PUBLISHED_FILES:
         if (SITE / name).exists():
             shutil.copyfile(SITE / name, dest / name)
-    for sub in ("maps", "m", "brand", staged.DIR_NAME):
+    for sub in ("maps", "m", "brand", brief_page.SLUG, staged.DIR_NAME):
         if (SITE / sub).is_dir():
             shutil.rmtree(dest / sub, ignore_errors=True)
             shutil.copytree(SITE / sub, dest / sub)

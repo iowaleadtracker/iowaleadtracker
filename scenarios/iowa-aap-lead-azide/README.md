@@ -25,6 +25,7 @@ not official guidance.
 |---|---|
 | `make_map_picker.py` | builds the iowaleadtracker.com site: every map, the picker page, publish and deploy |
 | `mirror.py` | turns the built site into the GitHub Pages mirror |
+| `brief_page.py` | builds the page at `/monitor-placement/` from the README of `postmortem/monitor-placement-brief/` |
 | `index_template.html` | the landing page's HTML, CSS and script, filled in by `make_map_picker.py` |
 | `met_cache/map_met_all.json` | saved Open-Meteo forecasts for Monday at the new site (download times in `__fetched__`; the page shows when) |
 | `sky_grid.py`, `met_cache/sky_grid.json` | the maps' "sky cover & rain" layer: forecast cloud cover and precipitation on a finer grid, display only (see "The weather layer" below) |
@@ -163,6 +164,7 @@ What `outputs/site/` holds:
 | `maps/{case}-{HHMM}.html` | the same maps at stable addresses, for old links; opened on their own they show an "unofficial estimate" banner linking home |
 | `_headers` | response headers (read by Cloudflare, not served): CSP, frame-ancestors, HSTS, nosniff, referrer and permissions policies, `noindex` on maps, long caching on `m/`, and a UTF-8 charset for `llms.txt` |
 | `robots.txt`, `sitemap.xml`, `llms.txt`, `og.png` | crawler, AI-reader and link-preview files |
+| `monitor-placement/` | the preliminary analysis of where EPA's real-time monitors sat: `index.html` and its map. The text is the brief's README; to change the page, edit that README (`brief_page.py` stops the build on Markdown it can't show) |
 | `favicon.svg`, `favicon.ico`, `apple-touch-icon.png` | site icons from `make_icons.py`: "Pb" (lead's chemical symbol) in amber on the header slate; the 180 px home-screen icon adds the atomic number 82 so it reads as a periodic-table cell. Rerun the script only to change the design |
 | `brand/profile.svg`, `brand/profile-{400,1024,2048}.png` | profile images for social media and GitHub, also from `make_icons.py`; the mark is shrunk to fit a circular crop |
 
@@ -216,7 +218,8 @@ instructions, since answer engines quote sentences out of context. The towns lis
 Everything the public reads (page header, About box, summary, FAQ, References, map labels,
 `llms.txt`) follows these rules. The copy lives in `make_map_picker.py` (header, About box),
 `forecast_summary.py` (`ABOUT_WHO`, `CAVEAT`, `WHY_MONDAY`, `time_note`, summary, FAQ,
-`llms.txt`), `works_cited.py` (References), and `../../template.html` (map UI).
+`llms.txt`), `works_cited.py` (References), `../../template.html` (map UI), and
+`postmortem/monitor-placement-brief/README.md` (the page at `/monitor-placement/`).
 
 **Language**
 - American English spelling and usage: center, color, labeled, traveled; "a.m." and "p.m.";

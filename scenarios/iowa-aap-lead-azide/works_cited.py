@@ -35,6 +35,12 @@ def doi(d: str) -> str:
 SOURCE_URL = "https://github.com/iowaleadtracker/iowaleadtracker"
 # The spread-method cross-check (HYSPLIT and tracer data) linked from the methodology table.
 TURBULENCE_URL = SOURCE_URL + "/blob/main/TURBULENCE.md"
+# The preliminary analysis of where EPA's real-time monitors sat: its page on the site
+# (built by brief_page.py from the brief's README) and its folder in the repository.
+ANALYSIS_PATH = "/monitor-placement/"
+ANALYSIS_URL = "https://iowaleadtracker.com" + ANALYSIS_PATH
+ANALYSIS_FOLDER = "scenarios/iowa-aap-lead-azide/postmortem/monitor-placement-brief"
+ANALYSIS_FOLDER_URL = f"{SOURCE_URL}/tree/main/{ANALYSIS_FOLDER}"
 #: The site's role inbox (no personal name; see the README's writing rules).
 CONTACT_EMAIL = "contact@iowaleadtracker.com"
 #: The site's Instagram account, for updates.
@@ -618,10 +624,34 @@ def method_intro(pct: dict[str, str]) -> str:
     )
 
 
+#: How the analysis after the blast was made, shown under the method note.
+ANALYSIS_HEAD = "The analysis after the blast."
+ANALYSIS_METHOD = (
+    f'The <a href="{ANALYSIS_PATH}">preliminary analysis</a> of where EPA&rsquo;s real-time '
+    "lead monitors sat runs this model twice: on the forecast the map showed at 9 a.m. on "
+    "Nov. 25, and on NOAA&rsquo;s hourly analyses of that morning&rsquo;s weather from the "
+    "HRRR system (Dowell et al. 2022). It also runs NOAA&rsquo;s HYSPLIT model (Stein et al. "
+    "2015) on NOAA&rsquo;s archive of HRRR. It models the release from two magazines that a "
+    "reader pointed to and that match published imagery; no official source confirms that "
+    "location. It places the Army&rsquo;s map by the county lines printed on it. The "
+    "results are model estimates, not measurements, and no one outside the project has "
+    f"reviewed them. The text, the code, and the data are on {_a(ANALYSIS_FOLDER_URL, 'GitHub')}."
+)
+
 #: What changed in the maps and their method, newest first (Central time dates). Add an
 #: entry for every change to the model, its settings or its sources.
 CHANGES_HEAD = "Change log"
 CHANGES = [
+    (
+        "Nov. 26",
+        (
+            "Added a preliminary analysis of where EPA&rsquo;s four real-time lead monitors "
+            "sat, compared with the forecast path and with models rerun on NOAA&rsquo;s weather "
+            f'analysis (<a href="{ANALYSIS_PATH}">the analysis</a>). The header, the About '
+            "box, the summary, the questions, and llms.txt report it. The header also links "
+            "EPA&rsquo;s data viewer and the Army&rsquo;s updates. The maps did not change."
+        ),
+    ),
     (
         "Nov. 25",
         (
@@ -804,6 +834,7 @@ def render(ctx: dict[str, Any], site_url: str, built_txt: str) -> str:
     today = dt.datetime.now(SITE_TZ).date()
     return f"""
   <p><b>{METHOD_HEAD}</b> {method_intro(ctx["pct"])}</p>
+  <p><b>{ANALYSIS_HEAD}</b> {ANALYSIS_METHOD}</p>
   <h3>{CHANGES_HEAD}</h3>
   {changes_html()}
   <h3>References</h3>

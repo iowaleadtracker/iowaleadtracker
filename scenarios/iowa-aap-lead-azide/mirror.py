@@ -21,6 +21,7 @@ import re
 import shutil
 from typing import TYPE_CHECKING
 
+from brief_page import SLUG as BRIEF_DIR
 from staged import DIR_NAME as STAGED_DIR
 from works_cited import SOURCE_URL
 
@@ -127,7 +128,8 @@ def write_mirror(site: Path, out: Path, csp: str) -> int:
         not_found.write_text(
             mirror_page(not_found.read_text(encoding="utf-8"), csp), encoding="utf-8"
         )
-    for page in sorted([*(out / "maps").glob("*.html"), *(out / "m").glob("*.html")]):
+    brief = (out / BRIEF_DIR).glob("*.html")  # the monitor-placement brief (brief_page.py)
+    for page in sorted([*(out / "maps").glob("*.html"), *(out / "m").glob("*.html"), *brief]):
         page.write_text(mirror_page(page.read_text(encoding="utf-8"), csp), encoding="utf-8")
         pages += 1
     # The staged maps (see staged.py): GitHub Pages can't send their noindex and

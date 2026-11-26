@@ -114,6 +114,61 @@ def test_llms_txt_leads_with_the_warning(rendered: tuple[str, list, str]) -> Non
 
 
 @pytest.mark.slow
+def test_analysis_after_the_blast_is_reported_with_its_caveat(
+    rendered: tuple[str, list, str],
+) -> None:
+    """The summary, the questions and llms.txt report the monitor-placement analysis.
+
+    Each says what it found in the same words, that it is preliminary and unofficial, and
+    where to read it. None of them says anything about a place being safe.
+    """
+    summary, faq, llms = rendered
+    assert "not measurements" in fs.ANALYSIS
+    assert "preliminary, unofficial analysis" in fs.ANALYSIS
+    assert "safe" not in fs.ANALYSIS.lower()
+    shown = html.escape(fs.ANALYSIS, quote=False)
+    assert f"<h3>{fs.ANALYSIS_QUESTION}</h3>\n  <p>{shown}" in summary
+    assert f'<a href="{works_cited.ANALYSIS_PATH}">Read the preliminary analysis</a>' in summary
+    assert summary.index(fs.ANALYSIS_QUESTION) < summary.index("How sure is this?")
+    answer = dict(faq)[fs.ANALYSIS_QUESTION]
+    assert answer.startswith(fs.ANALYSIS)
+    assert works_cited.ANALYSIS_URL in answer
+    assert answer.endswith(fs.CAVEAT)
+    assert f"(preliminary analysis): {fs.ANALYSIS}" in llms
+    assert f"- [Preliminary analysis]({works_cited.ANALYSIS_URL})" in llms
+
+
+def test_analysis_in_the_header_about_box_and_methodology() -> None:
+    page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    about = " ".join(dialog(page, "note").split())
+    assert "<p><b>$analysis_head</b> $analysis</p>" in about
+    assert about.index("What the map shows.") < about.index("$analysis_head")
+    assert about.index("$analysis_head") < about.index("decide if you&rsquo;re safe")
+    assert works_cited.ANALYSIS_PATH in fs.EARLY_AIR_HTML
+    assert "unofficial model estimates, not measurements" in fs.EARLY_AIR_HTML
+    ctx: dict[str, Any] = {
+        "pct": {"low": "7%", "mid": "26%", "high": "55%", "permit": "100%"},
+        "n_models": "two",
+        "got_txt": "now",
+        "shown_model": "GFS",
+        "models": [],
+    }
+    body = works_cited.render(ctx, "https://example.org/", "now")
+    method = f"<p><b>{works_cited.ANALYSIS_HEAD}</b> {works_cited.ANALYSIS_METHOD}</p>"
+    assert body.index(works_cited.METHOD_HEAD) < body.index(method)
+    assert body.index(method) < body.index(f"<h3>{works_cited.CHANGES_HEAD}</h3>")
+    assert "no official source confirms that location" in works_cited.ANALYSIS_METHOD
+    assert works_cited.ANALYSIS_FOLDER_URL in works_cited.ANALYSIS_METHOD
+    when, what = works_cited.CHANGES[0]
+    assert when == "Nov. 26"
+    assert works_cited.ANALYSIS_PATH in what
+    assert "The maps did not change." in what
+    # the two papers the method names are in the reference list
+    assert any(r.startswith("Dowell, D. C.") for r in works_cited.REFERENCES if isinstance(r, str))
+    assert any(r.startswith("Stein, A. F.") for r in works_cited.REFERENCES if isinstance(r, str))
+
+
+@pytest.mark.slow
 def test_no_private_citizen_in_warnings(rendered: tuple[str, list, str]) -> None:
     summary, faq, llms = rendered
     for text in (summary, llms, *(a for _, a in faq)):
