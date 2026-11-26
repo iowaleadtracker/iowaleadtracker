@@ -10,7 +10,7 @@ after the Army detonated its lead azide stockpile at the Iowa Army Ammunition Pl
 > instructions. The map shows model estimates for an assumed release. It is not a
 > measurement, and nothing here says how much lead reached any place.
 
-## In two sentences
+## Abstract
 
 The forecasts, including the Army's, pointed the plume toward about 230°, and EPA's four
 real-time lead monitors were lined up along that path; models rerun on NOAA's
@@ -19,7 +19,7 @@ outside the modeled cloud and the nearest was on its edge, so their near-zero re
 can't distinguish between little lead escaping and a cloud that passed just south of
 them.
 
-## Summary for publication
+## Summary
 
 EPA's four real-time lead monitors for the Nov. 25 detonation were set out along the path
 the forecasts showed, an analysis of public data by Iowa Lead Tracker finds. Measured from
