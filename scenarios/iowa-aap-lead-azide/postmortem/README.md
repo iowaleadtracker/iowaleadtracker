@@ -9,7 +9,7 @@ analyzed weather, NOAA's HYSPLIT and the U.S. Army's map against EPA's real-time
 > are not official NOAA products. The model maps below are estimates for assumed releases.
 > They are not measurements, and nothing here says how much lead reached any place.
 
-**Status.** Preliminary analysis, pending peer review. Second draft, updated Nov. 25, 2026, about 9 p.m. CST, twelve hours after the
+**Status.** Preliminary analysis, pending peer review. Second draft, updated Nov. 25, 2026, about 10 p.m. CST, thirteen hours after the
 detonation. It replaces a first draft that an independent review found wrong in
 several places ([what changed](#what-changed-since-the-first-draft)). The model comparison
 now covers all eight modeled hours (9 a.m. to 5 p.m.) on NOAA's archived weather; the
@@ -39,9 +39,10 @@ question.
 1. **EPA's four real-time lead monitors read almost nothing.** They sit 4.5 to 28 miles
    southwest of the plant. Through 6:23 p.m. they posted 244 readings after the
    detonation; 227 were zero and the highest was 0.010 µg/m³, about the size of readings
-   the same instruments posted before the detonation (up to 0.006). After 1:55 p.m. the
-   public layer holds only eight readings.
-2. **They were placed to catch a cloud at the ground.** Turning the modeled cloud through
+   the same instruments posted before the detonation (up to 0.006) and of the published
+   detection limit for this kind of instrument at short sampling times. After 1:55 p.m.
+   the public layer holds only eight readings.
+2. **They were placed to catch a cloud of fine dust at the ground.** Turning the modeled cloud through
    every direction it could plausibly have taken, the monitors would have read an hourly
    mean above the Army's 0.18 µg/m³ line for a release as small as 1% of the lead on any
    heading from 213° to 234°. Every estimate of the cloud's direction here falls
@@ -62,9 +63,11 @@ question.
    by 7 p.m.
 4. **Four explanations fit the near-zero reading at the nearest monitor** (section 6.6):
    little fine lead got out; the cloud passed overhead; a small, shallow cloud passed
-   just south; or the lead came out coarse and fell first. The last was calculated. It
-   works only for particles of about 100 µm or larger, which would leave nearly all of
-   the lead on the ground within 4.5 miles of the plant.
+   just south; or the lead was on coarse particles. The last was calculated. Coarse
+   particles fall out before the monitor only at about 100 µm or larger. But monitors of
+   this kind sample through a size-selective inlet. If these have the PM10 inlet, lead
+   on anything coarser than about 10 µm could pass the monitor in quantity and not be
+   measured. EPA hasn't published the monitors' model, inlet or detection limit.
 
 The supporting results:
 
@@ -103,7 +106,8 @@ The supporting results:
   measurements.
 - **No lead measurements beyond four instruments.** EPA lists 43 sampling sites; only the
   four real-time monitors have public results, and the layer names neither the substance
-  nor a detection limit. Filter, soil, wipe and water results will be the test of what
+  nor a detection limit. What is published for this kind of instrument is in section 3.8;
+  whether it applies to these four is an assumption. Filter, soil, wipe and water results will be the test of what
   landed. Nothing here estimates what was released.
 - **The "analyzed weather" is a model product.** NOAA's HRRR analysis blends observations
   into HRRR's own one-hour forecast. It is not independent of the HRRR forecast being
@@ -275,6 +279,28 @@ filter cassettes, canisters). The Xact layer doesn't name the substance or a det
 limit; EPA's release describes it as air monitoring for lead. Timestamps run to within
 minutes of the download, so we read them as UTC. These are EPA's preliminary values as
 posted.
+
+EPA hasn't said which instrument these are, and its list of instruments at AS01 to AS04
+(dust monitor, gas monitor, air cassette, canister) doesn't include one. The layer's name
+points to the Xact 625i, a monitor that collects particles on a filter tape and measures
+metals in the deposit by X-ray fluorescence, so it reads lead as an element whatever
+compound it is in. What is published for that instrument:
+
+- **Inlet.** It draws 16.7 L/min through a size-selective inlet; the options are PM10,
+  PM2.5, PM1 and low-volume total particulate (CARB 2018). EPA's own verification test
+  used a PM10 inlet (EPA 2012). A PM10 inlet passes about half of the particles of 10 µm
+  aerodynamic diameter and few larger ones.
+- **Sampling time.** 15 minutes to 4 hours (CARB 2018). The maker said in 2022 that
+  5-minute sampling and analysis was "now available" (Petterson 2022). EPA's layer has a
+  reading about every five minutes.
+- **Detection limit for lead**, at 68% confidence (one standard deviation): 1.8 ng/m³
+  for 15-minute samples, 0.63 for 30 minutes, 0.22 for an hour and 0.027 for four hours
+  (CARB 2018, Appendix 2). The table's formula makes the limit fall as the sampling time
+  to the power 1.5, and its values follow that. Carried down to 5 minutes it gives about
+  9 ng/m³, or 0.009 µg/m³. That figure is our extrapolation, not a published one.
+- **Accuracy.** In EPA's 80-day test of the earlier Xact 625 in Ohio, hourly lead averaged
+  over a day tracked lab filters with a slope of 1.1, r² of 0.94 and an offset of
+  +1.6 ng/m³; a blank stretch of filter tape alone read about 1 ng/m³ of lead (EPA 2012).
 
 ## 4. The weather: forecast against what was analyzed and observed
 
@@ -596,22 +622,27 @@ other three sit within 3° of each other on the forecast axis.
   as the mixed layer grew, 10 or more miles downwind. On the analyzed path the monitors
   there, AS02 to AS04, are 3 to 7 miles to the side. News video showed plumes that
   "quickly dissipated" (KCRG 2026a), which says nothing about height.
-- **Anything below their detection limit or between their samples.** The layer gives no
-  detection limit, sampling interval or status flags. Zeros are posted as exact zeros,
-  which suggests values below some limit are set to zero. We don't know what a 5-minute
-  reading represents.
-- **Lead on the ground.** These are air monitors. Very coarse particles, about 100 µm or
-  larger, fall out before a monitor 4.5 miles away; particles of 30 µm mostly do not
+- **Anything below their detection limit.** The layer gives no detection limit, sampling
+  interval or status flags. Zeros are posted as exact zeros and no value is negative,
+  which suggests small or negative values are set to zero. If these are Xact 625i units
+  sampling for 5 minutes, the published limits put one standard deviation near
+  0.009 µg/m³ (section 3.8). Every non-zero reading posted, 0.00001 to 0.010 µg/m³, is at
+  or below that, so the readings are what the instrument's noise would look like, and a
+  zero means less than about 0.01 to 0.03 µg/m³, not none.
+- **Particles too coarse for the inlet.** A monitor with a PM10 inlet measures little
+  that is larger than 10 µm in aerodynamic diameter, however much of it passes
   (section 6.6).
+- **Lead on the ground.** These are air monitors. Very coarse particles, about 100 µm or
+  larger, fall out before a monitor 4.5 miles away (section 6.6).
 
 ### 6.5 What the readings mean
 
 If the cloud crossed AS01 at the ground as modeled, the fine airborne share was thousands
 of times smaller than the lowest case: a few thousandths of a percent of the lead, taking
 the highest reading at face value. That is the simplest reading, it matches what the Army said its barriers, water and foam were built to do, and
-the placement analysis above supports it for a ground-level cloud. It is not established,
-because it rests on one instrument, an assumed mixing depth and an unknown detection
-limit.
+the placement analysis above supports it for a ground-level cloud of fine dust. It is not
+established, because it rests on one instrument, an assumed mixing depth, a detection
+limit EPA hasn't stated and an inlet that may not pass coarse particles.
 
 What would settle it: EPA's filter samples at AS06, AS12, AS13, AS14 and AS18, which
 collect over hours and are analyzed in a lab; the dust-monitor record at AS06; the Army's
@@ -635,7 +666,8 @@ roughly 15 minutes after the detonation and its center at 22 to 27, so the two r
 at 9:10 and 9:11 a.m. come a little before the modeled cloud. Two other monitors posted values that size before the detonation.
 
 Four explanations fit a near-zero reading there. They are not exclusive, and the data
-so far can't choose among them. In my judgment the first is the most likely.
+so far can't choose among them. In my judgment the first and the fourth are the
+likeliest, and air monitors alone can't tell those two apart.
 
 1. **Little fine lead became airborne.** If the barriers, water and foam worked as the
    Army says, the fine airborne share was far below any case the tracker published.
@@ -651,13 +683,14 @@ so far can't choose among them. In my judgment the first is the most likely.
    210°; the surface wind alone points to 204°–211°. This can't hide a large release: at
    1% of the lead the monitors respond on any heading from 213° to 234° (Table 10). It
    can hide a small one: at 0.1% the window is a few degrees around 225°.
-4. **The lead came out coarse and fell before it reached AS01.** This one can be
-   calculated, below.
+4. **The lead was on coarse particles.** They either fell before reaching AS01 or
+   reached it and were too large for its inlet. Both can be calculated, below.
 
-Instrument limits matter only at the low end. EPA's layer gives no detection limit,
-sampling interval or inlet size, and it posts zeros as exact zeros. That could hide a
-release near 0.01% of the lead. It could not hide 1%, which gives 0.8 to 1.1 µg/m³ at
-AS01 as fine dust.
+The detection limit matters only at the low end. With one standard deviation near
+0.009 µg/m³ for a 5-minute sample (section 3.8), fine dust from about 0.01% to 0.03% of
+the lead, one to two pounds, could pass AS01 unseen. That is the floor on what "zero"
+means there. It could not hide 1%, which gives 0.8 to 1.1 µg/m³ at AS01 as fine dust,
+about a hundred times that limit.
 
 **The coarse-particle explanation, calculated.** We reran the tracker on analyzed weather
 with all of the lead airborne in one particle size at a time: the four fine sizes of the
@@ -666,26 +699,31 @@ debris, the tracker's coarse sizes) and 30 µm at the density of the lead compou
 check, HYSPLIT was run for two hours on NOAA ARL's archived weather with the three
 soil-density sizes, using the tracker's deposition speeds.
 
-*Table 11. One particle size at a time: the highest hourly mean air at AS01 for each 1%
-of the lead airborne in that size, the share of the lead that would bring AS01 to
-0.01 µg/m³ (the highest reading any monitor posted), and the share of what is released
-that lands within AS01's distance and within 15 miles. Where two values are given they
-are tracker / HYSPLIT. Tracker shares on the ground are after 8 hours, HYSPLIT's after 2.*
+*Table 11. One particle size at a time: its aerodynamic diameter (the size an inlet
+sorts by), the highest hourly mean air at AS01 for each 1% of the lead airborne in that
+size, the share of the lead that would bring that air to 0.01 µg/m³ (the highest reading
+any monitor posted), and the share of what is released that lands within AS01's distance
+and within 15 miles. Air is what reaches AS01, whether or not an inlet would pass it.
+Where two values are given they are tracker / HYSPLIT. Tracker shares on the ground are
+after 8 hours, HYSPLIT's after 2.*
 
 <!-- table:coarse -->
-| Particle size | Settling speed | Air at AS01 per 1% of the lead (µg/m³) | Share of the lead for AS01 to read 0.01 µg/m³ | On the ground within 4.5 mi | On the ground within 15 mi |
-|---|---|---|---|---|---|
-| 0.3 µm, lead density | 0.0041 cm/s | 0.83 | 0.012% | 1% | 1% |
-| 1 µm, lead density | 0.0335 cm/s | 0.87 | 0.012% | 0% | 1% |
-| 3 µm, lead density | 0.27 cm/s | 0.92 | 0.011% | 1% | 3% |
-| 10 µm, lead density | 2.9 cm/s | 0.89 | 0.011% | 15% | 33% |
-| 10 µm, soil density | 0.81 cm/s | 0.89 / 1.00 | 0.011% / 0.010% | 4% / 4% | 10% / 10% |
-| 30 µm, soil density | 6.9 cm/s | 0.48 / 0.88 | 0.021% / 0.011% | 35% / 35% | 62% / 63% |
-| 100 µm, soil density | 58 cm/s | under 0.0001 / 0.0345 | all of it or more / 0.29% | 99% / 99% | 100% / 100% |
-| 30 µm, lead density | 24 cm/s | 0.0135 | 0.74% | 82% | 97% |
+| Particle size | Aerodynamic diameter | Settling speed | Air at AS01 per 1% of the lead (µg/m³) | Share of the lead for AS01 to read 0.01 µg/m³ | On the ground within 4.5 mi | On the ground within 15 mi |
+|---|---|---|---|---|---|---|
+| 0.3 µm, lead density | 0.92 µm | 0.0041 cm/s | 0.83 | 0.012% | 1% | 1% |
+| 1 µm, lead density | 3.1 µm | 0.0335 cm/s | 0.87 | 0.012% | 0% | 1% |
+| 3 µm, lead density | 9.2 µm | 0.27 cm/s | 0.92 | 0.011% | 1% | 3% |
+| 10 µm, lead density | 31 µm | 2.9 cm/s | 0.89 | 0.011% | 15% | 33% |
+| 10 µm, soil density | 16 µm | 0.81 cm/s | 0.89 / 1.00 | 0.011% / 0.010% | 4% / 4% | 10% / 10% |
+| 30 µm, soil density | 49 µm | 6.9 cm/s | 0.48 / 0.88 | 0.021% / 0.011% | 35% / 35% | 62% / 63% |
+| 100 µm, soil density | 163 µm | 58 cm/s | under 0.0001 / 0.0345 | all of it or more / 0.29% | 99% / 99% | 100% / 100% |
+| 30 µm, lead density | 92 µm | 24 cm/s | 0.0135 | 0.74% | 82% | 97% |
 <!-- /table:coarse -->
 
-Coarse particles explain AS01 only if they were very coarse. Particles of 10 µm reach
+Two things can keep coarse lead out of a reading at AS01: it falls to the ground before
+it gets there, or it gets there and the inlet doesn't pass it.
+
+**Falling out first** needs very coarse particles. Particles of 10 µm reach
 AS01 as readily as fine dust. At 30 µm and soil density the reading falls by half in the
 tracker and hardly at all in HYSPLIT, so 26% of the lead in that size would still put 12
 to 23 µg/m³ at AS01. Only at about 100 µm, the size of fine sand, or at 30 µm for
@@ -698,24 +736,39 @@ the tracker leaves almost none, and HYSPLIT leaves 0.035 µg/m³ for each 1% of 
 By HYSPLIT, even a release made up entirely of 100 µm particles would have to be under
 0.3% of the lead, about 20 lb, for AS01 to stay at 0.01 µg/m³.
 
-So this explanation needs nearly all of the airborne lead in sand-size particles or dense
-fragments, with no more than about 0.01% to 0.02% of the lead in anything of 30 µm or
-finer at soil density. Lead caught on wet soil, foam and debris could look like that. The
-published cases assumed the opposite, a condensed metal fume.
+So if the monitor measured every size, this explanation would need nearly all of the
+airborne lead in sand-size particles or dense fragments, with no more than about 0.01%
+to 0.02% of the lead in anything of 30 µm or finer at soil density.
 
-It makes a prediction that can be checked: the lead would be on the ground near the
-plant. With 26% of the lead in 100 µm particles, both models put 100 µg/ft² or more over
-about 4 sq mi out to 5 miles, and 5 µg/ft² or more over 12 to 14 sq mi out to 10 miles.
-Soil and wipe samples there would show it. The Army's own map does not look like that
-case. Its 100 µg/ft² zone, 29 sq mi out to 12 miles, is nearer the 30 µm result (36 to
-43 sq mi out to 19 miles), a size that would have reached AS01.
+**Not passing the inlet** needs much less. If the monitors have a PM10 inlet (section
+3.8), they measure little that is larger than 10 µm in aerodynamic diameter. That is
+about 3 µm for particles as dense as the lead compound and about 6 µm at soil density.
+Every coarse size in Table 11 is above it. Lead on 30 µm soil particles would pass AS01
+at half or more of the fine-dust concentration and not be measured. This explanation
+then needs only that nearly all of the lead was on particles coarser than the inlet's
+cut, with no more than about 0.01% to 0.03% of it finer. A PM2.5 inlet would cut lower
+still. For the published fine cases the inlet changes little: a PM10 inlet would pass
+about 80% of their lead by mass and a PM2.5 inlet about 30%, against readings thousands
+of times below them.
+
+Lead caught on wet soil, foam and debris could be that coarse. The published cases
+assumed the opposite, a condensed metal fume.
+
+Either way the lead ends up on the ground, which can be checked. With 26% of the lead in
+100 µm particles, both models put 100 µg/ft² or more over about 4 sq mi out to 5 miles,
+and 5 µg/ft² or more over 12 to 14 sq mi out to 10 miles. At 30 µm it spreads farther:
+100 µg/ft² or more over 36 to 43 sq mi out to 19 miles. The Army's own map, 29 sq mi out
+to 12 miles, is nearer the 30 µm result than the 100 µm one. Lead on particles of a few
+tens of micrometers, with monitors behind a PM10 inlet, would fit both the Army's map
+and the readings. That is a possibility, not a finding: the inlet, the Army's particle
+sizes and the amount released are all unknown. Soil and wipe samples along 205° to 245°,
+and the filter cassettes if they collect every particle size, would show it.
 
 Limits of this calculation: single sizes of spherical particles; a cloud that starts
 mixed to the ground, as everywhere here; the tracker's map values are stored in steps
 with a floor, so its smallest values are rough; the HYSPLIT check runs two hours with
-fixed deposition speeds. And a separate point: if the monitors sample through a
-size-selective inlet, particles above its cut size would not register however many
-reached AS01. EPA's layer doesn't say.
+fixed deposition speeds; and the inlet is taken as a clean cut at 10 µm when a real one
+passes a falling share of particles on either side of it.
 
 ## 7. The Army's map
 
@@ -865,16 +918,17 @@ The Army hasn't published its model's inputs, and these runs don't identify them
 - **Coarse particles.** The published cases put all airborne lead in fine sizes. Table 8
   shows that a coarse share changes the lead on the ground within 15 miles by a factor of
   7 to 12 and brings the tracker's zones close to the Army's. The tracker should show a
-  coarse case. A coarse case does not by itself explain the monitors: particles of 30 µm
-  still reach AS01, and only sand-size particles fall out first (Table 11).
+  coarse case. Particles of 30 µm still reach AS01, and only sand-size particles fall out
+  first (Table 11). But a monitor with a PM10 inlet would not measure either, so the site
+  should say that real-time monitors may not see coarse lead.
 
 ## 9. Next steps
 
 - Check whether the site's direction spread and other weather models covered the
   analyzed path.
 - Add EPA's filter, soil and wipe results, the Army's samples, balloons and its final
-  map as they are published; ask EPA for the monitors' detection limit and sampling
-  interval.
+  map as they are published; ask EPA for the monitors' model, inlet, detection limit
+  and sampling interval, and what its filter cassettes collect.
 - Compare HYSPLIT's turbulence diagnostics on the archived weather with the tracker's,
   and test the tracker with stability taken from the analysis's profile.
 - Get the Army's maps as PDFs with a known projection, its post-detonation map, and its
@@ -946,12 +1000,19 @@ corrected here:
 - Benjamin, S. G., and Coauthors, 2016: A North American hourly assimilation and model
   forecast cycle: The Rapid Refresh. *Mon. Wea. Rev.*, **144**, 1669–1694,
   doi:10.1175/MWR-D-15-0242.1.
+- CARB, 2018: Standard operating procedure for continuous determination of metals in
+  ambient air using an Xact 625i ambient metals monitor. CAMB SOP 450, first edition,
+  California Air Resources Board, November 2018,
+  https://ww2.arb.ca.gov/sites/default/files/2019-04/SOP450%20for%20XACT625I%20XRF.pdf.
 - Dowell, D. C., and Coauthors, 2022: The High-Resolution Rapid Refresh (HRRR): An hourly
   updating convection-allowing forecast model. Part I: Motivation and system description.
   *Wea. Forecasting*, **37**, 1371–1395, doi:10.1175/WAF-D-21-0151.1.
 - Emerson, E. W., and Coauthors, 2020: Revisiting particle dry deposition and its role in
   radiative effect estimates. *Proc. Natl. Acad. Sci. USA*, **117**, 26076–26082,
   doi:10.1073/pnas.2014761117.
+- EPA, 2012: Environmental Technology Verification report: Cooper Environmental Services
+  LLC Xact 625 particulate metals monitor. EPA/600/R-12/680, September 2012,
+  https://archive.epa.gov/nrmrl/archive-etv/web/pdf/p100fk6b.pdf.
 - EPA, 2026a: EPA, Army and other federal partners provide public update on Iowa Army
   Ammunition Plant. News release, Nov. 24,
   https://www.epa.gov/newsreleases/epa-army-and-other-federal-partners-provide-public-update-iowa-army-ammunition-plant.
@@ -986,6 +1047,9 @@ corrected here:
 - NOAA, 2026: High-Resolution Rapid Refresh (HRRR) model, bucket `noaa-hrrr-bdp-pds`, and
   NEXRAD Level III products, bucket `unidata-nexrad-level3`. NOAA Open Data Dissemination
   on AWS (retrieved Nov. 25, 2026).
+- Petterson, K., 2022: Continuous multi-metal monitoring. Cooper Environmental,
+  presentation at EPA's National Ambient Air Monitoring Conference, Aug. 24, 2022,
+  https://www.epa.gov/system/files/documents/2022-10/Krag_Petterson_NAAMC_2022_08_24.pdf.
 - Stein, A. F., and Coauthors, 2015: NOAA's HYSPLIT atmospheric transport and dispersion
   modeling system. *Bull. Amer. Meteor. Soc.*, **96**, 2059–2077,
   doi:10.1175/BAMS-D-14-00110.1.

@@ -27,6 +27,8 @@ NOON = 12
 LOW = 0.07  # the lowest release case
 ARMY_LINE = 0.18  # µg/m³
 NOISE = 0.01  # µg/m³, the highest reading any real-time monitor posted
+# Aerodynamic diameter: the size of a water-density sphere that settles at the same speed.
+WATER = 1000.0  # kg/m3
 SOIL_MAX = 3000  # kg/m3; particle densities above this are the lead compound, below it soil
 
 
@@ -368,6 +370,7 @@ def coarse(c: dict[str, Any]) -> str:
         rows.append(
             [
                 f"{r['diameter_um']:g} µm, {kind} density",
+                f"{num(r['diameter_um'] * (r['density_kg_m3'] / WATER) ** 0.5)} µm",
                 f"{num(r['settling_cm_s'])} cm/s",
                 small(air) + (f" / {small(air_h)}" if air_h is not None else ""),
                 need(air) + (f" / {need(air_h)}" if air_h is not None else ""),
@@ -377,6 +380,7 @@ def coarse(c: dict[str, Any]) -> str:
         )
     head = [
         "Particle size",
+        "Aerodynamic diameter",
         "Settling speed",
         "Air at AS01 per 1% of the lead (µg/m³)",
         "Share of the lead for AS01 to read 0.01 µg/m³",
