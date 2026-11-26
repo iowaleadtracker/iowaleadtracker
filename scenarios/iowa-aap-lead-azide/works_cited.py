@@ -208,6 +208,11 @@ REFERENCES = [
     "guide. LLNL-SM-636474, Lawrence Livermore National Laboratory, "
     + _a("https://narac.llnl.gov/hotspot")
     + ".",
+    "Iowa Environmental Mesonet, 2026: ASOS observations for Burlington (BRL), Fort Madison "
+    "(FSW) and Mount Pleasant (MPZ), Iowa, 25 November 2026, 8:30&ndash;10:30 a.m. CST. Iowa "
+    "State University, accessed 26 November 2026, "
+    + _a("https://mesonet.agron.iastate.edu/request/download.phtml?network=IA_ASOS")
+    + ".",
     "Iowa HHS, 2026: Planned lead azide detonation fact sheet&mdash;November 23, 2026. Iowa "
     f"Department of Health and Human Services, {ACCESSED}, "
     + _a("https://hhs.iowa.gov/media/19822/download?inline=")
@@ -648,6 +653,17 @@ ANALYSIS_METHOD = (
 #: entry for every change to the model, its settings or its sources.
 CHANGES_HEAD = "Change log"
 CHANGES = [
+    (
+        "Nov. 26",
+        (
+            "The page gives the blast time as 9:00 a.m. CST, from the Army&rsquo;s own 3 p.m. "
+            "maps (&ldquo;DTG: 25NOV2026 0900 CST&rdquo;), and adds the weather observed at "
+            "blast time at the Burlington, Fort Madison and Mount Pleasant airports (Iowa "
+            "Environmental Mesonet): northeast winds of about 7 to 12 mph, close to the "
+            "archived and forecast winds, and clear skies, unlike the forecast&rsquo;s 100% "
+            "cloud cover. The maps did not change."
+        ),
+    ),
     (
         "Nov. 26",
         (
