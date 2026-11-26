@@ -27,7 +27,8 @@ VOLATILE = [
     re.compile(r'const BUILT = "[^"]*";'),
     re.compile(r"<lastmod>[^<]*</lastmod>"),
     re.compile(r'"dateModified":\s*"[^"]*"'),
-    re.compile(r"m/((?:\d{4}-\d\d-\d\d-)?[a-z]+-\d{4})-[0-9a-f]{10}"),
+    # m/permit-0900-<hash>, m/2026-11-26-permit-0900-<hash>, m/archived-permit-0900-<hash>
+    re.compile(r"m/((?:\d{4}-\d\d-\d\d-)?(?:[a-z]+-)?[a-z]+-\d{4})-[0-9a-f]{10}"),
 ]
 
 

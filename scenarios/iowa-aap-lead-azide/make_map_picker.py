@@ -99,8 +99,8 @@ DEFAULT_CASE = "low"
 # Weather behind the maps, as (id in file names and links, label in the Weather menu). The
 # page opens on the first one that is built.
 # - archived: NOAA's HRRR as Open-Meteo served it at 6:51 p.m. CST on Nov. 25, after all eight
-#   modeled hours had passed, so every hour is an analysis and none a forecast. It is saved
-#   in ARCHIVED_CACHE and replayed with ARCHIVED_AS_OF; nothing is downloaded.
+#   modeled hours had passed. It is saved in ARCHIVED_CACHE and replayed with
+#   ARCHIVED_AS_OF; nothing is downloaded.
 # - forecast: the forecasts the site showed before the blast (MET_CACHE, four models).
 SOURCES = [
     ("archived", "Archived weather (after the blast)"),
@@ -110,6 +110,8 @@ ARCHIVED_CACHE = HERE / "met_cache" / "archived_hrrr.json"
 ARCHIVED_AS_OF = "2026-11-26T00:51:31+00:00"
 ARCHIVED_MODEL = "ncep_hrrr_conus"
 ARCHIVED_NOTE = "archived weather (NOAA HRRR, saved Nov. 25, 6:51 p.m. CST)"
+# How the archived maps name their weather (the model would say "Open-Meteo forecast").
+ARCHIVED_LABEL = "archived NOAA HRRR (ncep_hrrr_conus, served Nov. 25, 6:51 p.m. CST)"
 # Where the archived-weather maps start the cloud: midway between the two magazines the
 # blasts were in, from a reader's tip checked against published imagery and video (the
 # monitor-placement brief, postmortem/monitor-placement-brief/data/source.json). No official
@@ -663,6 +665,8 @@ def archived_runs(py: str) -> list[Run]:
                 *("--release-case", release_case),
                 *args,
                 *("--as-of", ARCHIVED_AS_OF),
+                *("--weather-label", ARCHIVED_LABEL),
+                "--no-sky-layer",  # that layer is labeled a forecast
                 *("--home-url", SITE_URL),
                 *("--legend-note", f"{name} case, blast {blast_label(t, DATE)}, {ARCHIVED_NOTE}"),
                 *("-o", str(out)),
@@ -675,6 +679,8 @@ def build_archived(py: str) -> None:
     """Run the model on the archived weather; it is all saved, so nothing downloads."""
     if not ARCHIVED_CACHE.exists():
         print(f"no archived weather in {ARCHIVED_CACHE}; leaving those maps out")
+        for old in MAPS.glob("archived-*.html"):  # none from an earlier build either
+            old.unlink()
         return
     skipped = run_maps(archived_runs(py), saved=True)
     if skipped:
@@ -811,6 +817,7 @@ def source_values(maps: Maps) -> dict[str, str]:
             for s in maps.sources
         ),
         "open_source": json.dumps(opens),
+        "all_sources": json.dumps([s for s, _ in SOURCES]),
         "source_hidden": "" if len(maps.sources) > 1 else " hidden",
         # one blast time: nothing to choose, so the time menu and its buttons are hidden
         "time_hidden": "" if len(maps.times) > 1 else " hidden",

@@ -227,6 +227,9 @@ const day = document.getElementById('d');
 // Weather behind the maps: archived (after the blast) or the forecast (before it). The page
 // opens on OPEN_SOURCE; a link names the other one (#0900-low-forecast).
 const src = document.getElementById('w'), OPEN_SOURCE = $open_source;
+// Every weather source the site can have, built or not, so a link naming one this update
+// lacks isn't read as a day.
+const ALL_SOURCES = $all_sources;
 // Short codes for the days in links (#1200-permit-tue). A link without one means LINK_DAY
 // (the first planned day, as links always have); the page opens on OPEN_DAY.
 const DAY_CODES = $day_codes, LINK_DAY = $link_day, OPEN_DAY = $open_day;
@@ -340,7 +343,7 @@ function applyHash() {
   const [ht, hc, ...rest] = location.hash.slice(1).split('-');
   // After the time and case, in any order: a weather source and a day code.
   const hs = rest.find((x) => [...src.options].some((o) => o.value === x));
-  const hd = rest.find((x) => x !== hs);
+  const hd = rest.find((x) => !ALL_SOURCES.includes(x));
   let changed = false;
   for (const o of src.options) if (o.value === (hs || OPEN_SOURCE) && !o.selected) { o.selected = true; changed = true; }
   const found = Object.keys(DAY_CODES).find((k) => DAY_CODES[k] === hd);

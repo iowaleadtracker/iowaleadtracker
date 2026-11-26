@@ -425,8 +425,7 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
             "Charges",
             (
                 "Two equal blasts inside earth-covered magazines at about 9 a.m. Wednesday "
-                "(McFate 2026b; FEMA 2026), also modeled at 8:30 and 9:30 a.m. in case the time "
-                "shifts"
+                "(McFate 2026b; FEMA 2026); 8:30 and 9:30 a.m. were also modeled until Nov. 26"
             ),
             (
                 "Two detonations at about noon on the earlier Monday date (Iowa HHS 2026); drums "
@@ -484,8 +483,8 @@ def assumptions(ctx: dict[str, Any]) -> list[tuple[str, str, str]]:
             "Weather",
             (
                 "Archived weather (the map opens on it): NOAA&rsquo;s HRRR model as served at "
-                "6:51 p.m. CST on Nov. 25, after the eight hours modeled had passed, so every "
-                "hour is an analysis; one weather source, two deposition schemes. Forecast "
+                "6:51 p.m. CST on Nov. 25, after the eight hours modeled had passed; one "
+                "weather source, two deposition schemes. Forecast "
                 "(before the blast): "
                 f"{ctx['n_models']} forecast models pulled "
                 f"{ctx['got_txt']}; "
@@ -654,10 +653,11 @@ CHANGES = [
         (
             "The map now opens on a 9 a.m. blast, the low case, and archived weather "
             "(NOAA&rsquo;s HRRR model as served at 6:51 p.m. CST on Nov. 25, after the hours "
-            "modeled had passed). A new Weather menu also has the forecast shown before the "
+            "modeled had passed). Opening on the low case is not a finding that little lead "
+            "got out. A new Weather menu also has the forecast shown before the "
             "blast; those maps did not change. Before, the map opened on the EPA permit case "
-            "and showed only the forecast. The 8:30 and 9:30 a.m. blast times are gone, since "
-            "the blast was at 9 a.m. The archived-weather maps start the cloud midway between "
+            "and showed only the forecast. The 8:30 and 9:30 a.m. blast times are gone; 9 a.m. is "
+            "the time the Army had set. The archived-weather maps start the cloud midway between "
             "the two magazines the blasts were in (40.8096, &minus;91.2692), from a "
             "reader&rsquo;s tip checked against published imagery and video; the forecast maps "
             "still start it at the point for the whole plant. The summary, the questions, and "

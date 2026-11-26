@@ -116,8 +116,8 @@ python3 make_map_picker.py --build --publish --deploy
   the forecasts saved it runs up to 4 at a time with downloads off, and skips any blast
   time whose forecast isn't saved yet (a time added since the last refresh) until the next
   refresh downloads it, so a deploy never downloads. Without them (a refresh), the first map
-  of each blast hour runs alone and downloads that hour's forecasts (8:30, then 9:00, which
-  9:30 shares), one at a time; the rest then run up to 4 at a time from what those saved.
+  of each blast hour runs alone and downloads that hour's forecasts, one at a time; the rest
+  then run up to 4 at a time from what those saved.
   With `met_cache/map_met_all.json` present, each run gets
   `--as-of` set to when those forecasts were pulled, so a rebuild on any later date or
   machine replays the same weather offline and makes the same maps.
@@ -200,10 +200,11 @@ case, the most conservative one, and showed only the forecast.
   of maps the site showed before the blast; those maps are unchanged and keep their file
   names, so old links to `maps/permit-0900.html` still open them.
 - **Archived weather** is one source: NOAA's HRRR model as Open-Meteo served it at
-  6:51 p.m. CST on Nov. 25, when every modeled hour had passed, so each hour is an
-  analysis. It is saved in `met_cache/archived_hrrr.json` and replayed with
+  6:51 p.m. CST on Nov. 25, when every modeled hour had passed. It is saved in `met_cache/archived_hrrr.json` and replayed with
   `--as-of 2026-11-26T00:51:31+00:00`. A build never downloads it. These maps keep the two
-  deposition schemes but have no weather-model spread and no sky layer.
+  deposition schemes but have no weather-model spread, and the sky cover and rain layer is
+  left off (`--no-sky-layer`), because the map labels that layer a forecast. Their weather
+  line reads "archived NOAA HRRR" (`--weather-label`).
 - **Release point.** The archived-weather maps start the cloud midway between the two
   magazines the blasts were in (`ARCHIVED_LAT`, `ARCHIVED_LON`: 40.8096, −91.2692), from a
   reader's tip checked against published imagery and video; no official source confirms it.
@@ -218,8 +219,9 @@ case, the most conservative one, and showed only the forecast.
 - **Text.** The summary, the questions, and `llms.txt` first say what the page opens on and
   what the archived-weather maps show, then describe the forecast maps under "What the
   forecast showed before the blast". Wherever the text says the page opens on the low
-  case, it also says this is not a finding that little lead got out
-  (`forecast_summary.default_view`; `tests/test_site.py` checks).
+  case (About box, summary, questions, `llms.txt`, change log), it also says this is not a
+  finding that little lead got out (`forecast_summary.default_view` and `about_weather`;
+  `tests/test_site.py` checks).
 - Archived weather is a weather model's account of the day, not a measurement. The page
   says so in the About box and the summary.
 
@@ -414,7 +416,7 @@ time costs a few hundred.
   the winds over that run, so every start hour is a separate request of about 85 (25
   points x 3.3, for 33 variables counted per 10; about 65 before 1000 and 975 hPa were
   added on Nov. 25) per weather model and day; times within the same hour share it.
-  With 8:30, 9:00 and 9:30 a.m. (2 start hours; 9:30 shares 9:00's), the main refresh costs
+  With 8:30, 9:00 and 9:30 a.m. (2 start hours; 9:30 shares 9:00's), as built until Nov. 26, the main refresh cost
   about 400-550 per run; with hourly times from 9 a.m. to 1 p.m. it was about 1,000-1,300
   (Wednesday only, 3-4 models, 5 hours; about 800 with the earlier 11 a.m.-12:30 p.m.
   window and Thursday)

@@ -873,7 +873,7 @@ def _time_parts(built_txt: str) -> dict[str, str]:
             f"same 0.26 ({ARMY_MAPS_CITE}). The Army\u2019s maps and updates are at "
             f"{ARMY_MAPS_URL}."
         ),
-        "window": (f"These maps model a blast at {BLAST_TIME}, when the Army carried it out."),
+        "window": (f"These maps model a blast at {BLAST_TIME}, the time the Army had set."),
     }
 
 
@@ -1113,8 +1113,9 @@ DEFAULT_VIEW_QUESTION = "What does the map show when it opens?"
 ARCHIVED_HEAD = "With archived weather"
 FORECAST_HEAD = "What the forecast showed before the blast"
 FORECAST_NOTE = (
-    "The sections from here to \u201cHow sure is this?\u201d describe the forecast maps: "
-    "choose \u201cForecast (before the blast)\u201d in the Weather menu to see them."
+    "The sections below on where the cloud goes, how far lead on the ground could reach, lead "
+    "in the air, and the Army\u2019s maps describe the forecast maps: choose "
+    "\u201cForecast (before the blast)\u201d in the Weather menu to see them."
 )
 #: Starts the two answers that describe the forecast maps once the page opens on archived
 #: weather.
@@ -1140,7 +1141,9 @@ def about_weather(n_models: str, got_txt: str, *, archived: bool) -> str:
     if not archived:
         return f"The winds come from {forecast}."
     return (
-        f"The map opens on archived weather: {ARCHIVED_SOURCE}. The Weather menu also has "
+        "The map opens on the low case, the smallest of the four; that is not a finding "
+        "that little lead got out. It opens on archived weather: "
+        f"{ARCHIVED_SOURCE}. The Weather menu also has "
         f"the forecast shown before the blast, from {forecast}. Archived weather is a weather "
         "model\u2019s account of the day, not a measurement."
     )
@@ -1344,8 +1347,7 @@ def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) ->
   <p>{no_time}</p>
   {f'<p class="caveat">{ctx["pending_note"]}</p>' if ctx.get("pending_note") else ""}
   {_archived_html(ctx.get("archived"), ctx["pct"])}<h3>Where the cloud goes{on}</h3>
-  <p>{note + " " if note else ""}{wind_sentence(f)} {path_sentence(f)} The path can shift with \
-the blast time; use the blast-time menu to compare. {t.forecast_line}</p>
+  <p>{note + " " if note else ""}{wind_sentence(f)} {path_sentence(f)} {t.forecast_line}</p>
   <h3>How far lead on the ground could reach{on}</h3>
   <p>Farthest distance from the plant where lead on the ground reaches each EPA dust-lead action
     level by the end of the 8-hour run, for a blast at {BLAST_TIME} The
@@ -1374,7 +1376,7 @@ below it is
   <p>Not very. The Army estimates that 26% of the lead gets into the air with its mitigation
     (an emission factor of 0.26), but no one has measured a blast like this, and the actual
     winds may have differed from the forecast. The four cases show the range. Use the map
-    above to see each case and blast time. Last updated {built}.</p>
+    above to see each case. Last updated {built}.</p>
   <p>{PRECEDENT} Sources: {BRIEFING_SOURCES_HTML}.</p>
   <p>{RELEASE_POINT}</p>
   <h3>How the date was set</h3>
@@ -1480,6 +1482,7 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
     lead = f.get("day", PLANNED_DAY)
     mon = f"{lead}: " if more else ""  # the lead day's lines say so
     fa = ctx.get("archived")
+    before = FORECAST_PREFIX if fa else ""  # the lines that describe the forecast maps
     modeled = sorted({lead, *(m["day"] for m in more)}, key=day_num)
     return "\n".join(
         [
@@ -1544,19 +1547,19 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
                 "- EPA\u2019s monitors and the cloud\u2019s path (preliminary analysis): "
                 f"{ANALYSIS_TEXT}"
             ),
-            f"- {mon}{t.weather}",
-            f"- {mon}{t.forecast_line}",
-            f"- {mon}"
+            f"- {before}{mon}{t.weather}",
+            f"- {before}{mon}{t.forecast_line}",
+            f"- {before}{mon}"
             + (window_note(lead) + " " if window_note(lead) else "")
             + f"{wind_sentence(f)} {path_sentence(f, html=False)}",
-            f"- {mon}{t.town} {TOWN_CAVEAT}",
+            f"- {before}{mon}{t.town} {TOWN_CAVEAT}",
             (
-                f"- {mon}Farthest reach of ground lead at EPA dust-lead action levels (yellow 5, "
-                "orange 40, red 100 \u00b5g/ft\u00b2), any blast time:"
+                f"- {before}{mon}Farthest reach of ground lead at EPA dust-lead action levels "
+                f"(yellow 5, orange 40, red 100 \u00b5g/ft\u00b2), for a blast at {BLAST_TIME}:"
             ),
             *[f"  {r}" for r in t.rows_txt],
             f"  {REACH_NOTE}",
-            f"- {mon}{t.air_plain}",
+            f"- {before}{mon}{t.air_plain}",
             *[line for m in more for line in _day_plain(m, ctx)],
             f"- Last updated {ctx['built_txt']}.",
             "",
@@ -1566,7 +1569,7 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             "",
             "## Pages",
             "",
-            f"- [Map]({ctx['site_url']}): interactive map by blast time and case",
+            f"- [Map]({ctx['site_url']}): interactive map by weather and case",
             (
                 f"- [Preliminary analysis]({ANALYSIS_URL}): where EPA\u2019s real-time lead "
                 "monitors sat, compared with the forecast and analyzed-weather paths"

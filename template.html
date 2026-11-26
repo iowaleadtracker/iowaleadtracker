@@ -484,7 +484,9 @@ $("title").textContent = M.title;
 document.title = "Puff Dispersal Map";
 const BINS = M.bins, EX = M.explosion;
 const ENS = M.ensemble;
-const ENS_TEXT = !ENS ? "" : ENS.models
+// One weather source and no wind turning: the spread is only the dry-deposition schemes.
+const ENS_DEP_ONLY = !!ENS && !ENS.models && !ENS.spread && !!ENS.deposition;
+const ENS_TEXT = !ENS ? "" : ENS_DEP_ONLY ? `${ENS.deposition.length} dry-deposition schemes` : ENS.models
   ? `${ENS.models.length} weather models (${esc(ENS.models.join(", "))}; shown: ${esc(ENS.shown)})` +
     (ENS.rotations ? `, each turned up to ±${ENS.spread}°` : `, each allowed ±${ENS.spread}° of direction error`)
   : `${ENS.n} runs with the wind turned up to ±${ENS.spread}°`;
@@ -682,7 +684,7 @@ function buildOverlay() {
   const zones = S.field === "zones";
   const envOn = S.env && !!FIELDS["env_" + (zones ? S.zoneMetric : S.field)] && (zones || S.units !== "count");
   $("legenv").hidden = !envOn;
-  if (envOn) $("legenv").textContent = ENS.models ? `Highest value across ${ENS.models.length} weather models; other paths dashed` : `Highest value of ${ENS.n} runs with the wind turned up to ±${ENS.spread}°`;
+  if (envOn) $("legenv").textContent = ENS_DEP_ONLY ? `Highest value with any of ${ENS.deposition.length} deposition schemes` : ENS.models ? `Highest value across ${ENS.models.length} weather models; other paths dashed` : `Highest value of ${ENS.n} runs with the wind turned up to ±${ENS.spread}°`;
   $("legbar").style.display = zones ? "none" : ""; $("legticks").style.display = zones ? "none" : "";
   if (zones) $("nodata").hidden = true;
   $("rangewrap").hidden = zones;                 // threat zones use fixed levels
@@ -1250,7 +1252,8 @@ function hover(x, y) {
     };
     const main = cell(pf), top = cell("env_" + pf);
     const nf = ENS && (ENS.models ? ENS.models.length : ENS.n);
-    if (top) lines.push(`Up to <b>${fmtVal(top, kind, top)}</b> in any of ${nf} weather forecasts`);
+    if (top) lines.push(`Up to <b>${fmtVal(top, kind, top)}</b> ` +
+      (ENS_DEP_ONLY ? `with any of ${ENS.deposition.length} deposition schemes` : `in any of ${nf} weather forecasts`));
     const cr = M.caseRange, af = M.explosionOpts && M.explosionOpts.airborneFraction;
     if (main && cr && af) {
       let lo = fmtVal(main * cr[0] / af, kind, 0);
@@ -1335,8 +1338,9 @@ $("zmetric").onchange = (e) => { S.zoneMetric = e.target.value; syncLocInputs();
 if (!FIELDS.snap) document.querySelector('#fieldseg button[data-v="snap"]').hidden = true;   // older data
 if (M.ensemble) {
   $("envwrap").hidden = false;
-  $("envlabel").textContent = (ENS.models ? `weather-model spread (${ENS.models.length} models)` : `wind uncertainty ±${ENS.spread}°`)
-    + (ENS.deposition ? ` and ${ENS.deposition.length} deposition schemes` : "");
+  $("envlabel").textContent = ENS_DEP_ONLY ? `${ENS.deposition.length} deposition schemes`
+    : (ENS.models ? `weather-model spread (${ENS.models.length} models)` : `wind uncertainty ±${ENS.spread}°`)
+      + (ENS.deposition ? ` and ${ENS.deposition.length} deposition schemes` : "");
   $("showEnv").onchange = (e) => { S.env = e.target.checked; render(); };
 }
 if (SYS === "us" && S.units === "ugm3") S.units = "ugft2";
