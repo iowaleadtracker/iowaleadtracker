@@ -1,5 +1,24 @@
 # Referee report
 
+> **Status: superseded. Kept as a record.** This report reviewed the first draft (commit
+> `1fb9452`). Its recommendation, "major revision," and its statement that the draft was
+> not publishable apply to that draft, not to the current paper. The second draft was
+> written to answer it. The table below says where each major concern was handled.
+>
+> | Concern | What the first draft did | Where the current paper handles it |
+> |---|---|---|
+> | M1 | Read the tracker's running 60-minute maximum (`m60`) as an hourly mean | Hourly air now uses the clock-hour mean (`conc`); section 3.6 and `scripts/lib.py` |
+> | M2 | Said "the forecast held up" from mismatched hours | Forecast and analysis are matched hour for hour (section 4, Tables 1 and 1b); section 1 says the analysis is a model product, not an independent check |
+> | M3 | Drew conclusions from a HYSPLIT run that held 9 a.m. weather fixed | Reference runs use NOAA ARL's archived HRRR for all eight hours with nothing held fixed (section 3.5) |
+> | M4 | Compared areas without overlap | Every zone comparison reports overlap (Table 5, section 3.6) |
+> | M5 | Measured the Army map from the wrong point with too small an error bar, on an earlier issue | Uses the Army's final maps, anchors at the plume's tip with the marker's center as the alternative, and states the pixel error (sections 3.7 and 7) |
+> | M6 | Called particle size the likeliest reason for the Army's larger zone without testing it | Tested in Tables 8 and 11 and presented as one explanation among several (sections 6.6 and 7) |
+> | M7 | Stated the event and its time without a source; said no station reported low cloud | The event is sourced to the Army and KCRG and 9:00 a.m. is stated as an assumption (section 2); the cloud statement is corrected |
+>
+> The minor concerns in section 4 were worked through in the same revision. They have not
+> been re-audited one by one against the current text. The paper lists the changes under
+> "What changed since the first draft."
+
 **Manuscript:** "Postmortem: the Nov. 25, 2026 detonation at the Iowa Army Ammunition Plant. How the Iowa Lead Tracker's forecast compares with HYSPLIT run on the weather that happened, and with the U.S. Army's own plume map" (first draft, `scenarios/iowa-aap-lead-azide/postmortem/README.md`, branch `claude/fervent-turing-led5z2`, commit `69a1b4a`)
 
 **Date of review:** Nov. 25, 2026
