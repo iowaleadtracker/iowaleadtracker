@@ -3,7 +3,8 @@
 **Iowa Lead Tracker (iowaleadtracker.com) · Preliminary analysis, pending peer review**
 
 As of Nov. 26, 2026, 3:15 a.m. CST (09:15 UTC), about 18 hours after the detonation.
-Updated at 3:25 a.m. with the magazines' coordinates and a video of the detonation.
+Updated at 3:25 a.m. with the magazines' coordinates and a video of the detonation, and
+at 4:05 a.m. with the Army's map on the aerial figure.
 
 > **Unofficial.** This is a screening analysis by a private citizen, not from the Army or
 > any government agency. Don't use it to decide if you're safe; follow official
@@ -127,9 +128,12 @@ highest was 0.002 µg/m³.
 ![The modeled cloud and EPA's sites over aerial imagery](figures/fig7_aerial.png)
 
 *Where the highest hourly mean would be 0.18 µg/m³ or more for the lowest published case
-(7% of the lead airborne). Orange is the tracker's forecast; blue and purple are the two
-reruns on analyzed weather. Diamonds are EPA's real-time monitors, squares its filter
-sampling sites, the star the modeled source. Imagery: Esri World Imagery.*
+(7% of the lead airborne). Orange is the tracker's forecast; the dashed blue and purple
+lines are the two reruns on analyzed weather. Green is the Army's final ground map (lead
+on the ground of 5 and 100 µg/ft² or more, its 26% case), placed by the county lines on
+that map; its first miles are hidden under the Army's plant marker and are not drawn.
+Diamonds are EPA's real-time monitors, squares its filter sampling sites, the star the
+modeled source. Imagery: Esri World Imagery.*
 
 ### What the models give at the monitors
 
@@ -146,7 +150,8 @@ Highest hourly mean for the lowest published case (7%), in µg/m³:
 | AS13 (filter) | 12.8 mi at 224° | 1.1 | 0.58 | 1.0 |
 
 - **On the forecast, all four real-time monitors are inside the cloud.** EPA placed them
-  where the forecasts said the lead would go.
+  where the forecasts said the lead would go. Placed by its county lines, the Army's
+  ground map has AS02, AS03 and AS04 along the middle of its plume.
 - **On analyzed weather the cloud runs along 215°, about 17° south of the monitors'
   line.** AS01 is on its northwest edge and the other three are outside it.
 - **The edge is sharp.** One model cell from AS01 the tracker has 6 µg/m³; with the

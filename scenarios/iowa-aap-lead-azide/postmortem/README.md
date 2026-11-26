@@ -267,7 +267,9 @@ and 148) and mark the cloud's path in air at T+0.5, T+2, T+3 and T+5 hours.
 (1.66 px per mile, so one pixel is 0.6 mile). The source is taken to be the upwind tip of
 the ground plume, at the southwest edge of the magenta marker that the legend labels
 "Iowa Army Ammunition Plant"; the marker's center is 3 miles away, and results from it
-are given as the alternative. North is assumed up. The traced zones come to 165 and
+are given as the alternative. North is assumed up. (Placing the map by its county lines,
+done later for Figure 7, puts that tip about 5 miles southwest of the magazines; see the
+note at the start of section 7.) The traced zones come to 165 and
 26 sq mi against the printed 186 and 29, so the tracing runs about 10% small; areas quoted
 are the printed ones. On the air map the cloud's path is one band, crossed by four lines
 labeled with times. We read each line's end points from an enlarged crop (good to about
@@ -620,9 +622,21 @@ nothing and HYSPLIT gives AS02 0.02 µg/m³.
 ![Figure 7](figures/fig7_aerial.png)
 
 *Figure 7. Where the highest hourly mean air would be 0.18 µg/m³ or more for the lowest
-case (7% airborne), over aerial imagery. The forecast cloud covers the real-time monitors
-(diamonds). On analyzed weather AS01 sits on the cloud's edge and the others are outside
-it; filter sites AS06, AS12 and AS13 are inside. Imagery: Esri World Imagery.*
+case (7% airborne), over aerial imagery. The forecast is solid; the two runs on analyzed
+weather are dashed. The forecast cloud covers the real-time monitors (diamonds). On
+analyzed weather AS01 sits on the cloud's edge and the others are outside it; filter
+sites AS06, AS12 and AS13 are inside. Green is the Army's final ground map, lead on the
+ground of 5 and 100 µg/ft² or more for its 26% case, a different quantity and case from
+the outlines; it shows where the Army's forecast ran. Its first miles are hidden under
+the plant marker on the Army's map and are not drawn. Imagery: Esri World Imagery.*
+
+The Army's map is placed here by its county lines, not by its plume. Its plume is drawn
+over a base map with county lines on it, and `scripts/georeference.py` fits public county
+boundaries to those lines. About two thirds of the boundary points land within a pixel
+and a half of a line, and the placement is good to about a pixel, 0.6 mile. Placed this
+way, AS02, AS03 and AS04 are within 0.2 mile of the Army's traced ground zone, along its
+center line, and AS01 is where the zone goes under the plant marker. EPA's real-time
+monitors sit along the middle of the Army's forecast plume.
 
 ### 6.3 How much they cover
 
@@ -1011,6 +1025,15 @@ position to within a few hundred meters and the wind direction to within a few d
 
 ## 7. The Army's map
 
+**A known problem with this section's distances.** This section measures the Army's map
+from the upwind tip of its plume, taken to be the source. Placing the map by its county
+lines (section 6.2) shows that the tip is only where the plume comes out from under the
+plant marker. The two magazines fall about 5 miles northeast of it, under the marker. So
+the Army distances in Tables 7 and 7b are about 5 miles short if the Army's plume starts
+at the magazines, and in Figures 1 and 4 the Army's shapes are drawn about that far out
+of place. Directions are little changed. The tables and figures here have not been redone
+on that basis yet.
+
 *Table 7. The Army's final "Mitigated 0.26" maps (a/o 7 a.m. Nov. 25) against the
 tracker's 26% case. Army distances are from the plume's tip; values from the marker's
 center are in parentheses. Tracker ground zones are after 8 hours.*
@@ -1213,6 +1236,7 @@ runs HYSPLIT for 8 hours (`blast-day/2026-11-25-9am-{zhang,emerson}.CONTROL` on 
 | `coarse.py` | one particle size at a time in the tracker and HYSPLIT: air at AS01 and lead on the ground; Table 11 |
 | `place_sources.py` | rewrites a HYSPLIT input to release from the sources in `data/source.json` |
 | `figure.py` | Figures 1–6 |
+| `georeference.py` | places the Army's final maps by their county lines (needs the network for the county boundaries); output in `data/army_georef.json` |
 | `aerial_map.py` | Figure 7, over aerial imagery (needs the network for the imagery) |
 
 `data/obs/` and `data/epa/` hold the observations as extracted on Nov. 25; EPA's and
@@ -1277,6 +1301,11 @@ nearest monitor was inside the modeled cloud in every run from the assumed point
 longer holds: on analyzed weather it is on the cloud's edge. Sections 5 and 7 are
 unchanged. The magazines' coordinates were added afterward (section 6.8), once video of
 the detonation had been published.
+
+Figure 7 then gained the Army's ground zones, placed by the county lines on the Army's
+map. That placement shows the plume tip that section 7 measures from is about 5 miles
+southwest of the magazines, so section 7's Army distances are about 5 miles short. A
+note at the start of section 7 says so; its tables and figures are not yet redone.
 
 ## References
 

@@ -76,7 +76,8 @@ AN_CACHE=$(ls "$PWD/$P"/data/met_hrrr_asof_*.json)
 # 6. Figures
 (cd "$P/scripts" && python3 figure.py "$FC" "$WORK/maps" "$WORK/src_arl_zhang" ../data/army ../data/epa \
   ../data/monitor_coverage.json "$cache" "$AN_CACHE" ../figures)
-(cd "$P/scripts" && python3 aerial_map.py "$FC" "$WORK/maps" "$WORK/src_arl_zhang" ../data/epa ../figures/fig7_aerial.png)
+(cd "$P/scripts" && python3 georeference.py ../data/army > ../data/army_georef.json)
+(cd "$P/scripts" && python3 aerial_map.py "$FC" "$WORK/maps" "$WORK/src_arl_zhang" ../data/army ../data/epa ../figures/fig7_aerial.png)
 # 7. Tables in README.md
 python3 "$P/scripts/tables.py"
 echo "done: $P/data, $P/figures, tables in $P/README.md"

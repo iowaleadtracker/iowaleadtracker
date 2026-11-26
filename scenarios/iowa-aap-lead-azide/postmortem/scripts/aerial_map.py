@@ -2,31 +2,40 @@
 
 Usage (from the repository root, ``HYSPLIT_DIR`` set; needs the network for the imagery)::
 
-    python aerial_map.py FORECAST_MAPS ANALYSIS_MAPS HYSPLIT_RUN EPA_DIR OUT.png
+    python aerial_map.py FORECAST_MAPS ANALYSIS_MAPS HYSPLIT_RUN ARMY_DIR EPA_DIR OUT.png
 
 Outlines where the highest hourly mean air at the ground is 0.18 µg/m³ or more for the
 lowest case (7% of the lead airborne), from the modeled source, for the tracker's forecast,
-the tracker on analyzed weather and HYSPLIT on NOAA ARL's archived weather. The imagery is
-Esri World Imagery, fetched as map tiles when the figure is drawn.
+the tracker on analyzed weather and HYSPLIT on NOAA ARL's archived weather. The two runs
+on analyzed weather are dashed. The zones traced from the Army's final ground map (lead
+on the ground of 5 and 100 µg/ft² or more, its 26% case) are shaded. They are placed by
+the county lines on the Army's map (``georeference.py``, saved in
+``data/army_georef.json``), which is good to about a pixel, 0.6 mile. The zones' first
+miles are hidden under the plant marker on the Army's map and are not drawn. The imagery
+is Esri World Imagery, fetched as map tiles when the figure is drawn.
 """
 
 from __future__ import annotations
 
 import csv
 import io
+import json
 import math
 import sys
 import urllib.request
 from pathlib import Path
 
+import army_map
 import figure
+import georeference
 import lib
 import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 from PIL import Image
-from scipy.ndimage import gaussian_filter
+from scipy.ndimage import binary_closing, binary_fill_holes, gaussian_filter, map_coordinates
 
 LOW = 0.07
 TILES = (
@@ -38,6 +47,26 @@ XACT = ("AS01", "AS02", "AS03", "AS04")
 NAMED = ("AS06", "AS12", "AS13")
 HALO = [pe.Stroke(linewidth=4.2, foreground="white"), pe.Normal()]
 BOXED = {"fc": "white", "ec": "none", "alpha": 0.9, "pad": 2}
+# The forecast is solid; the runs on weather analyzed afterward are dashed.
+STYLE = {"forecast": "solid", "analysis": (0, (5, 2.5)), "hysplit": (0, (5, 2.5))}
+ARMY_LABEL = "Army map (final): lead on the ground, 5 and 100 µg/ft² or more, 26% case"
+
+
+def army_zones(army_dir: Path) -> tuple[np.ndarray, np.ndarray, dict[str, np.ndarray]]:
+    """Trace the ground zones on the Army's final map; return them on a lon-lat grid."""
+    name = figure.ARMY_MAP
+    traced = army_map.masks(army_map.image(army_dir, "ground", name), army_map.MAPS[name]["tip"])
+    ref = json.loads((Path(__file__).resolve().parents[1] / "data/army_georef.json").read_text())
+    west, east, south, north = BOX
+    lon, lat = np.arange(west, east, 0.002), np.arange(south, north, 0.002)
+    x, y = georeference.to_pixel(ref["ground"], *np.meshgrid(lon, lat))
+    zones = {}
+    for key, bridge in (("dep5", 4), ("dep100", 1)):  # county names are printed over the zones
+        grown = np.pad(traced[key], bridge)
+        closed = binary_closing(grown, iterations=bridge)[bridge:-bridge, bridge:-bridge]
+        solid = binary_fill_holes(closed).astype(float)
+        zones[key] = map_coordinates(gaussian_filter(solid, 0.7), [y, x], order=1)
+    return lon, lat, zones
 
 
 def basemap() -> tuple[Image.Image, tuple[float, float, float, float]]:
@@ -72,7 +101,7 @@ def worst(f: lib.Fields) -> np.ndarray:
 
 def main(args: list[str]) -> None:
     """Draw the figure."""
-    fc_dir, an_dir, hy_run, epa, out = (Path(a) for a in args)
+    fc_dir, an_dir, hy_run, army_dir, epa, out = (Path(a) for a in args)
     runs = {
         "forecast": lib.tracker(fc_dir / "permit-0900.html"),
         "analysis": lib.tracker(an_dir / "an_permit.html"),
@@ -87,10 +116,17 @@ def main(args: list[str]) -> None:
     ax.set_xlim(west, east)
     ax.set_ylim(south, north)
     ax.set_aspect(1 / math.cos(math.radians(lib.LAT0)))
+    plon, plat, zones = army_zones(army_dir)
+    green = figure.C["army"]
+    ax.contourf(plon, plat, zones["dep5"], [0.5, np.inf], colors=[green], alpha=0.25)
+    ax.contourf(plon, plat, zones["dep100"], [0.5, np.inf], colors=[green], alpha=0.35)
+    for key in ("dep5", "dep100"):
+        edge = ax.contour(plon, plat, zones[key], [0.5], colors=[green])
+        edge.set(linewidths=2, path_effects=HALO)
     for key, f in runs.items():
         field = gaussian_filter(worst(f), 1.5) if key == "hysplit" else worst(f)
         cs = ax.contour(f.lon, f.lat, field * LOW, levels=[lib.ARMY_AIR], colors=[figure.C[key]])
-        cs.set(linewidths=2.4, path_effects=HALO)
+        cs.set(linewidths=2.4, linestyles=[STYLE[key]], path_effects=HALO)
     for r in rows:
         name, la, lo = r["station_id"].replace("-", ""), float(r["lat"]), float(r["lon"])
         if not (west < lo < east and south < la < north):
@@ -152,7 +188,11 @@ def main(args: list[str]) -> None:
     ax.set_yticks([])
     square = {"marker": "s", "ls": "", "mfc": "white", "mec": figure.INK}
     handles = [
-        *[Line2D([], [], color=figure.C[k], lw=2.4, label=figure.NAMES[k]) for k in runs],
+        *[
+            Line2D([], [], color=figure.C[k], lw=2.4, ls=STYLE[k], label=figure.NAMES[k])
+            for k in runs
+        ],
+        Patch(fc=green, ec=green, alpha=0.5, label=ARMY_LABEL),
         Line2D(
             [],
             [],
@@ -173,8 +213,8 @@ def main(args: list[str]) -> None:
     legend.set_zorder(30)
     figure.title(
         fig,
-        "Modeled highest hourly mean lead in air of 0.18 µg/m³ or more, lowest case (7%).\n"
-        "Model estimates, not measurements.",
+        "Modeled highest hourly mean lead in air of 0.18 µg/m³ or more, lowest case (7%), "
+        "and the ground zones on the Army's map.\nModel estimates, not measurements.",
     )
     fig.get_layout_engine().set(rect=(0, 0.075, 1, 0.9))
     fig.text(
