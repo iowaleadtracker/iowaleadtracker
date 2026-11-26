@@ -1110,7 +1110,44 @@
       "AS04": 0.0
      }
     }
-   ]
+   ],
+   "case_1pct": {
+    "share": 0.01,
+    "released_lb": 69.00975140777365,
+    "deposited_lb": 9.348325094150805,
+    "dep": {
+     "100": {
+      "area_mi2": 0.0,
+      "near_mi": 0.0,
+      "reach_mi": 0.0,
+      "far_bearing": 0.0
+     },
+     "40": {
+      "area_mi2": 0.0,
+      "near_mi": 0.0,
+      "reach_mi": 0.0,
+      "far_bearing": 0.0
+     },
+     "5": {
+      "area_mi2": 1.2775201035934864,
+      "near_mi": 0.06205145800922485,
+      "reach_mi": 3.5717890868724207,
+      "far_bearing": 224.49024262684568
+     }
+    },
+    "air_army_line": {
+     "area_mi2": 67.34355974657093,
+     "near_mi": 0.06205145800922485,
+     "reach_mi": 29.100175000801727,
+     "far_bearing": 230.8955045125615
+    },
+    "air_pac1": {
+     "area_mi2": 0.0,
+     "near_mi": 0.0,
+     "reach_mi": 0.0,
+     "far_bearing": 0.0
+    }
+   }
   },
   "tracker analysis": {
    "cloud_bearing_hour1": 214.77140319818932,
@@ -2218,7 +2255,44 @@
       "AS04": 0.048563328219610465
      }
     }
-   ]
+   ],
+   "case_1pct": {
+    "share": 0.01,
+    "released_lb": 69.00975140777365,
+    "deposited_lb": 9.878872156440906,
+    "dep": {
+     "100": {
+      "area_mi2": 0.0,
+      "near_mi": 0.0,
+      "reach_mi": 0.0,
+      "far_bearing": 0.0
+     },
+     "40": {
+      "area_mi2": 0.0,
+      "near_mi": 0.0,
+      "reach_mi": 0.0,
+      "far_bearing": 0.0
+     },
+     "5": {
+      "area_mi2": 1.679973221014396,
+      "near_mi": 0.06146847920813265,
+      "reach_mi": 3.2621328482450114,
+      "far_bearing": 208.96799516596852
+     }
+    },
+    "air_army_line": {
+     "area_mi2": 75.93478958985068,
+     "near_mi": 0.06146847920813265,
+     "reach_mi": 28.069844591980424,
+     "far_bearing": 216.6237918230267
+    },
+    "air_pac1": {
+     "area_mi2": 0.0,
+     "near_mi": 0.0,
+     "reach_mi": 0.0,
+     "far_bearing": 0.0
+    }
+   }
   },
   "hysplit analysis": {
    "cloud_bearing_hour1": 214.9193395364128,
@@ -3326,7 +3400,44 @@
       "AS04": 0.0
      }
     }
-   ]
+   ],
+   "case_1pct": {
+    "share": 0.01,
+    "released_lb": 69.0097146034445,
+    "deposited_lb": 8.874980712499779,
+    "dep": {
+     "100": {
+      "area_mi2": 0.0,
+      "near_mi": 0.0,
+      "reach_mi": 0.0,
+      "far_bearing": 0.0
+     },
+     "40": {
+      "area_mi2": 0.06502806733721975,
+      "near_mi": 0.2332261923205337,
+      "reach_mi": 0.4910973607445196,
+      "far_bearing": 212.14726908930234
+     },
+     "5": {
+      "area_mi2": 1.4309674003466692,
+      "near_mi": 0.1044692902538575,
+      "reach_mi": 3.1727885610318833,
+      "far_bearing": 211.82208715990703
+     }
+    },
+    "air_army_line": {
+     "area_mi2": 67.97657137518758,
+     "near_mi": 0.052402553593738396,
+     "reach_mi": 33.72899656099139,
+     "far_bearing": 219.80577161893467
+    },
+    "air_pac1": {
+     "area_mi2": 0.0,
+     "near_mi": 0.0,
+     "reach_mi": 0.0,
+     "far_bearing": 0.0
+    }
+   }
   }
  }
 }

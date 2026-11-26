@@ -13,7 +13,9 @@ For each model run (with all of the lead airborne; other releases scale in propo
 - a direction sweep: the modeled cloud is turned about the plant in 1° steps and the four
   real-time monitors are sampled again, giving the highest hourly mean any of them would
   read for each cloud direction. Turning the cloud rigidly ignores how its shape would
-  change with a different wind, so this is a sensitivity test, not a forecast.
+  change with a different wind, so this is a sensitivity test, not a forecast;
+- a 1% case: the ground zones, the lead on the ground and the reach of hourly air at or
+  above 0.18 µg/m³ if 1% of the lead became airborne (the 100% run scaled, which is exact).
 """
 
 from __future__ import annotations
@@ -30,6 +32,8 @@ import numpy as np
 
 LEVELS = {"army_line_0.18": 0.18e-9, "highest_reading_0.01": 0.01e-9}  # kg/m3
 SWEEP = range(-30, 31)
+SMALL_CASE = 0.01  # a release of 1% of the lead
+DEP_LEVELS = (100, 40, 5)  # µg/ft²
 XACT = ("AS01", "AS02", "AS03", "AS04")
 
 
@@ -108,7 +112,23 @@ def main(args: list[str]) -> None:
                     "by_monitor": reads,
                 }
             )
-        out["runs"][name] = {"cloud_bearing_hour1": axis, "sites": rows, "sweep": sweep}
+        last = max(f.dep)
+        small = {
+            "share": SMALL_CASE,
+            "released_lb": f.released_kg * SMALL_CASE / lib.KG_PER_LB,
+            "deposited_lb": lib.deposited_lb(f, last) * SMALL_CASE,
+            "dep": {
+                str(u): lib.zone(f, f.dep[last] * SMALL_CASE, u * lib.UG_FT2) for u in DEP_LEVELS
+            },
+            "air_army_line": lib.zone(f, field * SMALL_CASE, lib.ARMY_AIR),
+            "air_pac1": lib.zone(f, field * SMALL_CASE, lib.PAC1),
+        }
+        out["runs"][name] = {
+            "cloud_bearing_hour1": axis,
+            "sites": rows,
+            "sweep": sweep,
+            "case_1pct": small,
+        }
     json.dump(out, sys.stdout, indent=1)
     sys.stdout.write("\n")
 

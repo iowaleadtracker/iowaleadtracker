@@ -29,6 +29,7 @@ ARMY_LINE = 0.18  # µg/m³
 NOISE = 0.01  # µg/m³, the highest reading any real-time monitor posted
 # Aerodynamic diameter: the size of a water-density sphere that settles at the same speed.
 WATER = 1000.0  # kg/m3
+ONE_PCT_FILTERS = ("AS06", "AS12", "AS13", "AS14", "AS18")  # filter sites on the analyzed path
 SOIL_MAX = 3000  # kg/m3; particle densities above this are the lead compound, below it soil
 
 
@@ -342,6 +343,50 @@ def windows(c: dict[str, Any]) -> str:
     )
 
 
+def one_percent(c: dict[str, Any], d: dict[str, Any]) -> str:
+    """Table 12: a release of 1% of the lead, at EPA's sites and on the ground."""
+    runs = {
+        "Tracker, forecast": "tracker forecast",
+        "Tracker, analyzed weather": "tracker analysis",
+        "HYSPLIT, ARL archive": "hysplit analysis",
+    }
+    by = {k: {s["site"]: s for s in c["runs"][v]["sites"]} for k, v in runs.items()}
+    small = {k: c["runs"][v]["case_1pct"] for k, v in runs.items()}
+    share = next(iter(small.values()))["share"]
+    rows = []
+    for n in (*d["epa_monitors"], *ONE_PCT_FILTERS):
+        s = by["Tracker, analyzed weather"][n]
+        seen = d["epa_monitors"].get(n)
+        rows.append(
+            [
+                f"Air at {n}, {s['miles']:.1f} mi at {s['bearing']:.0f}°",
+                *[num(b[n]["air_100pct_ugm3"] * share) for b in by.values()],
+                num(seen["max_after_ugm3"]) if seen else "filter, no result posted",
+            ]
+        )
+    rows += [
+        [
+            f"Ground ≥ {u} µg/ft²",
+            *[
+                zone(r["dep"][str(u)]) if r["dep"][str(u)]["area_mi2"] else "none"
+                for r in small.values()
+            ],
+            "",
+        ]
+        for u in (100, 40, 5)
+    ]
+    rows.append(
+        ["Lead on the ground", *[f"{num(r['deposited_lb'])} lb" for r in small.values()], ""]
+    )
+    reach = []
+    for r in small.values():
+        z = r["air_army_line"]
+        reach.append(f"{num(z['area_mi2'])} sq mi / {num(z['reach_mi'])} mi")
+    rows.append(["Hourly air ≥ 0.18 µg/m³, area / farthest", *reach, ""])
+    head = ["", *runs, "Highest EPA reading after the detonation"]
+    return table(head, rows)
+
+
 def coarse(c: dict[str, Any]) -> str:
     """Table 11: one particle size at a time, air at AS01 and the lead left on the ground."""
     hy = {(r["diameter_um"], r["density_kg_m3"]): r for r in c["hysplit"]}
@@ -410,6 +455,7 @@ def main() -> None:
         "sites": sites(cov),
         "windows": windows(cov),
         "coarse": coarse(sizes),
+        "one_percent": one_percent(cov, d),
     }
     path = HERE / "README.md"
     text = path.read_text()

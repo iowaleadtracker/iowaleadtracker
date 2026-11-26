@@ -9,7 +9,7 @@ analyzed weather, NOAA's HYSPLIT and the U.S. Army's map against EPA's real-time
 > are not official NOAA products. The model maps below are estimates for assumed releases.
 > They are not measurements, and nothing here says how much lead reached any place.
 
-**Status.** Preliminary analysis, pending peer review. Second draft, updated Nov. 25, 2026, about 10:15 p.m. CST, thirteen hours after the
+**Status.** Preliminary analysis, pending peer review. Second draft, updated Nov. 26, 2026, about midnight CST, fifteen hours after the
 detonation. It replaces a first draft that an independent review found wrong in
 several places ([what changed](#what-changed-since-the-first-draft)). The model comparison
 now covers all eight modeled hours (9 a.m. to 5 p.m.) on NOAA's archived weather; the
@@ -798,6 +798,51 @@ with a floor, so its smallest values are rough; the HYSPLIT check runs two hours
 fixed deposition speeds; and the inlet is taken as a clean cut at 10 µm when a real one
 passes a falling share of particles on either side of it.
 
+### 6.7 A 1% release
+
+The lowest case the tracker published has 7% of the lead airborne. Table 12 scales the
+same runs to 1% (69 lb as fine dust), a release small enough that the three farther
+monitors matter less and the nearest one carries the answer.
+
+*Table 12. If 1% of the lead became airborne as fine dust: the highest hourly mean air
+(µg/m³) at EPA's four real-time monitors and at the five filter sites on the analyzed
+path, with the highest reading each monitor posted, and the ground zones (area /
+farthest distance / bearing of the far end) and lead on the ground after 8 hours.*
+
+<!-- table:one_percent -->
+|  | Tracker, forecast | Tracker, analyzed weather | HYSPLIT, ARL archive | Highest EPA reading after the detonation |
+|---|---|---|---|---|
+| Air at AS01, 4.5 mi at 222° | 1.1 | 0.96 | 0.78 | 0.0021 |
+| Air at AS02, 12.5 mi at 230° | 0.72 | 0 | 0.0237 | 0.0043 |
+| Air at AS03, 19.9 mi at 232° | 0.38 | 0 | 0 | 0.0043 |
+| Air at AS04, 28.1 mi at 233° | 0.17 | 0 | 0 | 0.0102 |
+| Air at AS06, 6.8 mi at 211° | 0 | 1.6 | 0.76 | filter, no result posted |
+| Air at AS12, 9.8 mi at 211° | 0 | 0.96 | 0.40 | filter, no result posted |
+| Air at AS13, 13.8 mi at 221° | 0.0122 | 0.36 | 0.14 | filter, no result posted |
+| Air at AS14, 21.4 mi at 220° | 0.0112 | 0.20 | 0.15 | filter, no result posted |
+| Air at AS18, 25.6 mi at 218° | 0.0008 | 0.26 | 0.16 | filter, no result posted |
+| Ground ≥ 100 µg/ft² | none | none | none |  |
+| Ground ≥ 40 µg/ft² | none | none | 0.065 sq mi / 0.49 mi / 212° |  |
+| Ground ≥ 5 µg/ft² | 1.3 sq mi / 3.6 mi / 224° | 1.7 sq mi / 3.3 mi / 209° | 1.4 sq mi / 3.2 mi / 212° |  |
+| Lead on the ground | 9.3 lb | 9.9 lb | 8.9 lb |  |
+| Hourly air ≥ 0.18 µg/m³, area / farthest | 67 sq mi / 29 mi | 76 sq mi / 28 mi | 68 sq mi / 34 mi |  |
+<!-- /table:one_percent -->
+
+At 1% the nearest monitor would still read 0.8 to 1.1 µg/m³ as an hourly mean. That is
+roughly 400 to 500 times its highest reading and about 80 to 100 times the highest
+reading at any monitor. On the forecast path the other three read 0.17 to 0.72 µg/m³. On
+analyzed weather they read nothing, or 0.02 µg/m³ at AS02 in HYSPLIT, so at 1% the answer
+rests on AS01 alone, with the limits in sections 6.4 and 6.6: fine dust, a cloud at the
+ground, and an inlet that passes it.
+
+The five filter sites on the analyzed path would have 0.14 to 1.6 µg/m³ for an hour.
+Their lab results are the direct test of a release this size.
+
+On the ground a 1% release leaves no 100 µg/ft² zone. The 5 µg/ft² zone covers 1.3 to
+1.7 sq mi and ends within 4 miles of the plant, and 9 to 10 lb of lead lands in eight
+hours. Hourly air of 0.18 µg/m³ or more reaches 28 to 34 miles. No hourly value reaches
+PAC-1 (32 µg/m³) in any run.
+
 ## 7. The Army's map
 
 *Table 7. The Army's final "Mitigated 0.26" maps (a/o 7 a.m. Nov. 25) against the
@@ -978,25 +1023,27 @@ runs HYSPLIT for 8 hours (`blast-day/2026-11-25-9am-{zhang,emerson}.CONTROL` on 
 `2026-11-25-9am-coarse-early2h.CONTROL` for the coarse sizes), and writes
 `data/compare.json`, `data/army_map.json`, `data/forecast_vs_analysis.json`,
 `data/station_vs_hrrr.json` and the figures. `scripts/tables.py` then rewrites Tables 1 and
-4–11 in this file from those data, so every number in them is in those files.
+4–12 in this file from those data, so every number in them is in those files.
 
 | Script | Does |
 |---|---|
 | `lib.py` | readers for the tracker's maps and HYSPLIT's output; zones, centers, overlap |
 | `compare.py` | the numbers for Tables 4–6 and 8 |
 | `snapshots.py` | the cloud at the Army's time marks from the tracker's time steps and HYSPLIT's 30-minute snapshots; Table 7b |
-| `tables.py` | writes Tables 1 and 4–11 into this file from the data |
+| `tables.py` | writes Tables 1 and 4–12 into this file from the data |
 | `army_map.py` | traces and measures both issues of the Army's maps; Table 7 |
 | `forecast_vs_analysis.py` | Table 1 |
 | `station_vs_hrrr.py` | Table 2 and the 21-station comparison |
 | `vad_decode.py`, `airnow_extract.py`, `epa_fetch.py` | the radar, AirNow and EPA downloads |
 | `run_tracker.sh` | the tracker on analyzed weather and Table 8's runs |
-| `monitor_coverage.py` | EPA sites in the modeled cloud and the direction sweep; Tables 9–10 |
+| `monitor_coverage.py` | EPA sites in the modeled cloud, the direction sweep and the 1% case; Tables 9, 10 and 12 |
 | `coarse.py` | one particle size at a time in the tracker and HYSPLIT: air at AS01 and lead on the ground; Table 11 |
 | `figure.py` | Figures 1–6 |
 
 `data/obs/` and `data/epa/` hold the observations as extracted on Nov. 25; EPA's and
-AirNow's files change as new data post. `data/draft1/` holds the first draft's numbers.
+AirNow's files change as new data post. [`data/sources/`](data/sources/README.md) holds
+copies of the documents quoted for the monitors' specifications and the precedents in
+section 6.6. `data/draft1/` holds the first draft's numbers.
 
 ## What changed since the first draft
 
