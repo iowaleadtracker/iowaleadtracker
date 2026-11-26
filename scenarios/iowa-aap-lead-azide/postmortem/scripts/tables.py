@@ -6,9 +6,9 @@ Usage (from the repository root)::
 
 Each generated table sits between ``<!-- table:NAME -->`` and ``<!-- /table:NAME -->``
 in ``README.md``. The numbers come from ``data/compare.json``, ``data/army_map.json`` and
-``data/forecast_vs_analysis.json`` and ``data/monitor_coverage.json`` (written by
-``reproduce.sh``), so the tables can't
-drift from the data. Captions and prose are written by hand.
+``data/forecast_vs_analysis.json``, ``data/monitor_coverage.json``, ``data/snapshots.json``
+and ``data/coarse.json`` (written by ``reproduce.sh``), so the tables can't drift from the
+data. Captions and prose are written by hand.
 """
 
 from __future__ import annotations
@@ -27,6 +27,7 @@ NOON = 12
 LOW = 0.07  # the lowest release case
 ARMY_LINE = 0.18  # µg/m³
 NOISE = 0.01  # µg/m³, the highest reading any real-time monitor posted
+SOIL_MAX = 3000  # kg/m3; particle densities above this are the lead compound, below it soil
 
 
 def num(x: float) -> str:
@@ -339,6 +340,52 @@ def windows(c: dict[str, Any]) -> str:
     )
 
 
+def coarse(c: dict[str, Any]) -> str:
+    """Table 11: one particle size at a time, air at AS01 and the lead left on the ground."""
+    hy = {(r["diameter_um"], r["density_kg_m3"]): r for r in c["hysplit"]}
+
+    def pct(x: float) -> str:
+        return f"{min(x, 1) * HUNDRED:.0f}%"
+
+    def need(air_per_pct: float) -> str:
+        share = NOISE / air_per_pct if air_per_pct else HUNDRED
+        if share >= HUNDRED:
+            return "all of it or more"
+        return f"{share:.3f}%" if share < 0.1 else f"{num(share)}%"
+
+    def small(x: float) -> str:
+        return num(x) if num(x) != "0" else "under 0.0001"
+
+    def both(r: dict[str, Any], h: dict[str, Any] | None, key: str) -> str:
+        return pct(r[key]) + (f" / {pct(h[key])}" if h else "")
+
+    rows = []
+    for r in c["tracker"]:
+        h = hy.get((r["diameter_um"], r["density_kg_m3"]))
+        air = r["air_100pct_ugm3"]["AS01"] / HUNDRED  # per 1% of the lead
+        air_h = h["air_100pct_ugm3"]["AS01"] / HUNDRED if h else None
+        kind = "lead" if r["density_kg_m3"] > SOIL_MAX else "soil"
+        rows.append(
+            [
+                f"{r['diameter_um']:g} µm, {kind} density",
+                f"{num(r['settling_cm_s'])} cm/s",
+                small(air) + (f" / {small(air_h)}" if air_h is not None else ""),
+                need(air) + (f" / {need(air_h)}" if air_h is not None else ""),
+                both(r, h, "share_on_ground_within_as01_distance"),
+                both(r, h, "share_on_ground_within_15mi"),
+            ]
+        )
+    head = [
+        "Particle size",
+        "Settling speed",
+        "Air at AS01 per 1% of the lead (µg/m³)",
+        "Share of the lead for AS01 to read 0.01 µg/m³",
+        "On the ground within 4.5 mi",
+        "On the ground within 15 mi",
+    ]
+    return table(head, rows)
+
+
 def main() -> None:
     """Rewrite every marked table in README.md."""
     d = json.loads((HERE / "data/compare.json").read_text())
@@ -346,6 +393,7 @@ def main() -> None:
     fva = json.loads((HERE / "data/forecast_vs_analysis.json").read_text())
     cov = json.loads((HERE / "data/monitor_coverage.json").read_text())
     snaps = json.loads((HERE / "data/snapshots.json").read_text())
+    sizes = json.loads((HERE / "data/coarse.json").read_text())
     blocks = {
         "wind": wind(fva, [h for h in sorted(fva, key=int) if int(h) <= NOON + 6]),
         "wind_pm": wind(fva, [h for h in sorted(fva, key=int) if int(h) > NOON + 6]),
@@ -357,6 +405,7 @@ def main() -> None:
         "sensitivity": sensitivity(d, a),
         "sites": sites(cov),
         "windows": windows(cov),
+        "coarse": coarse(sizes),
     }
     path = HERE / "README.md"
     text = path.read_text()

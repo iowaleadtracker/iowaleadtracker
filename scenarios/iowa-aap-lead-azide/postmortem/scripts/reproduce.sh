@@ -46,6 +46,7 @@ hysplit() {  # hysplit RUN_NAME CONTROL_NAME WEATHER_FILE...
 hysplit run_arl_zhang 2026-11-25-9am-zhang "${ARCHIVE[@]}" &
 hysplit run_arl_emerson 2026-11-25-9am-emerson "${ARCHIVE[@]}" &
 hysplit run_analyses_zhang 2026-11-25-9am-zhang-analyses "$ARL" &
+hysplit run_arl_coarse 2026-11-25-9am-coarse-early2h "${ARCHIVE[0]}" &  # coarse sizes, 2 hours
 wait
 
 # 4. EPA's public layers
@@ -60,6 +61,7 @@ python3 "$P/scripts/forecast_vs_analysis.py" "$cache" "$WORK" "$ARL" > "$P/data/
 python3 "$P/scripts/station_vs_hrrr.py" "$WORK" "$ARL" "$P/data/obs" > "$P/data/station_vs_hrrr.json"
 (cd "$P/scripts" && python3 monitor_coverage.py "$FC" "$WORK/maps" "$WORK/run_arl_zhang" ../data/epa) > "$P/data/monitor_coverage.json"
 AN_CACHE=$(ls "$PWD/$P"/data/met_hrrr_asof_*.json)
+(cd "$P/scripts" && python3 coarse.py "$AN_CACHE" ../data/epa "$WORK/run_arl_coarse") > "$P/data/coarse.json"
 (cd "$P/scripts" && python3 snapshots.py "$cache" "$AN_CACHE" "$WORK/run_arl_zhang" "$WORK/run_analyses_zhang") > "$P/data/snapshots.json"
 
 # 6. Figures

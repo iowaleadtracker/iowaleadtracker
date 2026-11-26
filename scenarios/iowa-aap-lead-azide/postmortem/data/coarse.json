@@ -1,0 +1,336 @@
+{
+ "sites_miles_bearing": {
+  "AS01": [
+   4.485511225254946,
+   221.92956588762283
+  ],
+  "AS06": [
+   6.785327837268274,
+   211.09082253377574
+  ],
+  "AS12": [
+   9.832329488347408,
+   211.03216290091518
+  ]
+ },
+ "tracker": [
+  {
+   "diameter_um": 0.3,
+   "density_kg_m3": 9500.0,
+   "settling_cm_s": 0.004082714506729727,
+   "hours": 8,
+   "air_100pct_ugm3": {
+    "AS01": 82.61916438090216,
+    "AS06": 158.68846714780673,
+    "AS12": 97.26283852467773
+   },
+   "ring_max_at_as01_distance_ugm3": 258.9069986820434,
+   "share_on_ground_within_as01_distance": 0.005884088963266837,
+   "share_on_ground_within_15mi": 0.014947147622678089,
+   "share_on_ground": 0.06672147489419733,
+   "ground_zones_26pct": {
+    "100": {
+     "area_mi2": 0.16650508462159633,
+     "near_mi": 0.5082303094161126,
+     "reach_mi": 0.5082303094161126,
+     "far_bearing": 219.46399985105194
+    },
+    "5": {
+     "area_mi2": 45.4558881016958,
+     "near_mi": 0.08645745307925887,
+     "reach_mi": 22.95050483839311,
+     "far_bearing": 216.92732345040014
+    }
+   }
+  },
+  {
+   "diameter_um": 1.0,
+   "density_kg_m3": 9500.0,
+   "settling_cm_s": 0.03349552754346163,
+   "hours": 8,
+   "air_100pct_ugm3": {
+    "AS01": 86.88118584587879,
+    "AS06": 153.80031893347186,
+    "AS12": 94.26681002304308
+   },
+   "ring_max_at_as01_distance_ugm3": 250.93177649965486,
+   "share_on_ground_within_as01_distance": 0.004147894641306445,
+   "share_on_ground_within_15mi": 0.01019549004416621,
+   "share_on_ground": 0.04372193992150317,
+   "ground_zones_26pct": {
+    "100": {
+     "area_mi2": 0.0,
+     "near_mi": 0.0,
+     "reach_mi": 0.0,
+     "far_bearing": 0.0
+    },
+    "5": {
+     "area_mi2": 21.34243814591118,
+     "near_mi": 0.07799022353901296,
+     "reach_mi": 15.80083891670653,
+     "far_bearing": 214.31222739083591
+    }
+   }
+  },
+  {
+   "diameter_um": 3.0,
+   "density_kg_m3": 9500.0,
+   "settling_cm_s": 0.2721149830940583,
+   "hours": 8,
+   "air_100pct_ugm3": {
+    "AS01": 91.75438765555602,
+    "AS06": 149.70119474203437,
+    "AS12": 47.77077359580618
+   },
+   "ring_max_at_as01_distance_ugm3": 244.24388064493266,
+   "share_on_ground_within_as01_distance": 0.014155737621464066,
+   "share_on_ground_within_15mi": 0.033339246370176726,
+   "share_on_ground": 0.1295243116080129,
+   "ground_zones_26pct": {
+    "100": {
+     "area_mi2": 1.3422164274448833,
+     "near_mi": 0.044709370237492156,
+     "reach_mi": 3.268421188570478,
+     "far_bearing": 209.23711780224514
+    },
+    "5": {
+     "area_mi2": 91.94182527997451,
+     "near_mi": 0.044709370237492156,
+     "reach_mi": 33.80360333731448,
+     "far_bearing": 218.07811191645726
+    }
+   }
+  },
+  {
+   "diameter_um": 10.0,
+   "density_kg_m3": 9500.0,
+   "settling_cm_s": 2.9093980099447547,
+   "hours": 8,
+   "air_100pct_ugm3": {
+    "AS01": 89.0186285669295,
+    "AS06": 123.37102774902574,
+    "AS12": 75.61618412635146
+   },
+   "ring_max_at_as01_distance_ugm3": 201.28509080037972,
+   "share_on_ground_within_as01_distance": 0.15417797509198214,
+   "share_on_ground_within_15mi": 0.3260118868165119,
+   "share_on_ground": 0.7956652781089179,
+   "ground_zones_26pct": {
+    "100": {
+     "area_mi2": 30.74350994456344,
+     "near_mi": 0.06146847920813265,
+     "reach_mi": 18.15430954434412,
+     "far_bearing": 215.7131462289492
+    },
+    "5": {
+     "area_mi2": 622.4300783858337,
+     "near_mi": 0.06146847920813265,
+     "reach_mi": 79.45890194433774,
+     "far_bearing": 219.32544297727685
+    }
+   }
+  },
+  {
+   "diameter_um": 10.0,
+   "density_kg_m3": 2650.0,
+   "settling_cm_s": 0.8115689185635369,
+   "hours": 8,
+   "air_100pct_ugm3": {
+    "AS01": 89.2278513715243,
+    "AS06": 145.57904309410992,
+    "AS12": 96.81296165690829
+   },
+   "ring_max_at_as01_distance_ugm3": 237.51841451334357,
+   "share_on_ground_within_as01_distance": 0.04097591614614283,
+   "share_on_ground_within_15mi": 0.09505093684465146,
+   "share_on_ground": 0.33736909002141124,
+   "ground_zones_26pct": {
+    "100": {
+     "area_mi2": 5.540226996669375,
+     "near_mi": 0.06443512745119061,
+     "reach_mi": 8.597978583847949,
+     "far_bearing": 211.12613522323255
+    },
+    "5": {
+     "area_mi2": 301.01900015236936,
+     "near_mi": 0.06443512745119061,
+     "reach_mi": 59.97247375840057,
+     "far_bearing": 218.86667300004083
+    }
+   }
+  },
+  {
+   "diameter_um": 30.0,
+   "density_kg_m3": 2650.0,
+   "settling_cm_s": 6.91279887946406,
+   "hours": 8,
+   "air_100pct_ugm3": {
+    "AS01": 48.063786537997686,
+    "AS06": 117.91844995373465,
+    "AS12": 48.063786537997686
+   },
+   "ring_max_at_as01_distance_ugm3": 192.38897769630478,
+   "share_on_ground_within_as01_distance": 0.34759538272188273,
+   "share_on_ground_within_15mi": 0.6171329471728328,
+   "share_on_ground": 0.9746270646133577,
+   "ground_zones_26pct": {
+    "100": {
+     "area_mi2": 35.757670290787715,
+     "near_mi": 0.19886251569875546,
+     "reach_mi": 19.543822192564782,
+     "far_bearing": 215.2301246019033
+    },
+    "5": {
+     "area_mi2": 428.7562907167691,
+     "near_mi": 0.19886251569875546,
+     "reach_mi": 62.50931066051038,
+     "far_bearing": 218.761177567192
+    }
+   }
+  },
+  {
+   "diameter_um": 100.0,
+   "density_kg_m3": 2650.0,
+   "settling_cm_s": 57.884069591063046,
+   "hours": 8,
+   "air_100pct_ugm3": {
+    "AS01": 0.007500786532354388,
+    "AS06": 0.7233671366320744,
+    "AS12": 0.1107638759267245
+   },
+   "ring_max_at_as01_distance_ugm3": 4.01285310867579,
+   "share_on_ground_within_as01_distance": 0.994151352013697,
+   "share_on_ground_within_15mi": 1.0021144579261492,
+   "share_on_ground": 1.0022437358668916,
+   "ground_zones_26pct": {
+    "100": {
+     "area_mi2": 4.148734923892167,
+     "near_mi": 0.06208379764940175,
+     "reach_mi": 5.44651527864654,
+     "far_bearing": 209.19401843345761
+    },
+    "5": {
+     "area_mi2": 11.659375734386607,
+     "near_mi": 0.06208379764940175,
+     "reach_mi": 10.032631747335703,
+     "far_bearing": 212.09879929310782
+    }
+   }
+  },
+  {
+   "diameter_um": 30.0,
+   "density_kg_m3": 9500.0,
+   "settling_cm_s": 23.63107697451544,
+   "hours": 8,
+   "air_100pct_ugm3": {
+    "AS01": 1.3498483590781087,
+    "AS06": 27.625401902019128,
+    "AS12": 8.124797433071837
+   },
+   "ring_max_at_as01_distance_ugm3": 73.53692327231717,
+   "share_on_ground_within_as01_distance": 0.816880038410854,
+   "share_on_ground_within_15mi": 0.9681713320169468,
+   "share_on_ground": 1.0011331261869985,
+   "ground_zones_26pct": {
+    "100": {
+     "area_mi2": 15.275471460111618,
+     "near_mi": 0.03799827149429301,
+     "reach_mi": 12.129338427926218,
+     "far_bearing": 212.51925014338497
+    },
+    "5": {
+     "area_mi2": 79.5667414515704,
+     "near_mi": 0.03799827149429301,
+     "reach_mi": 26.686649862301106,
+     "far_bearing": 215.5979946617987
+    }
+   }
+  }
+ ],
+ "hysplit": [
+  {
+   "diameter_um": 10.0,
+   "density_kg_m3": 2650.0,
+   "hours": 2,
+   "air_100pct_ugm3": {
+    "AS01": 99.67,
+    "AS06": 90.77,
+    "AS12": 46.089999999999996
+   },
+   "ring_max_at_as01_distance_ugm3": 190.3,
+   "share_on_ground_within_as01_distance": 0.04395886055246855,
+   "share_on_ground_within_15mi": 0.0965341864054297,
+   "share_on_ground": 0.13504879385777643,
+   "ground_zones_26pct": {
+    "100": {
+     "area_mi2": 4.163846923412944,
+     "near_mi": 0.10446929025312042,
+     "reach_mi": 5.5152779229482105,
+     "far_bearing": 210.15928052047892
+    },
+    "5": {
+     "area_mi2": 127.37980211228904,
+     "near_mi": 0.05240255359449283,
+     "reach_mi": 28.955059222890544,
+     "far_bearing": 220.0019912686462
+    }
+   }
+  },
+  {
+   "diameter_um": 30.0,
+   "density_kg_m3": 2650.0,
+   "hours": 2,
+   "air_100pct_ugm3": {
+    "AS01": 87.75,
+    "AS06": 70.05,
+    "AS12": 37.1
+   },
+   "ring_max_at_as01_distance_ugm3": 192.2,
+   "share_on_ground_within_as01_distance": 0.34686023697973456,
+   "share_on_ground_within_15mi": 0.6288765988707871,
+   "share_on_ground": 0.7605615875685167,
+   "ground_zones_26pct": {
+    "100": {
+     "area_mi2": 42.9897952967578,
+     "near_mi": 0.05240255359449283,
+     "reach_mi": 18.56485870961515,
+     "far_bearing": 214.28042342511407
+    },
+    "5": {
+     "area_mi2": 171.06718903093454,
+     "near_mi": 0.05240255359449283,
+     "reach_mi": 30.974310821675793,
+     "far_bearing": 220.27697132693618
+    }
+   }
+  },
+  {
+   "diameter_um": 100.0,
+   "density_kg_m3": 2650.0,
+   "hours": 2,
+   "air_100pct_ugm3": {
+    "AS01": 3.445,
+    "AS06": 0.4024,
+    "AS12": 0.035629999999999995
+   },
+   "ring_max_at_as01_distance_ugm3": 5.9719999999999995,
+   "share_on_ground_within_as01_distance": 0.9943899398325531,
+   "share_on_ground_within_15mi": 0.999829036502122,
+   "share_on_ground": 0.9998470608533924,
+   "ground_zones_26pct": {
+    "100": {
+     "area_mi2": 4.2934901400006495,
+     "near_mi": 0.05240255359449283,
+     "reach_mi": 4.648427553010208,
+     "far_bearing": 216.5907627780928
+    },
+    "5": {
+     "area_mi2": 13.893799903169787,
+     "near_mi": 0.05240255359449283,
+     "reach_mi": 10.366918249225945,
+     "far_bearing": 216.8799050571411
+    }
+   }
+  }
+ ]
+}

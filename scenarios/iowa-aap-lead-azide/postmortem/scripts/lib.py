@@ -91,11 +91,12 @@ def tracker(path: Path, scale: float = 1.0) -> Fields:
     )
 
 
-def hysplit(run: Path, scale: float = 1.0, level: str = "00010") -> Fields:
+def hysplit(run: Path, scale: float = 1.0, level: str = "00010", species: str = "P0") -> Fields:
     """Read a HYSPLIT run directory (CONTROL and cdump). Air is the 0-10 m layer.
 
     Dumps the cdump with HYSPLIT's ``con2asc`` (needs ``HYSPLIT_DIR``). The CONTROL
-    releases 100% of the lead; ``scale`` 0.26 gives the Army's case.
+    releases 100% of the lead; ``scale`` 0.26 gives the Army's case. ``species`` keeps
+    the pollutants whose names start with it (all of them by default).
     """
     lines = (run / "CONTROL").read_text().split("\n")
     i = next(k for k, line in enumerate(lines) if line.strip() == "cdump")
@@ -110,7 +111,9 @@ def hysplit(run: Path, scale: float = 1.0, level: str = "00010") -> Fields:
     k0 = 6 + n_src + 2 * n_met
     n_pol = int(lines[k0])
     released = sum(
-        float(lines[k0 + 2 + 4 * p]) * float(lines[k0 + 3 + 4 * p]) for p in range(n_pol)
+        float(lines[k0 + 2 + 4 * p]) * float(lines[k0 + 3 + 4 * p])
+        for p in range(n_pol)
+        if lines[k0 + 1 + 4 * p].strip().startswith(species)
     )
     for f in run.glob("cdump_*"):
         f.unlink()
@@ -125,8 +128,8 @@ def hysplit(run: Path, scale: float = 1.0, level: str = "00010") -> Fields:
         v = np.array([[float(x) for x in row.split(",")] for row in rows[1:]]).reshape(
             -1, len(head)
         )
-        ia = [k for k, c in enumerate(head) if c.startswith("P0") and c.endswith(level)]
-        i0 = [k for k, c in enumerate(head) if c.startswith("P0") and c.endswith("00000")]
+        ia = [k for k, c in enumerate(head) if c.startswith(species) and c.endswith(level)]
+        i0 = [k for k, c in enumerate(head) if c.startswith(species) and c.endswith("00000")]
         j = np.rint((v[:, 2] - lat[0]) / dx).astype(int)
         k = np.rint((v[:, 3] - lon[0]) / dx).astype(int)
         a = np.zeros((nlat, nlon))

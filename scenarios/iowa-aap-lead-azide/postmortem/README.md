@@ -9,8 +9,8 @@ analyzed weather, NOAA's HYSPLIT and the U.S. Army's map against EPA's real-time
 > are not official NOAA products. The model maps below are estimates for assumed releases.
 > They are not measurements, and nothing here says how much lead reached any place.
 
-**Status.** Preliminary analysis, pending peer review. Second draft, updated Nov. 25, 2026, about 7:30 p.m. CST, ten and a half
-hours after the detonation. It replaces a first draft that an independent review found wrong in
+**Status.** Preliminary analysis, pending peer review. Second draft, updated Nov. 25, 2026, about 9 p.m. CST, twelve hours after the
+detonation. It replaces a first draft that an independent review found wrong in
 several places ([what changed](#what-changed-since-the-first-draft)). The model comparison
 now covers all eight modeled hours (9 a.m. to 5 p.m.) on NOAA's archived weather; the
 Army's results and all lab sampling are still to come. It was drafted with an AI coding assistant, and the
@@ -60,6 +60,11 @@ question.
    221° (sites AS06, AS12, AS13, AS14 and AS18) are on that path in both models; their
    lab results, with soil and surface samples, are what can settle it. None were public
    by 7 p.m.
+4. **Four explanations fit the near-zero reading at the nearest monitor** (section 6.6):
+   little fine lead got out; the cloud passed overhead; a small, shallow cloud passed
+   just south; or the lead came out coarse and fell first. The last was calculated. It
+   works only for particles of about 100 µm or larger, which would leave nearly all of
+   the lead on the ground within 4.5 miles of the plant.
 
 The supporting results:
 
@@ -595,8 +600,9 @@ other three sit within 3° of each other on the forecast axis.
   detection limit, sampling interval or status flags. Zeros are posted as exact zeros,
   which suggests values below some limit are set to zero. We don't know what a 5-minute
   reading represents.
-- **Lead on the ground.** These are air monitors. Coarse particles that fall out within a
-  few miles (section 7) may never reach a monitor 4.5 miles away.
+- **Lead on the ground.** These are air monitors. Very coarse particles, about 100 µm or
+  larger, fall out before a monitor 4.5 miles away; particles of 30 µm mostly do not
+  (section 6.6).
 
 ### 6.5 What the readings mean
 
@@ -619,6 +625,97 @@ range. All are upwind or off to the side. The one to the southwest, Lake Sugema 
 at 257°), is roughly 20 miles north of the modeled path at that distance and posted 3 to
 10 µg/m³ in the hours from 8 a.m. to 5 p.m. Lead at the Army map's 0.18 µg/m³
 line would be a few percent of that background, so PM2.5 can't show it.
+
+### 6.6 Why AS01 read almost nothing
+
+AS01 was inside the modeled cloud in every run. It posted every five minutes through the
+first hour and read 0.002 µg/m³ at most. On the models' timing (Table 7b, taking the
+speed as steady over the first half hour) the cloud's front reaches AS01's distance
+roughly 15 minutes after the detonation and its center at 22 to 27, so the two readings
+at 9:10 and 9:11 a.m. come a little before the modeled cloud. Two other monitors posted values that size before the detonation.
+
+Four explanations fit a near-zero reading there. They are not exclusive, and the data
+so far can't choose among them. In my judgment the first is the most likely.
+
+1. **Little fine lead became airborne.** If the barriers, water and foam worked as the
+   Army says, the fine airborne share was far below any case the tracker published.
+   For fine dust at the ground, AS01's readings fit about 0.01% of the lead or less,
+   under a pound (Table 11).
+2. **The cloud passed over AS01.** Both models start the cloud mixed from the ground to
+   251 m. The 9 a.m. analysis has a stable layer between 40 and 240 m (section 6.4). A
+   hot cloud that rose into or above it could cross AS01 aloft and come down 10 or more
+   miles out, where on the analyzed path the real-time monitors are 3 to 7 miles to the
+   side. Nothing public says how high the cloud went.
+3. **A small, shallow cloud passed just south of AS01.** AS01 is at 222°. On analyzed
+   weather the cloud's center is at 215° and its highest value at AS01's distance is near
+   210°; the surface wind alone points to 204°–211°. This can't hide a large release: at
+   1% of the lead the monitors respond on any heading from 213° to 234° (Table 10). It
+   can hide a small one: at 0.1% the window is a few degrees around 225°.
+4. **The lead came out coarse and fell before it reached AS01.** This one can be
+   calculated, below.
+
+Instrument limits matter only at the low end. EPA's layer gives no detection limit,
+sampling interval or inlet size, and it posts zeros as exact zeros. That could hide a
+release near 0.01% of the lead. It could not hide 1%, which gives 0.8 to 1.1 µg/m³ at
+AS01 as fine dust.
+
+**The coarse-particle explanation, calculated.** We reran the tracker on analyzed weather
+with all of the lead airborne in one particle size at a time: the four fine sizes of the
+published cases, then 10, 30 and 100 µm at the density of soil (lead carried on soil and
+debris, the tracker's coarse sizes) and 30 µm at the density of the lead compound. As a
+check, HYSPLIT was run for two hours on NOAA ARL's archived weather with the three
+soil-density sizes, using the tracker's deposition speeds.
+
+*Table 11. One particle size at a time: the highest hourly mean air at AS01 for each 1%
+of the lead airborne in that size, the share of the lead that would bring AS01 to
+0.01 µg/m³ (the highest reading any monitor posted), and the share of what is released
+that lands within AS01's distance and within 15 miles. Where two values are given they
+are tracker / HYSPLIT. Tracker shares on the ground are after 8 hours, HYSPLIT's after 2.*
+
+<!-- table:coarse -->
+| Particle size | Settling speed | Air at AS01 per 1% of the lead (µg/m³) | Share of the lead for AS01 to read 0.01 µg/m³ | On the ground within 4.5 mi | On the ground within 15 mi |
+|---|---|---|---|---|---|
+| 0.3 µm, lead density | 0.0041 cm/s | 0.83 | 0.012% | 1% | 1% |
+| 1 µm, lead density | 0.0335 cm/s | 0.87 | 0.012% | 0% | 1% |
+| 3 µm, lead density | 0.27 cm/s | 0.92 | 0.011% | 1% | 3% |
+| 10 µm, lead density | 2.9 cm/s | 0.89 | 0.011% | 15% | 33% |
+| 10 µm, soil density | 0.81 cm/s | 0.89 / 1.00 | 0.011% / 0.010% | 4% / 4% | 10% / 10% |
+| 30 µm, soil density | 6.9 cm/s | 0.48 / 0.88 | 0.021% / 0.011% | 35% / 35% | 62% / 63% |
+| 100 µm, soil density | 58 cm/s | under 0.0001 / 0.0345 | all of it or more / 0.29% | 99% / 99% | 100% / 100% |
+| 30 µm, lead density | 24 cm/s | 0.0135 | 0.74% | 82% | 97% |
+<!-- /table:coarse -->
+
+Coarse particles explain AS01 only if they were very coarse. Particles of 10 µm reach
+AS01 as readily as fine dust. At 30 µm and soil density the reading falls by half in the
+tracker and hardly at all in HYSPLIT, so 26% of the lead in that size would still put 12
+to 23 µg/m³ at AS01. Only at about 100 µm, the size of fine sand, or at 30 µm for
+particles as dense as the lead compound itself, does most of the lead fall first: 82% to
+99% of it lands within AS01's distance.
+
+The two models agree on where the lead lands, within one percentage point at every size
+both ran. They disagree on how much of the rest is still in the air at AS01. For 100 µm
+the tracker leaves almost none, and HYSPLIT leaves 0.035 µg/m³ for each 1% of the lead.
+By HYSPLIT, even a release made up entirely of 100 µm particles would have to be under
+0.3% of the lead, about 20 lb, for AS01 to stay at 0.01 µg/m³.
+
+So this explanation needs nearly all of the airborne lead in sand-size particles or dense
+fragments, with no more than about 0.01% to 0.02% of the lead in anything of 30 µm or
+finer at soil density. Lead caught on wet soil, foam and debris could look like that. The
+published cases assumed the opposite, a condensed metal fume.
+
+It makes a prediction that can be checked: the lead would be on the ground near the
+plant. With 26% of the lead in 100 µm particles, both models put 100 µg/ft² or more over
+about 4 sq mi out to 5 miles, and 5 µg/ft² or more over 12 to 14 sq mi out to 10 miles.
+Soil and wipe samples there would show it. The Army's own map does not look like that
+case. Its 100 µg/ft² zone, 29 sq mi out to 12 miles, is nearer the 30 µm result (36 to
+43 sq mi out to 19 miles), a size that would have reached AS01.
+
+Limits of this calculation: single sizes of spherical particles; a cloud that starts
+mixed to the ground, as everywhere here; the tracker's map values are stored in steps
+with a floor, so its smallest values are rough; the HYSPLIT check runs two hours with
+fixed deposition speeds. And a separate point: if the monitors sample through a
+size-selective inlet, particles above its cut size would not register however many
+reached AS01. EPA's layer doesn't say.
 
 ## 7. The Army's map
 
@@ -768,7 +865,8 @@ The Army hasn't published its model's inputs, and these runs don't identify them
 - **Coarse particles.** The published cases put all airborne lead in fine sizes. Table 8
   shows that a coarse share changes the lead on the ground within 15 miles by a factor of
   7 to 12 and brings the tracker's zones close to the Army's. The tracker should show a
-  coarse case.
+  coarse case. A coarse case does not by itself explain the monitors: particles of 30 µm
+  still reach AS01, and only sand-size particles fall out first (Table 11).
 
 ## 9. Next steps
 
@@ -794,23 +892,25 @@ HYSPLIT_DIR=/path/to/hysplit scenarios/iowa-aap-lead-azide/postmortem/scripts/re
 It rebuilds the site's maps from the 9 a.m. forecast (`c9f8e59`), reruns the tracker on
 the saved analyzed weather, downloads NOAA ARL's archived HRRR and the hourly analyses,
 runs HYSPLIT for 8 hours (`blast-day/2026-11-25-9am-{zhang,emerson}.CONTROL` on the archive,
-`2026-11-25-9am-zhang-analyses.CONTROL` on the analyses), and writes
+`2026-11-25-9am-zhang-analyses.CONTROL` on the analyses, and
+`2026-11-25-9am-coarse-early2h.CONTROL` for the coarse sizes), and writes
 `data/compare.json`, `data/army_map.json`, `data/forecast_vs_analysis.json`,
 `data/station_vs_hrrr.json` and the figures. `scripts/tables.py` then rewrites Tables 1 and
-4–10 in this file from those data, so every number in them is in those files.
+4–11 in this file from those data, so every number in them is in those files.
 
 | Script | Does |
 |---|---|
 | `lib.py` | readers for the tracker's maps and HYSPLIT's output; zones, centers, overlap |
 | `compare.py` | the numbers for Tables 4–6 and 8 |
 | `snapshots.py` | the cloud at the Army's time marks from the tracker's time steps and HYSPLIT's 30-minute snapshots; Table 7b |
-| `tables.py` | writes Tables 1 and 4–10 into this file from the data |
+| `tables.py` | writes Tables 1 and 4–11 into this file from the data |
 | `army_map.py` | traces and measures both issues of the Army's maps; Table 7 |
 | `forecast_vs_analysis.py` | Table 1 |
 | `station_vs_hrrr.py` | Table 2 and the 21-station comparison |
 | `vad_decode.py`, `airnow_extract.py`, `epa_fetch.py` | the radar, AirNow and EPA downloads |
 | `run_tracker.sh` | the tracker on analyzed weather and Table 8's runs |
 | `monitor_coverage.py` | EPA sites in the modeled cloud and the direction sweep; Tables 9–10 |
+| `coarse.py` | one particle size at a time in the tracker and HYSPLIT: air at AS01 and lead on the ground; Table 11 |
 | `figure.py` | Figures 1–6 |
 
 `data/obs/` and `data/epa/` hold the observations as extracted on Nov. 25; EPA's and
