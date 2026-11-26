@@ -1231,8 +1231,10 @@ the numbers right and several conclusions too strong. Changed here:
   response site, https://response.epa.gov/site/site_profile.aspx?site_id=17211 (retrieved
   Nov. 26, 2026, about 01:00 UTC).
 - EPA, 2026e: U.S. EPA Heartland Region, Facebook post on the equipment used for the
-  detonation, Nov. 25, 2026, about 8 p.m. CST (text and photos from the maintainer's
-  screenshot; a copy of the post is in
+  detonation, Nov. 25, 2026, about 8 p.m. CST,
+  https://www.facebook.com/story.php?story_fbid=1424138166543295&id=100068413763562
+  (link supplied by the maintainer; text and photos read from the maintainer's screenshot,
+  a copy of which is in
   [`data/sources/`](data/sources/epa_region7_facebook_post_20261125.jpg)).
 - EPA AirNow, 2026: Hourly data files, Nov. 25, 2026,
   https://files.airnowtech.org/airnow/2026/20261125/ (retrieved Nov. 25, 2026;

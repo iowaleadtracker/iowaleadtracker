@@ -273,7 +273,8 @@ Government documents and other sources, not peer reviewed:
 - EPA, 2008: National Ambient Air Quality Standards for Lead; final rule. 73 Fed. Reg.
   66964 ([signed version](data/sources/epa_2008_lead_naaqs_final_rule_signed.pdf)).
 - EPA, 2026: U.S. EPA Heartland Region, Facebook post on the equipment used for the
-  detonation, Nov. 25, 2026, about 8 p.m. CST
+  detonation, Nov. 25, 2026, about 8 p.m. CST,
+  https://www.facebook.com/story.php?story_fbid=1424138166543295&id=100068413763562
   ([copy](data/sources/epa_region7_facebook_post_20261125.jpg)).
 - EPA, 2012: Environmental Technology Verification report: Xact 625 particulate metals
   monitor. EPA/600/R-12/680. A government test report

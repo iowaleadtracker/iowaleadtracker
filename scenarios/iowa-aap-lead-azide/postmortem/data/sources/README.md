@@ -13,7 +13,7 @@ citations.
 | `epa_2008_lead_naaqs_response_to_comments.pdf` | EPA, Responses to significant comments on the 2008 proposed lead rule, October 2008 | https://www.epa.gov/sites/default/files/2020-07/documents/20081015_responsetocomments1.pdf | Background to section 6.6 (commenters' concern that PM10 samplers miss particles larger than 10 µm); not quoted |
 | `vangeen_2020_geohealth_notre_dame.pdf` | van Geen, Yao, Ellis and Gelman, 2020: Fallout of lead over Paris from the 2019 Notre-Dame cathedral fire. *GeoHealth*, 4, e2020GH000279 | https://doi.org/10.1029/2020GH000279 (supplied by the maintainer) | Section 6.6: the Notre-Dame passage |
 
-| `epa_region7_facebook_post_20261125.jpg` | U.S. EPA Heartland Region, Facebook post, Nov. 25, 2026, about 8 p.m. CST: "Xact stations monitoring for lead, DustTrak aerosol equipment ... AreaRAEs ... and Summa cans sampling for Volatile Organic Compounds," with four photos | The maintainer's phone screenshot, cropped to the post | Section 3.8: EPA's own statement of what the real-time monitors are and what they measure |
+| `epa_region7_facebook_post_20261125.jpg` | U.S. EPA Heartland Region, Facebook post, Nov. 25, 2026, about 8 p.m. CST: "Xact stations monitoring for lead, DustTrak aerosol equipment ... AreaRAEs ... and Summa cans sampling for Volatile Organic Compounds," with four photos | https://www.facebook.com/story.php?story_fbid=1424138166543295&id=100068413763562 (the maintainer's phone screenshot, cropped to the post) | Section 3.8: EPA's own statement of what the real-time monitors are and what they measure |
 
 The EPA documents are U.S. government works. The Notre-Dame paper is open access under a
 Creative Commons Attribution license, as stated on its first page. The California
