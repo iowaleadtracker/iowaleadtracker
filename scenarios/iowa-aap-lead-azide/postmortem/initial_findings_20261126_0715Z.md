@@ -3,6 +3,7 @@
 **Iowa Lead Tracker (iowaleadtracker.com) · Preliminary analysis, pending peer review**
 
 As of Nov. 26, 2026, 1:15 a.m. CST (07:15 UTC), about 16 hours after the detonation.
+Updated at 1:45 a.m. with EPA's statement of what its real-time monitors are.
 
 > **Unofficial.** This is a screening analysis by a private citizen, not from the Army or
 > any government agency. Don't use it to decide if you're safe; follow official
@@ -25,8 +26,9 @@ project has reviewed either document; the two reviews so far were by AI referees
   analyzed weather is itself a model product, so this is the likely size and direction of
   the forecast error, not a measured one.
 - **EPA's four real-time monitors posted essentially zero.** Of 253 readings from the
-  detonation through 8:40 p.m., 236 were zero and the highest was 0.010 µg/m³. EPA's
-  public data doesn't name the substance, the instrument or a detection limit.
+  detonation through 8:40 p.m., 236 were zero and the highest was 0.010 µg/m³. EPA calls
+  them "Xact stations monitoring for lead" (EPA 2026). It hasn't published their model,
+  inlet or detection limit.
 - **Whether those monitors were placed to catch a cloud depends on where the detonation
   was, and that is not public.** Measured from one point taken for the whole plant, the
   nearest monitor sits inside the modeled cloud in every run. If the source was 2 km east
@@ -141,7 +143,9 @@ AS01, posted a value about every five minutes through the first hour. Its highes
    6.5 µg/m³ for the 7% case against 5.5, because the morning's mixed layer grows past it
    within the hour and the wind at that height points at AS01. This is one run of one
    model. A cloud that rose well above 500 m could still pass over.
-6. **What can the instrument see?** EPA hasn't said. For one monitor of this kind, the
+6. **What can the instrument see?** EPA says the stations are Xact monitors, which
+   measure metals on a filter tape by X-ray fluorescence, but hasn't given the model, the
+   inlet or a detection limit. For the maker's current model, the
    maker's table gives 0.0018 µg/m³ for lead at 15 minutes, the shortest time listed, as
    one standard deviation (CARB 2018). If its formula held down to 5 minutes it would give
    about 0.009 µg/m³. That is our extrapolation, and the posted readings are quieter than
@@ -187,9 +191,9 @@ versions:
   from 24° to 31° at 9 a.m. and the wind above it from 51°.
 - **The detonation was not at the assumed point** (test 3).
 
-**The public feed doesn't show what the instruments measured.** The data doesn't name the
-substance, EPA's list of instruments at these sites doesn't include this kind of monitor,
-and the posted values don't behave like raw readings (test 6).
+**The public feed doesn't show what the instruments measured.** EPA says the stations
+monitor for lead, but it hasn't said how the feed treats small values, and the posted
+values don't behave like raw readings (test 6).
 
 ### Two events where air sampling and the ground differed
 
@@ -268,6 +272,9 @@ Government documents and other sources, not peer reviewed:
   table ([copy](data/sources/carb_2018_sop450_xact625i.pdf)).
 - EPA, 2008: National Ambient Air Quality Standards for Lead; final rule. 73 Fed. Reg.
   66964 ([signed version](data/sources/epa_2008_lead_naaqs_final_rule_signed.pdf)).
+- EPA, 2026: U.S. EPA Heartland Region, Facebook post on the equipment used for the
+  detonation, Nov. 25, 2026, about 8 p.m. CST
+  ([copy](data/sources/epa_region7_facebook_post_20261125.jpg)).
 - EPA, 2012: Environmental Technology Verification report: Xact 625 particulate metals
   monitor. EPA/600/R-12/680. A government test report
   ([copy](data/sources/epa_2012_etv_xact625.pdf)).

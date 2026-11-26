@@ -39,8 +39,9 @@ question.
 1. **EPA's four real-time lead monitors read almost nothing.** They sit 4.5 to 28 miles
    southwest of the plant. Through 8:40 p.m. they posted 253 readings from the
    detonation on; 236 were zero and the highest was 0.010 µg/m³, about the size of readings
-   the same instruments posted before the detonation (up to 0.006). EPA hasn't published
-   their model, inlet or detection limit.
+   the same instruments posted before the detonation (up to 0.006). EPA calls them "Xact
+   stations monitoring for lead" (EPA 2026e). It hasn't published their model, inlet or
+   detection limit.
 2. **Whether they were placed to catch a cloud depends on where the detonation was, and
    that is not public.** Every distance here is measured from one point taken for the
    whole plant. From that point the nearest monitor, AS01, is inside the modeled cloud in
@@ -103,8 +104,9 @@ The supporting results:
   nothing about other weather, and it is agreement between two models, not with
   measurements.
 - **No lead measurements beyond four instruments.** EPA lists 43 sampling sites; only the
-  four real-time monitors have public results, and the layer names neither the substance
-  nor a detection limit. What is published for this kind of instrument is in section 3.8;
+  four real-time monitors have public results. EPA says they are "Xact stations monitoring
+  for lead" (EPA 2026e); the data layer itself names neither the substance nor a detection
+  limit. What is published for this kind of instrument is in section 3.8;
   whether it applies to these four is an assumption. Filter, soil, wipe and water results will be the test of what
   landed. Nothing here estimates what was released.
 - **The "analyzed weather" is a model product.** NOAA's HRRR analysis blends observations
@@ -278,11 +280,18 @@ limit; EPA's release describes it as air monitoring for lead. Timestamps run to 
 minutes of the download, so we read them as UTC. These are EPA's preliminary values as
 posted.
 
-EPA hasn't said which instrument these are, and its list of instruments at AS01 to AS04
-(dust monitor, gas monitor, air cassette, canister) doesn't include one. The layer's name
-points to the Xact 625i, a monitor that collects particles on a filter tape and measures
-metals in the deposit by X-ray fluorescence, so it reads lead as an element whatever
-compound it is in. What is published for that instrument:
+EPA's Heartland Region wrote on the evening of Nov. 25 that its equipment included "Xact
+stations monitoring for lead, DustTrak aerosol equipment monitoring for particulate
+matter, AreaRAEs providing real-time air monitoring, and Summa cans sampling for Volatile
+Organic Compounds" (EPA 2026e). The viewer's own text gives a screening level "for lead."
+So the real-time readings are lead from Xact monitors. EPA hasn't given the model, the
+inlet or a detection limit, and its list of instruments at AS01 to AS04 (dust monitor, gas
+monitor, air cassette, canister) leaves the Xact out. A photo with the post shows a
+rack-mounted instrument with a filter tape and a sample line through a trailer roof,
+which looks like the maker's current ambient model, the Xact 625i (Petterson 2022). That
+monitor collects particles on a filter tape and measures metals in the deposit by X-ray
+fluorescence, so it reads lead as an element whatever compound it is in. What is
+published for it:
 
 - **Inlet.** It draws 16.7 L/min through a size-selective inlet; the options are PM10,
   PM2.5, PM1 and low-volume total particulate (CARB 2018). EPA's own verification test
@@ -707,10 +716,9 @@ exposure.
    207° the tracker's cloud misses every real-time monitor even at 7%; only HYSPLIT's
    wider cloud is caught. A shallow cloud would also be narrower than the modeled one.
 5. **The detonation was not at the assumed point.** Tested in section 6.8.
-6. **The public feed doesn't show what the instruments measured.** The layer doesn't name
-   the substance, EPA's list of instruments at these sites doesn't include this kind of
-   monitor (section 3.8), and the posted values don't behave like raw readings
-   (section 6.4).
+6. **The public feed doesn't show what the instruments measured.** EPA says the stations
+   monitor for lead, but it hasn't said how the feed treats small values, and the posted
+   values don't behave like raw readings (section 6.4).
 
 **The cloud-overhead explanation, calculated.** We ran HYSPLIT on NOAA ARL's archived
 weather with the cloud released between 251 and 502 m, from the modeled cloud top up to
@@ -1222,6 +1230,10 @@ the numbers right and several conclusions too strong. Changed here:
 - EPA, 2026d: IAAAP Lead Azide, site profile and documents. EPA On-Scene Coordinator
   response site, https://response.epa.gov/site/site_profile.aspx?site_id=17211 (retrieved
   Nov. 26, 2026, about 01:00 UTC).
+- EPA, 2026e: U.S. EPA Heartland Region, Facebook post on the equipment used for the
+  detonation, Nov. 25, 2026, about 8 p.m. CST (text and photos from the maintainer's
+  screenshot; a copy of the post is in
+  [`data/sources/`](data/sources/epa_region7_facebook_post_20261125.jpg)).
 - EPA AirNow, 2026: Hourly data files, Nov. 25, 2026,
   https://files.airnowtech.org/airnow/2026/20261125/ (retrieved Nov. 25, 2026;
   preliminary, unvalidated data).
