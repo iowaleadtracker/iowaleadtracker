@@ -9,7 +9,7 @@ analyzed weather, NOAA's HYSPLIT and the U.S. Army's map against EPA's real-time
 > are not official NOAA products. The model maps below are estimates for assumed releases.
 > They are not measurements, and nothing here says how much lead reached any place.
 
-**Status.** Preliminary analysis, pending peer review. Second draft, updated Nov. 25, 2026, about 10 p.m. CST, thirteen hours after the
+**Status.** Preliminary analysis, pending peer review. Second draft, updated Nov. 25, 2026, about 10:15 p.m. CST, thirteen hours after the
 detonation. It replaces a first draft that an independent review found wrong in
 several places ([what changed](#what-changed-since-the-first-draft)). The model comparison
 now covers all eight modeled hours (9 a.m. to 5 p.m.) on NOAA's archived weather; the
@@ -67,7 +67,8 @@ question.
    particles fall out before the monitor only at about 100 µm or larger. But monitors of
    this kind sample through a size-selective inlet. If these have the PM10 inlet, lead
    on anything coarser than about 10 µm could pass the monitor in quantity and not be
-   measured. EPA hasn't published the monitors' model, inlet or detection limit.
+   measured. EPA's own lead standard samples particles of all sizes for that reason.
+   EPA hasn't published the monitors' model, inlet or detection limit.
 
 The supporting results:
 
@@ -764,6 +765,22 @@ and the readings. That is a possibility, not a finding: the inlet, the Army's pa
 sizes and the amount released are all unknown. Soil and wipe samples along 205° to 245°,
 and the filter cassettes if they collect every particle size, would show it.
 
+**It has happened before.** EPA does not measure lead against its national air standard
+with PM10 samplers. It uses samplers that collect particles of all sizes. When it kept
+that method in 2008 it wrote that "ingestion pathways are important to air-related Pb
+exposures and that Pb particles contributing to these pathways include ultra-coarse
+particles," its term for particles larger than 10 µm, and that measuring all sizes "is
+necessary to provide sufficient public health protection from the range of particle
+sizes of ambient air Pb, including ultra-coarse particles" (EPA 2008). Two events show
+the same thing on the ground. In the dust that settled east of the World Trade Center in
+2001, particles finer than 2.5 µm were 0.9% to 2% of the mass, the largest share was
+coarser than 53 µm, and the dust held 101 to 625 µg/g of lead (Lioy et al. 2002). After
+the 2019 fire at Notre-Dame cathedral in Paris, whose roof was covered in lead, soil
+within 1 km downwind held about 200 mg/kg more lead than soil elsewhere around it (van
+Geen et al. 2020). Neither was a detonation, and neither shows what happened in Iowa.
+They show that lead from a single event can settle on particles that fine-particle
+monitors don't count, and that EPA's own lead standard is built around that.
+
 Limits of this calculation: single sizes of spherical particles; a cloud that starts
 mixed to the ground, as everywhere here; the tracker's map values are stored in steps
 with a floor, so its smallest values are rough; the HYSPLIT check runs two hours with
@@ -1010,6 +1027,9 @@ corrected here:
 - Emerson, E. W., and Coauthors, 2020: Revisiting particle dry deposition and its role in
   radiative effect estimates. *Proc. Natl. Acad. Sci. USA*, **117**, 26076–26082,
   doi:10.1073/pnas.2014761117.
+- EPA, 2008: National Ambient Air Quality Standards for Lead; final rule. 73 Fed. Reg.
+  66964, Nov. 12, 2008 (read in the version signed Oct. 15, 2008,
+  https://webarchive.library.unt.edu/eot2008/20081106175556/http://www.epa.gov/air/lead/pdfs/20081015_pb_naaqs_final.pdf).
 - EPA, 2012: Environmental Technology Verification report: Cooper Environmental Services
   LLC Xact 625 particulate metals monitor. EPA/600/R-12/680, September 2012,
   https://archive.epa.gov/nrmrl/archive-etv/web/pdf/p100fk6b.pdf.
@@ -1038,6 +1058,9 @@ corrected here:
 - KCRG, 2026b: Army says Iowa ammunition plant detonation exceeded expectations for lead
   containment. Nov. 25, updated 6:28 p.m. CST,
   https://www.kcrg.com/2026/11/25/watch-army-gives-update-after-lead-azide-detonation/.
+- Lioy, P. J., and Coauthors, 2002: Characterization of the dust/smoke aerosol that
+  settled east of the World Trade Center (WTC) in lower Manhattan after the collapse of
+  the WTC 11 September 2001. *Environ. Health Perspect.*, **110**, 703–714.
 - McFate, L., 2026a: Public safety advisory (Iowa Army Ammunition Plant). U.S. Army
   Sustainment Command, Nov. 24, https://www.army.mil/article/297039 (as described in the
   scenario README; army.mil refuses scripted downloads).
@@ -1062,6 +1085,10 @@ corrected here:
   https://response.epa.gov/site/site_profile.aspx?site_id=17211 (retrieved Nov. 25, 2026).
 - U.S. Army, 2026c: Public advisory maps, "Mitigated 0.26", earlier issue. Issued Nov.
   24, 2026, a/o 240630NOV26 (two JPEG images supplied by the maintainer; in `data/army/`).
+- van Geen, A., Y. Yao, T. Ellis, and A. Gelman, 2020: Fallout of lead over Paris from
+  the 2019 Notre-Dame cathedral fire. *GeoHealth*, doi:10.1029/2020GH000279 (cited from
+  the paper's published key points; the full text sat behind a browser check and was not
+  read for this draft).
 - Zhang, L., S. Gong, J. Padro, and L. Barrie, 2001: A size-segregated particle dry
   deposition scheme for an atmospheric aerosol module. *Atmos. Environ.*, **35**, 549–560,
   doi:10.1016/S1352-2310(00)00326-5.
