@@ -790,24 +790,17 @@ EARLIER_HEAD = "Earlier dates."
 
 
 def _time_parts(built_txt: str) -> dict[str, str]:
-    """Return the time paragraph's sentences by topic: when, evacuation, alert, maps, window."""
+    """Return the time paragraph's sentences by topic: when, evacuation, maps, window."""
     return {
-        "when": (
-            f"As of this update ({built_txt}), {BLAST_DONE[0].lower()}{BLAST_DONE[1:]} The Army "
-            "had planned it for about 9 a.m. CST Wednesday, Nov. 25 (Army public safety "
-            "advisory, Nov. 24)."
-        ),
+        "when": (f"As of this update ({built_txt}), {BLAST_DONE[0].lower()}{BLAST_DONE[1:]}"),
         "evacuation": (
             "FEMA supports relocating all residents of Middletown and the immediate surrounding "
             "areas, starting Nov. 24; the evacuation zone is a 5-mile cone extending southwest "
             "of the plant, reaching one mile beyond the Army\u2019s modeled dispersion path. "
             "The Army encourages people outside the zone to shelter in place, closing all "
-            "windows and doors. Questions about the evacuation area or help: FEMA Helpline "
+            "windows and doors (Army public safety advisory, Nov. 24). Questions about the "
+            "evacuation area or help: FEMA Helpline "
             "1-800-621-3362 (24/7) or DisasterAssistance.gov."
-        ),
-        "alert": (
-            "A FEMA emergency alert sent to phones near the plant gave the same 9 a.m. time "
-            "(FEMA emergency alert, Nov. 24)."
         ),
         "maps": (
             "The Army\u2019s latest maps still show its model estimate for the mitigated "
@@ -828,7 +821,7 @@ def time_note(built_txt: str) -> str:
     on the page, under its own headings.
     """
     p = _time_parts(built_txt)
-    return " ".join(p[k] for k in ("when", "evacuation", "alert", "maps", "window"))
+    return " ".join(p[k] for k in ("when", "evacuation", "maps", "window"))
 
 
 def _link_sources(text: str) -> str:
@@ -862,7 +855,7 @@ def about_time_html(built_txt: str) -> str:
     """
     p = {k: _link_sources(v) for k, v in _time_parts(built_txt).items()}
     return (
-        f"<p><b>{TIME_HEAD}</b> {p['when']} {p['alert']} {p['window']}</p>\n"
+        f"<p><b>{TIME_HEAD}</b> {p['when']} {p['window']}</p>\n"
         f"  <p><b>{EVACUATION_HEAD}</b> {p['evacuation']}</p>\n"
         f"  <p><b>{ARMY_MAPS_HEAD}</b> {p['maps']}</p>"
     )

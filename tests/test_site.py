@@ -272,7 +272,8 @@ def test_key_facts_lead_the_summary_and_faq(rendered: tuple[str, list, str]) -> 
     assert fs.COURT_URL in summary
     when = dict(faq)["When was the lead azide blast at the Iowa Army Ammunition Plant?"]
     assert when.startswith("As of this update (")
-    assert when.index("about 9 a.m. CST Wednesday") < when.index(fs.TRUMP_HOLD)
+    assert when.index("set it for 9 a.m. CST") < when.index(fs.TRUMP_HOLD)
+    assert "had planned it for about 9 a.m." not in when  # said once, in the first sentence
     assert fs.ADVISORY_NOV24_URL in when
     assert (
         "The Army had "

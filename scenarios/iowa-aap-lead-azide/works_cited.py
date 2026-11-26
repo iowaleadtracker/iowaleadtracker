@@ -618,6 +618,15 @@ CHANGES = [
     (
         "Nov. 25",
         (
+            "The &ldquo;When&rdquo; paragraph no longer repeats the planned 9 a.m. time (from "
+            "the Army&rsquo;s Nov. 24 advisory and FEMA&rsquo;s alert); the "
+            "Army&rsquo;s Nov. 24 advisory is now cited on its evacuation and shelter advice. "
+            "The maps did not change."
+        ),
+    ),
+    (
+        "Nov. 25",
+        (
             "The Army&rsquo;s 3 p.m. update: air sensors report no lead detection, ground "
             "sampling is underway, and people should wait for its all-clear. EPA&rsquo;s "
             "real-time readings through 4 p.m. were all below the 0.18 &micro;g/m&sup3; "
