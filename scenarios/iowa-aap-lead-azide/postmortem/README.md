@@ -14,8 +14,7 @@ detonation. It replaces a first draft that an independent review found wrong in
 several places ([what changed](#what-changed-since-the-first-draft)). The model comparison
 now covers all eight modeled hours (9 a.m. to 5 p.m.) on NOAA's archived weather; the
 Army's results and all lab sampling are still to come. It was drafted with an AI coding assistant, and the
-first draft was reviewed by a separate AI referee
-([`reviews/`](reviews/referee-report-1.md)); the maintainer has not yet checked every
+first draft was reviewed by a separate AI referee; the maintainer has not yet checked every
 number by hand.
 
 Contents: [Summary](#summary) · [1. What this can and can't say](#1-what-this-can-and-cant-say) ·
@@ -208,7 +207,7 @@ fixed per size: the tracker's Zhang et al. (2001) values at a 5 m/s reference wi
 0.10, 0.32 and 3.66 cm/s), or its Emerson et al. (2020) values. The tracker itself varies
 them with the wind each hour. Lower releases are the same run scaled, which is exact. The
 10 µm size holds 10% of the mass and makes about two-thirds of HYSPLIT's first-hour
-deposition (the referee's count), so the near field depends on the coarse end of the
+deposition (counted in the review of the first draft), so the near field depends on the coarse end of the
 assumed sizes.
 
 Two sets of runs:
@@ -1047,8 +1046,9 @@ section 6.6. `data/draft1/` holds the first draft's numbers.
 
 ## What changed since the first draft
 
-The first draft (commit `1fb9452`) was reviewed the same day
-([`reviews/referee-report-1.md`](reviews/referee-report-1.md)). Its main errors, all
+The first draft (commit `1fb9452`) was reviewed the same day by a separate AI referee.
+That report was a working document for the rewrite and is no longer kept here; it is in
+the git history (last present at commit `0206b75`). The first draft's main errors, all
 corrected here:
 
 - It read the tracker's `m60` field as an hourly mean, which made the tracker's cloud
