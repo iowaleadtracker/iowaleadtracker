@@ -3,7 +3,8 @@
 **Iowa Lead Tracker (iowaleadtracker.com) · Preliminary analysis, pending peer review**
 
 As of Nov. 26, 2026, 1:15 a.m. CST (07:15 UTC), about 16 hours after the detonation.
-Updated at 1:45 a.m. with EPA's statement of what its real-time monitors are.
+Updated at 1:30 a.m. with EPA's statement of what its real-time monitors are, and with a
+field study of that kind of monitor.
 
 > **Unofficial.** This is a screening analysis by a private citizen, not from the Army or
 > any government agency. Don't use it to decide if you're safe; follow official
@@ -151,8 +152,10 @@ AS01, posted a value about every five minutes through the first hour. Its highes
    about 0.009 µg/m³. That is our extrapolation, and the posted readings are quieter than
    it implies. So a posted zero can't be turned into an upper bound. The inlet options
    for this kind of monitor are PM10, PM2.5, PM1 and total particulate (CARB 2018); EPA's
-   own test of the earlier model used PM10 (EPA 2012). A PM10 inlet passes little that is
-   larger than 10 µm.
+   own test of the earlier model used PM10 (EPA 2012), and a field study in the United
+   Kingdom used PM10 and PM2.5 (Tremper et al. 2018). A PM10 inlet passes little that is
+   larger than 10 µm. That field study measured mean lead of 0.004 to 0.022 µg/m³ at
+   roadside and industrial sites, the same size as the highest values EPA posted in Iowa.
 
 ![What the best-placed monitor would read as the cloud's direction changes](figures/fig5_monitor_coverage.png)
 
@@ -234,8 +237,6 @@ real-time monitors and a list of 43 sampling sites.
 - The literature was not fully searched. Two searches, on detonation mitigation and on how
   high detonation clouds rise, could not be run. The second bears on the cloud-overhead
   explanation.
-- Tremper et al. (2018), a field test of this kind of monitor, could not be read and is
-  not relied on here.
 - NOAA's archived weather may hold short forecasts for some hours, not analyses. We have
   not confirmed which.
 - The source-shift and direction tests move or turn the modeled cloud rigidly. They are
@@ -261,6 +262,10 @@ Journal papers:
 - Stein, A. F., and Coauthors, 2015: NOAA's HYSPLIT atmospheric transport and dispersion
   modeling system. *Bull. Amer. Meteor. Soc.*, **96**, 2059–2077,
   doi:10.1175/BAMS-D-14-00110.1.
+- Tremper, A. H., and Coauthors, 2018: Field and laboratory evaluation of a high time
+  resolution x-ray fluorescence instrument for determining the elemental composition of
+  ambient aerosols. *Atmos. Meas. Tech.*, **11**, 3541–3557, doi:10.5194/amt-11-3541-2018
+  ([copy](data/sources/tremper_2018_amt_xact625.pdf)).
 - van Geen, A., Y. Yao, T. Ellis, and A. Gelman, 2020: Fallout of lead over Paris from the
   2019 Notre-Dame cathedral fire. *GeoHealth*, **4**, e2020GH000279,
   doi:10.1029/2020GH000279 ([copy](data/sources/vangeen_2020_geohealth_notre_dame.pdf)).

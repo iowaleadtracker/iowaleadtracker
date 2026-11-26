@@ -311,6 +311,14 @@ published for it:
 - **Accuracy.** In EPA's 80-day test of the earlier Xact 625 in Ohio, hourly lead averaged
   over a day tracked lab filters with a slope of 1.1, r² of 0.94 and an offset of
   +1.6 ng/m³; a blank stretch of filter tape alone read about 1 ng/m³ of lead (EPA 2012).
+- **A field study.** Tremper et al. (2018) ran an Xact 625 at three sites in the United
+  Kingdom, sampling hourly through a PM10 or PM2.5 inlet. They write that the size of
+  particle collected "depends on the size selective inlet chosen." Their detection limit
+  for lead, three standard deviations of filtered-air blanks, was 0.12 ng/m³ at one hour.
+  Against lab filters lead agreed closely with one digestion method (slope 1.02, r² 0.99)
+  and read 44% high with the other. Mean lead at the three sites was 3.7 to 22 ng/m³,
+  the same size as the highest values EPA posted in Iowa. One author worked for the
+  instrument's maker.
 
 ## 4. The weather: forecast against what was analyzed and observed
 
@@ -648,7 +656,9 @@ other three sit within 3° of each other on the forecast axis.
   maker's table implies at 5 minutes (section 3.8) and negative values were posted as
   zero, about half the readings would be above zero. Seventeen of about 250 are. So
   either the noise is far smaller than that or the feed is processed in a way EPA hasn't
-  described. Until EPA states the limit and how small values are treated, a posted zero
+  described. The field study's one-hour limit (0.12 ng/m³; Tremper et al. 2018), scaled the
+  same way, would put three standard deviations near 0.005 µg/m³ at 5 minutes, which is
+  also an extrapolation. Until EPA states the limit and how small values are treated, a posted zero
   can't be turned into an upper bound.
 - **Particles too coarse for the inlet.** A monitor with a PM10 inlet measures little
   that is larger than 10 µm in aerodynamic diameter, however much of it passes
@@ -1266,6 +1276,9 @@ the numbers right and several conclusions too strong. Changed here:
 - Stein, A. F., and Coauthors, 2015: NOAA's HYSPLIT atmospheric transport and dispersion
   modeling system. *Bull. Amer. Meteor. Soc.*, **96**, 2059–2077,
   doi:10.1175/BAMS-D-14-00110.1.
+- Tremper, A. H., and Coauthors, 2018: Field and laboratory evaluation of a high time
+  resolution x-ray fluorescence instrument for determining the elemental composition of
+  ambient aerosols. *Atmos. Meas. Tech.*, **11**, 3541–3557, doi:10.5194/amt-11-3541-2018.
 - U.S. Army, 2026a: Public advisory maps, "Mitigated 0.26" dispersion and deposition,
   detonation 25 Nov 2026 0900 CST. Issued Nov. 25, 2026, a/o 250700NOV26 (two 1200 × 675
   JPEG images supplied by the maintainer as the Army's final maps before the detonation;

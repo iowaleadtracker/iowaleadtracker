@@ -11,12 +11,14 @@ citations.
 | `epa_2012_etv_xact625.pdf` | EPA Environmental Technology Verification report for the Xact 625, EPA/600/R-12/680, September 2012 | https://archive.epa.gov/nrmrl/archive-etv/web/pdf/p100fk6b.pdf | Section 3.8: PM10 inlet, lead slope, r² and offset (Table VS-1), and the blank-tape lead (section 6.3) |
 | `epa_2008_lead_naaqs_final_rule_signed.pdf` | EPA, National Ambient Air Quality Standards for Lead, final rule as signed Oct. 15, 2008 (published as 73 Fed. Reg. 66964, Nov. 12, 2008) | https://webarchive.library.unt.edu/eot2008/20081106175556/http://www.epa.gov/air/lead/pdfs/20081015_pb_naaqs_final.pdf | Section 6.6: the two quotations on ultra-coarse particles (pp. 98 and 107 of this version) |
 | `epa_2008_lead_naaqs_response_to_comments.pdf` | EPA, Responses to significant comments on the 2008 proposed lead rule, October 2008 | https://www.epa.gov/sites/default/files/2020-07/documents/20081015_responsetocomments1.pdf | Background to section 6.6 (commenters' concern that PM10 samplers miss particles larger than 10 µm); not quoted |
+| `tremper_2018_amt_xact625.pdf` | Tremper and Coauthors, 2018: Field and laboratory evaluation of a high time resolution x-ray fluorescence instrument. *Atmos. Meas. Tech.*, 11, 3541–3557 | https://doi.org/10.5194/amt-11-3541-2018 (supplied by the maintainer) | Section 3.8: inlets used (section 2.1 and 2.3.1), lead detection limit (Tables 3–5), agreement with lab filters (Table 7), mean lead at the sites (Tables 3–5) |
 | `vangeen_2020_geohealth_notre_dame.pdf` | van Geen, Yao, Ellis and Gelman, 2020: Fallout of lead over Paris from the 2019 Notre-Dame cathedral fire. *GeoHealth*, 4, e2020GH000279 | https://doi.org/10.1029/2020GH000279 (supplied by the maintainer) | Section 6.6: the Notre-Dame passage |
 
 | `epa_region7_facebook_post_20261125.jpg` | U.S. EPA Heartland Region, Facebook post, Nov. 25, 2026, about 8 p.m. CST: "Xact stations monitoring for lead, DustTrak aerosol equipment ... AreaRAEs ... and Summa cans sampling for Volatile Organic Compounds," with four photos | https://www.facebook.com/story.php?story_fbid=1424138166543295&id=100068413763562 (the maintainer's phone screenshot, cropped to the post) | Section 3.8: EPA's own statement of what the real-time monitors are and what they measure |
 
-The EPA documents are U.S. government works. The Notre-Dame paper is open access under a
-Creative Commons Attribution license, as stated on its first page. The California
+The EPA documents are U.S. government works. The Notre-Dame paper and the field study by
+Tremper and Coauthors are open access under a Creative Commons Attribution license, as
+stated on their first pages. The California
 procedure is a state agency's public document; its detection-limit table comes from the
 instrument's maker.
 
@@ -38,3 +40,4 @@ they are linked, not copied.
     727cc01f460fb0c996960058a38faf19c2e944667188a6516f347cb3dd397235  epa_2012_etv_xact625.pdf
     dd0a82971925e866f467609a0bebe4bbaf87370e2043297a26fd4eced0b99a20  vangeen_2020_geohealth_notre_dame.pdf
     73d49077c787b4666337e8aaaf4ad8be40d83949c3bd415270a5a3334d34b588  epa_region7_facebook_post_20261125.jpg
+    b9cff70886a77d3aa042f4a4200c61909989862a9365618eba74b166225d8631  tremper_2018_amt_xact625.pdf
