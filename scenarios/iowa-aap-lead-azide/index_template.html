@@ -45,7 +45,7 @@
        bar at the bottom jumps between sections */
     header { position: static; }
     .mapbox { height: auto; min-height: 0; }
-    iframe { height: var(--frameh, 1200px); flex: none; }
+    iframe { height: var(--frameh, 1200px); }
     #summary, #faq, .doc h3 { scroll-margin-top: 12px; }
     body { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); }
     .bottomnav {
@@ -63,7 +63,7 @@
     header { gap: 6px 10px; padding: 6px 12px; }
     header .title p, header .warn .long { display: none; }
     header button, header select { min-height: 32px; }
-    header .warn button { min-height: 32px; padding: 4px 2px; }
+    header .warn button { min-height: 32px; }
     header #prev, header #next { padding: 4px 10px; }
   }
   label { display: flex; align-items: center; gap: 8px; }
@@ -100,7 +100,7 @@
   dialog form { margin: 14px 0 0; text-align: right; }
   dialog form button { font: inherit; padding: 6px 16px; border-radius: 6px; border: 0;
                         background: #1f2933; color: #fff; cursor: pointer; }
-  header label[hidden], .daynote[hidden] { display: none; }
+  header label[hidden] { display: none; }
   .daynote { margin: 4px 0 0; padding: 4px 8px; border-radius: 4px; background: #fde8c8;
              color: #1d1d1b; font-size: 13px; }
 </style></head><body>

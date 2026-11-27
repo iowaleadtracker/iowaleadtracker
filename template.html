@@ -23,6 +23,7 @@
   --c-air: #d95926; --c-dry: #ad7f4c; --c-wet: #199e70;
 }
 * { box-sizing: border-box; }
+/* eslint-disable-next-line css/no-important -- hidden must win over any display rule */
 [hidden] { display: none !important; }
 html, body { margin: 0; height: 100%; }
 body {
@@ -42,7 +43,6 @@ aside {
   border-left: 1px solid var(--line); padding: 14px 16px 24px;
 }
 aside h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); margin: 18px 0 6px; font-weight: 600; }
-aside h2:first-child { margin-top: 0; }
 dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 0; }
 dt { color: var(--ink-2); }
 dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
@@ -98,7 +98,6 @@ table.zones { width: 100%; border-collapse: collapse; font-size: 13px; font-vari
 table.zones th { text-align: left; color: var(--ink-3); font-weight: 500; font-size: 12px; padding: 2px 0; }
 table.zones td { padding: 3px 0; border-top: 1px solid var(--line); }
 table.zones td.n, table.zones th.n { text-align: right; white-space: nowrap; padding-left: 8px; vertical-align: top; }
-aside section > h2:first-child { margin-top: 18px; }
 .zsw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 6px; }
 .legnote { width: 0; min-width: 100%; font-size: 11.5px; color: var(--ink-3); margin-top: 5px; padding-top: 4px; border-top: 1px solid var(--line); white-space: normal; }
 #legsky .legnote { margin-top: 2px; }
@@ -157,9 +156,9 @@ body.embedded > header { display: none; }
     <canvas id="map" role="img" aria-label="Map of the dispersal cloud. The same numbers are in the side panel."></canvas>
     <div id="loading">Decoding model output…</div>
     <div class="zoom">
-      <button class="mapbtn" id="zin" title="Zoom in" aria-label="Zoom in">+</button>
-      <button class="mapbtn" id="zout" title="Zoom out" aria-label="Zoom out">−</button>
-      <button class="mapbtn" id="zfit" title="Fit plume" aria-label="Fit plume" style="font-size:14px">⤢</button>
+      <button type="button" class="mapbtn" id="zin" title="Zoom in" aria-label="Zoom in">+</button>
+      <button type="button" class="mapbtn" id="zout" title="Zoom out" aria-label="Zoom out">−</button>
+      <button type="button" class="mapbtn" id="zfit" title="Fit plume" aria-label="Fit plume" style="font-size:14px">⤢</button>
     </div>
     <div class="legend">
       <div class="lt" id="legtitle"></div>
@@ -204,7 +203,7 @@ body.embedded > header { display: none; }
     <section id="zonesec" hidden>
       <h2>Levels of concern, release to end of this hour</h2>
       <div class="zonectl">
-        <label for="zmetric" class="muted">Metric</label>
+        <label for="zmetric">Metric</label>
         <select id="zmetric">
           <option value="m60">max 60-min average (AEGL/PAC style)</option>
           <option value="peak">max short-term peak</option>
@@ -235,24 +234,24 @@ body.embedded > header { display: none; }
 </main>
 <div class="controls">
   <div class="timebox">
-    <button id="play" aria-label="Play">▶</button>
+    <button type="button" id="play" aria-label="Play">▶</button>
     <input id="hour" type="range" min="1" max="24" value="1" aria-label="Hour">
     <div id="timelabel"></div>
   </div>
   <div class="seg" id="modelseg" role="group" aria-label="Model" hidden>
-    <button data-v="own" aria-pressed="true" id="ownbtn">This model</button>
-    <button data-v="hysplit" aria-pressed="false">NOAA HYSPLIT</button>
+    <button type="button" data-v="own" aria-pressed="true" id="ownbtn">This model</button>
+    <button type="button" data-v="hysplit" aria-pressed="false">NOAA HYSPLIT</button>
   </div>
   <div class="seg" id="fieldseg" role="group" aria-label="What to show">
-    <button data-v="conc" aria-pressed="true">Hourly mean</button>
-    <button data-v="peak" aria-pressed="false">Peak</button>
-    <button data-v="snap" aria-pressed="false">Snapshot</button>
-    <button data-v="dep" aria-pressed="false">Deposition</button>
-    <button data-v="zones" aria-pressed="false">Levels of concern</button>
+    <button type="button" data-v="conc" aria-pressed="true">Hourly mean</button>
+    <button type="button" data-v="peak" aria-pressed="false">Peak</button>
+    <button type="button" data-v="snap" aria-pressed="false">Snapshot</button>
+    <button type="button" data-v="dep" aria-pressed="false">Deposition</button>
+    <button type="button" data-v="zones" aria-pressed="false">Levels of concern</button>
   </div>
   <div class="seg" id="sysseg" role="group" aria-label="Unit system">
-    <button data-v="us" aria-pressed="false">U.S.</button>
-    <button data-v="metric" aria-pressed="true">Metric</button>
+    <button type="button" data-v="us" aria-pressed="false">U.S.</button>
+    <button type="button" data-v="metric" aria-pressed="true">Metric</button>
   </div>
   <label class="opt">Units
     <select id="units"><option value="mass">mass /m³</option><option value="ugm3">µg/m³</option><option value="ugft2">µg/m³ · µg/ft²</option><option value="cm3">µg/cm³</option><option value="count">particles</option></select>
@@ -300,18 +299,18 @@ if (M.homeUrl || M.legendNote) {
   ln.hidden = false;
 }
 // On narrow screens move the legend out of the map into a strip right below it.
+const narrowMQ = matchMedia("(max-width: 820px)"), coarseMQ = matchMedia("(pointer: coarse)");
 {
-  const legend = document.querySelector(".legend"), mq = matchMedia("(max-width: 820px)");
+  const legend = document.querySelector(".legend"), mq = narrowMQ;
   const placeLegend = () => {
     if (mq.matches) $("mapwrap").after(legend); else $("mapwrap").appendChild(legend);
     legend.classList.toggle("below", mq.matches);
   };
   placeLegend();
-  (mq.addEventListener ? mq.addEventListener("change", placeLegend) : mq.addListener(placeLegend));
+  if (mq.addEventListener) mq.addEventListener("change", placeLegend); else mq.addListener(placeLegend);
 }
 // Phones and small tablets: fold the technical panel sections, and on touch screens let one
 // finger scroll the page while two fingers move the map (like embedded Google Maps).
-const narrowMQ = matchMedia("(max-width: 820px)"), coarseMQ = matchMedia("(pointer: coarse)");
 const coop = () => narrowMQ.matches && coarseMQ.matches;
 $("techdetails").open = !narrowMQ.matches;
 $("mapwrap").classList.toggle("coop", coop());
@@ -360,7 +359,9 @@ function fmt(v, digits = 2) {
 // "metric" or "us" (U.S. customary). Shared with the picker page through localStorage.
 // Default: U.S. when the map was built with µg/ft² deposition (--units ugft2), else metric.
 let SYS = M.units === "ugft2" ? "us" : "metric";
-try { const p = Object(JSON.parse(localStorage.getItem("puffmap.prefs") || "{}")); if (p.sys === "us" || p.sys === "metric") SYS = p.sys; } catch (e) {}
+// Saved choices (basemap, unit system), read once.
+const PREFS = (() => { try { return Object(JSON.parse(localStorage.getItem("puffmap.prefs") || "{}")); } catch (e) { return {}; } })();
+if (PREFS.sys === "us" || PREFS.sys === "metric") SYS = PREFS.sys;
 if (hu) SYS = hu[1];
 const US = () => SYS === "us";
 function fmtMass(kg) {
@@ -493,7 +494,6 @@ const qToLog = (F, q) => F.lo + (q - 1) / 254 * (F.hi - F.lo);
 
 // ---------- static text ----------
 $("title").textContent = M.title;
-document.title = "Puff Dispersal Map";
 const BINS = M.bins, EX = M.explosion;
 const ENS = M.ensemble;
 // One weather source and no wind turning: the spread is only the dry-deposition schemes.
@@ -522,10 +522,10 @@ if (EX) {
     ["Specific energy", energyTxt(EX.specificEnergy)],
     ["Energy released", US() ? `${fmt(EX.energyJ / 1.05505585e9, 3)} MMBtu` : `${fmt(EX.energyJ / 1e9, 3)} GJ`],
     ["TNT equivalent", fmtMass(EX.tntKg)],
-    ["Charges", (EX.shots || 1) > 1 ? `${EX.shots} × ${fmtMass(EX.mass / EX.shots)}` : "1"],
+    ["Charges", (EX.shots || 1) > 1 ? `${esc(EX.shots)} × ${fmtMass(EX.mass / EX.shots)}` : "1"],
     ["Confinement", esc(EX.confinement || "open")],
-    ["Cloud top (Church)", fmtLen(EX.cloudTop) + (EX.churchFactor && EX.churchFactor !== 1 ? ` (× ${EX.churchFactor})` : "")],
-    ["Initial cloud", `${o.layers} layers, σ<sub>y</sub> ${fmtLen(o.radiusFrac * EX.cloudTop)}`],
+    ["Cloud top (Church)", fmtLen(EX.cloudTop) + (EX.churchFactor && EX.churchFactor !== 1 ? ` (× ${esc(EX.churchFactor)})` : "")],
+    ["Initial cloud", `${esc(o.layers)} layers, σ<sub>y</sub> ${fmtLen(o.radiusFrac * EX.cloudTop)}`],
   ].concat(TN ? [[`${esc(Cap(TN))} in the material`, `${fmt(M.trackedFraction * 100, 3)}%`]] : [],
     [[`Share of ${esc(TN || "material")} lofted`, `${fmt(o.airborneFraction * 100, 3)}%`]]));
 }
@@ -534,7 +534,7 @@ $("release").innerHTML = rows([
   ["Ground elevation", M.elevation != null ? fmtLen(M.elevation) : "–"],
   ["Height", EX ? `0–${fmtLen(EX.cloudTop)}` : fmtLen(M.releaseHeight)],
   [TN ? `${esc(Cap(TN))} lofted` : "Particulate mass", fmtMass(M.releaseMass)],
-  ["Duration", M.releaseDuration > 0 ? `${M.releaseDuration} h` : "instantaneous"],
+  ["Duration", M.releaseDuration > 0 ? `${esc(M.releaseDuration)} h` : "instantaneous"],
   ["Particle count", fmt(totalCount, 3)],
   ["Density", fmtDens(M.density)],
 ]);
@@ -569,14 +569,13 @@ renderStatic();
 
 // ---------- state ----------
 const S = {
-  hour: 1, field: "conc", units: "mass", decades: 5, puffs: true, wind: true, sky: false, hy: false, ref: false, base: "auto", playing: false,
+  hour: 1, field: "conc", units: M.units || "mass", puffs: true, wind: true, sky: false, hy: false, ref: false, base: "auto", playing: false,
   lat: M.lat, lon: M.lon, z: 8,
   zoneMetric: M.zoneMetric || "m60", locs: M.loc.map((l) => l.value), track: true, env: false,
   dlocs: M.depLoc ? M.depLoc.map((l) => l.value) : [1e-6, 1e-5, 1e-4],
   fixTop: !!M.scaleMax, fixMin: !!M.scaleMin, fixDepMin: !!M.depScaleMin, decades: M.decades || 5,
 };
-S.units = M.units || "mass";
-try { const s = Object(JSON.parse(localStorage.getItem("puffmap.prefs") || "{}")); if (["auto", "light", "dark", "topo", "imagery", "none"].includes(s.base)) S.base = s.base; } catch (e) {}
+if (["auto", "light", "dark", "topo", "imagery", "none"].includes(PREFS.base)) S.base = PREFS.base;
 
 // ---------- color ramps (one hue, sequential) ----------
 const RAMPS = {
@@ -589,10 +588,11 @@ const RAMPS = {
 };
 RAMPS.peak = RAMPS.conc; RAMPS.snap = RAMPS.conc;
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+const darkMQ = matchMedia("(prefers-color-scheme: dark)");
 const isDark = () => {
   const t = document.documentElement.getAttribute("data-theme");
   if (t) return t === "dark";
-  return matchMedia("(prefers-color-scheme: dark)").matches;
+  return darkMQ.matches;
 };
 function rampLUT(field) {
   const stops = RAMPS[field][isDark() ? "dark" : "light"].map(hex), lut = new Uint8ClampedArray(256 * 4);
@@ -772,7 +772,7 @@ const refKind = () => (S.field === "dep" || (S.field === "zones" && S.zoneMetric
 const refLayer = () => (S.ref && M.outlines && M.outlines[refKind()]) || null;
 const refAlpha = (k) => (k ? 0.35 : 0.25);
 const refLinks = () => ((M.outlines.links || []).length ? " Source: " + M.outlines.links.map((l) =>
-  `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.text)}</a>`).join(", ") + "." : "");
+  /^https?:\/\//i.test(l.url) ? `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.text)}</a>` : esc(l.text)).join(", ") + "." : "");
 let refLegendKey = "";
 function drawReference() {
   const L = refLayer(), key = L ? refKind() : "";
@@ -937,9 +937,10 @@ function tileImg(url) {
   }
   return t;
 }
+let attribFor = null;
 function drawTiles() {
-  const bm = BASEMAPS[baseStyle()];
-  $("attrib").innerHTML = (bm ? bm.attr + " · " : "") + "Weather: Open-Meteo";
+  const style = baseStyle(), bm = BASEMAPS[style];
+  if (style !== attribFor) { attribFor = style; $("attrib").innerHTML = (bm ? bm.attr + " · " : "") + "Weather: Open-Meteo"; }
   if (!bm) return;
   const tz = Math.max(0, Math.min(bm.max, Math.round(S.z))), sc = 2 ** (S.z - tz), n = 2 ** tz;
   const cx = wx(S.lon, tz), cy = wy(S.lat, tz), size = TS * sc;
@@ -1167,7 +1168,7 @@ function drawOwn(h) {
   if (S.track) stroke(track.slice(done.length - 1), "0.28");
   if (S.env && M.ensemble) for (const tr of M.ensemble.tracks)   // other wind directions
     stroke([{ p: toScreen(M.lat, M.lon) }].concat(tr.filter(Boolean).map((c) => ({ p: toScreen(...c) }))), "0.2");
-  let pts = done.map((t) => t.p);
+  const pts = done.map((t) => t.p);
   if (S.puffs) {
     for (const [la, lo, sy, f] of h.puffs) {
       const [x, y] = toScreen(la, lo), r = sy / mPerPx(la);
@@ -1190,11 +1191,14 @@ function drawSource() {
 }
 // Hour labels along the center path: local clock time when the cloud's center is there.
 const clock = (iso) => fmtTime(iso, M.tzOffsetMin).slice(11, 16);
+const labelAvoid = [document.querySelector(".legend"), document.querySelector(".zoom")];
+let surfaceFor = null, surfaceColor = "";
 function drawTrackLabels(track, ink) {
-  const surface = getComputedStyle(document.body).getPropertyValue("--surface").trim() || "#fff";
+  if (surfaceFor !== isDark()) { surfaceFor = isDark(); surfaceColor = getComputedStyle(document.body).getPropertyValue("--surface").trim() || "#fff"; }
+  const surface = surfaceColor;
   // keep labels off the legend and the zoom buttons
   const cr = cv.getBoundingClientRect();
-  const placed = [document.querySelector(".legend"), document.querySelector(".zoom")].map((el) => {
+  const placed = labelAvoid.map((el) => {
     const r = el.getBoundingClientRect();
     return { x0: r.left - cr.left, y0: r.top - cr.top, x1: r.right - cr.left, y1: r.bottom - cr.top };
   });
@@ -1248,7 +1252,7 @@ function updatePanel() {
     [`Wind (${fmtLen(10)})`, `${fmtSpeed(h.ws)} from ${compass(h.wd)} (${h.wd}°)`],
     [`Wind (${fmtLen(M.zUp)})`, `${fmtSpeed(h.wsUp)} from ${compass(h.wdUp)} (${h.wdUp}°)`],
     ...(h.prof || []).filter((q) => q[0] <= 2000).map((q) => [`Wind (${fmtLen(q[0])})`, `${fmtSpeed(q[1])} from ${compass(q[2])} (${q[2]}°)`]),
-    ["Stability", `${h.stab} · ${stabName}`],
+    ["Stability", `${esc(h.stab)} · ${stabName}`],
     ["Mixing height", fmtLen(h.blh)],
     ["Cloud / sun", `${h.cloud}% · ${h.sw} W/m²`],
     ["Precipitation", fmtRate(h.precip)],
@@ -1293,10 +1297,10 @@ function render() { syncMinBox(); updatePanel(); draw(); }
 
 // ---------- interaction ----------
 const pointers = new Map();
-let pinch = null, dragMoved = false;
+let pinch = null;
 cv.addEventListener("pointerdown", (e) => {
   if (e.pointerType === "touch" && coop()) return;   // touch handled below: 1 finger scrolls, 2 move the map
-  cv.setPointerCapture(e.pointerId); pointers.set(e.pointerId, [e.offsetX, e.offsetY]); dragMoved = false;
+  cv.setPointerCapture(e.pointerId); pointers.set(e.pointerId, [e.offsetX, e.offsetY]);
   if (pointers.size === 2) { const [a, b] = [...pointers.values()]; pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), z: S.z, mx: (a[0] + b[0]) / 2, my: (a[1] + b[1]) / 2 }; }
   cv.classList.add("dragging");
 });
@@ -1316,7 +1320,6 @@ cv.addEventListener("pointermove", (e) => {
   }
 
   const dx = e.offsetX - px, dy = e.offsetY - py;
-  if (Math.abs(dx) + Math.abs(dy) > 0) dragMoved = true;
   S.lon = xlon(wx(S.lon, S.z) - dx, S.z); S.lat = ylat(wy(S.lat, S.z) - dy, S.z);
   $("tip").style.display = "none";
   schedule();
@@ -1357,7 +1360,7 @@ function showGestureHint() {
   hintTimer = setTimeout(() => g.classList.remove("show"), 1400);
 }
 const onMQ = () => { $("mapwrap").classList.toggle("coop", coop()); };
-for (const q of [narrowMQ, coarseMQ]) (q.addEventListener ? q.addEventListener("change", onMQ) : q.addListener(onMQ));
+for (const q of [narrowMQ, coarseMQ]) { if (q.addEventListener) q.addEventListener("change", onMQ); else q.addListener(onMQ); }
 function zoomAt(x, y, dz) {
   const nz = Math.max(2, Math.min(18, S.z + dz)); if (nz === S.z) return;
   const [la, lo] = toLatLon(x, y);
@@ -1494,7 +1497,7 @@ document.addEventListener("keydown", (e) => {
     S.hour = Math.max(1, Math.min(HRS.length, S.hour + (e.key === "ArrowRight" ? 1 : -1))); $("hour").value = S.hour; render();
   } else if (e.key === " " && e.target.tagName !== "BUTTON") { e.preventDefault(); setPlaying(!S.playing); }
 });
-matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { overlayKey = ""; schedule(); });
+darkMQ.addEventListener("change", () => { overlayKey = ""; schedule(); });
 // threat-level inputs follow the display units (kg/m3 internally)
 const locUnit = () => (S.zoneMetric === "dep"
   ? (S.units === "ugft2" ? [UGFT2, "µg/ft²"] : S.units === "ugm3" ? [1e9, "µg/m²"] : S.units === "cm3" ? [1e5, "µg/cm²"] : [1e6, "mg/m²"])

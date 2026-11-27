@@ -201,7 +201,6 @@ NOT_CHECKED = (
     "The U.S. Army, the Iowa Army Ammunition Plant, and government agencies didn\u2019t make "
     "this map, and none of them have checked it."
 )
-ADVISORY_URL = "https://d34w7g4gy10iej.cloudfront.net/pubs/pdf_78366.pdf"
 # The Eighth Circuit's order, as reported by Iowa Public Radio (Nov. 20, 2026, 11:45 a.m. CST).
 COURT_URL = (
     "https://www.iowapublicradio.org/ipr-news/2026-11-20/"
@@ -1613,18 +1612,24 @@ def _day_plain(f: Facts, ctx: dict[str, Any]) -> list[str]:
     ]
 
 
+def _esc(s: str) -> str:
+    """Return plain text for HTML (escape ``&`` and ``<``)."""
+    return html.escape(s, quote=False)
+
+
 def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
     built = ctx["built_txt"]
     lead = f.get("day", PLANNED_DAY)
     on = f" on {lead}" if more else ""  # label the lead day's parts when there are more
     note = window_note(lead)
     no_time = "</p>\n  <p>".join(time_note_paragraphs_html(built))
+    pending = _esc(ctx.get("pending_note") or "")
     return f"""<section id="summary" aria-labelledby="summary-h">
   <h2 id="summary-h">What the maps show</h2>
   <p class="caveat"><b>{CAVEAT}</b></p>
   <h3>When was the detonation?</h3>
   <p>{no_time}</p>
-  {f'<p class="caveat">{ctx["pending_note"]}</p>' if ctx.get("pending_note") else ""}
+  {f'<p class="caveat">{pending}</p>' if pending else ""}
   {_archived_html(ctx.get("archived"), ctx["pct"])}<h3>Where the cloud goes{on}</h3>
   <p>{note + " " if note else ""}{wind_sentence(f)} {path_sentence(f)} {t.forecast_line}</p>
   <h3>How far lead on the ground could reach{on}</h3>
@@ -1657,15 +1662,15 @@ below it is
     (an emission factor of 0.26), but no one has measured a blast like this, and the actual
     winds may have differed from the forecast. The four cases show the range. Use the map
     above to see each case. Last updated {built}.</p>
-  <p>{PRECEDENT} Sources: {BRIEFING_SOURCES_HTML}.</p>
-  <p>{RELEASE_POINT}</p>
+  <p>{_esc(PRECEDENT)} Sources: {BRIEFING_SOURCES_HTML}.</p>
+  <p>{_esc(RELEASE_POINT)}</p>
   <h3>How the date was set</h3>
-  <p>{TRUMP_HOLD} Sources: {TRUMP_SOURCE_HTML}.</p>
-  <p>{WHY_WEDNESDAY} Source: {WEDNESDAY_SOURCE_HTML}.</p>
+  <p>{_esc(TRUMP_HOLD)} Sources: {TRUMP_SOURCE_HTML}.</p>
+  <p>{_esc(WHY_WEDNESDAY)} Source: {WEDNESDAY_SOURCE_HTML}.</p>
   <p><b>Court case.</b> {court_pause([m["day"] for m in more], lead)} Sources: \
 {COURT_SOURCES_HTML}.</p>
-  <p><b>{EARLIER_HEAD}</b> {WHY_TUESDAY} Sources: {TUESDAY_SOURCES_HTML}.
-    {WHY_MONDAY} Source: <a href="{ARMY_URL}" rel="noopener">{ARMY_CITE}</a>.</p>
+  <p><b>{EARLIER_HEAD}</b> {_esc(WHY_TUESDAY)} Sources: {TUESDAY_SOURCES_HTML}.
+    {_esc(WHY_MONDAY)} Source: <a href="{ARMY_URL}" rel="noopener">{_esc(ARMY_CITE)}</a>.</p>
 </section>"""
 
 

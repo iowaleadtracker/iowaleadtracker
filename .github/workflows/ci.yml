@@ -6,6 +6,10 @@
 # workflows start CI on their branches themselves (`gh workflow run ci.yml`), because
 # pushes made with the workflow token don't start other workflows. A pull request from a
 # fork gets no automatic CI; run this workflow on its branch by hand.
+#
+# The front-end lint job runs on every branch push except main, so a pull request shows
+# it but the merge to main doesn't run it again. A merge that resolves conflicts in the
+# pages isn't linted before it deploys: run `pnpm lint` on the merged branch first.
 name: CI
 
 on:
@@ -33,6 +37,32 @@ jobs:
       - name: pre-commit (ruff, ruff format, mypy, fast tests, file checks)
         run: pre-commit run --all-files --show-diff-on-failure
 
+  lint-frontend:
+    # oxlint (JavaScript) and ESLint (HTML, CSS) on the site's pages: see package.json
+    if: github.ref != 'refs/heads/main'
+    needs: build  # lints the built landing page, whose summary comes from the built maps
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: site-${{ needs.build.outputs.key }}
+          path: scenarios/iowa-aap-lead-azide/outputs/site/
+      - uses: actions/setup-python@v7
+        with:
+          python-version-file: .python-version
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: python -m pip install -r requirements.txt
+      - uses: pnpm/action-setup@v6  # the version in package.json's packageManager
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Lint the pages' JavaScript, CSS and HTML
+        run: pnpm lint
+
   tests:
     runs-on: ubuntu-latest
     steps:
@@ -52,6 +82,8 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    outputs:
+      key: ${{ steps.key.outputs.key }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7

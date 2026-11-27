@@ -471,7 +471,9 @@ def test_hysplit_view_is_offered_and_described() -> None:
     assert site.HYSPLIT_OVERLAY.exists()  # saved in the repository: the build never runs HYSPLIT
     page = load_template()
     assert '<div class="seg" id="modelseg" role="group" aria-label="Model" hidden>' in page
-    assert '<button data-v="hysplit" aria-pressed="false">NOAA HYSPLIT</button>' in page
+    assert (
+        '<button type="button" data-v="hysplit" aria-pressed="false">NOAA HYSPLIT</button>' in page
+    )
     assert "hy: false" in page  # the site's own model until the reader switches
     assert 'const OWN = M.homeName || "This model";' in page  # its button: the site's name
     assert "if (FIELDS.hy_conc) {" in page  # offered only on maps that carry the saved run

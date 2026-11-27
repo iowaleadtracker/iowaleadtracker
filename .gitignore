@@ -70,3 +70,6 @@ scenarios/*/outputs/site/*
 
 # older forecast pulls, kept locally when refreshing (README "Refreshing on the day")
 scenarios/*/met_cache_retrieved_*/
+
+# front-end lint: pages and inline code written by tools/lint_pages.py
+.lint/
