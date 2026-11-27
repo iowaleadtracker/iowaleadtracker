@@ -155,6 +155,10 @@ MODEL_ARGS = [
     *("--dt", "60"),
     *("--grid", "360"),
     *("--scale-min", "0.15ug"),
+    # Deposition below EPA's lowest dust-lead action level (5 ug/ft2, floors) is hidden until
+    # the reader unticks the box. Without a minimum the view ran four powers of ten below its
+    # peak, to amounts no routine test would report (README, "Deposition minimum").
+    *("--dep-scale-min", "5ug/ft2"),
     *("--decades", "4"),
     *("--weather-model", WEATHER),
     *("--met-cache", str(MET_CACHE)),

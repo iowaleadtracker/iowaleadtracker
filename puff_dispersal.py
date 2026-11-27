@@ -501,6 +501,13 @@ def _add_display_args(p: argparse.ArgumentParser) -> None:
         "are hidden (toggle in page)",
     )
     p.add_argument(
+        "--dep-scale-min",
+        type=parse_areal,
+        default=None,
+        help="minimum deposition to show, e.g. 5ug/ft2: the deposition color scale starts "
+        "here and runs --decades above it; lower values are hidden (toggle in page)",
+    )
+    p.add_argument(
         "--home-url",
         default=None,
         help="site the map belongs to; shown in a banner when the map page is "
@@ -1291,6 +1298,7 @@ def _meta(
         ),
         "scaleMax": a.scale_max,
         "scaleMin": a.scale_min,
+        "depScaleMin": getattr(a, "dep_scale_min", None),
         "decades": max(2, min(8, a.decades)),
         "units": a.units,
         "zoneMetric": a.zone_metric,

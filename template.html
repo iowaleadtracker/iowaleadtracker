@@ -570,7 +570,7 @@ const S = {
   lat: M.lat, lon: M.lon, z: 8,
   zoneMetric: M.zoneMetric || "m60", locs: M.loc.map((l) => l.value), track: true, env: false,
   dlocs: M.depLoc ? M.depLoc.map((l) => l.value) : [1e-6, 1e-5, 1e-4],
-  fixTop: !!M.scaleMax, fixMin: !!M.scaleMin, decades: M.decades || 5,
+  fixTop: !!M.scaleMax, fixMin: !!M.scaleMin, fixDepMin: !!M.depScaleMin, decades: M.decades || 5,
 };
 S.units = M.units || "mass";
 try { const s = Object(JSON.parse(localStorage.getItem("puffmap.prefs") || "{}")); if (["auto", "light", "dark", "topo", "imagery", "none"].includes(s.base)) S.base = s.base; } catch (e) {}
@@ -700,7 +700,7 @@ const OWN = M.homeName || "This model";   // the button beside "NOAA HYSPLIT" (-
 const hyName = () => (S.field === "dep" ? "hy_dep" : "hy_conc");
 const hyPeak = (kind) => ((M.hysplitOverlay || {})[kind === "dep" ? "depMax" : "airMax"] || [])[S.hour - 1] || 0;
 let hyBand = null, hyEdges = { key: null, segs: [] };
-function buildHysplit(floor, top, useMin) {
+function buildHysplit(floor, top, minV) {
   const F = FIELDS[hyName()], n = HY_BANDS.length, step = (top - floor) / n;
   const px = new Uint8ClampedArray(NCELL * 4), base = (S.hour - 1) * NCELL;
   hyBand = new Uint8Array(NCELL);
@@ -724,11 +724,12 @@ function buildHysplit(floor, top, useMin) {
   $("leghytext").textContent = `NOAA’s HYSPLIT model${O.note ? " " + O.note : ""}, run for this map. Not a NOAA forecast.`;
   rangeLabel(floor + shift, top + shift, U.label);
   const nd = $("nodata");
-  nd.hidden = !(useMin && shown === 0);
+  nd.hidden = !(minV && shown === 0);
   if (!nd.hidden) {
-    const vmax = hyPeak("conc");
-    nd.innerHTML = `<b>HYSPLIT has nothing at the ${fmtVal(M.scaleMin, "conc")} minimum this hour.</b> ` +
-      (vmax > 0 ? `Its highest hourly mean: ${fmtVal(vmax, "conc", 0)} (${fmt(vmax / M.scaleMin * 100, 2)}% of the minimum).` : "It has no airborne material on the map.");
+    const vmax = hyPeak(kind);
+    nd.innerHTML = `<b>HYSPLIT has nothing at the ${fmtVal(minV, kind)} minimum this hour.</b> ` +
+      (vmax > 0 ? `Its highest ${kind === "dep" ? "amount on the ground" : "hourly mean"}: ${fmtVal(vmax, kind, 0)} (${fmt(vmax / minV * 100, 2)}% of the minimum).`
+        : kind === "dep" ? "It has nothing on the ground on the map." : "It has no airborne material on the map.");
   }
 }
 // Cell edges where HYSPLIT's band changes, as corner indexes [i1, j1, i2, j2] of the grid.
@@ -752,8 +753,12 @@ function drawHysplitEdges() {
   for (let k = 0; k < segs.length; k += 4) { ctx.moveTo(xs[segs[k]], ys[segs[k + 1]]); ctx.lineTo(xs[segs[k + 2]], ys[segs[k + 3]]); }
   ctx.stroke();
 }
+// The lowest value the map shows, when one is set and its box is ticked: --scale-min for the
+// air views, --dep-scale-min for deposition (kg/m3 or kg/m2). Lower values are hidden, not zero.
+const shownMin = () => (S.units === "count" || S.field === "zones" ? 0
+  : S.field === "dep" ? (S.fixDepMin && M.depScaleMin) || 0 : (S.fixMin && M.scaleMin) || 0);
 function buildOverlay() {
-  const key = [S.hour, S.field, S.units, S.decades, isDark(), S.zoneMetric, S.locs.join(","), S.dlocs.join(","), S.fixTop, S.fixMin, S.env, S.hy].join("|");
+  const key = [S.hour, S.field, S.units, S.decades, isDark(), S.zoneMetric, S.locs.join(","), S.dlocs.join(","), S.fixTop, S.fixMin, S.fixDepMin, S.env, S.hy].join("|");
   if (key === overlayKey) return;
   overlayKey = key;
   const zones = S.field === "zones";
@@ -769,11 +774,11 @@ function buildOverlay() {
   const F = FIELDS[fkey(S.field)], lut = rampLUT(S.field);
   const px = new Uint8ClampedArray(NCELL * 4);
   const air = S.field !== "dep" && S.units !== "count";
-  const useMin = air && S.fixMin && M.scaleMin, fixed = air && !useMin && S.fixTop && M.scaleMax;
+  const minV = shownMin(), useMin = !!minV, fixed = air && !useMin && S.fixTop && M.scaleMax;
   const base = (S.hour - 1) * NCELL;
   let top = fixed ? Math.max(F.hi, Math.log10(M.scaleMax)) : F.hi, floor = top - S.decades;
-  if (useMin) { floor = Math.log10(M.scaleMin); top = floor + S.decades; }
-  if (S.hy) { buildHysplit(floor, top, useMin); return; }   // HYSPLIT's result between the same two levels
+  if (useMin) { floor = Math.log10(minV); top = floor + S.decades; }
+  if (S.hy) { buildHysplit(floor, top, minV); return; }   // HYSPLIT's result between the same two levels
   let shown = 0, frameMax = -Infinity;
   for (let i = 0; i < NCELL; i++) {
     const q = F.q[base + i];
@@ -791,9 +796,10 @@ function buildOverlay() {
   nd.hidden = !(useMin && shown === 0);
   if (!nd.hidden) {
     const h = HRS[S.hour - 1];
-    const [what, vmax] = { peak: ["short-term peak", h.pmax], snap: ["end-of-hour value", h.smax] }[S.field] || ["hourly mean", h.cmax];   // exact, not color-quantized
-    nd.innerHTML = `<b>Nothing reaches the ${fmtVal(M.scaleMin, "conc")} minimum this hour.</b> ` +
-      (vmax > 0 ? `Highest ${what}: ${fmtVal(vmax, "conc")} (${fmt(vmax / M.scaleMin * 100, 2)}% of the minimum).` : "No airborne material on the map.");
+    const kind = S.field === "dep" ? "dep" : "conc";
+    const [what, vmax] = { peak: ["short-term peak", h.pmax], snap: ["end-of-hour value", h.smax], dep: ["amount on the ground", h.dmax] }[S.field] || ["hourly mean", h.cmax];   // exact, not color-quantized
+    nd.innerHTML = `<b>Nothing reaches the ${fmtVal(minV, kind)} minimum this hour.</b> ` +
+      (vmax > 0 ? `Highest ${what}: ${fmtVal(vmax, kind)} (${fmt(vmax / minV * 100, 2)}% of the minimum).` : kind === "dep" ? "Nothing on the ground on the map." : "No airborne material on the map.");
   }
 }
 function putWarped(px) {
@@ -814,7 +820,7 @@ function drawLegend(lut, floor, top) {
   for (let e = Math.ceil(lo); e <= Math.floor(hi); e += step) ticks.push(e);
   let html = ticks.filter((e) => hi - e > 0.45 || e === Math.floor(hi) && hi - e < 0.05).map((e) =>
     `<span style="left:${((e - lo) / (hi - lo) * 100).toFixed(1)}%">${fmt(10 ** e, 1)}</span>`).join("");
-  if (S.fixMin && M.scaleMin && S.field !== "dep" && S.units !== "count" && Math.ceil(lo) - lo >= 0.05)   // label the minimum
+  if (shownMin() && Math.ceil(lo) - lo >= 0.05)   // label the minimum
     html = `<span style="left:0;transform:none;font-weight:600;color:var(--ink)">${fmt(10 ** lo, 2)}</span>` + html;
   if (!ticks.length || hi - ticks[ticks.length - 1] >= 0.05)   // label the top of the scale
     html += `<span style="left:100%;transform:translateX(-100%);font-weight:600;color:var(--ink)">${fmt(10 ** hi, 2)}</span>`;
@@ -1228,7 +1234,17 @@ function updatePanel() {
   ]).map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`).join("");
 }
 
-function render() { updatePanel(); draw(); }
+// The "show only ≥" box belongs to the view on screen: the air minimum on the air views,
+// the deposition minimum on the deposition view, and nothing where neither applies.
+function syncMinBox() {
+  if (!M.scaleMin && !M.depScaleMin) return;
+  const dep = S.field === "dep", v = S.field === "zones" || S.units === "count" ? 0 : dep ? M.depScaleMin : M.scaleMin;
+  $("fixtopwrap").hidden = !v;
+  if (!v) return;
+  $("fixtop").checked = dep ? S.fixDepMin : S.fixMin;
+  $("fixtoplabel").textContent = "show only ≥ " + (dep ? depText(v) : M.scaleMin >= 1e-6 ? fmt(M.scaleMin * 1e3, 3) + " µg/cm³" : fmt(M.scaleMin * 1e9, 3) + " µg/m³");
+}
+function render() { syncMinBox(); updatePanel(); draw(); }
 
 // ---------- interaction ----------
 const pointers = new Map();
@@ -1473,11 +1489,8 @@ $("units").value = S.units;
 $("zmetric").value = S.zoneMetric;
 syncLocInputs();
 $("decades").value = S.decades;
-if (M.scaleMin) {
-  $("fixtopwrap").hidden = false;
-  $("fixtop").checked = true;
-  $("fixtoplabel").textContent = `show only ≥ ${M.scaleMin >= 1e-6 ? fmt(M.scaleMin * 1e3, 3) + " µg/cm³" : fmt(M.scaleMin * 1e9, 3) + " µg/m³"}`;
-  $("fixtop").onchange = (e) => { S.fixMin = e.target.checked; render(); };
+if (M.scaleMin || M.depScaleMin) {                // the box follows the view: air or deposition (syncMinBox)
+  $("fixtop").onchange = (e) => { if (S.field === "dep") S.fixDepMin = e.target.checked; else S.fixMin = e.target.checked; render(); };
 } else if (M.scaleMax) {
   $("fixtopwrap").hidden = false;
   $("fixtoplabel").textContent = `scale top ${fmt(M.scaleMax * 1e3, 3)} µg/cm³`;

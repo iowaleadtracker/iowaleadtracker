@@ -218,6 +218,18 @@ case, the most conservative one, and showed only the forecast.
   uses the four colors of HYSPLIT's own plots, between the same lowest and highest levels
   as the site's map. It has the hourly mean and deposition only.
   The build reads the saved file; it doesn't run HYSPLIT. See `hysplit-archived/README.md`.
+- **Deposition minimum.** The deposition view opens showing 5 µg/ft² or more
+  (`--dep-scale-min 5ug/ft2`), in both models' views, the way the air views open at
+  0.15 µg/m³. 5 µg/ft² is EPA's lowest dust-lead action level, for indoor floors
+  (40 CFR 745.227), which the page already uses as a rough comparison. Labs in EPA's lead
+  accreditation program must be able to measure a dust wipe at 80% of the lowest action
+  level for the surface sampled, so 4 µg/ft² for a floor wipe, and need not go lower
+  ([EPA NLLAP, Laboratory Quality Standards for Recognition 4.0, 2024](https://www.epa.gov/system/files/documents/2024-10/final-lqsr-4.0_document_10.10.2024.pdf)).
+  Before, the view's colors ran four powers of ten below the map's highest value: in the
+  Low case, down to 0.012 µg/ft², over about 4,000 square miles, of which about 26 are at
+  5 µg/ft² or more. The "show only" box under the map brings the lower values back. They
+  are hidden, not zero, and the level is a display choice, not a line between safe and
+  unsafe.
 - **Blast time.** Only 9:00 a.m. is built (`TIMES`), so the time menu and its Earlier and
   Later buttons are hidden. The 8:30 and 9:30 maps are gone; an old link to one opens
   9:00.

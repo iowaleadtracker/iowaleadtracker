@@ -375,6 +375,8 @@ def test_archived_map_runs_offline_from_the_new_release_point(
     assert note["note"] == site.HYSPLIT_NOTE
     assert note["scaledBy"] == pytest.approx(meta["explosionOpts"]["airborneFraction"], rel=1e-4)
     assert len(note["airMax"]) == len(note["depMax"]) == len(out["hours"])  # HYSPLIT's peaks
+    # the deposition view's minimum, 5 ug/ft2 in the page's kg/m2
+    assert meta["depScaleMin"] == pytest.approx(5e-9 / 0.09290304)
     # two models, one release: their highest hourly means agree within a factor of 3
     assert 1 / 3 < grid["hy_conc"]["max"] / grid["conc"]["max"] < 3
     i = argv.index("--weather-at")
@@ -438,6 +440,20 @@ def test_hysplit_view_is_offered_and_described() -> None:
     readme = (site.HYSPLIT_OVERLAY.parent / "README.md").read_text(encoding="utf-8")
     flat = " ".join(readme.split())
     assert "don't use it to decide if you're safe; follow official instructions" in flat
+
+
+def test_deposition_view_opens_at_epas_lowest_action_level() -> None:
+    """Deposition has a minimum like air's, with a box that brings the lower values back."""
+    args = site.MODEL_ARGS
+    assert args[args.index("--dep-scale-min") + 1] == "5ug/ft2"
+    assert fs.DEP_LEVELS[0] == ("yellow", 5)  # the level the page already compares against
+    page = load_template()
+    assert "fixDepMin: !!M.depScaleMin" in page  # on when the map carries a minimum
+    assert "function syncMinBox()" in page  # the box follows the view: air or deposition
+    assert 'S.field === "dep" ? (S.fixDepMin && M.depScaleMin) || 0' in page
+    what = works_cited.CHANGES[0][1]
+    assert "hidden, not zero" in what
+    assert "not a line between safe and unsafe" in what
 
 
 def test_staged_page_keeps_the_permit_case_first() -> None:

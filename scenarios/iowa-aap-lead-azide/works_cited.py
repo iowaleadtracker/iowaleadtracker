@@ -686,7 +686,14 @@ CHANGES = [
             "this site&rsquo;s model to NOAA&rsquo;s HYSPLIT model, run on NOAA&rsquo;s archive "
             "of the same weather model for the same assumed release, in the colors of "
             "HYSPLIT&rsquo;s own plots. It is a second model&rsquo;s estimate, not a "
-            "measurement. The maps&rsquo; own numbers did not change."
+            "measurement. The deposition view now opens showing 5 &micro;g/ft&sup2; or more, "
+            "EPA&rsquo;s lowest dust-lead action level (for indoor floors), the way the air "
+            "views open at 0.15 &micro;g/m&sup3;. Before, its colors ran down to one "
+            "ten-thousandth of the map&rsquo;s highest value, amounts far too small for a "
+            "routine wipe test to report. Untick &ldquo;show only&rdquo; under the map to see "
+            "the lower values: they are hidden, not zero, and the level is a choice about "
+            "what to draw, not a line between safe and unsafe. The maps&rsquo; own numbers "
+            "did not change."
         ),
     ),
     (
