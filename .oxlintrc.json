@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "env": { "browser": true, "es2024": true },
+  "categories": { "correctness": "error" },
+  "rules": {
+    "no-unused-vars": ["error", { "caughtErrors": "none" }],
+    "no-dupe-keys": "error",
+    "no-undef": "error",
+    "no-var": "error",
+    "prefer-const": "error",
+    "eqeqeq": ["error", "smart"],
+    "no-shadow-restricted-names": "error",
+    "no-self-assign": "error",
+    "no-useless-concat": "error"
+  }
+}

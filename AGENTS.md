@@ -18,10 +18,11 @@ Iowa scenario and every assumption in `scenarios/iowa-aap-lead-azide/README.md`.
 ```bash
 pre-commit run --all-files   # ruff, ruff format, mypy, fast tests, file checks
 pytest                       # the full suite
+pnpm install && pnpm lint    # front-end lint: oxlint (JS), ESLint (HTML, CSS); Node from .nvmrc
 ```
 
-CI (`.github/workflows/ci.yml`) runs both, plus an offline site build, on every push
-and pull request; `main` only takes changes through a reviewed pull request.
+CI (`.github/workflows/ci.yml`) runs these, plus an offline site build, on every push
+and pull request (the front-end lint on pull request branches only, not on main); `main` only takes changes through a reviewed pull request.
 
 If the change should not alter the published maps, prove it:
 

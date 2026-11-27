@@ -1,0 +1,23 @@
+{
+  "name": "iowaleadtracker-lint",
+  "private": true,
+  "description": "Front-end linters for the site's pages (JavaScript, CSS and HTML). The site itself needs no Node.",
+  "type": "module",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "lint": "pnpm run lint:pages && pnpm run lint:js && pnpm run lint:eslint",
+    "lint:pages": "python3 tools/lint_pages.py .lint",
+    "lint:js": "oxlint --deny-warnings .lint/js/*.js",
+    "lint:eslint": "eslint --max-warnings 0 .lint"
+  },
+  "devDependencies": {
+    "@eslint/css": "2.0.1",
+    "@html-eslint/eslint-plugin": "0.69.0",
+    "@html-eslint/parser": "0.69.0",
+    "eslint": "10.16.0",
+    "oxlint": "1.95.0"
+  }
+}

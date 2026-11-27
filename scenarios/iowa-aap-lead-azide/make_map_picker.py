@@ -51,6 +51,19 @@ SITE = HERE / "outputs" / "site"
 MAPS = SITE / "maps"
 HASHED = SITE / "m"  # content-hashed copies of the maps, cached for a year
 PAGE_TEMPLATE = HERE / "index_template.html"
+#: Landing-page values that are plain text, not HTML: escaped before substitution.
+PLAIN_TEXT_KEYS = (
+    "about_who",
+    "misting",
+    "precedent",
+    "release_point",
+    "why_monday",
+    "why_tuesday",
+    "why_wednesday",
+    "trump_hold",
+    "not_checked",
+    "army_cite",
+)
 MET_CACHE = HERE / "met_cache" / "map_met_all.json"
 # The planned blast day (CST, UTC-6): the Army said on Nov. 22 that the blasts are now
 # scheduled for Wednesday. It is always built, its maps have no date in their names, and
@@ -1166,8 +1179,6 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
             f"{name}: {pct[c]} of the lead</option>"
             for c, _, name in CASES
         ),
-        "got_txt": got_txt,
-        "n_models": n_models,
         "weather_line": forecast_summary.weather_line(got_txt, archived=archived),
         "about_weather": html.escape(
             forecast_summary.about_weather(n_models, got_txt, archived=archived), quote=False
@@ -1187,19 +1198,12 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "precedent": forecast_summary.PRECEDENT,
         "release_point": forecast_summary.RELEASE_POINT,
         "briefing_sources_html": forecast_summary.BRIEFING_SOURCES_HTML,
-        "advisory_url": forecast_summary.ADVISORY_URL,
         "advisory_nov24_url": forecast_summary.ADVISORY_NOV24_URL,
         "army_maps_pdf": forecast_summary.ARMY_MAPS_PDF,
         "blast_status": forecast_summary.BLAST_STATUS_HTML,
         "early_air": forecast_summary.EARLY_AIR_HTML,
-        "analysis_head": forecast_summary.ANALYSIS_HEAD,
-        "analysis": forecast_summary.ANALYSIS_HTML,
         "court_pause": forecast_summary.court_pause([day_label(d) for d in told]),
-        "court_url": forecast_summary.COURT_URL,
-        "court_cite": forecast_summary.COURT_CITE,
         "court_sources": forecast_summary.COURT_SOURCES_HTML,
-        "court_short": forecast_summary.COURT_SHORT_HTML,
-        "time_head": forecast_summary.TIME_HEAD,
         "earlier_head": forecast_summary.EARLIER_HEAD,
         "why_monday": forecast_summary.WHY_MONDAY,
         "why_tuesday": forecast_summary.WHY_TUESDAY,
@@ -1210,7 +1214,6 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "tuesday_sources": forecast_summary.TUESDAY_SOURCES_HTML,
         "army_url": forecast_summary.ARMY_URL,
         "army_cite": forecast_summary.ARMY_CITE,
-        "time_note": forecast_summary.time_note_html(built_txt),
         "about_time": forecast_summary.about_time_html(built_txt),
         "methodology_time": forecast_summary.methodology_time_html(built_txt),
         "analysis_short_head": forecast_summary.ANALYSIS_SHORT_HEAD,
@@ -1223,6 +1226,9 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "map_files": json.dumps(write_hashed_maps(maps.days, maps.sources), separators=(",", ":")),
         **source_values(maps),
     }
+    # Plain-text values: escape here so a later "&" or "<" in the copy can't break the page.
+    for key in PLAIN_TEXT_KEYS:
+        values[key] = html.escape(values[key], quote=False)
     template = Template(PAGE_TEMPLATE.read_text(encoding="utf-8").removesuffix("\n"))
     return template.substitute(values), llms_txt
 

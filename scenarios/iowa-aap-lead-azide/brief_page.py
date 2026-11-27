@@ -100,7 +100,7 @@ PAGE = Template("""<!doctype html><html lang="en-US"><head><meta charset="utf-8"
   .doc li { margin: 0 0 5px; }
   .doc .caveat { background: #fde8c8; padding: 8px 12px; border-radius: 6px; margin: 0 0 14px; }
   .doc .caveat p:last-child { margin-bottom: 0; }
-  .doc .meta, .doc .cap, .doc figcaption { color: #52606d; font-size: 12.5px; }
+  .doc .cap, .doc figcaption { color: #52606d; font-size: 12.5px; }
   .doc a { color: #0b5cad; overflow-wrap: anywhere; } /* long source URLs wrap on phones */
   .doc code { font: 12.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
               background: #eef1f4; padding: 1px 4px; border-radius: 3px; overflow-wrap: anywhere; }
@@ -114,7 +114,6 @@ PAGE = Template("""<!doctype html><html lang="en-US"><head><meta charset="utf-8"
   .doc figure img { display: block; width: 100%; height: auto; border: 1px solid #cbd2d9;
                     border-radius: 6px; background: #fff; }
   .doc figcaption { margin-top: 6px; }
-  .doc nav { margin: 0 0 14px; font-size: 13px; }
   .doc h2, .doc h3 { scroll-margin-top: 12px; }
   footer { max-width: 46rem; margin: 0 auto; padding: 0 16px 48px; color: #52606d;
            font-size: 12.5px; line-height: 1.5; }
