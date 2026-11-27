@@ -656,10 +656,33 @@ ANALYSIS_METHOD = (
     f"reviewed them. The text, the code, and the data are on {_a(ANALYSIS_FOLDER_URL, 'GitHub')}."
 )
 
+#: The HYSPLIT outline on the archived-weather maps, shown under the method note.
+HYSPLIT_HEAD = "The HYSPLIT outline."
+HYSPLIT_METHOD = (
+    "On the archived-weather maps, a box under the map outlines the result of NOAA&rsquo;s "
+    "HYSPLIT model (Stein et al. 2015) for the same blast: the same amount of lead in the same "
+    "four particle sizes, released at 9 a.m. from the two magazines, on NOAA Air Resources "
+    "Laboratory&rsquo;s archive of the HRRR weather model. The outline is drawn where "
+    "HYSPLIT&rsquo;s hourly mean near the ground, or its lead on the ground, is at or above "
+    "the lowest level the map is showing, scaled to the case chosen. HYSPLIT was run once, "
+    "ahead of time; the site reads its saved output. It is a second model&rsquo;s estimate, "
+    "not a measurement. The inputs and the output are on "
+    f"{_a(SOURCE_URL + '/tree/main/scenarios/iowa-aap-lead-azide/hysplit-archived', 'GitHub')}."
+)
+
 #: What changed in the maps and their method, newest first (Central time dates). Add an
 #: entry for every change to the model, its settings or its sources.
 CHANGES_HEAD = "Change log"
 CHANGES = [
+    (
+        "Nov. 27",
+        (
+            "The archived-weather maps have a new box under the map, &ldquo;HYSPLIT "
+            "outline&rdquo;. It draws where NOAA&rsquo;s HYSPLIT model, run on NOAA&rsquo;s "
+            "archive of the same weather model, puts lead at or above the lowest level the "
+            "map is showing. The maps&rsquo; own numbers did not change."
+        ),
+    ),
     (
         "Nov. 26",
         "Snopes (Nov. 25) added to the mentions of the Iowa Lead Tracker. The maps did not change.",
@@ -884,6 +907,7 @@ def render(ctx: dict[str, Any], site_url: str, built_txt: str) -> str:
     return f"""
   <p><b>{METHOD_HEAD}</b> {method_intro(ctx["pct"])}</p>
   <p><b>{ANALYSIS_HEAD}</b> {ANALYSIS_METHOD}</p>
+  <p><b>{HYSPLIT_HEAD}</b> {HYSPLIT_METHOD}</p>
   <h3>{CHANGES_HEAD}</h3>
   {changes_html()}
   <h3>References</h3>

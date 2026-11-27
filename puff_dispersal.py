@@ -66,7 +66,7 @@ from dispersal.met import (
     rotated_met,
 )
 from dispersal.model import run_model
-from dispersal.output import hysplit_files, pack, write_html
+from dispersal.output import hysplit_files, hysplit_overlay, pack, write_html
 from dispersal.particles import particle_properties
 from dispersal.source_term import (
     COARSE_BINS,
@@ -505,6 +505,20 @@ def _add_display_args(p: argparse.ArgumentParser) -> None:
         default=None,
         help="site the map belongs to; shown in a banner when the map page is "
         "opened on its own instead of inside that site",
+    )
+    p.add_argument(
+        "--hysplit-overlay",
+        default=None,
+        metavar="FILE",
+        help="add a saved NOAA HYSPLIT run for the same release (a file made by a "
+        "scenario's make_overlay.py) to the map as an outline readers can switch on; it is "
+        "scaled to this run's release mass",
+    )
+    p.add_argument(
+        "--hysplit-overlay-note",
+        default=None,
+        metavar="TEXT",
+        help="what the saved HYSPLIT run used, shown in the map's legend with the outline",
     )
     p.add_argument(
         "--legend-note",
@@ -1007,6 +1021,23 @@ def _wind_from(u: float, v: float) -> int:
     return round((math.degrees(math.atan2(-u, -v)) + 360) % 360)
 
 
+def _hysplit_overlay(
+    a: argparse.Namespace, xe: FloatArray, ye: FloatArray, coslat0: float
+) -> tuple[dict[str, FloatArray], Json | None]:
+    """Return ``--hysplit-overlay`` on the map's grid and its note, or nothing without it."""
+    path = getattr(a, "hysplit_overlay", None)
+    if not path:
+        return {}, None
+    rows = a.lat + np.degrees((ye[:-1] + ye[1:]) / 2 / R_EARTH)
+    cols = a.lon + np.degrees((xe[:-1] + xe[1:]) / 2 / (R_EARTH * coslat0))
+    try:
+        fields, note = hysplit_overlay(path, a.start, a.hours, a.release_mass, (rows, cols))
+    except (OSError, ValueError, KeyError) as e:
+        raise SystemExit(f"--hysplit-overlay: {e}") from None
+    note["note"] = getattr(a, "hysplit_overlay_note", None) or ""
+    return fields, note
+
+
 def _hours_output(
     a: argparse.Namespace, met: MetField, hourly: Sequence[Json], F: dict[str, FloatArray]
 ) -> list[Json]:
@@ -1305,6 +1336,7 @@ def simulate(a: argparse.Namespace, log: TextIO = sys.stderr) -> Json:
     print(f"grid: {conc.shape[2]}x{conc.shape[1]} cells of {dx / 1000:.3g} km", file=log)
 
     coslat0 = math.cos(math.radians(a.lat))
+    overlay, overlay_note = _hysplit_overlay(a, xe, ye, coslat0)
     hours_out = _hours_output(a, met, hourly, F)
     sky_meta, sky_hours = _sky_grid_output(a)
     for h, sh in zip(hours_out, sky_hours, strict=False):
@@ -1323,9 +1355,12 @@ def simulate(a: argparse.Namespace, log: TextIO = sys.stderr) -> Json:
             "west": a.lon + math.degrees(xe[0] / (R_EARTH * coslat0)),
             "east": a.lon + math.degrees(xe[-1] / (R_EARTH * coslat0)),
             **{k: pack(v) for k, v in F.items()},
+            **{k: pack(v) for k, v in overlay.items()},
         },
         "hours": hours_out,
     }
+    if overlay_note:
+        payload["meta"]["hysplitOverlay"] = overlay_note
     payload["meta"]["hysplit"] = hysplit_files(a, bins_out, payload["grid"])
     if sky_meta:
         payload["meta"]["skyGrid"] = sky_meta

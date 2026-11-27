@@ -165,6 +165,7 @@ body.embedded > header { display: none; }
       <div class="ticks" id="legticks"></div>
       <div id="legzones" hidden></div>
       <div class="lz" id="legenv" hidden></div>
+      <div class="lz" id="leghy" hidden><svg width="26" height="8" aria-hidden="true" style="flex:none"><line x1="1" y1="4" x2="25" y2="4" stroke="#6a4ce2" stroke-width="2.5"/></svg><span id="leghytext"></span></div>
       <div class="lz lpath" style="margin-top:4px"><svg width="26" height="8" aria-hidden="true"><line x1="1" y1="4" x2="25" y2="4" stroke="currentColor" stroke-width="2" stroke-dasharray="5 4"/></svg>Path of the cloud's center, labeled with the local time it passes</div>
       <div id="legsky" hidden>
         <div class="lz"><span class="zsw" id="legskycloud"></span>Forecast cloud cover (more solid = more overcast)</div>
@@ -249,6 +250,7 @@ body.embedded > header { display: none; }
   <label class="opt" id="fixtopwrap" hidden><input type="checkbox" id="fixtop" checked> <span id="fixtoplabel"></span></label>
   <label class="opt" id="rangewrap">Color scale <input id="decades" type="range" min="2" max="8" value="5" aria-label="Color scale range"> <span id="decout"></span></label>
   <label class="opt" id="envwrap" hidden><input type="checkbox" id="showEnv"> <span id="envlabel"></span></label>
+  <label class="opt" id="hywrap" hidden><input type="checkbox" id="showHy"> HYSPLIT outline</label>
   <label class="opt"><input type="checkbox" id="showPuffs" checked> puffs</label>
   <label class="opt"><input type="checkbox" id="showWind" checked> wind</label>
   <label class="opt" id="skywrap"><input type="checkbox" id="showSky"> sky cover &amp; rain</label>
@@ -557,7 +559,7 @@ renderStatic();
 
 // ---------- state ----------
 const S = {
-  hour: 1, field: "conc", units: "mass", decades: 5, puffs: true, wind: true, sky: false, base: "auto", playing: false,
+  hour: 1, field: "conc", units: "mass", decades: 5, puffs: true, wind: true, sky: false, hy: false, base: "auto", playing: false,
   lat: M.lat, lon: M.lon, z: 8,
   zoneMetric: M.zoneMetric || "m60", locs: M.loc.map((l) => l.value), track: true, env: false,
   dlocs: M.depLoc ? M.depLoc.map((l) => l.value) : [1e-6, 1e-5, 1e-4],
@@ -677,6 +679,53 @@ function buildZones() {
     `<div class="lz"><span class="zsw" style="background:rgb(${ZONE_COLORS[k]})"></span><b>${ZONE_NAMES[k]}</b>≥ ${txt(levels[k])}</div>`).join("");
   return px;
 }
+// ---------- NOAA HYSPLIT outline (--hysplit-overlay) ----------
+// A saved HYSPLIT run for the same release, on the map's grid: hy_conc is its hourly mean in
+// the lowest 10 m of air, hy_dep its deposition since the release. The outline marks where
+// HYSPLIT's value is at or above the lowest level the map is showing (hyFloor, log10), so it
+// can be compared with the edge of the shaded area. Peak and end-of-hour views still get
+// HYSPLIT's hourly mean, since that is what it saved.
+const HY_COLOR = "#6a4ce2";
+let hyFloor = null, hyCache = { key: "", segs: [] };
+const hyName = () => (S.field === "dep" ? "hy_dep" : "hy_conc");
+function hysplitSegments() {
+  const F = FIELDS[hyName()];
+  if (!F || hyFloor === null) return [];
+  const key = [S.hour, hyName(), hyFloor].join("|");
+  if (hyCache.key === key) return hyCache.segs;
+  const base = (S.hour - 1) * NCELL, on = new Uint8Array(NCELL);
+  for (let k = 0; k < NCELL; k++) { const q = F.q[base + k]; on[k] = q && qToLog(F, q) >= hyFloor ? 1 : 0; }
+  // every cell edge with HYSPLIT at or above the level on one side only
+  const dLat = (GR.north - GR.south) / NY, dLon = (GR.east - GR.west) / NX, segs = [];
+  for (let j = 0; j < NY; j++) for (let i = 0; i < NX; i++) {
+    if (!on[j * NX + i]) continue;
+    const n = GR.north - j * dLat, s = n - dLat, w = GR.west + i * dLon, e = w + dLon;
+    if (j === 0 || !on[(j - 1) * NX + i]) segs.push([n, w, n, e]);
+    if (j === NY - 1 || !on[(j + 1) * NX + i]) segs.push([s, w, s, e]);
+    if (i === 0 || !on[j * NX + i - 1]) segs.push([n, w, s, w]);
+    if (i === NX - 1 || !on[j * NX + i + 1]) segs.push([n, e, s, e]);
+  }
+  hyCache = { key, segs };
+  return segs;
+}
+function drawHysplit() {
+  const show = S.hy && !!FIELDS.hy_conc && hyFloor !== null;
+  $("leghy").hidden = !show;
+  if (!show) return;
+  const kind = S.field === "dep" ? "dep" : "conc", O = M.hysplitOverlay || {};
+  $("leghytext").textContent = `NOAA HYSPLIT ${O.note ? O.note + ": " : ""}` +
+    (kind === "dep" ? "on the ground" : "hourly mean in air") + ` of ${fmtVal(10 ** hyFloor, kind, 0)} or more`;
+  const segs = hysplitSegments();
+  for (const [color, width] of [["rgba(255,255,255,0.85)", 4.5], [HY_COLOR, 2]]) {   // white under purple, to show on any map
+    ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineCap = "round"; ctx.beginPath();
+    for (const [la1, lo1, la2, lo2] of segs) {
+      const [x1, y1] = toScreen(la1, lo1), [x2, y2] = toScreen(la2, lo2);
+      ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+    }
+    ctx.stroke();
+  }
+  ctx.lineCap = "butt";
+}
 function buildOverlay() {
   const key = [S.hour, S.field, S.units, S.decades, isDark(), S.zoneMetric, S.locs.join(","), S.dlocs.join(","), S.fixTop, S.fixMin, S.env].join("|");
   if (key === overlayKey) return;
@@ -689,6 +738,7 @@ function buildOverlay() {
   if (zones) $("nodata").hidden = true;
   $("rangewrap").hidden = zones;                 // threat zones use fixed levels
   $("legzones").hidden = !zones;
+  hyFloor = null;                                // no HYSPLIT outline on the levels-of-concern view
   if (zones) { putWarped(buildZones()); return; }
   const F = FIELDS[fkey(S.field)], lut = rampLUT(S.field);
   const px = new Uint8ClampedArray(NCELL * 4);
@@ -697,6 +747,7 @@ function buildOverlay() {
   const base = (S.hour - 1) * NCELL;
   let top = fixed ? Math.max(F.hi, Math.log10(M.scaleMax)) : F.hi, floor = top - S.decades;
   if (useMin) { floor = Math.log10(M.scaleMin); top = floor + S.decades; }
+  if (S.units !== "count") hyFloor = floor;      // the HYSPLIT outline is drawn at this level
   let shown = 0, frameMax = -Infinity;
   for (let i = 0; i < NCELL; i++) {
     const q = F.q[base + i];
@@ -1013,6 +1064,7 @@ function draw() {
   const h = HRS[S.hour - 1];
   if (S.sky) drawSky(h);
   drawOverlay();
+  drawHysplit();
   const ink = isDark() ? "rgba(240,239,234," : "rgba(29,29,27,";
   if (S.wind) for (const [la, lo, u, v] of h.wind) {
     const [x, y] = toScreen(la, lo);
@@ -1251,6 +1303,10 @@ function hover(x, y) {
       return q ? 10 ** qToLog(F, q) : 0;
     };
     const main = cell(pf), top = cell("env_" + pf);
+    if (S.hy && S.field !== "zones" && FIELDS.hy_conc) {
+      const hv = cell(hyName());
+      lines.push(`NOAA HYSPLIT, ${kind === "dep" ? "deposited" : "hourly mean"}: <b>${hv ? fmtVal(hv, kind, 0) : "below its lowest stored value"}</b>`);
+    }
     const nf = ENS && (ENS.models ? ENS.models.length : ENS.n);
     if (top) lines.push(`Up to <b>${fmtVal(top, kind, top)}</b> ` +
       (ENS_DEP_ONLY ? `with any of ${ENS.deposition.length} deposition schemes` : `in any of ${nf} weather forecasts`));
@@ -1336,6 +1392,10 @@ for (let k = 0; k < 3; k++) {
 }
 $("zmetric").onchange = (e) => { S.zoneMetric = e.target.value; syncLocInputs(); render(); };
 if (!FIELDS.snap) document.querySelector('#fieldseg button[data-v="snap"]').hidden = true;   // older data
+if (FIELDS.hy_conc) {                             // a saved HYSPLIT run came with this map
+  $("hywrap").hidden = false;
+  $("showHy").onchange = (e) => { S.hy = e.target.checked; render(); };
+}
 if (M.ensemble) {
   $("envwrap").hidden = false;
   $("envlabel").textContent = ENS_DEP_ONLY ? `${ENS.deposition.length} deposition schemes`

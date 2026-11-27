@@ -10,7 +10,14 @@ import numpy as np
 import pytest
 
 import puff_dispersal as puff
-from dispersal.output import gdas1_files, hysplit_files, load_template, pack, write_html
+from dispersal.output import (
+    gdas1_files,
+    hysplit_files,
+    hysplit_overlay,
+    load_template,
+    pack,
+    write_html,
+)
 
 LS, PS = chr(0x2028), chr(0x2029)  # JavaScript line terminators
 
@@ -74,3 +81,56 @@ def test_hysplit_control_is_consistent() -> None:
     assert lines[1] == "2"  # a vertical line source: two starting heights
     assert set(files) == {"CONTROL", "SETUP.CFG", "README.txt"}
     assert gdas1_files(a.start, 24) == ["gdas1.nov26.w4"]
+
+
+def _overlay_file(tmp_path: Path) -> Path:
+    """Write a small saved HYSPLIT run: 2 hours on a 5 x 6 grid, one cell filled each hour."""
+    lat, lon = 40.0 + 0.1 * np.arange(5), -92.0 + 0.1 * np.arange(6)
+    air, dep = np.zeros((2, 5, 6), np.float32), np.zeros((2, 5, 6), np.float32)
+    air[0, 2, 3], air[1, 3, 4] = 8.0, 4.0
+    dep[0, 2, 3] = 1.0
+    dep[1] = dep[0]
+    dep[1, 3, 4] += 0.5
+    path = tmp_path / "overlay.npz"
+    np.savez_compressed(
+        path,
+        lat=lat,
+        lon=lon,
+        air=air,
+        dep=dep,
+        released_kg=np.float64(100.0),
+        start_utc=np.array("2026-11-25T15:00"),
+    )
+    return path
+
+
+def test_hysplit_overlay_lands_on_the_map_grid_scaled(tmp_path: Path) -> None:
+    """Values are read at the map's cell centers and scaled by the mass released."""
+    import datetime as dt  # noqa: PLC0415
+
+    start = dt.datetime(2026, 11, 25, 9, 0, tzinfo=dt.timezone(dt.timedelta(hours=-6)))
+    rows = np.array([40.4, 40.2, 40.25, 39.0])  # north to south, as map rows run; one outside
+    cols = np.array([-91.7, -91.65, -91.0])  # the filled cell, halfway to the next, outside
+    fields, note = hysplit_overlay(_overlay_file(tmp_path), start, 2, 25.0, (rows, cols))
+    conc, dep = fields["hy_conc"], fields["hy_dep"]
+    assert conc.shape == dep.shape == (2, 4, 3)
+    assert note == {"file": "overlay.npz", "scaledBy": 0.25, "releasedKg": 100.0}
+    assert conc[0, 1, 0] == pytest.approx(8.0 * 0.25)  # on the filled cell, a quarter of the mass
+    assert conc[0, 1, 1] == pytest.approx(8.0 * 0.25 / 2)  # halfway to an empty cell
+    assert conc[0, 2, 0] == pytest.approx(8.0 * 0.25 / 2)  # halfway between rows
+    assert conc[0, 0, 0] == 0.0
+    assert float(np.max(conc[:, 3, :])) == 0.0  # a row south of HYSPLIT's grid
+    assert float(np.max(conc[:, :, 2])) == 0.0  # a column east of it
+    assert dep[1, 1, 0] == pytest.approx(1.0 * 0.25)  # deposition stays where it fell
+
+
+def test_hysplit_overlay_refuses_another_release(tmp_path: Path) -> None:
+    import datetime as dt  # noqa: PLC0415
+
+    path = _overlay_file(tmp_path)
+    grid = (np.array([40.2]), np.array([-91.7]))
+    utc = dt.timezone.utc
+    with pytest.raises(ValueError, match="release at 2026-11-25T15:00 UTC, not"):
+        hysplit_overlay(path, dt.datetime(2026, 11, 25, 16, 0, tzinfo=utc), 2, 25.0, grid)
+    with pytest.raises(ValueError, match="covers 2 hours"):
+        hysplit_overlay(path, dt.datetime(2026, 11, 25, 15, 0, tzinfo=utc), 3, 25.0, grid)

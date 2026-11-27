@@ -1124,6 +1124,13 @@ ARCHIVED_SOURCE = (
 DEFAULT_VIEW_HEAD = "What the map opens on"
 DEFAULT_VIEW_QUESTION = "What does the map show when it opens?"
 ARCHIVED_HEAD = "With archived weather"
+#: The box under the archived-weather maps that outlines NOAA's HYSPLIT result.
+HYSPLIT_BOX = (
+    "On these maps, the \u201cHYSPLIT outline\u201d box under the map draws a second "
+    "opinion: where NOAA\u2019s HYSPLIT model, run on NOAA\u2019s own archive of the same "
+    "weather model, puts lead at or above the lowest level the map is showing. It is another "
+    "model\u2019s estimate for the same assumed release, not a measurement."
+)
 FORECAST_HEAD = "What the forecast showed before the blast"
 FORECAST_NOTE = (
     "The sections below on where the cloud goes, how far lead on the ground could reach, lead "
@@ -1254,6 +1261,7 @@ def _archived_html(fa: Facts | None, pct: dict[str, str]) -> str:
   <p>{default_view(pct["low"])}</p>
   <h3>{ARCHIVED_HEAD}</h3>
   <p>{archived_wind_sentence(fa)} {path_sentence(fa)} {OBSERVED_WX}</p>
+  <p>{HYSPLIT_BOX}</p>
   <p>Farthest distance from the plant where lead on the ground reaches each EPA dust-lead
     action level by the end of the 8-hour run, for a blast at {BLAST_TIME} The smaller
     number, where there is one, is the farther of the two dry-deposition schemes.</p>
@@ -1272,7 +1280,9 @@ def _archived_plain(fa: Facts, pct: dict[str, str]) -> str:
     return (
         f"{default_view(pct['low'])} {archived_wind_sentence(fa)} "
         f"{path_sentence(fa, html=False)} {OBSERVED_WX} {_town_text(fa)} {TOWN_CAVEAT} "
-        "Farthest reach of ground lead with archived weather: " + " ".join(r[2:] for r in rows)
+        "Farthest reach of ground lead with archived weather: "
+        + " ".join(r[2:] for r in rows)
+        + f" {HYSPLIT_BOX}"
     )
 
 
