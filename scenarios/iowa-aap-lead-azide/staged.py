@@ -265,7 +265,7 @@ def page_html(built_txt: str, got_txt: str, days: dict[str, list[str]]) -> str:
         secarmy=html.escape(fs.SECARMY_URL),
     )
     return f"""<!doctype html>
-<html lang="en">
+<html lang="en-US">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -315,10 +315,10 @@ function step(k) {{
   const s = $("t"); const i = s.selectedIndex + k;
   if (i >= 0 && i < s.options.length) {{ s.selectedIndex = i; show(); }}
 }}
-$("d").onchange = () => {{ fillTimes(); show(); }};
-for (const id of ["t", "c"]) $(id).onchange = show;
-$("prev").onclick = () => step(-1);
-$("next").onclick = () => step(1);
+$("d").addEventListener("change", () => {{ fillTimes(); show(); }});
+for (const id of ["t", "c"]) $(id).addEventListener("change", show);
+$("prev").addEventListener("click", () => step(-1));
+$("next").addEventListener("click", () => step(1));
 fillTimes();  // the browser may restore another day on reload
 show();
 </script>
