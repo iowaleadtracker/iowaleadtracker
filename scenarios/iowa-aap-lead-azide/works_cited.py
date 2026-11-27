@@ -662,6 +662,17 @@ CHANGES_HEAD = "Change log"
 CHANGES = [
     (
         "Nov. 26",
+        (
+            f'Correction to the <a href="{ANALYSIS_PATH}">preliminary analysis</a> of '
+            "EPA&rsquo;s monitors. It said soil samples would show lead that came down. For "
+            "the amounts the models put on the ground, soil samples probably can&rsquo;t: "
+            "even the highest would add less than 0.1 mg/kg to soil that already holds about "
+            "22 mg/kg. Wipes of surfaces near the path can. The analysis and its summary on "
+            "this page now say so. The maps did not change."
+        ),
+    ),
+    (
+        "Nov. 26",
         "Snopes (Nov. 25) added to the mentions of the Iowa Lead Tracker. The maps did not change.",
     ),
     (

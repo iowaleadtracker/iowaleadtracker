@@ -264,5 +264,48 @@
   "ref_lon": -91.27,
   "ref_lat": 40.81,
   "share_near": 0.6525180295807359
+ },
+ "ground": {
+  "wipe_limit_ugft2": 4.0,
+  "soil": {
+   "samples": 91,
+   "median": 21.7,
+   "lowest": 8.4,
+   "highest": 48.5,
+   "depth_m": 0.0254,
+   "kg_m3": 1300.0
+  },
+  "runs": {
+   "tracker": {
+    "highest_ugft2": 124.64487181430741,
+    "levels": {
+     "5": {
+      "square_miles": 25.65126828507231,
+      "miles_out": 16.624628990166197
+     },
+     "1": {
+      "square_miles": 151.92073563127983,
+      "miles_out": 42.244681116816075
+     }
+    },
+    "soil_added_mgkg": 0.04063192713844554,
+    "soil_added_mgkg_all_airborne": 0.5804561019777933
+   },
+   "hysplit": {
+    "highest_ugft2": 163.16235425401828,
+    "levels": {
+     "5": {
+      "square_miles": 16.797466551306357,
+      "miles_out": 10.565320366120263
+     },
+     "1": {
+      "square_miles": 135.70716293465648,
+      "miles_out": 36.86660564853725
+     }
+    },
+    "soil_added_mgkg": 0.0531879153412995,
+    "soil_added_mgkg_all_airborne": 0.7598273620185642
+   }
+  }
  }
 }

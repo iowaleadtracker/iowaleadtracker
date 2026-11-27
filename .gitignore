@@ -35,6 +35,7 @@ htmlcov/
 *.npz
 # ...except the small saved fields behind the monitor-placement brief
 !scenarios/iowa-aap-lead-azide/postmortem/monitor-placement-brief/data/model_fields.npz
+!scenarios/iowa-aap-lead-azide/postmortem/monitor-placement-brief/data/ground_fields.npz
 *.pkl
 
 # --- Editors and OS ---
