@@ -1,12 +1,14 @@
-# HYSPLIT on archived weather, for the map's outline
+# HYSPLIT on archived weather, for the map's HYSPLIT view
 
 NOAA's HYSPLIT model (Stein et al. 2015) run for the Nov. 25, 2026 blast on archived
-weather, saved so the site's archived-weather maps can outline it. On those maps, the
-"HYSPLIT outline" box under the map draws where HYSPLIT's value is at or above the lowest
-level the map is showing.
+weather, saved so the site's archived-weather maps can show it. On those maps, the "NOAA
+HYSPLIT" button under the map switches from the site's model to this run. It is drawn in
+the four colors of HYSPLIT's own plots (cyan, green, blue, and yellow, lowest to highest),
+between the same lowest and highest levels as the site's map, so switching back and forth
+compares the two.
 
-It is a second model's estimate for the same assumed release. It is not a measurement, and
-the site's warnings apply to it: don't use it to decide if you're safe; follow official
+It is a second model's estimate for the same assumed release. It is not a measurement and
+not a forecast from NOAA: this project ran HYSPLIT itself. The site's warnings apply to it: don't use it to decide if you're safe; follow official
 instructions.
 
 ## What is here
@@ -53,11 +55,15 @@ The site build does not run HYSPLIT. It reads `overlay_0900.npz` (`--hysplit-ove
 
 ## Limits
 
-- HYSPLIT follows particles, so its edges are grainy at low levels. The outline at the
-  far end of the cloud, and at the lowest deposition levels, shows that grain.
-- The outline is HYSPLIT's hourly mean. The map's "Peak" and "Snapshot" views still get
-  the hourly-mean outline, since that is what the run saved. The "Levels of concern" view
-  has no outline.
+- HYSPLIT follows particles, so its edges are grainy at low levels. The far end of the
+  cloud, and the lowest deposition band, show that grain.
+- The run saved hourly means and deposition. The map's "Peak", "Snapshot", and "Levels of
+  concern" views are off while HYSPLIT shows, and so are the site's own puffs, path, and
+  wind arrows.
+- The four colors each cover a quarter of the map's range. With the map's usual range of
+  four powers of ten, each color is one power of ten, as on HYSPLIT's own plots. The
+  colors are not easy to tell apart for some readers; the legend and the readout under the
+  pointer give the numbers.
 - HYSPLIT and the site's model were given the same release but not the same copy of the
   weather, and they treat mixing differently. They are two estimates, and neither is a
   check against what happened.

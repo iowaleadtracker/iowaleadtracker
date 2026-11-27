@@ -85,7 +85,8 @@ def hysplit_overlay(
     -------
     tuple
         The fields ``hy_conc`` and ``hy_dep``, shaped like the map's own (hour, row,
-        column), and a note for the page: the mass ratio used and the file's name.
+        column), and a note for the page: the mass ratio used, the file's name, and each
+        hour's highest value on the map (``airMax``, ``depMax``).
 
     Raises
     ------
@@ -118,8 +119,15 @@ def hysplit_overlay(
         bottom = a[:, j0 + 1][:, :, i0] * (1 - wi) + a[:, j0 + 1][:, :, i0 + 1] * wi
         return np.where(inside, top * (1 - wj) + bottom * wj, 0.0) * (release_kg / file_kg)
 
-    note = {"file": Path(path).name, "scaledBy": release_kg / file_kg, "releasedKg": file_kg}
-    return {"hy_conc": on_map(air), "hy_dep": on_map(dep)}, note
+    fields = {"hy_conc": on_map(air), "hy_dep": on_map(dep)}
+    note = {
+        "file": Path(path).name,
+        "scaledBy": release_kg / file_kg,
+        "releasedKg": file_kg,
+        "airMax": [float(v) for v in fields["hy_conc"].max(axis=(1, 2))],
+        "depMax": [float(v) for v in fields["hy_dep"].max(axis=(1, 2))],
+    }
+    return fields, note
 
 
 def hysplit_files(a: argparse.Namespace, bins: Sequence[Json], grid: Json) -> dict[str, str]:

@@ -1124,12 +1124,14 @@ ARCHIVED_SOURCE = (
 DEFAULT_VIEW_HEAD = "What the map opens on"
 DEFAULT_VIEW_QUESTION = "What does the map show when it opens?"
 ARCHIVED_HEAD = "With archived weather"
-#: The box under the archived-weather maps that outlines NOAA's HYSPLIT result.
+#: The button under the archived-weather maps that switches to NOAA's HYSPLIT result.
 HYSPLIT_BOX = (
-    "On these maps, the \u201cHYSPLIT outline\u201d box under the map draws a second "
-    "opinion: where NOAA\u2019s HYSPLIT model, run on NOAA\u2019s own archive of the same "
-    "weather model, puts lead at or above the lowest level the map is showing. It is another "
-    "model\u2019s estimate for the same assumed release, not a measurement."
+    "On these maps, the \u201cNOAA HYSPLIT\u201d button under the map switches to a second "
+    "opinion: the result of NOAA\u2019s HYSPLIT model for the same assumed release, run on "
+    "NOAA\u2019s own archive of the same weather model. It is drawn in the four colors of "
+    "HYSPLIT\u2019s own plots, between the same lowest and highest levels as this "
+    "site\u2019s map. It is another model\u2019s estimate, not a measurement, and not a "
+    "forecast from NOAA."
 )
 FORECAST_HEAD = "What the forecast showed before the blast"
 FORECAST_NOTE = (

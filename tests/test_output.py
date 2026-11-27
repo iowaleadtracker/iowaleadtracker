@@ -114,7 +114,11 @@ def test_hysplit_overlay_lands_on_the_map_grid_scaled(tmp_path: Path) -> None:
     fields, note = hysplit_overlay(_overlay_file(tmp_path), start, 2, 25.0, (rows, cols))
     conc, dep = fields["hy_conc"], fields["hy_dep"]
     assert conc.shape == dep.shape == (2, 4, 3)
-    assert note == {"file": "overlay.npz", "scaledBy": 0.25, "releasedKg": 100.0}
+    assert (note["file"], note["scaledBy"], note["releasedKg"]) == ("overlay.npz", 0.25, 100.0)
+    # each hour's highest value on the map, for the panel beside the HYSPLIT view
+    assert note["airMax"] == pytest.approx([float(np.max(conc[0])), float(np.max(conc[1]))])
+    assert note["depMax"] == pytest.approx([float(np.max(dep[0])), float(np.max(dep[1]))])
+    assert note["airMax"][0] == pytest.approx(8.0 * 0.25)
     assert conc[0, 1, 0] == pytest.approx(8.0 * 0.25)  # on the filled cell, a quarter of the mass
     assert conc[0, 1, 1] == pytest.approx(8.0 * 0.25 / 2)  # halfway to an empty cell
     assert conc[0, 2, 0] == pytest.approx(8.0 * 0.25 / 2)  # halfway between rows

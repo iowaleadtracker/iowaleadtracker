@@ -209,7 +209,7 @@ def test_header_and_about_box_name_the_weather() -> None:
         "The winds come from four weather forecasts, current as of X."
     )
     nov26 = [what for when, what in works_cited.CHANGES if when == "Nov. 26"]
-    assert works_cited.CHANGES[0][0] == "Nov. 27"  # the newest entry (the HYSPLIT outline)
+    assert works_cited.CHANGES[0][0] == "Nov. 27"  # the newest entry (the HYSPLIT view)
     assert any("opens on a 9 a.m. blast, the low case, and archived weather" in w for w in nov26)
     assert any(
         "Opening on the low case is not a finding that little lead got out." in w for w in nov26
@@ -374,6 +374,7 @@ def test_archived_map_runs_offline_from_the_new_release_point(
     assert note["file"] == site.HYSPLIT_OVERLAY.name
     assert note["note"] == site.HYSPLIT_NOTE
     assert note["scaledBy"] == pytest.approx(meta["explosionOpts"]["airborneFraction"], rel=1e-4)
+    assert len(note["airMax"]) == len(note["depMax"]) == len(out["hours"])  # HYSPLIT's peaks
     # two models, one release: their highest hourly means agree within a factor of 3
     assert 1 / 3 < grid["hy_conc"]["max"] / grid["conc"]["max"] < 3
     i = argv.index("--weather-at")
@@ -411,18 +412,23 @@ def test_hashed_names_cover_both_weather_sets(
     assert '"low-0900"' in cleaned
 
 
-def test_hysplit_outline_is_offered_and_described() -> None:
-    """The archived maps' HYSPLIT box: off by default, labeled, and explained as an estimate."""
+def test_hysplit_view_is_offered_and_described() -> None:
+    """The archived maps' HYSPLIT button: off by default, labeled, explained as an estimate."""
     assert site.HYSPLIT_OVERLAY.exists()  # saved in the repository: the build never runs HYSPLIT
     page = load_template()
-    assert '<label class="opt" id="hywrap" hidden><input type="checkbox" id="showHy">' in page
-    assert "hy: false" in page  # off until the reader ticks it
-    assert "if (FIELDS.hy_conc) {" in page  # shown only on maps that carry the saved run
-    assert "hyFloor = null;" in page  # no outline on the levels-of-concern view
+    assert '<div class="seg" id="modelseg" role="group" aria-label="Model" hidden>' in page
+    assert '<button data-v="hysplit" aria-pressed="false">NOAA HYSPLIT</button>' in page
+    assert "hy: false" in page  # the site's own model until the reader switches
+    assert "if (FIELDS.hy_conc) {" in page  # offered only on maps that carry the saved run
+    # the four fixed contour colors of HYSPLIT's own plots, lowest to highest
+    assert "HY_BANDS = [[0, 255, 255], [0, 255, 0], [0, 0, 255], [255, 255, 0]]" in page
+    assert 'x.disabled = S.hy && !["conc", "dep"].includes(x.dataset.v)' in page  # no other views
+    assert "Not a NOAA forecast." in page  # in the legend whenever HYSPLIT shows
     for text in (fs.HYSPLIT_BOX, works_cited.HYSPLIT_METHOD):
         assert "not a measurement" in text
+        assert "not a forecast from NOAA" in text
         assert "safe" not in text.lower()
-    assert "\u201cHYSPLIT outline\u201d box under the map" in fs.HYSPLIT_BOX
+    assert "\u201cNOAA HYSPLIT\u201d button under the map" in fs.HYSPLIT_BOX
     assert "Stein et al. 2015" in works_cited.HYSPLIT_METHOD
     when, what = works_cited.CHANGES[0]
     assert when == "Nov. 27"
@@ -449,7 +455,7 @@ def test_archived_runs_use_only_the_saved_weather() -> None:
         assert cmd[cmd.index("--as-of") + 1] == site.ARCHIVED_AS_OF
         assert "--sky-grid" not in cmd  # the sky grid is a forecast
         assert "--no-sky-layer" in cmd  # and so is the map's own sky layer, by its label
-        # NOAA's HYSPLIT result for the same blast, for the "HYSPLIT outline" box
+        # NOAA's HYSPLIT result for the same blast, for the "NOAA HYSPLIT" button
         assert cmd[cmd.index("--hysplit-overlay") + 1] == str(site.HYSPLIT_OVERLAY)
         assert cmd[cmd.index("--hysplit-overlay-note") + 1] == site.HYSPLIT_NOTE
         assert cmd[cmd.index("--weather-label") + 1].startswith("archived NOAA HRRR")

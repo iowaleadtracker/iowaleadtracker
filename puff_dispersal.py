@@ -511,14 +511,14 @@ def _add_display_args(p: argparse.ArgumentParser) -> None:
         default=None,
         metavar="FILE",
         help="add a saved NOAA HYSPLIT run for the same release (a file made by a "
-        "scenario's make_overlay.py) to the map as an outline readers can switch on; it is "
-        "scaled to this run's release mass",
+        "scenario's make_overlay.py) to the map as a second view readers can switch to; it "
+        "is scaled to this run's release mass",
     )
     p.add_argument(
         "--hysplit-overlay-note",
         default=None,
         metavar="TEXT",
-        help="what the saved HYSPLIT run used, shown in the map's legend with the outline",
+        help="what the saved HYSPLIT run used, shown in the legend of its view",
     )
     p.add_argument(
         "--legend-note",

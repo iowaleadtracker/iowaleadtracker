@@ -656,17 +656,21 @@ ANALYSIS_METHOD = (
     f"reviewed them. The text, the code, and the data are on {_a(ANALYSIS_FOLDER_URL, 'GitHub')}."
 )
 
-#: The HYSPLIT outline on the archived-weather maps, shown under the method note.
-HYSPLIT_HEAD = "The HYSPLIT outline."
+#: The HYSPLIT view of the archived-weather maps, shown under the method note.
+HYSPLIT_HEAD = "The HYSPLIT view."
 HYSPLIT_METHOD = (
-    "On the archived-weather maps, a box under the map outlines the result of NOAA&rsquo;s "
-    "HYSPLIT model (Stein et al. 2015) for the same blast: the same amount of lead in the same "
-    "four particle sizes, released at 9 a.m. from the two magazines, on NOAA Air Resources "
-    "Laboratory&rsquo;s archive of the HRRR weather model. The outline is drawn where "
-    "HYSPLIT&rsquo;s hourly mean near the ground, or its lead on the ground, is at or above "
-    "the lowest level the map is showing, scaled to the case chosen. HYSPLIT was run once, "
-    "ahead of time; the site reads its saved output. It is a second model&rsquo;s estimate, "
-    "not a measurement. The inputs and the output are on "
+    "On the archived-weather maps, the &ldquo;NOAA HYSPLIT&rdquo; button under the map shows "
+    "the result of NOAA&rsquo;s HYSPLIT model (Stein et al. 2015) for the same blast in place "
+    "of this site&rsquo;s: the same amount of lead in the same four particle sizes, released "
+    "at 9 a.m. from the two magazines, on NOAA Air Resources Laboratory&rsquo;s archive of the "
+    "HRRR weather model. It shows HYSPLIT&rsquo;s hourly mean near the ground, or its lead on "
+    "the ground, scaled to the case chosen. The colors are the four of HYSPLIT&rsquo;s own "
+    "plots (cyan, green, blue, and yellow, lowest to highest), between the same lowest and "
+    "highest levels as this site&rsquo;s map, so switching back and forth compares the two. "
+    "HYSPLIT saved hourly means and lead on the ground, so the peak, end-of-hour, and "
+    "levels-of-concern views are off while it shows. This site ran HYSPLIT once, ahead of "
+    "time, and reads its saved output. It is a second model&rsquo;s estimate, not a "
+    "measurement, and not a forecast from NOAA. The inputs and the output are on "
     f"{_a(SOURCE_URL + '/tree/main/scenarios/iowa-aap-lead-azide/hysplit-archived', 'GitHub')}."
 )
 
@@ -677,10 +681,12 @@ CHANGES = [
     (
         "Nov. 27",
         (
-            "The archived-weather maps have a new box under the map, &ldquo;HYSPLIT "
-            "outline&rdquo;. It draws where NOAA&rsquo;s HYSPLIT model, run on NOAA&rsquo;s "
-            "archive of the same weather model, puts lead at or above the lowest level the "
-            "map is showing. The maps&rsquo; own numbers did not change."
+            "The archived-weather maps have a new button under the map, &ldquo;NOAA "
+            "HYSPLIT&rdquo;. It switches the map from this site&rsquo;s model to NOAA&rsquo;s "
+            "HYSPLIT model, run on NOAA&rsquo;s archive of the same weather model for the "
+            "same assumed release, in the colors of HYSPLIT&rsquo;s own plots. It is a second "
+            "model&rsquo;s estimate, not a measurement. The maps&rsquo; own numbers did not "
+            "change."
         ),
     ),
     (

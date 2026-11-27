@@ -120,8 +120,8 @@ ARCHIVED_LABEL = "archived NOAA HRRR (ncep_hrrr_conus, served Nov. 25, 6:51 p.m.
 # archived weather was saved for a grid centered on LAT, LON; --weather-at reuses it.
 ARCHIVED_LAT, ARCHIVED_LON = 40.8096, -91.2692
 # NOAA's HYSPLIT model for the same blast on NOAA ARL's archive of HRRR, saved as fields the
-# archived-weather maps can outline (hysplit-archived/README.md). A box under the map turns
-# the outline on. HYSPLIT isn't run by the build; the saved file is read.
+# archived-weather maps can show (hysplit-archived/README.md). A button under the map
+# switches to it. HYSPLIT isn't run by the build; the saved file is read.
 HYSPLIT_OVERLAY = HERE / "hysplit-archived" / "overlay_0900.npz"
 HYSPLIT_NOTE = "on NOAA\u2019s archived weather"
 # The first model with data for the whole run is shown; the rest make up the spread.
