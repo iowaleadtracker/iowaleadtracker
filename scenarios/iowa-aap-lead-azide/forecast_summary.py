@@ -509,7 +509,9 @@ ANALYSIS = (
     "about 215\u00b0). On that path, three of the monitors were outside the modeled cloud and "
     "the nearest was on its edge. So the near-zero readings can\u2019t show, by themselves, "
     "whether little lead got out or a cloud passed just south of the monitors. Lab results "
-    "from EPA\u2019s filter samplers on the more southerly path, and from soil sampling, can. "
+    "from EPA\u2019s filter samplers on the more southerly path, and from wipes of surfaces "
+    "along it, can; soil samples probably can\u2019t, because the modeled amounts are far "
+    "less than soil already holds. "
     "This is a preliminary, unofficial analysis of model estimates, not measurements, and no "
     "one outside the project has reviewed it."
 )

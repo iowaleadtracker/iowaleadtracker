@@ -8,6 +8,7 @@ the site and its mirror.
 from __future__ import annotations
 
 import datetime as dt
+import json
 import re
 import struct
 from typing import TYPE_CHECKING
@@ -157,3 +158,23 @@ def test_landing_page_links_to_the_analysis() -> None:
     assert f'<a href="/{brief_page.SLUG}/">preliminary analysis</a>' in fs.EARLY_AIR_HTML
     assert brief_page.SLUG == "monitor-placement"  # the page's public address
     assert "safe" not in fs.EARLY_AIR_HTML.lower()  # still no verdicts about anyone's safety
+
+
+def test_brief_says_what_ground_samples_can_show(page: str) -> None:
+    """Corrected Nov. 26: wipes near the path can show the modeled lead; bulk soil can't."""
+    readme = " ".join(brief_page.README.read_text(encoding="utf-8").split())
+    assert "Corrected Nov. 26, 2026" in readme
+    assert "Bulk soil samples probably can't." in readme
+    assert "a sample taken afterward finds it" not in readme  # the claim that was too strong
+    numbers = json.loads((brief_page.README.parent / "numbers.json").read_text(encoding="utf-8"))
+    ground = numbers["ground"]
+    assert ground["wipe_limit_ugft2"] == pytest.approx(4.0)  # 80% of EPA's 5 µg/ft² for floors
+    for run in ground["runs"].values():
+        # far less than the 22 mg/kg Iowa's soil holds, even if all of the lead got out
+        assert run["soil_added_mgkg"] < 0.1
+        assert run["soil_added_mgkg_all_airborne"] < 1.0 < ground["soil"]["lowest"]
+        assert f"{run['highest_ugft2']:.0f} µg/ft²" in readme  # the table quotes the numbers
+        assert f"out to {run['levels']['5']['miles_out']:.0f} mi" in readme
+    assert "Table B." in page
+    assert "soil sampling, can" not in fs.ANALYSIS
+    assert "soil samples probably can\u2019t" in fs.ANALYSIS

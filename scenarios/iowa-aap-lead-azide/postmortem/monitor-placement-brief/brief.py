@@ -5,8 +5,9 @@ Usage (from anywhere; needs the network for the aerial imagery only)::
     python scenarios/iowa-aap-lead-azide/postmortem/monitor-placement-brief/brief.py
 
 Reads, all from ``data/`` (see ``data/README.md``): the three modeled fields the map is
-drawn from, EPA's public site list and real-time readings, where the release is modeled
-from, and the Army's final ground map with where it sits on the ground.
+drawn from, the modeled lead on the ground, EPA's public site list and real-time readings,
+where the release is modeled from, and the Army's final ground map with where it sits on
+the ground.
 
 Writes ``monitor_placement_map.png`` (and a smaller ``.jpg`` copy for the site's page) and
 ``numbers.json``, and rewrites the tables between
@@ -41,6 +42,19 @@ RINGS_MI = (5, 10, 20)
 PIXEL_MI = 0.6  # one pixel of the Army's map
 UG = lib.UG
 SMALL = 0.001
+# Lead on the ground, for "What is needed now": what a sample could show.
+GROUND_RUNS = {
+    "tracker": "Tracker, the site's archived-weather map",
+    "hysplit": "HYSPLIT, archived weather",
+}
+UG_FT2 = 1e9 * 0.09290304  # kg/m2 to µg/ft2
+ACTION_LEVEL = 5.0  # µg/ft2: EPA's lowest dust-lead action level, for floors (EPA 2024a)
+WIPE_LIMIT = 0.8 * ACTION_LEVEL  # µg/ft2 an accredited lab must be able to measure (EPA 2024b)
+GROUND_LEVELS = (ACTION_LEVEL, 1.0)  # µg/ft2
+SOIL_DEPTH_M, SOIL_KG_M3 = 0.0254, 1300.0  # the top inch of soil at 1.3 g/cm3 (assumed)
+# Lead in Iowa's soil, mg/kg: 91 samples of USGS's 2007-2010 background survey (EPA undated).
+IOWA_SOIL = {"samples": 91, "median": 21.7, "lowest": 8.4, "highest": 48.5}
+LOW_CASE = 0.07  # share of the lead airborne in the case the fields are for
 
 
 def nearest(grid: lib.Grid, lat: float, lon: float) -> float:
@@ -137,6 +151,42 @@ def readings() -> dict[str, dict[str, Any]]:
     return out
 
 
+def ground() -> dict[str, Any]:
+    """Return what the two models put on the ground, and what that adds to soil."""
+    z = np.load(HERE / "data" / "ground_fields.npz")
+    out: dict[str, Any] = {
+        "wipe_limit_ugft2": WIPE_LIMIT,
+        "soil": {**IOWA_SOIL, "depth_m": SOIL_DEPTH_M, "kg_m3": SOIL_KG_M3},
+        "runs": {},
+    }
+    for run in GROUND_RUNS:
+        lat, lon, dep = z[f"{run}_lat"], z[f"{run}_lon"], z[f"{run}_dep"].astype(float)
+        # each cell's area in square miles, and its distance from the modeled source
+        km2 = (
+            abs(lat[1] - lat[0])
+            * abs(lon[1] - lon[0])
+            * lib.KM_PER_DEG**2
+            * np.cos(np.radians(lat))[:, None]
+        )
+        miles = np.array([[lib.dist_brg(la, lo)[0] for lo in lon] for la in lat])
+        peak = float(np.max(dep))
+        soil = peak / (SOIL_DEPTH_M * SOIL_KG_M3) * 1e6  # mg of lead per kg of soil
+        levels = {}
+        for level in GROUND_LEVELS:
+            at = dep * UG_FT2 >= level
+            levels[f"{level:g}"] = {
+                "square_miles": float(np.sum(np.where(at, km2, 0.0))) / lib.KM_PER_MI**2,
+                "miles_out": float(np.max(miles[at])) if at.any() else 0.0,
+            }
+        out["runs"][run] = {
+            "highest_ugft2": peak * UG_FT2,
+            "levels": levels,
+            "soil_added_mgkg": soil,
+            "soil_added_mgkg_all_airborne": soil / LOW_CASE,
+        }
+    return out
+
+
 def numbers(grids: dict[str, lib.Grid]) -> dict[str, Any]:
     """Compute everything the README quotes."""
     out: dict[str, Any] = {
@@ -146,6 +196,7 @@ def numbers(grids: dict[str, lib.Grid]) -> dict[str, Any]:
         "in_rerun_path": in_rerun_path(grids),
         "readings": readings(),
         "army_map": lib.army_placement(),
+        "ground": ground(),
     }
     for s in out["sites"].values():
         s["air_ugm3"] = {k: nearest(g, s["lat"], s["lon"]) * UG for k, g in grids.items()}
@@ -210,7 +261,24 @@ def tables(n: dict[str, Any]) -> dict[str, str]:
         need.append(
             f"| {name} | {s['miles']:.1f} mi at {s['bearing']:.0f}° | {air} | {kit} | {public} |"
         )
+    runs = [n["ground"]["runs"][k] for k in GROUND_RUNS]
+    grd = ["| Modeled for the 7% case | " + " | ".join(GROUND_RUNS.values()) + " |"]
+    grd.append("|---" * (len(GROUND_RUNS) + 1) + "|")
+    line = " | ".join(f"{r['highest_ugft2']:.0f} µg/ft²" for r in runs)
+    grd.append(f"| Highest lead on the ground | {line} |")
+    for level in GROUND_LEVELS:
+        line = " | ".join(
+            f"out to {r['levels'][f'{level:g}']['miles_out']:.0f} mi, "
+            f"{r['levels'][f'{level:g}']['square_miles']:.0f} sq mi"
+            for r in runs
+        )
+        grd.append(f"| {level:g} µg/ft² or more | {line} |")
+    line = " | ".join(f"{r['soil_added_mgkg']:.2f} mg/kg" for r in runs)
+    grd.append(f"| Added to the top inch of soil at the highest point | {line} |")
+    line = " | ".join(f"{r['soil_added_mgkg_all_airborne']:.1f} mg/kg" for r in runs)
+    grd.append(f"| The same if all of the lead became airborne | {line} |")
     return {
+        "ground": "\n".join(grd),
         "sites": "\n".join(rows),
         "paths": "\n".join(paths),
         "readings": "\n".join(read),

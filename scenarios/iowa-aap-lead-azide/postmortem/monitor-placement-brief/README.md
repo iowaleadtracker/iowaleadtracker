@@ -5,6 +5,10 @@
 A short, reproducible brief on one map. As of Nov. 26, 2026, 6:40 a.m. CST, about 22 hours
 after the Army detonated its lead azide stockpile at the Iowa Army Ammunition Plant.
 
+*Corrected Nov. 26, 2026, 8 p.m. CST: an earlier version said soil samples would find lead
+that came down. For the amounts modeled here, bulk soil samples probably can't show it;
+wipes of surfaces near the path can. See "What is needed now."*
+
 > **Unofficial.** This is a screening analysis by a private citizen, not from the Army or
 > any government agency. Don't use it to decide if you're safe; follow official
 > instructions. The map shows model estimates for an assumed release. It is not a
@@ -43,12 +47,14 @@ not spread across it, those readings fit more than one account, and the public d
 can't tell them apart: little fine lead got out, or a cloud passed south of the monitors.
 
 The measurements that can tell them apart are the ones not yet public: lab results from
-samples of the ground, and from the other instruments EPA set out along the
-analyzed-weather path. EPA lists filter samplers at eight sites in that path within
+the other instruments EPA set out along the analyzed-weather path, and from wipes of
+surfaces along it. EPA lists filter samplers at eight sites in that path within
 about 30 miles, among them AS06 and AS12, about 6 and 9 miles from the magazines and in the body
-of the rerun cloud. No results from them, or from soil and surface sampling, had been
+of the rerun cloud. No results from them, or from surface sampling, had been
 posted when this was written. Until they are, the real-time readings can't settle what
-reached the ground or the air south of the monitors.
+reached the ground or the air south of the monitors. Bulk soil samples probably can't
+settle it either: the lead the models put on the ground is far less than soil already
+holds.
 
 These are model estimates, not measurements. Nothing here shows that lead reached any
 place, or how much. Where the magazines are comes from a reader's tip checked against
@@ -61,19 +67,50 @@ public.
 **The four real-time monitors can't answer this. Two other kinds of measurement can, and
 neither is public yet.**
 
-**1. Lab results from the ground.** Soil, surface-wipe, and water samples don't depend on
-an instrument having been in the right place at the right minute. Lead that came down
-stays where it fell, and a sample taken afterward finds it. Ground samples also catch
-lead on particles too coarse for an air monitor's inlet. EPA says it collected more than
-1,200 air, land, and water samples before the detonation (EPA 2026c), so there is a
-baseline to compare with. Sampling between about 205° and 245° from the magazines, out
-to 15 miles, would span every model run here; the reruns' path runs along 210° to 217°.
+**1. Lab results from surfaces on the ground.** A sample of what came down doesn't depend
+on an instrument having been in the right place at the right minute, and it catches lead
+on particles too coarse for an air monitor's inlet. But the kind of sample matters,
+because the amounts the models put on the ground are small:
+
+*Table A. Modeled lead on the ground eight hours after the blast, for the 7% case, and
+what the highest amount would add to soil. Model estimates, not measurements.*
+
+<!-- table:ground -->
+| Modeled for the 7% case | Tracker, the site's archived-weather map | HYSPLIT, archived weather |
+|---|---|---|
+| Highest lead on the ground | 125 µg/ft² | 163 µg/ft² |
+| 5 µg/ft² or more | out to 17 mi, 26 sq mi | out to 11 mi, 17 sq mi |
+| 1 µg/ft² or more | out to 42 mi, 152 sq mi | out to 37 mi, 136 sq mi |
+| Added to the top inch of soil at the highest point | 0.04 mg/kg | 0.05 mg/kg |
+| The same if all of the lead became airborne | 0.6 mg/kg | 0.8 mg/kg |
+<!-- /table:ground -->
+
+- **Wipes of surfaces can show it, near the path.** Labs in EPA's lead accreditation
+  program must be able to measure a dust wipe at 80% of the lowest action level for the
+  surface sampled (EPA 2024b). For floors that level is 5 µg/ft² (EPA 2024a), so 4 µg/ft².
+  Those rules are for indoor dust in housing; they are used here only to show what a
+  routine lab wipe can measure. The models put 5 µg/ft² or more on the ground along the
+  path for the distances in Table A. Wipes of smooth outdoor surfaces, or plates set out
+  to catch fallout, between about 205° and 245° from the magazines and out to 15 miles
+  would span every model run here; the reruns' path runs along 210° to 217°. Dust doesn't
+  stay on outdoor surfaces, so earlier samples are worth more.
+- **Bulk soil samples probably can't.** Mixed into the top inch of soil, the highest
+  modeled amount adds a few hundredths of a milligram of lead per kilogram of soil
+  (Table A, assuming soil at 1.3 g/cm³). Iowa's soil already holds about 22 mg/kg: the
+  median of 91 samples in the U.S. Geological Survey's background survey, which ranged
+  from 8 to 49 mg/kg (EPA undated). Even if all of the lead had become airborne, the
+  addition would be under 1 mg/kg. So a soil result that matches the baseline would not
+  show that no lead came down. The models cover only fine dust carried downwind; they say
+  nothing about coarser debris close to the magazines.
+- **There is a baseline.** EPA says it collected more than 1,200 air, land, and water
+  samples before the detonation (EPA 2026c). This brief has not worked out what water
+  samples could show.
 
 **2. Results from the instruments already in the analyzed-weather path.** EPA's site list
 has 43 sites. Besides the nearest real-time monitor, eight of them are places where a
 rerun on analyzed weather reaches 0.18 µg/m³ for the 7% case:
 
-*Table A. EPA sites within about 30 miles where either rerun on analyzed weather gives a
+*Table B. EPA sites within about 30 miles where either rerun on analyzed weather gives a
 highest hourly mean of 0.18 µg/m³ or more for the 7% case, nearest first, with the modeled
 values (µg/m³) and the instruments EPA lists. Model estimates, not measurements.*
 
@@ -241,7 +278,7 @@ python3 scenarios/iowa-aap-lead-azide/postmortem/monitor-placement-brief/brief.p
 ```
 
 That redraws `monitor_placement_map.png` (and the smaller `.jpg` the site's page shows),
-rewrites `numbers.json`, and rewrites the four tables above from the files in
+rewrites `numbers.json`, and rewrites the five tables above from the files in
 [`data/`](data/README.md). It needs the network only for the aerial imagery; `--no-map`
 skips the map. The run takes under a minute.
 
@@ -250,10 +287,12 @@ skips the map. The run takes under a minute.
 | The map and the tables, from the saved fields | `brief.py` | Python; network for imagery |
 | EPA's sites and readings | `epa_fetch.py OUT_DIR` | network; EPA's layer keeps changing, so a new pull will differ |
 | Where the Army's map sits | `place_army_map.py` | network for county boundaries; about a minute |
+| The fields of lead on the ground | `ground_fields.py MAP.html OVERLAY.npz` | the site's built archived-weather map for the Low case (`make_map_picker.py --build`, no network) and the saved HYSPLIT run |
 | The model fields themselves | the full analysis's `scripts/reproduce.sh`, on the working branch | HYSPLIT 5.4, NOAA ARL's HRRR archive files, about an hour |
 
-The code is four short files: `brief.py` (the numbers and tables), `brief_map.py` (the
-map), `brief_lib.py` (the source, distances, and the Army's map) and `place_army_map.py`.
+The code is five short files: `brief.py` (the numbers and tables), `brief_map.py` (the
+map), `brief_lib.py` (the source, distances, and the Army's map), `place_army_map.py`, and
+`ground_fields.py` (the lead on the ground).
 The inputs are described in [`data/README.md`](data/README.md).
 
 ## Questions and answers
@@ -327,9 +366,11 @@ public feed doesn't show what the instruments measured.
 **What would settle it?**
 Lab results from the ground and from the instruments in the analyzed-weather path; see
 "What is needed now." Above all, EPA's filter samples at AS06 and AS12, its DustTrak
-record at AS06 for the morning of Nov. 25, and soil and surface samples between about
-205° and 245° from the magazines out to 15 miles. Also an official statement of where
-the detonation was, and the monitors' model, inlet, and detection limit.
+record at AS06 for the morning of Nov. 25, and wipes of surfaces between about
+205° and 245° from the magazines out to 15 miles. Bulk soil samples probably can't: the
+modeled lead on the ground is far less than soil already holds. Also an official
+statement of where the detonation was, and the monitors' model, inlet, and detection
+limit.
 
 **Has anyone checked this?**
 No one outside the project. It has had AI referee reviews, which found and led to
@@ -347,6 +388,19 @@ Iowa Lead Tracker, an unofficial public project by a private citizen
 
 ## Sources
 
+- EPA, 2024a: Hazard standards and clearance levels for lead in paint, dust and soil
+  (TSCA sections 402 and 403). Dust-lead action levels of 5 µg/ft² for floors, 40 for
+  window sills, and 100 for window troughs,
+  https://www.epa.gov/lead/hazard-standards-and-clearance-levels-lead-paint-dust-and-soil-tsca-sections-402-and-403.
+- EPA, 2024b: National Lead Laboratory Accreditation Program, Laboratory Quality Standards
+  for Recognition, Revision 4.0, October 2024,
+  https://www.epa.gov/system/files/documents/2024-10/final-lqsr-4.0_document_10.10.2024.pdf.
+  Source of the quantitation limit for dust wipes: 80% of the lowest action level for
+  the surface sampled.
+- EPA, undated: USGS Background Soil-Lead Survey: State Data,
+  https://www.epa.gov/superfund/usgs-background-soil-lead-survey-state-data (retrieved
+  Nov. 26, 2026). Iowa: 91 samples from 2007 to 2010, median 21.7 mg/kg, lowest 8.4,
+  highest 48.5.
 - EPA, 2026a: Iowa Army Ammunition Plant Response Data Viewer, public layers
   `IAAAP_Xact_Data_Public_Viewer` and `Air_Sampling_and_Monitoring_Location`,
   https://experience.arcgis.com/experience/1ddcf8b9d8314971b00dac8893ae9cd6 (retrieved
