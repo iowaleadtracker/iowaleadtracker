@@ -419,6 +419,7 @@ def test_hysplit_view_is_offered_and_described() -> None:
     assert '<div class="seg" id="modelseg" role="group" aria-label="Model" hidden>' in page
     assert '<button data-v="hysplit" aria-pressed="false">NOAA HYSPLIT</button>' in page
     assert "hy: false" in page  # the site's own model until the reader switches
+    assert 'const OWN = M.homeName || "This model";' in page  # its button: the site's name
     assert "if (FIELDS.hy_conc) {" in page  # offered only on maps that carry the saved run
     # the four fixed contour colors of HYSPLIT's own plots, lowest to highest
     assert "HY_BANDS = [[0, 255, 255], [0, 255, 0], [0, 0, 255], [255, 255, 0]]" in page
@@ -458,6 +459,7 @@ def test_archived_runs_use_only_the_saved_weather() -> None:
         # NOAA's HYSPLIT result for the same blast, for the "NOAA HYSPLIT" button
         assert cmd[cmd.index("--hysplit-overlay") + 1] == str(site.HYSPLIT_OVERLAY)
         assert cmd[cmd.index("--hysplit-overlay-note") + 1] == site.HYSPLIT_NOTE
+        assert cmd[cmd.index("--home-name") + 1] == "Iowa Lead Tracker"  # the other button
         assert cmd[cmd.index("--weather-label") + 1].startswith("archived NOAA HRRR")
         # from midway between the two magazines, on the weather saved around the plant point
         assert cmd[cmd.index("--lat") + 1] == "40.8096"

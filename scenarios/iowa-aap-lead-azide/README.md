@@ -214,7 +214,7 @@ case, the most conservative one, and showed only the forecast.
   centered on the plant point; `--weather-at` lets the run reuse it from the new point.
 - **HYSPLIT view.** The archived-weather maps carry NOAA's HYSPLIT result for the same
   blast (`hysplit-archived/overlay_0900.npz`, `--hysplit-overlay`). Under the map, a button
-  switches between "This site's model" (the default) and "NOAA HYSPLIT". The HYSPLIT view
+  switches between "Iowa Lead Tracker" (the default) and "NOAA HYSPLIT". The HYSPLIT view
   uses the four colors of HYSPLIT's own plots, between the same lowest and highest levels
   as the site's map. It has the hourly mean and deposition only.
   The build reads the saved file; it doesn't run HYSPLIT. See `hysplit-archived/README.md`.

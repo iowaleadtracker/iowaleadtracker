@@ -675,6 +675,7 @@ def archived_runs(py: str) -> list[Run]:
                 *("--weather-label", ARCHIVED_LABEL),
                 "--no-sky-layer",  # that layer is labeled a forecast
                 *("--home-url", SITE_URL),
+                *("--home-name", SITE_NAME),  # the button beside "NOAA HYSPLIT"
                 *("--legend-note", f"{name} case, blast {blast_label(t, DATE)}, {ARCHIVED_NOTE}"),
                 *("-o", str(out)),
             ]

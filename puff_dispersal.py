@@ -507,6 +507,13 @@ def _add_display_args(p: argparse.ArgumentParser) -> None:
         "opened on its own instead of inside that site",
     )
     p.add_argument(
+        "--home-name",
+        default=None,
+        metavar="NAME",
+        help="name of that site; with --hysplit-overlay, the button for this model's own "
+        'result carries it (default: "This model")',
+    )
+    p.add_argument(
         "--hysplit-overlay",
         default=None,
         metavar="FILE",
@@ -1246,6 +1253,7 @@ def _meta(
         "zUp": met.z_up,
         "generated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "homeUrl": a.home_url,
+        "homeName": getattr(a, "home_name", None),
         "legendNote": a.legend_note,
         "caseRange": getattr(a, "case_range", None),
         "scavenging": a.scavenging,

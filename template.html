@@ -696,7 +696,7 @@ function buildZones() {
 // deposition, so the peak, end-of-hour and levels-of-concern views are off while it shows,
 // and so is everything that belongs to this model: puffs, path, wind, and the spread of runs.
 const HY_BANDS = [[0, 255, 255], [0, 255, 0], [0, 0, 255], [255, 255, 0]], HY_ALPHA = 0.6;
-const OWN = M.homeUrl ? "This site’s model" : "This model";
+const OWN = M.homeName || "This model";   // the button beside "NOAA HYSPLIT" (--home-name)
 const hyName = () => (S.field === "dep" ? "hy_dep" : "hy_conc");
 const hyPeak = (kind) => ((M.hysplitOverlay || {})[kind === "dep" ? "depMax" : "airMax"] || [])[S.hour - 1] || 0;
 let hyBand = null, hyEdges = { key: null, segs: [] };
@@ -1457,7 +1457,7 @@ if (!FIELDS.snap) document.querySelector('#fieldseg button[data-v="snap"]').hidd
 if (FIELDS.hy_conc) {                             // a saved HYSPLIT run came with this map
   $("modelseg").hidden = false;
   $("ownbtn").textContent = OWN;
-  $("hynote").textContent = `The map is showing NOAA’s HYSPLIT model. “Peak on map” is HYSPLIT’s. The weather and the model details in this panel describe ${OWN.charAt(0).toLowerCase() + OWN.slice(1)}.`;
+  $("hynote").textContent = `The map is showing NOAA’s HYSPLIT model. “Peak on map” is HYSPLIT’s. The weather and the model details in this panel are ${M.homeName ? M.homeName + "’s" : "this model’s"}.`;
 }
 if (M.ensemble) {
   $("envwrap").hidden = false;

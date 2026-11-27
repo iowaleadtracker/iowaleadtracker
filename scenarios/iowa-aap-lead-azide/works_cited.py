@@ -682,11 +682,11 @@ CHANGES = [
         "Nov. 27",
         (
             "The archived-weather maps have a new button under the map, &ldquo;NOAA "
-            "HYSPLIT&rdquo;. It switches the map from this site&rsquo;s model to NOAA&rsquo;s "
-            "HYSPLIT model, run on NOAA&rsquo;s archive of the same weather model for the "
-            "same assumed release, in the colors of HYSPLIT&rsquo;s own plots. It is a second "
-            "model&rsquo;s estimate, not a measurement. The maps&rsquo; own numbers did not "
-            "change."
+            "HYSPLIT&rdquo;, beside &ldquo;Iowa Lead Tracker&rdquo;. It switches the map from "
+            "this site&rsquo;s model to NOAA&rsquo;s HYSPLIT model, run on NOAA&rsquo;s archive "
+            "of the same weather model for the same assumed release, in the colors of "
+            "HYSPLIT&rsquo;s own plots. It is a second model&rsquo;s estimate, not a "
+            "measurement. The maps&rsquo; own numbers did not change."
         ),
     ),
     (
