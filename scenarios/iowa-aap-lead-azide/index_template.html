@@ -123,7 +123,7 @@
   <p class="warn" role="note"><b>This is an unofficial estimate, not from the Army or any government
     agency. Don't use it to decide if you're safe.</b>
     <span class="long">Follow official instructions. $weather_line</span>
-    <button id="about" type="button">About this map</button> &middot;
+    <button id="about" type="button" aria-haspopup="dialog">About this map</button> &middot;
     <button id="tosummary" type="button">What the maps show</button> &middot;
     <button id="cites" type="button" aria-haspopup="dialog">Methodology and References</button></p>
   <p class="fema" role="note">$blast_status</p>
@@ -264,8 +264,8 @@ sel.addEventListener('change', show);
 cas.addEventListener('change', show);
 src.addEventListener('change', show);
 day.addEventListener('change', () => { dayNote.hidden = true; show(); });
-document.getElementById('prev').onclick = () => step(-1);
-document.getElementById('next').onclick = () => step(1);
+document.getElementById('prev').addEventListener('click', () => step(-1));
+document.getElementById('next').addEventListener('click', () => step(1));
 const note = document.getElementById('note');
 // the map fills the screen under the header; the summary scrolls below it
 const hdr = document.querySelector('header');
@@ -273,7 +273,7 @@ const setHH = () => document.documentElement.style.setProperty('--hh', hdr.offse
 new ResizeObserver(setHH).observe(hdr); setHH();
 const toSummary = () => document.getElementById('summary').scrollIntoView({
   behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
-document.getElementById('tosummary').onclick = toSummary;
+document.getElementById('tosummary').addEventListener('click', toSummary);
 // <dialog> is missing on some older browsers; fall back to the summary instead of failing
 const canModal = typeof note.showModal === 'function';
 // open a dialog at the top of its text, with focus on its heading (not the button at the end)
@@ -282,9 +282,9 @@ const openDialog = (d) => {
   d.showModal(); d.scrollTop = 0;
   const h = d.querySelector('h2'); if (h) h.focus({ preventScroll: true });
 };
-document.getElementById('about').onclick = () => openDialog(note);
+document.getElementById('about').addEventListener('click', () => openDialog(note));
 const cite = document.getElementById('cite');
-document.getElementById('cites').onclick = () => openDialog(cite);
+document.getElementById('cites').addEventListener('click', () => openDialog(cite));
 cite.addEventListener('click', (e) => {       // a click on the backdrop closes it
   const r = cite.getBoundingClientRect();
   if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) cite.close();
@@ -300,7 +300,7 @@ function setSys(v, tell) {
   try { const p = prefs(); p.sys = v; localStorage.setItem('puffmap.prefs', JSON.stringify(p)); } catch (e) {}
   if (tell && frame.contentWindow) frame.contentWindow.postMessage({ puffUnits: v }, location.origin);
 }
-document.getElementById('sys').onclick = (e) => { const b = e.target.closest('button'); if (b) setSys(b.dataset.v, true); };
+document.getElementById('sys').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) setSys(b.dataset.v, true); });
 window.addEventListener('message', (e) => {
   if (e.source !== frame.contentWindow || e.origin !== location.origin || !e.data) return;
   if (typeof e.data.puffHeight === 'number') {             // phones: frame as tall as the map page

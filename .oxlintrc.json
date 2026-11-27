@@ -24,7 +24,17 @@
     ],
     "no-shadow-restricted-names": "error",
     "no-self-assign": "error",
-    "no-useless-concat": "error"
+    "no-useless-concat": "error",
+    "no-shadow": "error",
+    "unicorn/prefer-add-event-listener": "error",
+    "no-console": [
+      "error",
+      {
+        "allow": [
+          "error"
+        ]
+      }
+    ]
   },
   "overrides": [
     {
@@ -35,6 +45,9 @@
       "env": {
         "node": true,
         "browser": true
+      },
+      "rules": {
+        "no-script-url": "off"
       }
     }
   ]

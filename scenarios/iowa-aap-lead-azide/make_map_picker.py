@@ -1240,7 +1240,7 @@ def not_found_page() -> str:
     type, which iPhone Safari offers to download as a file.
     """
     return f"""<!doctype html>
-<html lang="en">
+<html lang="en-US">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">

@@ -25,12 +25,14 @@ pytest                 # everything, including full model runs (about 10 s)
 ## Browser tests of the map page
 
 ```bash
-pnpm install && pnpm test:map   # Node from .nvmrc; Chromium, desktop and phone, about 10 s
+pnpm install && pnpm test:map   # Node from .nvmrc; every engine, desktop and phone
+pnpm test:map --project=chromium-desktop   # one engine: chromium-, firefox-, webkit-
 ```
 
-`frontend/map.spec.js` (Playwright) opens `template.html` with saved map data put in the
-way `dispersal/output.py` does it, served from memory with every outside request blocked:
-no build, no server, no Python. It checks that the page loads and every control works
+`frontend/map.spec.js` (Playwright) runs in Chromium (Chrome, Edge), Firefox and WebKit
+(Safari's engine) on desktop, and on a phone in Chromium and WebKit. It opens
+`template.html` with saved map data put in the way `dispersal/output.py` does it, served
+from memory with every outside request blocked: no build, no server, no Python. It checks that the page loads and every control works
 without errors, the units and peak values, the HYSPLIT and Army-zone boxes, escaping of
 text from the data, the basemap credit, dark mode, saved choices, and the phone layout.
 

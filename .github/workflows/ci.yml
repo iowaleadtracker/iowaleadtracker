@@ -65,7 +65,8 @@ jobs:
         run: pnpm lint
 
   test-map:
-    # the map page in Chromium, desktop and phone, with saved map data: no build needed
+    # the map page in Chromium, Firefox and WebKit (Safari), desktop and phone, with saved
+    # map data: no build needed
     if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
@@ -76,7 +77,7 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - name: Browser tests of the map page
         run: pnpm test:map
 
