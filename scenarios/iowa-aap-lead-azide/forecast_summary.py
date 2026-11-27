@@ -621,6 +621,47 @@ ARMY_COMPARE = (
     "are told to stay indoors; inside 100, also to wet-clean surfaces children touch. Those "
     "are the yellow and red levels here."
 )
+#: What NOAA and its HYSPLIT model are, for a reader who has heard of neither. The
+#: description of HYSPLIT follows NOAA Air Resources Laboratory's own page (HYSPLIT_URL, read
+#: Nov. 26, 2026): "one of the most extensively used atmospheric transport and dispersion
+#: models", used for "radioactive material, wildfire smoke, windblown dust ... and volcanic
+#: ash", and "used operationally by NOAA Weather Forecast Offices to plan for and respond to
+#: emergency situations" (its About page).
+HYSPLIT_URL = "https://www.arl.noaa.gov/hysplit/"
+HYSPLIT_CITE = "NOAA Air Resources Laboratory"
+HYSPLIT_HEAD = "How this compares with the NOAA HYSPLIT model"
+HYSPLIT_QUESTION = "How does this compare with NOAA\u2019s HYSPLIT model?"
+NOAA_WHAT = (
+    "NOAA is the National Oceanic and Atmospheric Administration, the U.S. government\u2019s "
+    "weather and ocean science agency. The National Weather Service is part of it."
+)
+HYSPLIT_WHAT = (
+    "HYSPLIT is a computer model from NOAA\u2019s Air Resources Laboratory. It is told what "
+    "was released, where, and when, and is given the winds from a weather model. It then "
+    "works out where the air carries the material and how much comes down to the ground, by "
+    "following a great many imaginary particles as the wind moves and spreads them. NOAA "
+    "calls it one of the most widely used models of its kind. It is used to track wildfire "
+    "smoke, volcanic ash, windblown dust, and releases of radioactive material, and "
+    f"NOAA\u2019s weather offices use it in emergencies ({HYSPLIT_CITE})."
+)
+HYSPLIT_HOW = (
+    "NOAA did not run it for this blast. This site ran NOAA\u2019s public copy of HYSPLIT "
+    "itself, for the same assumed release, on NOAA\u2019s own archive of that morning\u2019s "
+    "weather. The \u201cNOAA HYSPLIT\u201d button under the map shows the result. It is a second "
+    "estimate, from a different kind of model than this site\u2019s. It is not a measurement, "
+    "and it is not a forecast from NOAA."
+)
+HYSPLIT_LIMIT = (
+    "HYSPLIT\u2019s result has a grainy edge, because it follows particles, so its distances "
+    "here are good to a mile or two; stray specks past the main area are left out. Two models "
+    "agreeing does not show that either is right. Both were given the same guess about how "
+    "much lead got into the air, and both ran on the same NOAA weather model."
+)
+HYSPLIT_TABLE_HEAD = (
+    '<thead><tr><th scope="col">Case (share of lead airborne)</th>'
+    '<th scope="col">This site\u2019s model</th>'
+    '<th scope="col">NOAA HYSPLIT, run by this site</th></tr></thead>'
+)
 CASE_WORD = {"permit": "EPA permit", "high": "high", "mid": "U.S. Army mitigated", "low": "low"}
 SAFETY_ANSWER = (
     "Don't use this map to decide if you're safe. Follow instructions from the Army, your "
@@ -710,6 +751,42 @@ def zone_stats(d: dict[str, Any], arr2d: FloatArray, threshold: float) -> tuple[
     return float(np.hypot(dx, dy).max()), len(js) * (g["dx"] / 1000) ** 2
 
 
+def joined_to_peak(arr2d: FloatArray, threshold: float) -> FloatArray:
+    """Return ``arr2d`` with zeros outside the area at or above ``threshold`` around its peak.
+
+    Keeps the cells joined edge to edge to the highest cell. A model that follows particles
+    (HYSPLIT) leaves stray cells past the edge of its result; measuring a farthest distance
+    on them would follow the grain, not the cloud.
+    """
+    at = arr2d >= threshold
+    keep = np.zeros(at.shape, dtype=bool)
+    start = np.unravel_index(int(np.argmax(arr2d)), arr2d.shape)
+    if not at[start]:
+        return np.zeros_like(arr2d)
+    stack = [(int(start[0]), int(start[1]))]
+    keep[start] = True
+    while stack:
+        j, i = stack.pop()
+        for y, x in ((j - 1, i), (j + 1, i), (j, i - 1), (j, i + 1)):
+            if 0 <= y < at.shape[0] and 0 <= x < at.shape[1] and at[y, x] and not keep[y, x]:
+                keep[y, x] = True
+                stack.append((y, x))
+    return np.where(keep, arr2d, 0.0)
+
+
+def center_bearing(d: dict[str, Any], arr2d: FloatArray) -> float | None:
+    """Return the bearing from the source to the middle (center of mass) of a field."""
+    g, m = d["grid"], d["meta"]
+    total = float(arr2d.sum())
+    if total <= 0:
+        return None
+    lat = g["north"] - (np.arange(g["ny"]) + 0.5) / g["ny"] * (g["north"] - g["south"])
+    lon = g["west"] + (np.arange(g["nx"]) + 0.5) / g["nx"] * (g["east"] - g["west"])
+    la = float((arr2d.sum(axis=1) * lat).sum()) / total
+    lo = float((arr2d.sum(axis=0) * lon).sum()) / total
+    return dist_bearing(m["lat"], m["lon"], la, lo)[1]
+
+
 def towns_at_or_above(d: dict[str, Any], arr2d: FloatArray, threshold: float) -> list[str]:
     """Return the listed towns whose grid cell is at or above threshold."""
     out = []
@@ -749,6 +826,10 @@ def _new_case(label: str) -> dict[str, Any]:
         "pac1_env_km": 0.0,
         "lead_lb": None,
         "share": None,
+        # where the lead on the ground lies, and NOAA HYSPLIT's result where the map has one
+        "dep_bearing": None,
+        "hy_dep": None,
+        "hy_bearing": None,
     }
 
 
@@ -765,6 +846,14 @@ def _add_map_to_case(c: dict[str, Any], d: dict[str, Any], out: Facts) -> None:
         c["dep"][k][0] = max(c["dep"][k][0], km)
         c["dep"][k][1] = max(c["dep"][k][1], area)
         c["towns"][k].update(towns_at_or_above(d, dep_end, ugft2 * KG_M2_PER_UG_FT2))
+    c["dep_bearing"] = center_bearing(d, dep_end)
+    if "hy_dep" in d["grid"]:  # the saved NOAA HYSPLIT run, on this map's grid and case
+        hy_end = field(d, "hy_dep")[-1]
+        c["hy_dep"] = {}
+        for k, ugft2 in DEP_LEVELS:  # without the stray cells past its grainy edge
+            level = ugft2 * KG_M2_PER_UG_FT2
+            c["hy_dep"][k] = zone_stats(d, joined_to_peak(hy_end, level), level)[0]
+        c["hy_bearing"] = center_bearing(d, hy_end)
     if "env_dep" in d["grid"]:
         env_end = field(d, "env_dep")[-1]
         for k, ugft2 in DEP_LEVELS:
@@ -1308,6 +1397,76 @@ def _archived_plain(fa: Facts, pct: dict[str, str]) -> str:
     )
 
 
+SAME_LINE_DEG = 10  # bearings this close are "nearly the same line"
+
+
+def _hysplit_result(fa: Facts, pct: dict[str, str], *, html: bool) -> tuple[str, list[str], str]:
+    """Return the comparison sentences, a row for each case, and which model reaches farther."""
+    c = fa["cases"]
+    first = c[_order(fa)[0]]
+    ours, theirs = first["dep_bearing"], first["hy_bearing"]
+    same = abs(ours - theirs) <= SAME_LINE_DEG
+    along = "nearly the same line" if same else "different lines"
+    line = (
+        f"Both models put the lead on the ground along {along} from the plant, toward the "
+        f"{WORDS[compass(ours)]}: {ours:.0f}\u00b0 for this site\u2019s model and "
+        f"{theirs:.0f}\u00b0 for HYSPLIT, measured to the middle of the lead on the ground. "
+        "They differ more on how far it reaches. Farthest distance from the plant where lead "
+        "on the ground reaches 5 \u00b5g/ft\u00b2 by the end of the 8 hours:"
+    )
+    rows = []
+    for case in _order(fa):
+        x = c[case]
+        mine = both(x["dep"]["yellow"][0], html=html)
+        noaa = both(x["hy_dep"]["yellow"], html=html)
+        if html:
+            rows.append(
+                f'<tr><th scope="row">{x["label"]} ({pct[case]})</th>'
+                f"<td>{mine}</td><td>{noaa}</td></tr>"
+            )
+        else:
+            rows.append(f"{x['label']} ({pct[case]}): {mine} here, {noaa} in HYSPLIT")
+    ahead = [c[k]["dep"]["yellow"][0] > c[k]["hy_dep"]["yellow"] for k in _order(fa)]
+    farther = (
+        "This site\u2019s model reaches farther in every case."
+        if all(ahead)
+        else "HYSPLIT reaches farther in every case."
+        if not any(ahead)
+        else "Neither model reaches farther in every case."
+    )
+    return line, rows, farther
+
+
+def hysplit_compare_html(fa: Facts | None, pct: dict[str, str]) -> str:
+    """Return the section on NOAA, HYSPLIT and how its result compares; empty without one."""
+    if not fa or not all(x.get("hy_dep") for x in fa["cases"].values()):
+        return ""
+    line, rows, farther = _hysplit_result(fa, pct, html=True)
+    what = HYSPLIT_WHAT.replace(
+        f"({HYSPLIT_CITE})", f'(<a href="{HYSPLIT_URL}" rel="noopener">{HYSPLIT_CITE}</a>)'
+    )
+    return f"""
+  <h3>{HYSPLIT_HEAD}</h3>
+  <p>{NOAA_WHAT} {what}</p>
+  <p>{HYSPLIT_HOW}</p>
+  <p>{line}</p>
+  <div class="tablewrap"><table>
+    {HYSPLIT_TABLE_HEAD}
+    <tbody>{"".join(rows)}</tbody></table></div>
+  <p>{farther} {HYSPLIT_LIMIT}</p>"""
+
+
+def hysplit_compare_plain(fa: Facts | None, pct: dict[str, str]) -> str:
+    """Return the same comparison as one plain paragraph; empty without a HYSPLIT result."""
+    if not fa or not all(x.get("hy_dep") for x in fa["cases"].values()):
+        return ""
+    line, rows, farther = _hysplit_result(fa, pct, html=False)
+    return (
+        f"{NOAA_WHAT} {HYSPLIT_WHAT} {HYSPLIT_HOW} {line} {'; '.join(rows)}. "
+        f"{farther} {HYSPLIT_LIMIT} NOAA\u2019s page on HYSPLIT: {HYSPLIT_URL}."
+    )
+
+
 @dataclass(frozen=True)
 class _Text:
     """Sentences shared by the summary, the FAQ and llms.txt."""
@@ -1433,7 +1592,8 @@ below it is
   <h3>How this compares with the Army\u2019s maps</h3>
   <p>{ARMY_COMPARE} Sources: <a href="{PERMIT_URL}" rel="noopener">{PERMIT_CITE}</a>; \
 <a href="{ARMY_MAPS_PDF}" rel="noopener">{ARMY_MAPS_CITE}</a>.</p>
-  <p>{t.weather}</p>{"".join(_day_html(m, ctx, lead) for m in more)}
+  <p>{t.weather}</p>{hysplit_compare_html(ctx.get("archived"), ctx["pct"])}\
+{"".join(_day_html(m, ctx, lead) for m in more)}
   <h3>{ANALYSIS_QUESTION}</h3>
   <p>{ANALYSIS_HTML}</p>
   <h3>How sure is this?</h3>
@@ -1476,6 +1636,7 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
     fa = ctx.get("archived")
     before = FORECAST_PREFIX if fa else ""
     opens = [(DEFAULT_VIEW_QUESTION, f"{_archived_plain(fa, pct)} {CAVEAT}")] if fa else []
+    noaa = bool(hysplit_compare_plain(fa, pct))
     return [
         (
             "Is the Iowa Lead Tracker official?",
@@ -1537,6 +1698,7 @@ def _faq(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> list[tup
             ),
         ),
         ("How does this compare with the Army's official maps?", ARMY_COMPARE + " " + t.weather),
+        *([(HYSPLIT_QUESTION, f"{hysplit_compare_plain(fa, pct)} {CAVEAT}")] if noaa else []),
         (ANALYSIS_QUESTION, f"{ANALYSIS_TEXT} {CAVEAT}"),
         ("What should I do?", SAFETY_ANSWER),
     ]
@@ -1602,6 +1764,11 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
                 "all in breathable sizes."
             ),
             f"- Army comparison: {ARMY_COMPARE}",
+            *(
+                [f"- NOAA HYSPLIT comparison: {hysplit_compare_plain(fa, ctx['pct'])}"]
+                if hysplit_compare_plain(fa, ctx["pct"])
+                else []
+            ),
             *(
                 [f"- Default view and archived weather: {_archived_plain(fa, ctx['pct'])}"]
                 if fa

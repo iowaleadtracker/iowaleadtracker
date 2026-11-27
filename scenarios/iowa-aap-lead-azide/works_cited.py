@@ -288,6 +288,8 @@ REFERENCES = [
     "tools, which nytimes.com blocks), "
     + _a("https://www.nytimes.com/live/2026/11/25/us/iowa-detonation-ammunition-news")
     + ".",
+    "NOAA Air Resources Laboratory, 2026: HYSPLIT. Web page describing the model and its uses, "
+    "accessed 26 November 2026, " + _a("https://www.arl.noaa.gov/hysplit/") + ".",
     "NOAA, 2025: Radar images: Reflectivity. NOAA JetStream, last updated 11 March 2025, "
     "accessed 23 November 2026, " + _a("https://www.noaa.gov/jetstream/reflectivity") + ".",
     (
@@ -714,6 +716,16 @@ ARMY_BOX_METHOD = (
 #: entry for every change to the model, its settings or its sources.
 CHANGES_HEAD = "Change log"
 CHANGES = [
+    (
+        "Nov. 27",
+        (
+            "The summary has a new section, &ldquo;How this compares with the NOAA HYSPLIT "
+            "model&rdquo;. It says in plain words what NOAA and HYSPLIT are, that this site "
+            "ran HYSPLIT itself, and how the two models&rsquo; results compare: the direction "
+            "of the lead on the ground and how far 5 &micro;g/ft&sup2; reaches in each case. "
+            "The numbers come from the maps. The maps did not change."
+        ),
+    ),
     (
         "Nov. 27",
         (

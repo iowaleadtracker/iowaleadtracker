@@ -8,6 +8,7 @@ and check that every place the text is generated still carries them.
 
 from __future__ import annotations
 
+import copy
 import datetime as dt
 import html
 import json
@@ -18,6 +19,7 @@ from typing import Any
 
 import forecast_summary as fs
 import make_map_picker as site
+import numpy as np
 import pytest
 import staged
 import works_cited
@@ -141,6 +143,46 @@ def test_analysis_after_the_blast_is_reported_with_its_caveat(
 
 
 @pytest.mark.slow
+def test_summary_explains_noaa_and_hysplit_and_compares_the_models(
+    facts_ctx: tuple[dict[str, Any], dict[str, Any]],
+) -> None:
+    """The section under the Army comparison: what NOAA and HYSPLIT are, then the numbers.
+
+    It appears only when the archived maps carry a HYSPLIT result, says this site ran the
+    model, and ends by saying that agreement doesn't show either model is right.
+    """
+    facts, ctx = facts_ctx
+    plain = fs.render(facts, {**ctx, "archived": facts})
+    assert fs.HYSPLIT_HEAD not in plain[0]  # these maps carry no HYSPLIT result
+    assert fs.HYSPLIT_QUESTION not in dict(plain[1])
+    with_hy = copy.deepcopy(facts)
+    for c in with_hy["cases"].values():
+        c["hy_dep"] = {k: v[0] * 0.8 for k, v in c["dep"].items()}  # HYSPLIT: four-fifths as far
+        c["dep_bearing"], c["hy_bearing"] = 218.0, 221.0
+    summary, faq, llms = fs.render(facts, {**ctx, "archived": with_hy})
+    army, noaa = summary.index("How this compares with the Army"), summary.index(fs.HYSPLIT_HEAD)
+    assert army < noaa < summary.index(fs.ANALYSIS_QUESTION)  # right under the Army comparison
+    section = summary[noaa : summary.index(fs.ANALYSIS_QUESTION)]
+    for text in (fs.NOAA_WHAT, fs.HYSPLIT_HOW, fs.HYSPLIT_LIMIT):
+        assert text in section
+    assert "National Oceanic and Atmospheric Administration" in fs.NOAA_WHAT
+    assert "National Weather Service" in fs.NOAA_WHAT
+    assert "It is not a measurement, and it is not a forecast from NOAA." in fs.HYSPLIT_HOW
+    assert f'<a href="{fs.HYSPLIT_URL}" rel="noopener">{fs.HYSPLIT_CITE}</a>' in section
+    assert "nearly the same line" in section
+    assert "218\u00b0 for this site\u2019s model and 221\u00b0 for HYSPLIT" in section
+    assert "This site\u2019s model reaches farther in every case." in section
+    assert section.count("<tr>") == 1 + len(with_hy["cases"])  # a row for each case
+    answer = dict(faq)[fs.HYSPLIT_QUESTION]
+    assert answer.startswith(fs.NOAA_WHAT)
+    assert answer.endswith(fs.CAVEAT)
+    assert "- NOAA HYSPLIT comparison: " in llms
+    assert "safe" not in (section + answer).lower().replace("follow official instructions", "")
+    refs = [r for r in works_cited.REFERENCES if isinstance(r, str)]
+    assert any(r.startswith("NOAA Air Resources Laboratory, 2026:") for r in refs)
+
+
+@pytest.mark.slow
 def test_summary_questions_and_llms_describe_the_default_view(
     facts_ctx: tuple[dict[str, Any], dict[str, Any]],
 ) -> None:
@@ -210,7 +252,7 @@ def test_header_and_about_box_name_the_weather() -> None:
         "The winds come from four weather forecasts, current as of X."
     )
     nov26 = [what for when, what in works_cited.CHANGES if when == "Nov. 26"]
-    assert works_cited.CHANGES[0][0] == "Nov. 27"  # the newest entry (the Army's final forecast)
+    assert works_cited.CHANGES[0][0] == "Nov. 27"  # the newest entry (the HYSPLIT comparison)
     assert any("opens on a 9 a.m. blast, the low case, and archived weather" in w for w in nov26)
     assert any(
         "Opening on the low case is not a finding that little lead got out." in w for w in nov26
@@ -437,7 +479,7 @@ def test_hysplit_view_is_offered_and_described() -> None:
         assert "safe" not in text.lower()
     assert "\u201cNOAA HYSPLIT\u201d button under the map" in fs.HYSPLIT_BOX
     assert "Stein et al. 2015" in works_cited.HYSPLIT_METHOD
-    when, what = next(c for c in works_cited.CHANGES if "NOAA HYSPLIT" in c[1])
+    when, what = next(c for c in works_cited.CHANGES if "new button under the map" in c[1])
     assert when == "Nov. 27"
     assert "HYSPLIT" in what
     assert "numbers did not change" in what
@@ -474,7 +516,8 @@ def test_armys_final_maps_are_offered_for_the_blast_they_were_made_for() -> None
     assert '<label class="opt" id="refwrap" hidden><input type="checkbox" id="showRef">' in page
     assert "ref: false" in page  # off until the reader ticks it
     assert "if (M.outlines) {" in page  # offered only on maps that carry outlines
-    for text in (fs.ARMY_BOX, works_cited.ARMY_BOX_METHOD, works_cited.CHANGES[0][1]):
+    log = next(w for _, w in works_cited.CHANGES if "final forecast&rdquo;" in w)
+    for text in (fs.ARMY_BOX, works_cited.ARMY_BOX_METHOD, log):
         assert "26% of the lead airborne" in text
         assert "0.6 mile" in text  # how well the pictures could be placed
         assert "safe" not in text.lower()
@@ -1617,3 +1660,17 @@ def test_about_safety_paragraph_says_no_warranty_and_no_verdicts() -> None:
         "follow $who",
     ):
         assert part in para
+
+
+def test_farthest_reach_ignores_stray_cells_past_the_edge() -> None:
+    """HYSPLIT's grainy edge: only the area joined to the peak counts toward its reach."""
+    a = np.zeros((6, 8))
+    a[1, 1], a[1, 2], a[2, 2] = 9.0, 6.0, 5.0  # the main area, joined edge to edge
+    a[3, 3] = 7.0  # touches it only at a corner
+    a[4, 6] = 8.0  # a stray cell far away
+    kept = fs.joined_to_peak(a, 5.0)
+    assert kept[1, 1] == 9.0
+    assert kept[2, 2] == 5.0
+    assert kept[3, 3] == 0.0
+    assert kept[4, 6] == 0.0
+    assert not fs.joined_to_peak(a, 10.0).any()  # nothing reaches the level
