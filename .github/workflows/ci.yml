@@ -7,9 +7,10 @@
 # pushes made with the workflow token don't start other workflows. A pull request from a
 # fork gets no automatic CI; run this workflow on its branch by hand.
 #
-# The front-end lint job runs on every branch push except main, so a pull request shows
-# it but the merge to main doesn't run it again. A merge that resolves conflicts in the
-# pages isn't linted before it deploys: run `pnpm lint` on the merged branch first.
+# The front-end lint and the map's browser tests run on every branch push except main, so
+# a pull request shows them but the merge to main doesn't run them again. A merge that
+# resolves conflicts in the pages isn't checked before it deploys: run `pnpm lint` and
+# `pnpm test:map` first.
 name: CI
 
 on:
@@ -62,6 +63,22 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Lint the pages' JavaScript, CSS and HTML
         run: pnpm lint
+
+  test-map:
+    # the map page in Chromium, desktop and phone, with saved map data: no build needed
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6  # the version in package.json's packageManager
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Browser tests of the map page
+        run: pnpm test:map
 
   tests:
     runs-on: ubuntu-latest
