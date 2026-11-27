@@ -58,7 +58,8 @@ site on any date (the site build passes `--as-of`, the time they were pulled); d
 cache file to download fresh forecasts from Open-Meteo. `--weather-at LAT,LON` centers the
 weather grid on another point, so a run can reuse weather saved for a nearby release point.
 `--dep-scale-min 5ug/ft2` hides deposition below a level until the reader unticks a box, as
-`--scale-min` does for air. `--hysplit-overlay FILE` adds a saved NOAA HYSPLIT run for the same release to the map, as a
+`--scale-min` does for air. `--reference-outlines FILE` adds outlines from another source, such as an agency's published
+map, that readers can switch on. `--hysplit-overlay FILE` adds a saved NOAA HYSPLIT run for the same release to the map, as a
 second view readers can switch to (see `scenarios/iowa-aap-lead-azide/hysplit-archived/`). A mirror of the site, built from
 this repository, is at https://iowaleadtracker.github.io/ for readers who can't reach
 iowaleadtracker.com. The `--publish`

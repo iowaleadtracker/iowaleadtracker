@@ -1,5 +1,9 @@
 """The command line: help text and option resolution (no model runs)."""
 
+import argparse
+import json
+from pathlib import Path
+
 import pytest
 
 import puff_dispersal as puff
@@ -65,3 +69,24 @@ def test_weather_at_centers_the_weather_grid_elsewhere() -> None:
     for bad in ("40.8", "north,west", "95,-91"):
         with pytest.raises(SystemExit):
             puff.weather_point(puff.parse_args([*base, "--weather-at", bad]))
+
+
+def test_reference_outlines_are_checked(tmp_path: Path) -> None:
+    """A file of outlines needs a name and zones of [latitude, longitude] lines."""
+    good = {
+        "name": "Agency map",
+        "air": {"zones": [{"label": "1 or more", "lines": [[[40, -91]]]}]},
+    }
+    path = tmp_path / "outlines.json"
+    path.write_text(json.dumps(good), encoding="utf-8")
+    ns = argparse.Namespace(reference_outlines=str(path))
+    out = puff._reference_outlines(ns)
+    assert out is not None
+    assert out["name"] == "Agency map"
+    assert out["note"] == ""
+    assert "dep" not in out
+    assert puff._reference_outlines(argparse.Namespace(reference_outlines=None)) is None
+    for bad in ({"name": "x"}, {"name": "x", "air": {"zones": [{"label": "", "lines": []}]}}):
+        path.write_text(json.dumps(bad), encoding="utf-8")
+        with pytest.raises(SystemExit, match="--reference-outlines"):
+            puff._reference_outlines(ns)

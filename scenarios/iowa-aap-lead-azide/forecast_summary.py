@@ -1133,6 +1133,17 @@ HYSPLIT_BOX = (
     "site\u2019s map. It is another model\u2019s estimate, not a measurement, and not a "
     "forecast from NOAA."
 )
+#: The box under the blast's maps that draws the zones of the Army's own final maps.
+ARMY_BOX = (
+    "Under the map, the \u201cArmy\u2019s final maps\u201d box draws the zones from the "
+    "Army\u2019s own final maps over either model\u2019s result: where the Army\u2019s "
+    "forecast put lead in air at 0.18 micrograms per cubic meter or more, with the times it "
+    "marked along the path, and lead on the ground at 5 and 100 micrograms per square foot "
+    "or more. The Army\u2019s maps are a forecast for 26% of the lead airborne, whichever "
+    "case this map shows. This site traced the zones from the Army\u2019s pictures and placed "
+    "them by their county lines, to about 0.6 mile; the Army\u2019s plant marker hides their "
+    "first miles."
+)
 FORECAST_HEAD = "What the forecast showed before the blast"
 FORECAST_NOTE = (
     "The sections below on where the cloud goes, how far lead on the ground could reach, lead "
@@ -1264,6 +1275,7 @@ def _archived_html(fa: Facts | None, pct: dict[str, str]) -> str:
   <h3>{ARCHIVED_HEAD}</h3>
   <p>{archived_wind_sentence(fa)} {path_sentence(fa)} {OBSERVED_WX}</p>
   <p>{HYSPLIT_BOX}</p>
+  <p>{ARMY_BOX}</p>
   <p>Farthest distance from the plant where lead on the ground reaches each EPA dust-lead
     action level by the end of the 8-hour run, for a blast at {BLAST_TIME} The smaller
     number, where there is one, is the farther of the two dry-deposition schemes.</p>
@@ -1284,7 +1296,7 @@ def _archived_plain(fa: Facts, pct: dict[str, str]) -> str:
         f"{path_sentence(fa, html=False)} {OBSERVED_WX} {_town_text(fa)} {TOWN_CAVEAT} "
         "Farthest reach of ground lead with archived weather: "
         + " ".join(r[2:] for r in rows)
-        + f" {HYSPLIT_BOX}"
+        + f" {HYSPLIT_BOX} {ARMY_BOX}"
     )
 
 

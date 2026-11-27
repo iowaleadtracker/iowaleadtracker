@@ -209,7 +209,7 @@ def test_header_and_about_box_name_the_weather() -> None:
         "The winds come from four weather forecasts, current as of X."
     )
     nov26 = [what for when, what in works_cited.CHANGES if when == "Nov. 26"]
-    assert works_cited.CHANGES[0][0] == "Nov. 27"  # the newest entry (the HYSPLIT view)
+    assert works_cited.CHANGES[0][0] == "Nov. 27"  # the newest entry (the Army's final maps)
     assert any("opens on a 9 a.m. blast, the low case, and archived weather" in w for w in nov26)
     assert any(
         "Opening on the low case is not a finding that little lead got out." in w for w in nov26
@@ -375,6 +375,9 @@ def test_archived_map_runs_offline_from_the_new_release_point(
     assert note["note"] == site.HYSPLIT_NOTE
     assert note["scaledBy"] == pytest.approx(meta["explosionOpts"]["airborneFraction"], rel=1e-4)
     assert len(note["airMax"]) == len(note["depMax"]) == len(out["hours"])  # HYSPLIT's peaks
+    # the Army's final maps ride along as outlines for the box under the map
+    assert meta["outlines"]["name"] == "Army\u2019s final maps"
+    assert len(meta["outlines"]["dep"]["zones"]) == 2
     # the deposition view's minimum, 5 ug/ft2 in the page's kg/m2
     assert meta["depScaleMin"] == pytest.approx(5e-9 / 0.09290304)
     # two models, one release: their highest hourly means agree within a factor of 3
@@ -433,7 +436,7 @@ def test_hysplit_view_is_offered_and_described() -> None:
         assert "safe" not in text.lower()
     assert "\u201cNOAA HYSPLIT\u201d button under the map" in fs.HYSPLIT_BOX
     assert "Stein et al. 2015" in works_cited.HYSPLIT_METHOD
-    when, what = works_cited.CHANGES[0]
+    when, what = next(c for c in works_cited.CHANGES if "NOAA HYSPLIT" in c[1])
     assert when == "Nov. 27"
     assert "HYSPLIT" in what
     assert "numbers did not change" in what
@@ -451,9 +454,47 @@ def test_deposition_view_opens_at_epas_lowest_action_level() -> None:
     assert "fixDepMin: !!M.depScaleMin" in page  # on when the map carries a minimum
     assert "function syncMinBox()" in page  # the box follows the view: air or deposition
     assert 'S.field === "dep" ? (S.fixDepMin && M.depScaleMin) || 0' in page
-    what = works_cited.CHANGES[0][1]
+    what = next(w for _, w in works_cited.CHANGES if "deposition view" in w)
     assert "hidden, not zero" in what
     assert "not a line between safe and unsafe" in what
+
+
+def test_armys_final_maps_are_offered_for_the_blast_they_were_made_for() -> None:
+    """The box: off by default, on the 9 a.m. maps only, and described as the Army's forecast."""
+    assert site.army_outlines(site.DATE, "09:00") == [
+        "--reference-outlines",
+        str(site.ARMY_OUTLINES),
+    ]
+    assert site.army_outlines(site.DATE, "09:30") == []  # another blast time: not its maps
+    assert site.army_outlines("2026-11-27", "09:00") == []
+    for run in site.archived_runs("python"):
+        assert "--reference-outlines" in run.cmd
+    page = load_template()
+    assert '<label class="opt" id="refwrap" hidden><input type="checkbox" id="showRef">' in page
+    assert "ref: false" in page  # off until the reader ticks it
+    assert "if (M.outlines) {" in page  # offered only on maps that carry outlines
+    for text in (fs.ARMY_BOX, works_cited.ARMY_BOX_METHOD, works_cited.CHANGES[0][1]):
+        assert "26% of the lead airborne" in text
+        assert "0.6 mile" in text  # how well the pictures could be placed
+        assert "safe" not in text.lower()
+    readme = (site.ARMY_OUTLINES.parent / "README.md").read_text(encoding="utf-8")
+    flat = " ".join(readme.split())
+    assert "don't use this to decide if you're safe; follow official instructions" in flat
+
+
+def test_armys_outlines_are_southwest_of_the_plant() -> None:
+    """The traced file: an air path with four time marks, two ground zones, all near the plant."""
+    data = json.loads(site.ARMY_OUTLINES.read_text(encoding="utf-8"))
+    assert data["name"] == "Army\u2019s final maps"
+    assert "Traced and placed by this site" in data["note"]
+    assert [m["label"] for m in data["air"]["marks"]] == ["T+0.5 h", "T+2 h", "T+3 h", "T+5 h"]
+    assert [z["label"].split()[0] for z in data["dep"]["zones"]] == ["5", "100"]
+    for kind in ("air", "dep"):
+        for zone in data[kind]["zones"]:
+            pts = [pt for line in zone["lines"] for pt in line]
+            assert len(pts) > 20
+            # the Army's forecast went southwest: nothing north or east of the plant point
+            assert all(39.5 < lat < site.LAT and -93.0 < lon < site.LON for lat, lon in pts)
 
 
 def test_staged_page_keeps_the_permit_case_first() -> None:

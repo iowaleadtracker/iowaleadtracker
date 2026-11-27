@@ -166,6 +166,7 @@ body.embedded > header { display: none; }
       <div class="ticks" id="legticks"></div>
       <div id="legzones" hidden></div>
       <div class="lz" id="legenv" hidden></div>
+      <div id="legref" hidden></div>
       <div id="leghy" hidden><div id="leghybands"></div><div class="legnote" id="leghytext" style="border-top:0;padding-top:0;margin-top:3px"></div></div>
       <div class="lz lpath" id="legpath" style="margin-top:4px"><svg width="26" height="8" aria-hidden="true"><line x1="1" y1="4" x2="25" y2="4" stroke="currentColor" stroke-width="2" stroke-dasharray="5 4"/></svg>Path of the cloud's center, labeled with the local time it passes</div>
       <div id="legsky" hidden>
@@ -258,6 +259,7 @@ body.embedded > header { display: none; }
   <label class="opt" id="fixtopwrap" hidden><input type="checkbox" id="fixtop" checked> <span id="fixtoplabel"></span></label>
   <label class="opt" id="rangewrap">Color scale <input id="decades" type="range" min="2" max="8" value="5" aria-label="Color scale range"> <span id="decout"></span></label>
   <label class="opt" id="envwrap" hidden><input type="checkbox" id="showEnv"> <span id="envlabel"></span></label>
+  <label class="opt" id="refwrap" hidden><input type="checkbox" id="showRef"> <span id="reflabel"></span></label>
   <label class="opt"><input type="checkbox" id="showPuffs" checked> puffs</label>
   <label class="opt"><input type="checkbox" id="showWind" checked> wind</label>
   <label class="opt" id="skywrap"><input type="checkbox" id="showSky"> sky cover &amp; rain</label>
@@ -566,7 +568,7 @@ renderStatic();
 
 // ---------- state ----------
 const S = {
-  hour: 1, field: "conc", units: "mass", decades: 5, puffs: true, wind: true, sky: false, hy: false, base: "auto", playing: false,
+  hour: 1, field: "conc", units: "mass", decades: 5, puffs: true, wind: true, sky: false, hy: false, ref: false, base: "auto", playing: false,
   lat: M.lat, lon: M.lon, z: 8,
   zoneMetric: M.zoneMetric || "m60", locs: M.loc.map((l) => l.value), track: true, env: false,
   dlocs: M.depLoc ? M.depLoc.map((l) => l.value) : [1e-6, 1e-5, 1e-4],
@@ -757,6 +759,43 @@ function drawHysplitEdges() {
 // air views, --dep-scale-min for deposition (kg/m3 or kg/m2). Lower values are hidden, not zero.
 const shownMin = () => (S.units === "count" || S.field === "zones" ? 0
   : S.field === "dep" ? (S.fixDepMin && M.depScaleMin) || 0 : (S.fixMin && M.scaleMin) || 0);
+// ---------- outlines from another source (--reference-outlines) ----------
+// Zones traced from someone else's published map, for example an agency's, as lines of
+// [latitude, longitude]: M.outlines.air goes with the air views, .dep with deposition. A box
+// under the map shows them over either model's result. The highest zone is drawn solid and
+// the ones below it dashed; "marks" are short labeled lines (times along a path).
+const REF_COLOR = "#b5179e";
+const refKind = () => (S.field === "dep" || (S.field === "zones" && S.zoneMetric === "dep") ? "dep" : "air");
+const refLayer = () => (S.ref && M.outlines && M.outlines[refKind()]) || null;
+const refDash = (k, n) => (k === n - 1 ? [] : [7, 5]);
+let refLegendKey = "";
+function drawReference() {
+  const L = refLayer(), key = L ? refKind() : "";
+  if (key !== refLegendKey) {
+    refLegendKey = key;
+    $("legref").hidden = !L;
+    if (L) $("legref").innerHTML = L.zones.map((z, k) =>
+      `<div class="lz"><svg width="26" height="8" aria-hidden="true" style="flex:none"><line x1="1" y1="4" x2="25" y2="4" stroke="${REF_COLOR}" stroke-width="2.5"${refDash(k, L.zones.length).length ? ' stroke-dasharray="6 4"' : ""}/></svg>${esc(M.outlines.name)}: ${esc(z.label)}</div>`).join("") +
+      (M.outlines.note ? `<div class="legnote" style="border-top:0;padding-top:0;margin-top:3px">${esc(M.outlines.note)}</div>` : "");
+  }
+  if (!L) return;
+  const path = (line) => { ctx.beginPath(); line.forEach(([la, lo], i) => { const [x, y] = toScreen(la, lo); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); }); ctx.stroke(); };
+  ctx.lineJoin = "round"; ctx.lineCap = "round";
+  for (const [color, width] of [["rgba(255,255,255,0.9)", 5], [REF_COLOR, 2.4]]) {   // white under the color, to show on any map
+    ctx.strokeStyle = color; ctx.lineWidth = width;
+    L.zones.forEach((z, k) => { ctx.setLineDash(refDash(k, L.zones.length)); z.lines.forEach(path); });
+    ctx.setLineDash([]);
+    for (const m of L.marks || []) path(m.line);
+  }
+  ctx.lineJoin = "miter"; ctx.lineCap = "butt";
+  ctx.font = "600 11.5px system-ui, sans-serif"; ctx.textBaseline = "middle"; ctx.textAlign = "right";
+  for (const m of L.marks || []) {                // label each mark beyond its western end
+    const end = m.line[0][1] < m.line[1][1] ? m.line[0] : m.line[1], [x, y] = toScreen(end[0], end[1]);
+    ctx.lineWidth = 3.5; ctx.strokeStyle = "rgba(255,255,255,0.92)"; ctx.strokeText(m.label, x - 7, y - 2);
+    ctx.fillStyle = REF_COLOR; ctx.fillText(m.label, x - 7, y - 2);
+  }
+  ctx.textAlign = "left";
+}
 function buildOverlay() {
   const key = [S.hour, S.field, S.units, S.decades, isDark(), S.zoneMetric, S.locs.join(","), S.dlocs.join(","), S.fixTop, S.fixMin, S.fixDepMin, S.env, S.hy].join("|");
   if (key === overlayKey) return;
@@ -1100,6 +1139,7 @@ function draw() {
   if (S.sky) drawSky(h);
   drawOverlay();
   drawHysplitEdges();
+  drawReference();
   if (S.hy) drawSource(); else drawOwn(h);       // HYSPLIT: the source alone, without this model's wind, path and puffs
 }
 function drawOwn(h) {
@@ -1470,6 +1510,11 @@ for (let k = 0; k < 3; k++) {
 }
 $("zmetric").onchange = (e) => { S.zoneMetric = e.target.value; syncLocInputs(); render(); };
 if (!FIELDS.snap) document.querySelector('#fieldseg button[data-v="snap"]').hidden = true;   // older data
+if (M.outlines) {                                 // outlines from another source came with this map
+  $("refwrap").hidden = false;
+  $("reflabel").textContent = M.outlines.name;
+  $("showRef").onchange = (e) => { S.ref = e.target.checked; render(); };
+}
 if (FIELDS.hy_conc) {                             // a saved HYSPLIT run came with this map
   $("modelseg").hidden = false;
   $("ownbtn").textContent = OWN;

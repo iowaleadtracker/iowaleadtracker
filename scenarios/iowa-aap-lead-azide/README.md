@@ -30,6 +30,7 @@ not official guidance.
 | `met_cache/map_met_all.json` | saved Open-Meteo forecasts for Monday at the new site (download times in `__fetched__`; the page shows when) |
 | `met_cache/archived_hrrr.json` | archived weather for the 9 a.m. blast: NOAA's HRRR as Open-Meteo served it at 6:51 p.m. CST on Nov. 25, after the eight modeled hours had passed. The map opens on the maps built from it (see "What the page opens on") |
 | `hysplit-archived/` | NOAA's HYSPLIT model for the same blast on NOAA ARL's archive of HRRR: the run's inputs, its output as fields the maps can read (`overlay_0900.npz`), and the script that made them. The archived-weather maps show it when the "NOAA HYSPLIT" button is chosen |
+| `army-final-maps/` | the zones on the Army's final "Mitigated 0.26" air and ground maps, traced and placed on the ground (`outlines.json`), with the script that made them. The maps for the 9 a.m. blast draw them when the "Army's final maps" box is ticked |
 | `sky_grid.py`, `met_cache/sky_grid.json` | the maps' "sky cover & rain" layer: forecast cloud cover and precipitation on a finer grid, display only (see "The weather layer" below) |
 | `make_icons.py` | builds the site icons and profile images |
 | `outputs/site/` | the site. The repo holds only the hand-made files (`og.png`, icons, `brand/`); `make_map_picker.py --build` writes the page and the maps |
@@ -218,6 +219,12 @@ case, the most conservative one, and showed only the forecast.
   uses the four colors of HYSPLIT's own plots, between the same lowest and highest levels
   as the site's map. It has the hourly mean and deposition only.
   The build reads the saved file; it doesn't run HYSPLIT. See `hysplit-archived/README.md`.
+- **Army's final maps.** The maps for the 9 a.m. blast, on either weather, carry the zones
+  of the Army's final maps (`army-final-maps/outlines.json`, `--reference-outlines`). A
+  box under the map, off by default, draws them over either model's result: the 0.18 µg/m³
+  path and its time marks on the air views, the 5 and 100 µg/ft² zones on the deposition
+  view. They are the Army's forecast for 26% of the lead airborne, whichever case is
+  shown. See `army-final-maps/README.md`.
 - **Deposition minimum.** The deposition view opens showing 5 µg/ft² or more
   (`--dep-scale-min 5ug/ft2`), in both models' views, the way the air views open at
   0.15 µg/m³. 5 µg/ft² is EPA's lowest dust-lead action level, for indoor floors

@@ -674,10 +674,39 @@ HYSPLIT_METHOD = (
     f"{_a(SOURCE_URL + '/tree/main/scenarios/iowa-aap-lead-azide/hysplit-archived', 'GitHub')}."
 )
 
+#: The Army's final maps drawn on the site's maps, shown under the HYSPLIT note.
+ARMY_BOX_HEAD = "The Army&rsquo;s final maps on the map."
+ARMY_BOX_METHOD = (
+    "On the maps for the 9 a.m. blast, the &ldquo;Army&rsquo;s final maps&rdquo; box draws "
+    "the zones of the U.S. Army&rsquo;s final &ldquo;Mitigated 0.26&rdquo; maps (stamped a/o "
+    "250700NOV26): on the air views, the path it shaded for lead in air of 0.18 "
+    "&micro;g/m&sup3; or more and the times it marked along it; on the deposition view, its "
+    "zones for lead on the ground of 5 and 100 &micro;g/ft&sup2; or more. Each map is a small "
+    "picture, about 0.6 mile per pixel. This site picked the zones out by color and placed "
+    "each picture by fitting public county boundaries to the county lines drawn on it, good "
+    "to about a pixel. The Army&rsquo;s plant marker covers the first miles of every zone, "
+    "so the lines stop there. The Army&rsquo;s maps are its forecast for 26% of the lead "
+    "airborne and stay the same whichever case the map shows. The tracing and placing are "
+    "this site&rsquo;s, not the Army&rsquo;s. The pictures, the lines, and the code are on "
+    f"{_a(SOURCE_URL + '/tree/main/scenarios/iowa-aap-lead-azide/army-final-maps', 'GitHub')}."
+)
+
 #: What changed in the maps and their method, newest first (Central time dates). Add an
 #: entry for every change to the model, its settings or its sources.
 CHANGES_HEAD = "Change log"
 CHANGES = [
+    (
+        "Nov. 27",
+        (
+            "The maps for the 9 a.m. blast have a new box under the map, &ldquo;Army&rsquo;s "
+            "final maps&rdquo;. It draws the zones from the Army&rsquo;s own final forecast "
+            "maps, for 26% of the lead airborne, over either model&rsquo;s result: lead in "
+            "air of 0.18 &micro;g/m&sup3; or more with the Army&rsquo;s time marks, and lead "
+            "on the ground of 5 and 100 &micro;g/ft&sup2; or more. This site traced them "
+            "from the Army&rsquo;s pictures and placed them by county lines, to about 0.6 "
+            "mile. The maps&rsquo; own numbers did not change."
+        ),
+    ),
     (
         "Nov. 27",
         (
@@ -921,6 +950,7 @@ def render(ctx: dict[str, Any], site_url: str, built_txt: str) -> str:
   <p><b>{METHOD_HEAD}</b> {method_intro(ctx["pct"])}</p>
   <p><b>{ANALYSIS_HEAD}</b> {ANALYSIS_METHOD}</p>
   <p><b>{HYSPLIT_HEAD}</b> {HYSPLIT_METHOD}</p>
+  <p><b>{ARMY_BOX_HEAD}</b> {ARMY_BOX_METHOD}</p>
   <h3>{CHANGES_HEAD}</h3>
   {changes_html()}
   <h3>References</h3>

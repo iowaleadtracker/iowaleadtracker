@@ -529,6 +529,14 @@ def _add_display_args(p: argparse.ArgumentParser) -> None:
         "is scaled to this run's release mass",
     )
     p.add_argument(
+        "--reference-outlines",
+        default=None,
+        metavar="FILE",
+        help="add outlines from another source (for example an agency's published map) that "
+        'readers can switch on: a JSON file with a name, a note, and under "air" and '
+        '"dep" a list of zones, each a label and lines of [latitude, longitude] points',
+    )
+    p.add_argument(
         "--hysplit-overlay-note",
         default=None,
         metavar="TEXT",
@@ -1052,6 +1060,32 @@ def _hysplit_overlay(
     return fields, note
 
 
+def _outline_layers(data: Json) -> Json:
+    """Return the "air" and "dep" outlines of a file, checked for labels and point pairs."""
+    layers: Json = {k: data[k] for k in ("air", "dep") if k in data}
+    if not layers:
+        msg = 'no "air" or "dep" outlines in the file'
+        raise ValueError(msg)
+    for layer in layers.values():
+        for zone in layer["zones"]:
+            if not zone["label"] or any(len(pt) != 2 for ln in zone["lines"] for pt in ln):
+                msg = "each zone needs a label and lines of [latitude, longitude] points"
+                raise ValueError(msg)
+    return layers
+
+
+def _reference_outlines(a: argparse.Namespace) -> Json | None:
+    """Return the outlines of ``--reference-outlines`` for the page, or nothing without it."""
+    path = getattr(a, "reference_outlines", None)
+    if not path:
+        return None
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+        return {"name": data["name"], "note": data.get("note", ""), **_outline_layers(data)}
+    except (OSError, ValueError, KeyError, TypeError) as e:
+        raise SystemExit(f"--reference-outlines: {e!r}") from None
+
+
 def _hours_output(
     a: argparse.Namespace, met: MetField, hourly: Sequence[Json], F: dict[str, FloatArray]
 ) -> list[Json]:
@@ -1377,6 +1411,9 @@ def simulate(a: argparse.Namespace, log: TextIO = sys.stderr) -> Json:
     }
     if overlay_note:
         payload["meta"]["hysplitOverlay"] = overlay_note
+    outlines = _reference_outlines(a)
+    if outlines:
+        payload["meta"]["outlines"] = outlines
     payload["meta"]["hysplit"] = hysplit_files(a, bins_out, payload["grid"])
     if sky_meta:
         payload["meta"]["skyGrid"] = sky_meta

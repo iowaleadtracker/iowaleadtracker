@@ -122,6 +122,10 @@ ARCHIVED_LAT, ARCHIVED_LON = 40.8096, -91.2692
 # NOAA's HYSPLIT model for the same blast on NOAA ARL's archive of HRRR, saved as fields the
 # archived-weather maps can show (hysplit-archived/README.md). A button under the map
 # switches to it. HYSPLIT isn't run by the build; the saved file is read.
+# The zones on the Army's final maps for the 9 a.m. blast, traced and placed on the ground
+# (army-final-maps/README.md). A box under the maps for that blast draws them.
+ARMY_OUTLINES = HERE / "army-final-maps" / "outlines.json"
+ARMY_BLAST = (DATE, "09:00")  # the blast the Army's final maps are for
 HYSPLIT_OVERLAY = HERE / "hysplit-archived" / "overlay_0900.npz"
 HYSPLIT_NOTE = "on NOAA\u2019s archived weather"
 # The first model with data for the whole run is shown; the rest make up the spread.
@@ -680,11 +684,19 @@ def archived_runs(py: str) -> list[Run]:
                 "--no-sky-layer",  # that layer is labeled a forecast
                 *("--home-url", SITE_URL),
                 *("--home-name", SITE_NAME),  # the button beside "NOAA HYSPLIT"
+                *army_outlines(DATE, t),
                 *("--legend-note", f"{name} case, blast {blast_label(t, DATE)}, {ARCHIVED_NOTE}"),
                 *("-o", str(out)),
             ]
             runs.append(Run(f"archived {case} {t}", cmd, out))
     return runs
+
+
+def army_outlines(day: str, t: str) -> list[str]:
+    """Return the option that adds the Army's final maps, for the blast they were made for."""
+    if (day, t) != ARMY_BLAST or not ARMY_OUTLINES.exists():
+        return []
+    return ["--reference-outlines", str(ARMY_OUTLINES)]
 
 
 def build_archived(py: str) -> None:
@@ -730,6 +742,7 @@ def build() -> None:
                     *as_of,
                     *sky,
                     *("--home-url", SITE_URL),
+                    *army_outlines(day, t),
                     *("--legend-note", f"{name} case, blast {blast_label(t, day)}{forecast}"),
                     *("-o", str(out)),
                 ]
