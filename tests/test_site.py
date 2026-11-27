@@ -194,7 +194,7 @@ def test_summary_questions_and_llms_describe_the_default_view(
     """
     facts, ctx = facts_ctx
     summary, faq, llms = fs.render(facts, {**ctx, "archived": facts})
-    view = fs.default_view(ctx["pct"]["low"])
+    view = fs.default_view(ctx["pct"]["mid"])
     assert f"<h3>{fs.DEFAULT_VIEW_HEAD}</h3>\n  <p>{view}</p>" in summary
     order = [
         fs.DEFAULT_VIEW_HEAD,
@@ -211,12 +211,12 @@ def test_summary_questions_and_llms_describe_the_default_view(
     assert "(the map\u2019s default)" not in summary  # the permit case no longer is
     answers = dict(faq)
     opens = answers[fs.DEFAULT_VIEW_QUESTION]
-    assert opens.startswith(fs.default_view(ctx["pct"]["low"]))
+    assert opens.startswith(fs.default_view(ctx["pct"]["mid"]))
     assert fs.TOWN_CAVEAT in opens
     assert opens.endswith(fs.CAVEAT)
     assert answers["Where could the lead go?"].startswith(fs.FORECAST_PREFIX)
     assert answers["How far could lead on the ground reach?"].startswith(fs.FORECAST_PREFIX)
-    assert "- Default view and archived weather: " + fs.default_view(ctx["pct"]["low"]) in llms
+    assert "- Default view and archived weather: " + fs.default_view(ctx["pct"]["mid"]) in llms
     # llms.txt labels its forecast lines too: an answer engine quotes single lines
     for line in llms.splitlines():
         if line.startswith("- ") and ("yellow area" in line or "were forecast" in line):
@@ -243,8 +243,8 @@ def test_header_and_about_box_name_the_weather() -> None:
     assert fs.weather_line("X", archived=False) == "Weather forecast from X."
     about = fs.about_weather("four", "X", archived=True)
     assert about.startswith(
-        "The map opens on the low case, the smallest of the four; that is not a finding that "
-        "little lead got out. It opens on archived weather: NOAA\u2019s HRRR weather model"
+        "The map opens on the U.S. Army mitigated case, the Army\u2019s own estimate, and on "
+        "archived weather: NOAA\u2019s HRRR weather model"
     )
     assert "from four weather forecasts, current as of X" in about
     assert "not a measurement" in about
@@ -262,11 +262,16 @@ def test_header_and_about_box_name_the_weather() -> None:
 def test_analysis_in_the_header_about_box_and_methodology() -> None:
     page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
     about = " ".join(dialog(page, "note").split())
-    assert "<p><b>$analysis_head</b> $analysis</p>" in about
-    assert about.index("What the map shows.") < about.index("$analysis_head")
-    assert about.index("$analysis_head") < about.index("decide if you&rsquo;re safe")
+    assert "<p><b>$analysis_short_head</b> $analysis_short</p>" in about
+    assert about.index("What the map shows.") < about.index("$analysis_short_head")
+    assert about.index("$analysis_short_head") < about.index("decide if you&rsquo;re safe")
     assert works_cited.ANALYSIS_PATH in fs.EARLY_AIR_HTML
     assert "unofficial model estimates, not measurements" in fs.EARLY_AIR_HTML
+    assert works_cited.ANALYSIS_PATH in fs.analysis_short_html()
+    assert "preliminary, unofficial analysis of model estimates, not measurements" in (
+        fs.ANALYSIS_SHORT
+    )
+    assert "still needed" in fs.ANALYSIS_SHORT
     ctx: dict[str, Any] = {
         "pct": {"low": "7%", "mid": "26%", "high": "55%", "permit": "100%"},
         "n_models": "two",
@@ -328,20 +333,21 @@ def test_pulled_label_for_the_legend() -> None:
     assert site.pulled_label(morning) == "Nov. 21, 8:08 a.m. CST"
 
 
-def test_page_opens_on_the_low_case_and_says_it_is_not_a_finding() -> None:
-    """Since Nov. 26 the page opens on the low case (maintainer's choice, after the blast).
+def test_page_opens_on_the_army_case() -> None:
+    """Since Nov. 27 the page opens on the U.S. Army mitigated case (maintainer's choice).
 
-    Before the blast it opened on the EPA permit case, to avoid a false sense of security.
-    The larger cases stay in the menu, and wherever the page says what it opens on, it
-    also says that this is not a finding that little lead got out.
+    It is the Army's own estimate, and its latest deposition maps still use it. Before the
+    blast the page opened on the EPA permit case; from Nov. 26, on the low case. The other
+    cases stay in the menu, and the page says no one has published how much got out.
     """
-    assert site.DEFAULT_CASE == "low"
-    assert {c: r for c, r, _ in site.CASES}["permit"] == "permit-100"
+    assert site.DEFAULT_CASE == "mid"
+    assert {c: r for c, r, _ in site.CASES}["mid"] == "army-26"
     assert [c for c, _, _ in site.CASES] == ["low", "mid", "high", "permit"]
-    view = fs.default_view("7%")
-    assert "the low case (7% of the lead in the air)" in view
-    assert "is not a finding that little lead got out" in view
-    assert "up to the EPA permit case, which assumes all of the lead got into the air" in view
+    view = fs.default_view("26%")
+    assert "the U.S. Army mitigated case (26% of the lead in the air" in view
+    assert "the Army\u2019s own estimate" in view
+    assert "No one has published how much lead actually got out." in view
+    assert "the EPA permit case, which assumes all of the lead got into the air" in view
     assert "not a measurement of where the cloud went" in view
     assert "safe" not in view.lower()
 
@@ -565,7 +571,7 @@ def test_armys_outlines_are_southwest_of_the_plant() -> None:
 def test_staged_page_keeps_the_permit_case_first() -> None:
     """The Wednesday-to-Friday forecasts from before the blast open as they did then."""
     assert staged.DEFAULT_CASE == "permit"
-    assert site.DEFAULT_CASE == "low"
+    assert site.DEFAULT_CASE == "mid"
 
 
 def test_archived_runs_use_only_the_saved_weather() -> None:
@@ -623,10 +629,11 @@ def dialog(page: str, dialog_id: str) -> str:
 
 
 def test_court_pause_note_in_about_dialog() -> None:
-    """About gives the Eighth Circuit ruling in one linked sentence; Methodology the full case."""
+    """The court case is in Methodology and References; the About box points there."""
     page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
     about, cite = dialog(page, "note"), dialog(page, "cite")
-    assert "<b>Court case.</b> $court_short" in about
+    assert "Court case." not in about
+    assert "the court case and the timeline are under Methodology" in " ".join(about.split())
     assert f'href="{fs.RULING_URL}"' in fs.COURT_SHORT_HTML
     assert "$court_pause" not in about
     assert "<b>Court case.</b> $court_pause" in cite
@@ -930,22 +937,21 @@ def test_about_box_leads_with_when() -> None:
     about = " ".join(dialog(page, "note").split())
     cite = " ".join(dialog(page, "cite").split())
     first = about.index("About this map</h2>") + len("About this map</h2>")
-    assert about[first:].startswith(" $about_time <p><b>Court case.</b>")
+    assert about[first:].startswith(" $about_time <p><b>What the map shows.</b>")
     lead = fs.about_time_html("X")
-    assert lead.startswith(f"<p><b>{fs.TIME_HEAD}</b> As of this update (X)")
+    assert lead.startswith(f"<p><b>{fs.TIME_HEAD}</b> The Army carried out the controlled")
+    assert "9:00 a.m. CST" in lead
+    assert fs.ARMY_3PM_URL in lead
+    assert fs.CBS2_RESUME_URL in lead
+    assert "Follow official instructions." in lead
+    assert "(Updated X.)" in lead
+    assert len(lead.split()) < 110  # short: the details are in Methodology
+    moved = fs.methodology_time_html("X")
     for part in ("5-mile cone", "shelter in place", "1-800-621-3362", "army.mil/asc"):
-        assert part in lead
-    assert lead.index("1-800-621-3362") < lead.index("army.mil/asc")  # help before maps
-
-    # the same sentences as the FAQ's and llms.txt's time paragraph, only split up
-    def plain(html_text: str) -> str:
-        return " ".join(re.sub(r"<[^>]+>|<p>|</p>", " ", html_text).split())
-
-    about_text = plain(re.sub(r"<b>[^<]*</b>", "", lead))
-    for sentence in plain(fs.time_note_html("X")).split(". "):
-        assert sentence in about_text
+        assert part in moved
+    assert "$methodology_time" in cite
+    assert "$methodology_time" not in about
     heads = [
-        "<b>Court case.</b>",
         "<b>What the map shows.</b>",
         "<b>Don&rsquo;t use this map to decide if you&rsquo;re safe.</b>",
         "<b>Who made it.</b> $about_who",
@@ -979,11 +985,21 @@ def test_about_box_leads_with_when() -> None:
 
 def test_blast_status_says_to_wait_for_the_army() -> None:
     """The reported blast is attributed, linked, and points readers to the Army's results."""
+    plain = fs.BLAST_DONE
+    assert "confirmed normal activities could resume" in plain  # attributed, not ours
+    assert "Middletown" in plain
+    assert "city clerk" in plain
+    assert fs.CBS2_RESUME_URL in fs.about_time_html("X")
+    page = " ".join(site.PAGE_TEMPLATE.read_text(encoding="utf-8").split())
+    header = page[page.index("<header>") : page.index("</header>")]
+    assert header.count('<p class="fema"') == 2  # the official word, then the analysis
+    assert header.index("$blast_status") < header.index("$early_air")
+    assert "$fema_header" not in page  # the Nov. 24 evacuation is in Methodology
+    assert f'href="{fs.ARMY_MAPS_URL}"' in fs.BLAST_STATUS_HTML
+    assert f'href="{fs.EPA_VIEWER_URL}"' in fs.BLAST_STATUS_HTML
+    assert fs.BLAST_STATUS_HTML.startswith("<b>Official:</b>")
     for text in (fs.BLAST_DONE, fs.BLAST_STATUS_HTML):
         plain = text.replace("<b>", "").replace("</b>", "")
-        assert "confirmed normal activities could resume" in plain  # attributed, not ours
-        assert "Middletown" in plain
-        assert "city clerk" in plain
         assert "Follow official instructions." in plain
         assert "no lead detection at this time" in text
         assert "safe" not in text.lower()  # no verdicts about anyone's safety
@@ -992,7 +1008,6 @@ def test_blast_status_says_to_wait_for_the_army() -> None:
     assert fs.ARMY_3PM_URL in fs.BLAST_STATUS_HTML
     assert fs.ARMY_3PM_URL in fs.time_note_html("X")
     assert any(r.startswith("McFate, L., 2026d:") for r in works_cited.REFERENCES)
-    assert fs.CBS2_RESUME_URL in fs.BLAST_STATUS_HTML
     assert fs.CBS2_RESUME_URL in fs.time_note_html("X")
     assert any(r.startswith("Iowa&rsquo;s News Now, 2026:") for r in works_cited.REFERENCES)
     assert "FEMA evacuation (Nov. 24):" in fs.FEMA_HEADER_HTML  # dated, not current advice
@@ -1015,10 +1030,10 @@ def test_early_air_readings_say_lab_results_are_pending() -> None:
     for text in (fs.EARLY_AIR, fs.EARLY_AIR_HTML):
         assert "early readings only" in text.lower()
         assert "still pending and are needed" in text.replace("</b>", "")
-        assert "soil and water sampling" in text
         assert "safe" not in text.lower()  # no verdicts about anyone's safety
+    assert "soil and water sampling" in fs.EARLY_AIR
+    assert "air filters and surface wipes along that path" in fs.EARLY_AIR_HTML
     assert fs.EARLY_AIR in fs.time_note("X")
-    assert fs.EPA_VIEWER_URL in fs.EARLY_AIR_HTML
     assert fs.EPA_VIEWER_URL in fs.time_note_html("X")
     assert any(r.startswith("EPA Region 7, 2026:") for r in works_cited.REFERENCES)
     assert any(r.startswith("New York Times, 2026:") for r in works_cited.REFERENCES)

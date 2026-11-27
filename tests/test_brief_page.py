@@ -144,10 +144,11 @@ def test_mirror_page_gets_the_policy(tmp_path: Path) -> None:
 
 
 def test_landing_page_header_has_the_official_links() -> None:
-    """The landing page and the analysis page carry the same official-information line."""
+    """The landing page's official line and the analysis page's carry the same links."""
     template = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
-    assert '<p class="fema" role="note">$official</p>' in template
-    assert template.index("$official") < template.index("$blast_status")
+    assert '<p class="fema" role="note">$blast_status</p>' in template
+    for link in (fs.EPA_VIEWER_URL, fs.ARMY_MAPS_URL):
+        assert f'href="{link}"' in fs.BLAST_STATUS_HTML
     assert f'href="{fs.EPA_VIEWER_URL}"' in fs.OFFICIAL_HTML
     assert f'href="{fs.ARMY_MAPS_URL}"' in fs.OFFICIAL_HTML
     assert fs.ARMY_MAPS_URL == "https://www.army.mil/asc#org-iowa-army-ammunition-plant"

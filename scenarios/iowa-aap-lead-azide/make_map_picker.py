@@ -92,10 +92,11 @@ CASES = [
     ("high", "tnt-fine", "High"),
     ("permit", "permit-100", "EPA permit"),
 ]
-# The page opens on the low case since Nov. 26, after the blast (maintainer's choice): EPA's
-# real-time monitors read near zero, and the analysis at /monitor-placement/ uses this case.
-# Before the blast it opened on the EPA permit case, the most conservative one.
-DEFAULT_CASE = "low"
+# The page opens on the U.S. Army mitigated case (26%) since Nov. 27 (maintainer's choice):
+# it is the Army's own estimate, and the Army's latest deposition maps (Nov. 25, 3 p.m.)
+# still use it. From Nov. 26 it opened on the low case; before the blast, on the EPA permit
+# case, the most conservative one.
+DEFAULT_CASE = "mid"
 # Weather behind the maps, as (id in file names and links, label in the Weather menu). The
 # page opens on the first one that is built.
 # - archived: NOAA's HRRR as Open-Meteo served it at 6:51 p.m. CST on Nov. 25, after all eight
@@ -1189,12 +1190,10 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "advisory_url": forecast_summary.ADVISORY_URL,
         "advisory_nov24_url": forecast_summary.ADVISORY_NOV24_URL,
         "army_maps_pdf": forecast_summary.ARMY_MAPS_PDF,
-        "official": forecast_summary.OFFICIAL_HTML,
         "blast_status": forecast_summary.BLAST_STATUS_HTML,
         "early_air": forecast_summary.EARLY_AIR_HTML,
         "analysis_head": forecast_summary.ANALYSIS_HEAD,
         "analysis": forecast_summary.ANALYSIS_HTML,
-        "fema_header": forecast_summary.FEMA_HEADER_HTML,
         "court_pause": forecast_summary.court_pause([day_label(d) for d in told]),
         "court_url": forecast_summary.COURT_URL,
         "court_cite": forecast_summary.COURT_CITE,
@@ -1213,6 +1212,9 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         "army_cite": forecast_summary.ARMY_CITE,
         "time_note": forecast_summary.time_note_html(built_txt),
         "about_time": forecast_summary.about_time_html(built_txt),
+        "methodology_time": forecast_summary.methodology_time_html(built_txt),
+        "analysis_short_head": forecast_summary.ANALYSIS_SHORT_HEAD,
+        "analysis_short": forecast_summary.analysis_short_html(),
         "not_checked": forecast_summary.NOT_CHECKED,
         "who": who,
         "cite_html": cite_html,
