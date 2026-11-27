@@ -19,26 +19,15 @@
 <meta name="twitter:description" content="$description">
 <script type="application/ld+json">$json_ld</script>
 <style>
-  html, body { margin: 0; font: 14px system-ui, -apple-system, sans-serif; background: #f5f7fa; color: #1f2933; }
+$base_css
   header { position: sticky; top: 0; z-index: 2; }
-  header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px;
-           padding: 8px 16px; background: #1f2933; color: #f5f7fa; }
-  header .title { display: flex; flex-direction: column; }
   header h1 { margin: 0; font-size: 16px; }
-  header .title p { margin: 0; font-size: 13px; color: #cbd2d9; }
   .mapbox { display: flex; height: calc(100vh - var(--hh, 120px)); height: calc(100dvh - var(--hh, 120px)); min-height: 360px; }
-  .doc { max-width: 46rem; margin: 0 auto; padding: 24px 16px 48px; line-height: 1.55; }
   .doc h2 { font-size: 20px; margin: 0 0 8px; }
-  .doc h3 { font-size: 16px; margin: 20px 0 6px; }
-  .doc p { margin: 0 0 10px; }
-  .doc .caveat { background: #fde8c8; padding: 8px 12px; border-radius: 6px; }
-  .doc a { color: #0b5cad; overflow-wrap: anywhere; } /* long source URLs wrap on phones */
-  .tablewrap { overflow-x: auto; }
-  .doc table { border-collapse: collapse; margin: 6px 0 10px; font-size: 13.5px; }
-  .doc th, .doc td { border-bottom: 1px solid #cbd2d9; padding: 5px 10px 5px 0; text-align: left; vertical-align: top; }
+  .doc .caveat { background: var(--peach); padding: 8px 12px; border-radius: 6px; }
   #faq { margin-top: 28px; }
   #summary, #faq, .doc h3 { scroll-margin-top: calc(var(--hh, 120px) + 8px); }
-  .mapnote { margin: 0; padding: 4px 16px; font-size: 12px; color: #52606d; background: #eef1f4; }
+  .mapnote { margin: 0; padding: 4px 16px; font-size: 12px; color: var(--gray); background: var(--mist); }
   .bottomnav { display: none; }
   @media (max-width: 820px) {
     /* one page scroll: the header scrolls away, the map frame grows to its content, and a
@@ -50,17 +39,16 @@
     body { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); }
     .bottomnav {
       display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 3;
-      background: #1f2933; border-top: 1px solid #52606d;
+      background: var(--ink); border-top: 1px solid var(--gray);
       padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
     }
     .bottomnav button {
       flex: 1; min-height: 44px; margin: 0 4px; border: 0; border-radius: 8px; background: transparent;
-      color: #cbd2d9; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+      color: var(--silver); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
     }
-    .bottomnav button[aria-current="true"] { background: #f5f7fa; color: #1f2933; }
+    .bottomnav button[aria-current="true"] { background: var(--paper); color: var(--ink); }
   }
   @media (max-width: 600px) {
-    header { gap: 6px 10px; padding: 6px 12px; }
     header .title p, header .warn .long { display: none; }
     header button, header select { min-height: 32px; }
     header .warn button { min-height: 32px; }
@@ -68,19 +56,17 @@
   }
   label { display: flex; align-items: center; gap: 8px; }
   select { font: inherit; padding: 4px 8px; border-radius: 6px; }
-  header .warn { margin: 0; flex-basis: 100%; color: #fde8c8; font-size: 12.5px; line-height: 1.4; }
-  header .warn b { color: #fff; }
-  header .fema { margin: 0; flex-basis: 100%; color: #f5f7fa; font-size: 12.5px; line-height: 1.4; }
+  header .fema { margin: 0; flex-basis: 100%; color: var(--paper); font-size: 12.5px; line-height: 1.4; }
   header .fema b { color: #fff; }
-  header .fema a { color: #9fd3ff; }
-  header .warn button { font: inherit; color: #9fd3ff; background: none; border: 0; padding: 0;
+  header .fema a { color: var(--sky); }
+  header .warn button { font: inherit; color: var(--sky); background: none; border: 0; padding: 0;
                          text-decoration: underline; cursor: pointer; }
-  .sys { display: inline-flex; border: 1px solid #52606d; border-radius: 6px; overflow: hidden; }
-  .sys button { font: inherit; border: 0; padding: 3px 10px; background: transparent; color: #cbd2d9; cursor: pointer; }
-  .sys button[aria-pressed="true"] { background: #f5f7fa; color: #1f2933; }
+  .sys { display: inline-flex; border: 1px solid var(--gray); border-radius: 6px; overflow: hidden; }
+  .sys button { font: inherit; border: 0; padding: 3px 10px; background: transparent; color: var(--silver); cursor: pointer; }
+  .sys button[aria-pressed="true"] { background: var(--paper); color: var(--ink); }
   iframe { flex: 1; width: 100%; border: 0; }
   dialog { max-width: 40rem; width: calc(100% - 32px); box-sizing: border-box; padding: 20px 24px;
-           border: 0; border-radius: 10px; background: #fff; color: #1f2933; line-height: 1.5;
+           border: 0; border-radius: 10px; background: #fff; color: var(--ink); line-height: 1.5;
            max-height: calc(100% - 32px); overflow-y: auto; }
   dialog.wide { max-width: 54rem; }
   dialog h3 { margin: 18px 0 6px; font-size: 15px; }
@@ -88,20 +74,20 @@
   dialog ul.refs li { margin: 0 0 7px; padding-left: 2em; text-indent: -2em; }
   dialog ul.changes { margin: 0 0 10px; padding-left: 1.2em; }
   dialog ul.changes li { margin: 0 0 5px; }
-  dialog a { color: #0b5cad; overflow-wrap: anywhere; }
+  dialog a { color: var(--blue); overflow-wrap: anywhere; }
   dialog table { border-collapse: collapse; font-size: 13px; }
-  dialog th, dialog td { border-bottom: 1px solid #cbd2d9; padding: 5px 10px 5px 0; text-align: left; vertical-align: top; }
+  dialog th, dialog td { border-bottom: 1px solid var(--silver); padding: 5px 10px 5px 0; text-align: left; vertical-align: top; }
   dialog tbody th { white-space: nowrap; }
   dialog::backdrop { background: rgba(0, 0, 0, .55); }
   dialog h2 { margin: 0 0 8px; font-size: 18px; }
   dialog h2:focus { outline: none; }
   dialog p { margin: 0 0 10px; }
-  dialog .meta { color: #52606d; font-size: 12.5px; }
+  dialog .meta { color: var(--gray); font-size: 12.5px; }
   dialog form { margin: 14px 0 0; text-align: right; }
   dialog form button { font: inherit; padding: 6px 16px; border-radius: 6px; border: 0;
-                        background: #1f2933; color: #fff; cursor: pointer; }
+                        background: var(--ink); color: #fff; cursor: pointer; }
   header label[hidden] { display: none; }
-  .daynote { margin: 4px 0 0; padding: 4px 8px; border-radius: 4px; background: #fde8c8;
+  .daynote { margin: 4px 0 0; padding: 4px 8px; border-radius: 4px; background: var(--peach);
              color: #1d1d1b; font-size: 13px; }
 </style></head><body>
 <header>

@@ -19,6 +19,7 @@ import shutil
 from pathlib import Path
 from string import Template
 
+import site_style
 from forecast_summary import OFFICIAL_HTML
 from works_cited import (
     ANALYSIS_FOLDER,
@@ -76,50 +77,36 @@ PAGE = Template("""<!doctype html><html lang="en-US"><head><meta charset="utf-8"
 <meta name="twitter:title" content="$title">
 <meta name="twitter:description" content="$description">
 <style>
-  html, body { margin: 0; font: 14px system-ui, -apple-system, sans-serif;
-               background: #f5f7fa; color: #1f2933; }
-  header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px;
-           padding: 8px 16px; background: #1f2933; color: #f5f7fa; }
-  header .title { display: flex; flex-direction: column; }
+$base_css
   header .site { margin: 0; font-size: 16px; font-weight: 700; }
   header .site a { color: inherit; text-decoration: none; }
-  header .title p { margin: 0; font-size: 13px; color: #cbd2d9; }
-  header .back { margin-left: auto; color: #9fd3ff; font-size: 13px; }
-  header .warn { margin: 0; flex-basis: 100%; color: #fde8c8; font-size: 12.5px; line-height: 1.4; }
-  header .warn b { color: #fff; }
-  header .official { margin: 0; flex-basis: 100%; color: #f5f7fa; font-size: 12.5px;
+  header .back { margin-left: auto; color: var(--sky); font-size: 13px; }
+  header .official { margin: 0; flex-basis: 100%; color: var(--paper); font-size: 12.5px;
                      line-height: 1.4; }
   header .official b { color: #fff; }
-  header .official a { color: #9fd3ff; }
-  .doc { max-width: 46rem; margin: 0 auto; padding: 24px 16px 48px; line-height: 1.55; }
+  header .official a { color: var(--sky); }
   .doc h1 { font-size: 24px; line-height: 1.25; margin: 0 0 8px; }
   .doc h2 { font-size: 20px; margin: 28px 0 8px; }
-  .doc h3 { font-size: 16px; margin: 20px 0 6px; }
-  .doc p { margin: 0 0 10px; }
   .doc ul, .doc ol { margin: 0 0 10px; padding-left: 1.4em; }
   .doc li { margin: 0 0 5px; }
-  .doc .caveat { background: #fde8c8; padding: 8px 12px; border-radius: 6px; margin: 0 0 14px; }
+  .doc .caveat { background: var(--peach); padding: 8px 12px; border-radius: 6px;
+                 margin: 0 0 14px; }
   .doc .caveat p:last-child { margin-bottom: 0; }
-  .doc .cap, .doc figcaption { color: #52606d; font-size: 12.5px; }
-  .doc a { color: #0b5cad; overflow-wrap: anywhere; } /* long source URLs wrap on phones */
+  .doc .cap, .doc figcaption { color: var(--gray); font-size: 12.5px; }
   .doc code { font: 12.5px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-              background: #eef1f4; padding: 1px 4px; border-radius: 3px; overflow-wrap: anywhere; }
-  .doc pre { background: #eef1f4; padding: 10px 12px; border-radius: 6px; overflow-x: auto; }
+              background: var(--mist); padding: 1px 4px; border-radius: 3px;
+              overflow-wrap: anywhere; }
+  .doc pre { background: var(--mist); padding: 10px 12px; border-radius: 6px; overflow-x: auto; }
   .doc pre code { background: none; padding: 0; overflow-wrap: normal; }
-  .tablewrap { overflow-x: auto; }
-  .doc table { border-collapse: collapse; margin: 6px 0 10px; font-size: 13.5px; }
-  .doc th, .doc td { border-bottom: 1px solid #cbd2d9; padding: 5px 10px 5px 0;
-                     text-align: left; vertical-align: top; }
   .doc figure { margin: 6px 0 14px; }
-  .doc figure img { display: block; width: 100%; height: auto; border: 1px solid #cbd2d9;
+  .doc figure img { display: block; width: 100%; height: auto; border: 1px solid var(--silver);
                     border-radius: 6px; background: #fff; }
   .doc figcaption { margin-top: 6px; }
   .doc h2, .doc h3 { scroll-margin-top: 12px; }
-  footer { max-width: 46rem; margin: 0 auto; padding: 0 16px 48px; color: #52606d;
+  footer { max-width: 46rem; margin: 0 auto; padding: 0 16px 48px; color: var(--gray);
            font-size: 12.5px; line-height: 1.5; }
-  footer a { color: #0b5cad; }
+  footer a { color: var(--blue); }
   @media (max-width: 600px) {
-    header { gap: 6px 10px; padding: 6px 12px; }
     .doc h1 { font-size: 21px; }
   }
 </style></head><body>
@@ -329,6 +316,7 @@ def render(site_name: str, site_url: str, built_txt: str) -> str:
     """Return the page."""
     title, body = to_html(README.read_text(encoding="utf-8"))
     return PAGE.substitute(
+        base_css=site_style.BASE_CSS,
         title=html.escape(title),
         site_name=site_name,
         description=html.escape(DESCRIPTION),
