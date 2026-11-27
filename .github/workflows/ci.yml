@@ -40,9 +40,14 @@ jobs:
   lint-frontend:
     # oxlint (JavaScript) and ESLint (HTML, CSS) on the site's pages: see package.json
     if: github.ref != 'refs/heads/main'
+    needs: build  # lints the built landing page, whose summary comes from the built maps
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: site-${{ needs.build.outputs.key }}
+          path: scenarios/iowa-aap-lead-azide/outputs/site/
       - uses: actions/setup-python@v7
         with:
           python-version-file: .python-version
@@ -77,6 +82,8 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    outputs:
+      key: ${{ steps.key.outputs.key }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7

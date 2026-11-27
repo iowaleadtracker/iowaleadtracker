@@ -9,19 +9,20 @@ can't read them where they live. This writes, under OUT (default ``.lint``)::
 
 Each script and style is padded with blank lines so a reported line number is the line in
 the page (for template.html, the line in the source file).
-No model run is needed: the map template is read as it is, and the landing page and the
-Python pages are rendered from the saved forecasts with sample data (no map files).
+No model run is needed. The map template is read as it is; the 404, brief and staged pages
+are rendered with sample data. The landing page is the built one when there is a build (CI
+lints the build job's), else the template with stand-ins for its $placeholders.
 
 Run with ``pnpm lint`` (package.json), or by hand: ``python3 tools/lint_pages.py [OUT]``.
 """
 
 from __future__ import annotations
 
-import datetime as dt
 import re
 import shutil
 import sys
 from pathlib import Path
+from string import Template
 
 ROOT = Path(__file__).resolve().parent.parent
 SCENARIO = ROOT / "scenarios" / "iowa-aap-lead-azide"
@@ -34,39 +35,48 @@ import staged  # noqa: E402
 
 BLOCK = re.compile(r"<(script|style)\b([^>]*)>(.*?)</\1>", re.DOTALL | re.IGNORECASE)
 MARK = ".lint_pages"  # marks a folder this tool wrote, so a rerun may replace it
-SAMPLE_NOW = dt.datetime(2026, 11, 27, 12, tzinfo=dt.timezone.utc)
 SAMPLE_TIME = "Wednesday, Nov. 25, 2026, 3:00 p.m. CST"
 
 
-def landing_page() -> str:
-    """Return the landing page as the build writes it, with no map files.
+class _StandIns(dict[str, str]):
+    """Fill every $placeholder: ``null`` inside a script, nothing elsewhere."""
 
-    The summary, questions and references come from the saved forecasts' facts.
+    def __init__(self, in_script: bool) -> None:
+        super().__init__(site_name=site.SITE_NAME)
+        self.value = "null" if in_script else ""
+
+    def __missing__(self, key: str) -> str:
+        return self.value
+
+
+def landing_page() -> tuple[str, str]:
+    """Return the landing page to lint and where it came from.
+
+    The built page (outputs/site/index.html) when there is one: it has the summary,
+    questions and references, which are made from the built maps. Without a build, the
+    template with its $placeholders filled by stand-ins.
     """
-    maps = site.Maps(
-        pages=[],
-        pct={c: "26%" for c, _, _ in site.CASES},
-        times=site.TIMES,
-        default=site.DEFAULT,
-        days={site.DATE: site.TIMES},
-        pages_by_day={site.DATE: []},
-    )
-    real = site.write_hashed_maps
-    site.write_hashed_maps = lambda *_a, **_k: {}  # don't touch outputs/site/m
-    try:
-        return site.render_page(
-            maps, dt.datetime(2026, 11, 27, tzinfo=dt.timezone.utc), SAMPLE_TIME
-        )[0]
-    finally:
-        site.write_hashed_maps = real
+    built = site.SITE / "index.html"
+    if built.exists():
+        return built.read_text(encoding="utf-8"), str(built.relative_to(ROOT))
+    text = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
+    out, pos = [], 0
+    for m in BLOCK.finditer(text):
+        out.append(Template(text[pos : m.start()]).safe_substitute(_StandIns(False)))
+        out.append(Template(m.group(0)).safe_substitute(_StandIns(m.group(1) == "script")))
+        pos = m.end()
+    out.append(Template(text[pos:]).safe_substitute(_StandIns(False)))
+    return "".join(out), "index_template.html (no build: summary, questions, references left out)"
 
 
 def pages() -> dict[str, str]:
     """Return {name: html} for every kind of page the site has."""
     days = dict.fromkeys(staged.DAYS, staged.TIMES)
+    landing, source = landing_page()
+    print(f"landing page: {source}")
     return {
         "map": (ROOT / "template.html").read_text(encoding="utf-8"),
-        "landing": landing_page(),
+        "landing": landing,
         "404": site.not_found_page(),
         "brief": brief_page.render(site.SITE_NAME, site.SITE_URL, SAMPLE_TIME),
         "staged": staged.page_html(SAMPLE_TIME, SAMPLE_TIME, days),
