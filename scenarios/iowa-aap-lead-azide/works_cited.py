@@ -720,6 +720,16 @@ CHANGES = [
     (
         "Nov. 27",
         (
+            "&ldquo;When was the detonation?&rdquo; is rewritten in order, in three short "
+            "paragraphs: the blast and the advice before it, what officials have reported "
+            "since, then the Army&rsquo;s maps and where to get help. The page still says to "
+            "follow official instructions in the header, the About box, the summary&rsquo;s "
+            "opening note and the last question. The maps did not change."
+        ),
+    ),
+    (
+        "Nov. 27",
+        (
             "&ldquo;EPA&rsquo;s four real-time lead monitors&rdquo; now reads &ldquo;four "
             "continuous lead monitors&rdquo; and says which: the Xact analyzers at stations "
             "AS01&ndash;AS04, which measure lead directly, not the air-sample cassettes at "

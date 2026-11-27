@@ -545,15 +545,18 @@ EARLY_AIR = (
 # live blogs ("At 9:00am CT, @USArmy Sustainment Command executed the controlled mitigated
 # detonation"; not read first-hand), and Newsweek's report of two bangs at about 9:01 a.m.
 # on a livestream about 5 miles away (sound takes about 25 seconds to travel that far).
-BLAST_DONE = (
-    "The Army carried out the controlled detonation at 9:00 a.m. CST on Wednesday, Nov. 25. "
-    "In its 3 p.m. CST update, which gives that time, the Army said air sensors report no "
-    "lead detection at this time, and that sampling of the ground after the detonation is "
-    "underway, with results to be published when "
-    f"available ({ARMY_3PM_CITE}). {EARLY_AIR} On Wednesday evening, Middletown\u2019s city "
-    "clerk said the Army, CDC, EPA and FEMA had confirmed normal activities could resume "
-    f"({CBS2_RESUME_CITE}). Follow official instructions."
+BLAST_TIME_SENTENCE = (
+    "The Army carried out the controlled detonation at 9:00 a.m. CST on Wednesday, Nov. 25 "
+    f"({ARMY_3PM_CITE})."
 )
+#: What officials reported after the blast, in order.
+AFTER_BLAST = (
+    "At 3 p.m. CST that day, the Army said air sensors report no lead detection at this time, "
+    "and that sampling of the ground is underway, with results to be published when available "
+    f"({ARMY_3PM_CITE}). {EARLY_AIR} That evening, Middletown\u2019s city clerk said the Army, "
+    f"CDC, EPA and FEMA had confirmed normal activities could resume ({CBS2_RESUME_CITE})."
+)
+BLAST_DONE = f"{BLAST_TIME_SENTENCE} {AFTER_BLAST}"
 BLAST_STATUS_HTML = (
     "<b>Official:</b> the Army carried out the detonation at 9:00 a.m. CST Wednesday, "
     "Nov. 25. At 3 p.m. it said air sensors report no lead detection at this time and ground "
@@ -953,18 +956,17 @@ EARLIER_HEAD = "Earlier dates."
 
 
 def _time_parts(built_txt: str) -> dict[str, str]:
-    """Return the time paragraph's sentences by topic: when, evacuation, maps, window."""
+    """Return the When section's sentences by topic, in reading order (TIME_PARAGRAPHS)."""
     return {
-        "when": (f"As of this update ({built_txt}), {BLAST_DONE[0].lower()}{BLAST_DONE[1:]}"),
+        "when": BLAST_TIME_SENTENCE,
         "evacuation": (
-            "Before the blast, FEMA supported relocating all residents of Middletown and the "
-            "immediate surrounding areas, starting Nov. 24; the evacuation zone was a 5-mile cone"
-            " extending southwest of the plant, reaching one mile beyond the Army\u2019s modeled "
-            "dispersion path. The Army encouraged people outside the zone to shelter in place, "
-            "closing all windows and doors (Army public safety advisory, Nov. 24). Questions "
-            "about the evacuation area or help: FEMA Helpline 1-800-621-3362 (24/7) or "
-            "DisasterAssistance.gov."
+            "Before the blast, FEMA supported relocating residents of Middletown and the "
+            "immediate surrounding areas, starting Nov. 24, within a 5-mile cone extending "
+            "southwest of the plant, and the Army encouraged people outside that zone to "
+            "shelter in place, closing all windows and doors (Army public safety advisory, "
+            "Nov. 24)."
         ),
+        "after": AFTER_BLAST,
         "maps": (
             "The Army\u2019s latest maps still show its model estimate for the mitigated "
             "blast, using an emission factor of 0.26: lead on surfaces above 100 \u00b5g/ft\u00b2 "
@@ -973,18 +975,36 @@ def _time_parts(built_txt: str) -> dict[str, str]:
             f"same 0.26 ({ARMY_MAPS_CITE}). The Army\u2019s maps and updates are at "
             f"{ARMY_MAPS_URL}."
         ),
-        "window": (f"These maps model a blast at {BLAST_TIME}, the time the Army had set."),
+        "help": (
+            "For questions or help, FEMA\u2019s helpline is 1-800-621-3362 (24/7), and "
+            "DisasterAssistance.gov has more."
+        ),
+        "window": (
+            f"This site\u2019s maps model a blast at {BLAST_TIME}, the time the Army set. "
+            f"(As of {built_txt}.)"
+        ),
     }
 
 
+#: The When section's paragraphs: the blast and the advice before it, what officials have
+#: reported since, then the Army's maps and where to get help.
+TIME_PARAGRAPHS = (("when", "evacuation"), ("after",), ("maps", "help", "window"))
+
+
 def time_note(built_txt: str) -> str:
-    """Give the key facts first: the time, the official evacuation and shelter advice, the maps.
+    """Give the key facts first: the blast, the official advice and reports, the Army's maps.
 
     The timeline that led here (court case, presidential hold, earlier dates) comes after it
     on the page, under its own headings.
     """
     p = _time_parts(built_txt)
-    return " ".join(p[k] for k in ("when", "evacuation", "maps", "window"))
+    return " ".join(p[k] for para in TIME_PARAGRAPHS for k in para)
+
+
+def time_note_paragraphs_html(built_txt: str) -> list[str]:
+    """Return the When section as linked paragraphs, for the summary."""
+    p = _time_parts(built_txt)
+    return [_link_sources(" ".join(p[k] for k in para)) for para in TIME_PARAGRAPHS]
 
 
 def _link_sources(text: str) -> str:
@@ -1052,7 +1072,7 @@ def methodology_time_html(built_txt: str) -> str:
     """Return the evacuation and the Army's maps, for Methodology and References."""
     p = {k: _link_sources(v) for k, v in _time_parts(built_txt).items()}
     return (
-        f"<p><b>{EVACUATION_HEAD}</b> {p['evacuation']}</p>\n"
+        f"<p><b>{EVACUATION_HEAD}</b> {p['evacuation']} {p['help']}</p>\n"
         f"  <p><b>{ARMY_MAPS_HEAD}</b> {p['maps']}</p>"
     )
 
@@ -1598,7 +1618,7 @@ def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) ->
     lead = f.get("day", PLANNED_DAY)
     on = f" on {lead}" if more else ""  # label the lead day's parts when there are more
     note = window_note(lead)
-    no_time = time_note_html(built)
+    no_time = "</p>\n  <p>".join(time_note_paragraphs_html(built))
     return f"""<section id="summary" aria-labelledby="summary-h">
   <h2 id="summary-h">What the maps show</h2>
   <p class="caveat"><b>{CAVEAT}</b></p>
