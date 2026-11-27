@@ -41,7 +41,7 @@ SAMPLE_TIME = "Wednesday, Nov. 25, 2026, 3:00 p.m. CST"
 class _StandIns(dict[str, str]):
     """Fill every $placeholder: ``null`` inside a script, nothing elsewhere."""
 
-    def __init__(self, in_script: bool) -> None:
+    def __init__(self, *, in_script: bool) -> None:
         super().__init__(site_name=site.SITE_NAME)
         self.value = "null" if in_script else ""
 
@@ -62,10 +62,12 @@ def landing_page() -> tuple[str, str]:
     text = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
     out, pos = [], 0
     for m in BLOCK.finditer(text):
-        out.append(Template(text[pos : m.start()]).safe_substitute(_StandIns(False)))
-        out.append(Template(m.group(0)).safe_substitute(_StandIns(m.group(1) == "script")))
+        out.append(Template(text[pos : m.start()]).safe_substitute(_StandIns(in_script=False)))
+        out.append(
+            Template(m.group(0)).safe_substitute(_StandIns(in_script=m.group(1) == "script"))
+        )
         pos = m.end()
-    out.append(Template(text[pos:]).safe_substitute(_StandIns(False)))
+    out.append(Template(text[pos:]).safe_substitute(_StandIns(in_script=False)))
     return "".join(out), "index_template.html (no build: summary, questions, references left out)"
 
 
