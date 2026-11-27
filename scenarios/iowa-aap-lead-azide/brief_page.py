@@ -39,7 +39,8 @@ MAP_SIZE = (1760, 1376)  # pixels, for the page to reserve the space
 REPO_FOLDER = ANALYSIS_FOLDER
 SOURCE_FOLDER_URL = ANALYSIS_FOLDER_URL
 DESCRIPTION = (
-    "A preliminary, unofficial analysis: EPA's four real-time lead monitors for the Nov. 25, "
+    "A preliminary, unofficial analysis: EPA's four continuous lead monitors (AS01-AS04) for "
+    "the Nov. 25, "
     "2026 detonation at the Iowa Army Ammunition Plant sat along the forecast path, and "
     "reruns on analyzed weather put the modeled cloud south of them. Model estimates, not "
     "measurements."

@@ -500,9 +500,12 @@ EPA_VIEWER_CITE = "EPA response data viewer, Nov. 25"
 # brief_page.py from the brief's README; the numbers are in that brief's tables). Every
 # place that reports it uses these words, with the caveat that it is unofficial.
 ANALYSIS_HEAD = "EPA\u2019s monitors and the cloud\u2019s path."
-ANALYSIS_QUESTION = "Were EPA\u2019s real-time lead monitors on the cloud\u2019s path?"
+ANALYSIS_QUESTION = "Were EPA\u2019s continuous lead monitors on the cloud\u2019s path?"
 ANALYSIS = (
-    "After the blast, this site checked where EPA\u2019s four real-time lead monitors sat. "
+    "After the blast, this site checked where EPA\u2019s four continuous lead monitors sat "
+    "(Xact analyzers at stations AS01\u2013AS04, which measure lead directly as air passes "
+    "through; not the air-sample cassettes at its other stations, such as AS-06 and AS-12, "
+    "whose lead results need lab analysis). "
     "The forecasts, including the Army\u2019s, pointed the cloud to the southwest (toward "
     "about 230\u00b0), and the four monitors lined up along that path. Models rerun on "
     "NOAA\u2019s analysis of that morning\u2019s weather put the cloud farther south (toward "
@@ -528,7 +531,8 @@ OFFICIAL_HTML = (
     f'<a href="{ARMY_MAPS_URL}" rel="noopener">Army updates and maps</a> (army.mil/asc).'
 )
 EARLY_AIR = (
-    "Every reading from EPA\u2019s four real-time lead monitors southwest of the plant, "
+    "Every reading from EPA\u2019s four continuous lead monitors (Xact, stations "
+    "AS01\u2013AS04) southwest of the plant, "
     "through 4 p.m. CST, was below the 0.18 micrograms per cubic meter detection limit the "
     f"Army cites ({EPA_VIEWER_CITE}). These are early readings only. Lab results from "
     "EPA\u2019s other air samples, and soil and water sampling, are still pending and are "
@@ -559,7 +563,8 @@ BLAST_STATUS_HTML = (
     "<b>Follow official instructions.</b>"
 )
 EARLY_AIR_HTML = (
-    "<b>Preliminary analysis (unofficial):</b> EPA&rsquo;s four real-time lead monitors read "
+    "<b>Preliminary analysis (unofficial):</b> EPA&rsquo;s four continuous lead monitors "
+    "(Xact, stations AS01&ndash;AS04; not the lab-analyzed samplers such as AS-06 and AS-12) read "
     "below detection, but models rerun on NOAA&rsquo;s weather analysis put the cloud south of "
     f'them (<a href="{ANALYSIS_PATH}">preliminary analysis</a>). The readings are early '
     "readings only, and the paths are unofficial model estimates, not measurements: "
@@ -1017,7 +1022,10 @@ ABOUT_WHEN = (
 ANALYSIS_SHORT_HEAD = "Preliminary analysis."
 ANALYSIS_SHORT = (
     "The forecasts, including the Army\u2019s, pointed the cloud southwest, along EPA\u2019s "
-    "four real-time lead monitors. Models rerun on NOAA\u2019s analysis of that morning\u2019s "
+    "four continuous lead monitors (Xact analyzers at stations AS01\u2013AS04, which measure "
+    "lead directly as air passes through; not the air-sample cassettes at its other stations, "
+    "such as AS-06 and AS-12, whose lead results need lab analysis). Models rerun on "
+    "NOAA\u2019s analysis of that morning\u2019s "
     "weather put it farther south, where three of the monitors were outside the modeled cloud. "
     "So their near-zero readings can\u2019t show by themselves whether little lead got out. "
     "Lab results from EPA\u2019s filter samplers and surface wipes on that path are still "
@@ -1829,8 +1837,9 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             "",
             f"- [Map]({ctx['site_url']}): interactive map by weather and case",
             (
-                f"- [Preliminary analysis]({ANALYSIS_URL}): where EPA\u2019s real-time lead "
-                "monitors sat, compared with the forecast and analyzed-weather paths"
+                f"- [Preliminary analysis]({ANALYSIS_URL}): where EPA\u2019s four continuous "
+                "lead monitors (Xact, AS01\u2013AS04) sat, compared with the forecast and "
+                "analyzed-weather paths"
             ),
             f"- [Source code]({SOURCE_URL}): the model, saved forecasts, assumptions and tests",
             f"- [Instagram @{INSTAGRAM_HANDLE}]({INSTAGRAM_URL}): updates",

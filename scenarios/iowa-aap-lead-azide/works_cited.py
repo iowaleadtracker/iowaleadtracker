@@ -153,7 +153,7 @@ REFERENCES = [
     "Emerson, E. W., and Coauthors, 2020: Revisiting particle dry deposition and its role in "
     "radiative effect estimates. <i>Proc. Natl. Acad. Sci. USA</i>, <b>117</b>, "
     "26&thinsp;076&ndash;26&thinsp;082, " + doi("10.1073/pnas.2014761117") + ".",
-    "EPA Region 7, 2026: Iowa Army Ammunition Plant response data viewer (real-time lead "
+    "EPA Region 7, 2026: Iowa Army Ammunition Plant response data viewer (continuous lead "
     "monitors and air sampling stations). ArcGIS Experience, U.S. Environmental Protection "
     "Agency, accessed 25 November 2026, "
     + _a("https://experience.arcgis.com/experience/1ddcf8b9d8314971b00dac8893ae9cd6")
@@ -716,6 +716,18 @@ ARMY_BOX_METHOD = (
 #: entry for every change to the model, its settings or its sources.
 CHANGES_HEAD = "Change log"
 CHANGES = [
+    (
+        "Nov. 27",
+        (
+            "&ldquo;EPA&rsquo;s four real-time lead monitors&rdquo; now reads &ldquo;four "
+            "continuous lead monitors&rdquo; and says which: the Xact analyzers at stations "
+            "AS01&ndash;AS04, which measure lead directly, not the air-sample cassettes at "
+            "EPA&rsquo;s other stations (such as AS-06 and AS-12), whose lead results need lab "
+            "analysis. Some of those stations also have real-time dust monitors, which don&rsquo;t "
+            "measure lead. Same on the preliminary analysis page and its map. The maps did not "
+            "change."
+        ),
+    ),
     (
         "Nov. 27",
         (

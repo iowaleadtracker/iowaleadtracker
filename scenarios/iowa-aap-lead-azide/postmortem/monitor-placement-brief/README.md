@@ -1,4 +1,4 @@
-# Were EPA's real-time lead monitors on the cloud's path?
+# Were EPA's continuous lead monitors on the cloud's path?
 
 **Iowa Lead Tracker (iowaleadtracker.com) · Preliminary analysis, pending peer review**
 
@@ -17,7 +17,7 @@ wipes of surfaces near the path can. See "What is needed now."*
 ## Abstract
 
 The forecasts, including the Army's, pointed the plume toward about 230°, and EPA's four
-real-time lead monitors were lined up along that path; models rerun on NOAA's
+continuous lead monitors (Xact, AS01–AS04) were lined up along that path; models rerun on NOAA's
 after-the-fact weather analysis put it along about 215°. On that path three monitors were
 outside the modeled cloud and the nearest was on its edge, so their near-zero readings
 can't distinguish between little lead escaping and a cloud that passed just south of
@@ -25,7 +25,10 @@ them.
 
 ## Summary
 
-EPA's four real-time lead monitors for the Nov. 25 detonation were set out along the path
+EPA's four continuous lead monitors for the Nov. 25 detonation (Xact analyzers at stations
+AS01–AS04, which measure lead directly as air passes through; not the air-sample cassettes at
+its other stations, such as AS-06 and AS-12, whose lead results need lab analysis) were set out
+along the path
 the forecasts showed, an analysis of public data by Iowa Lead Tracker finds. Measured from
 the two magazines, the monitors lie on one line to the southwest, at 232° to 235°, from
 3.6 to 27 miles out. Placed on the Army's own advisory map, three of them fall inside the
@@ -51,7 +54,7 @@ the other instruments EPA set out along the analyzed-weather path, and from wipe
 surfaces along it. EPA lists filter samplers at eight sites in that path within
 about 30 miles, among them AS06 and AS12, about 6 and 9 miles from the magazines and in the body
 of the rerun cloud. No results from them, or from surface sampling, had been
-posted when this was written. Until they are, the real-time readings can't settle what
+posted when this was written. Until they are, the continuous monitors' readings can't settle what
 reached the ground or the air south of the monitors. Bulk soil samples probably can't
 settle it either: the lead the models put on the ground is far less than soil already
 holds.
@@ -64,7 +67,7 @@ public.
 
 ## What is needed now
 
-**The four real-time monitors can't answer this. Two other kinds of measurement can, and
+**The four continuous lead monitors can't answer this. Two other kinds of measurement can, and
 neither is public yet.**
 
 **1. Lab results from surfaces on the ground.** A sample of what came down doesn't depend
@@ -107,7 +110,7 @@ what the highest amount would add to soil. Model estimates, not measurements.*
   samples could show.
 
 **2. Results from the instruments already in the analyzed-weather path.** EPA's site list
-has 43 sites. Besides the nearest real-time monitor, eight of them are places where a
+has 43 sites. Besides the nearest continuous lead monitor, eight of them are places where a
 rerun on analyzed weather reaches 0.18 µg/m³ for the 7% case:
 
 *Table B. EPA sites within about 30 miles where either rerun on analyzed weather gives a
@@ -117,7 +120,7 @@ values (µg/m³) and the instruments EPA lists. Model estimates, not measurement
 <!-- table:needed -->
 | Site | From the modeled source | Tracker, analyzed weather | HYSPLIT, archived weather | Instruments EPA lists there | Results public |
 |---|---|---|---|---|---|
-| AS01 | 3.6 mi at 232° | 1.3 | 0.44 | Xact real-time lead monitor, DustTrak, AreaRAE, Air Cassette, Summa canister | real-time lead only |
+| AS01 | 3.6 mi at 232° | 1.3 | 0.44 | Xact continuous lead monitor, DustTrak, AreaRAE, Air Cassette, Summa canister | continuous lead only |
 | AS06 | 5.8 mi at 216° | 5.9 | 6.4 | DustTrak, AreaRAE, Air Cassette, Summa canister | none |
 | AS12 | 8.8 mi at 214° | 6.8 | 4.0 | Air Cassette, Summa canister | none |
 | AS13 | 12.8 mi at 224° | 0.58 | 1.0 | Air Cassette, Summa canister | none |
@@ -139,7 +142,7 @@ values (µg/m³) and the instruments EPA lists. Model estimates, not measurement
   public.
 
 If these come back clean along 210° to 220°, that supports little lead having become
-airborne. If they don't, the real-time monitors were beside the cloud, not in it.
+airborne. If they don't, the continuous lead monitors were beside the cloud, not in it.
 
 ## The map
 
@@ -152,7 +155,7 @@ detection limit. Solid orange is the tracker's forecast, shown on the site at 9 
 Dashed blue and purple are two models rerun on analyzed weather. Green is the Army's final
 ground map (lead on the ground of 5 and 100 µg/ft² or more, its 26% case), a different
 quantity, shown for where the Army's forecast ran; its first miles are hidden under the
-plant marker on the Army's map. Diamonds are EPA's real-time lead monitors, squares its
+plant marker on the Army's map. Diamonds are EPA's continuous lead monitors (Xact), squares its
 other sampling sites, the star the modeled source. AS04 is off the map to the lower left.
 Imagery: Esri World Imagery.*
 
@@ -162,7 +165,7 @@ Imagery: Esri World Imagery.*
 path at every distance, and three are in the Army's ground zone.
 
 *Table 1. Direction from the modeled source at which each run's modeled air is highest,
-at three distances, and the direction of the real-time monitor nearest each distance. The
+at three distances, and the direction of the continuous lead monitor nearest each distance. The
 fourth monitor, AS04, is 27 miles out at 235°.*
 
 <!-- table:paths -->
@@ -171,7 +174,7 @@ fourth monitor, AS04, is 27 miles out at 235°.*
 | Tracker, forecast | 227° | 229° | 231° |
 | Tracker, analyzed weather | 212° | 214° | 216° |
 | HYSPLIT, archived weather | 210° | 216° | 217° |
-| EPA's real-time monitor nearest that distance | 232° (AS01, 3.6 mi) | 233° (AS02, 11.8 mi) | 234° (AS03, 19.1 mi) |
+| EPA's continuous lead monitor nearest that distance | 232° (AS01, 3.6 mi) | 233° (AS02, 11.8 mi) | 234° (AS03, 19.1 mi) |
 <!-- /table:paths -->
 
 **2. On analyzed weather the modeled cloud passes south of them.** Both reruns are 17° to
@@ -184,10 +187,10 @@ measurements. The last column says where the site falls on the Army's final grou
 <!-- table:sites -->
 | Site | Kind | From the modeled source | Tracker, forecast | Tracker, analyzed weather | HYSPLIT, archived weather | On the Army's ground map |
 |---|---|---|---|---|---|---|
-| AS01 | real-time lead monitor | 3.6 mi at 232° | 15 | 1.3 | 0.44 | under the plant marker |
-| AS02 | real-time lead monitor | 11.8 mi at 233° | 2.5 | 0 | 0.015 | in the zone |
-| AS03 | real-time lead monitor | 19.1 mi at 234° | 1.5 | 0 | 0 | in the zone |
-| AS04 | real-time lead monitor | 27.3 mi at 235° | 0.76 | 0 | 0 | in the zone |
+| AS01 | continuous lead monitor (Xact) | 3.6 mi at 232° | 15 | 1.3 | 0.44 | under the plant marker |
+| AS02 | continuous lead monitor (Xact) | 11.8 mi at 233° | 2.5 | 0 | 0.015 | in the zone |
+| AS03 | continuous lead monitor (Xact) | 19.1 mi at 234° | 1.5 | 0 | 0 | in the zone |
+| AS04 | continuous lead monitor (Xact) | 27.3 mi at 235° | 0.76 | 0 | 0 | in the zone |
 | AS06 | filter sampler, no results posted | 5.8 mi at 216° | 0.011 | 5.9 | 6.4 | under the plant marker |
 | AS12 | filter sampler, no results posted | 8.8 mi at 214° | 0 | 6.8 | 4.0 | 2.5 mi outside the zone |
 | AS13 | filter sampler, no results posted | 12.8 mi at 224° | 1.1 | 0.58 | 1.0 | 1.5 mi outside the zone |
@@ -203,7 +206,7 @@ measurements. The last column says where the site falls on the Army's final grou
 
 **3. The monitors posted almost nothing.**
 
-*Table 3. EPA's posted real-time readings from the detonation (9 a.m. CST Nov. 25) through
+*Table 3. EPA's posted continuous lead monitor readings from the detonation (9 a.m. CST Nov. 25) through
 6:36 a.m. CST Nov. 26, and the highest each monitor posted in the two hours before.*
 
 <!-- table:readings -->
