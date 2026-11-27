@@ -266,6 +266,16 @@ REFERENCES = [
     "Sustainment Command, 25 November 2026, accessed 25 November 2026, "
     + _a("https://www.army.mil/article/297109")
     + ".",
+    "McFate, L., 2026e: Deposition map 1 as of 8:00 AM (CST). Image, &ldquo;Mitigated 0.26 "
+    "Deposition&rdquo; (lead on the ground). Iowa Army Ammunition Plant, DVIDS, 25 November "
+    "2026, accessed 26 November 2026, "
+    + _a("https://www.dvidshub.net/image/10118630/deposition-map-1-800-am-cst")
+    + ".",
+    "McFate, L., 2026f: Deposition map 2 at 8:00 AM (CST). Image, &ldquo;Mitigated 0.26 "
+    "Dispersion&rdquo; (lead in air, with times T+0.5 to T+5 hours). Iowa Army Ammunition "
+    "Plant, DVIDS, 25 November 2026, accessed 26 November 2026, "
+    + _a("https://www.dvidshub.net/image/10118629/deposition-map-2-800-am-cst")
+    + ".",
     "New York Times, 2026: Live coverage of the Iowa lead azide detonation. <i>The New York "
     "Times</i>, 25 November 2026 (read by the maintainer; not fetched by this site&rsquo;s "
     "tools, which nytimes.com blocks), "
@@ -679,7 +689,7 @@ ARMY_BOX_HEAD = "The Army&rsquo;s final forecast on the map."
 ARMY_BOX_METHOD = (
     "On the maps for the 9 a.m. blast, the &ldquo;Army&rsquo;s final forecast&rdquo; box draws "
     "the zones of the U.S. Army&rsquo;s final &ldquo;Mitigated 0.26&rdquo; maps (stamped a/o "
-    "250700NOV26): on the air views, the path it shaded for lead in air of 0.18 "
+    "250700NOV26; McFate 2026e,f): on the air views, the path it shaded for lead in air of 0.18 "
     "&micro;g/m&sup3; or more and the times it marked along it; on the deposition view, its "
     "zones for lead on the ground of 5 and 100 &micro;g/ft&sup2; or more. Each map is a small "
     "picture, about 0.6 mile per pixel. This site picked the zones out by color and placed "

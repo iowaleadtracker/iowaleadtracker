@@ -487,6 +487,15 @@ def test_armys_outlines_are_southwest_of_the_plant() -> None:
     data = json.loads(site.ARMY_OUTLINES.read_text(encoding="utf-8"))
     assert data["name"] == "Army\u2019s final forecast"
     assert "Traced and placed by this site" in data["note"]
+    # where the Army posted the two maps, linked from the legend, the summary and the references
+    assert [ln["url"] for ln in data["links"]] == [fs.ARMY_AIR_MAP_URL, fs.ARMY_GROUND_MAP_URL]
+    assert fs.ARMY_AIR_MAP_URL.endswith("/image/10118629/deposition-map-2-800-am-cst")
+    assert fs.ARMY_GROUND_MAP_URL.endswith("/image/10118630/deposition-map-1-800-am-cst")
+    assert fs.ARMY_AIR_MAP_URL in fs.ARMY_BOX_LINKS_HTML
+    assert fs.ARMY_GROUND_MAP_URL in fs.ARMY_BOX_LINKS
+    refs = [r for r in works_cited.REFERENCES if isinstance(r, str)]
+    assert any(r.startswith("McFate, L., 2026e:") and fs.ARMY_GROUND_MAP_URL in r for r in refs)
+    assert any(r.startswith("McFate, L., 2026f:") and fs.ARMY_AIR_MAP_URL in r for r in refs)
     assert [m["label"] for m in data["air"]["marks"]] == ["T+0.5 h", "T+2 h", "T+3 h", "T+5 h"]
     assert [z["label"].split()[0] for z in data["dep"]["zones"]] == ["5", "100"]
     for kind in ("air", "dep"):

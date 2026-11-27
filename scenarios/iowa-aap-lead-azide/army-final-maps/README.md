@@ -8,8 +8,19 @@ them green over either model's result, as on the map in the monitor-placement br
 They are the Army's forecast, made before the blast, for 26% of the lead becoming
 airborne. They are not measurements, and the tracing and placing are this project's, not
 the Army's. The site's warnings apply: don't use this to decide if you're safe; follow
-official instructions. The Army's own maps are at
+official instructions. The Army's own maps and updates are at
 https://www.army.mil/asc#org-iowa-army-ammunition-plant.
+
+The Army posted the two maps on DVIDS on Nov. 25, 2026 (photo by Lori McFate, Iowa Army
+Ammunition Plant; marked public domain there):
+
+- Air map, "Mitigated 0.26 Dispersion": [Deposition Map 2 at 8:00 AM (CST)](https://www.dvidshub.net/image/10118629/deposition-map-2-800-am-cst)
+- Ground map, "Mitigated 0.26 Deposition": [Deposition Map 1 as of 8:00 AM (CST)](https://www.dvidshub.net/image/10118630/deposition-map-1-800-am-cst)
+
+Those pages were read on Nov. 26; their descriptions match the maps traced here (the same
+model name, issue date, and time marks). The pictures themselves could not be downloaded
+from DVIDS by this project's tools, so the copies traced here, stamped a/o 250700NOV26,
+were not compared with DVIDS's pixel by pixel.
 
 ## What is here
 

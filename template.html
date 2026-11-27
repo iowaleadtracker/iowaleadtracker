@@ -770,6 +770,8 @@ const REF_RGB = "0,184,148", REF_COLOR = `rgb(${REF_RGB})`, REF_INK = "#00735a";
 const refKind = () => (S.field === "dep" || (S.field === "zones" && S.zoneMetric === "dep") ? "dep" : "air");
 const refLayer = () => (S.ref && M.outlines && M.outlines[refKind()]) || null;
 const refAlpha = (k) => (k ? 0.35 : 0.25);
+const refLinks = () => ((M.outlines.links || []).length ? " Source: " + M.outlines.links.map((l) =>
+  `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.text)}</a>`).join(", ") + "." : "");
 let refLegendKey = "";
 function drawReference() {
   const L = refLayer(), key = L ? refKind() : "";
@@ -778,7 +780,7 @@ function drawReference() {
     $("legref").hidden = !L;
     if (L) $("legref").innerHTML = L.zones.map((z, k) =>
       `<div class="lz"><span class="zsw" style="background:rgba(${REF_RGB},${k ? 0.6 : 0.3});border:1.5px solid ${REF_COLOR};margin-right:0;box-sizing:border-box"></span>${esc(M.outlines.name)}: ${esc(z.label)}</div>`).join("") +
-      (M.outlines.note ? `<div class="legnote" style="border-top:0;padding-top:0;margin-top:3px">${esc(M.outlines.note)}</div>` : "");
+      (M.outlines.note ? `<div class="legnote" style="border-top:0;padding-top:0;margin-top:3px">${esc(M.outlines.note)}${refLinks()}</div>` : "");
   }
   if (!L) return;
   const trace = (line) => { ctx.beginPath(); line.forEach(([la, lo], i) => { const [x, y] = toScreen(la, lo); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); }); };

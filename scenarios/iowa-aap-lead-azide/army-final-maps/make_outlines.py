@@ -63,6 +63,18 @@ TIME_LINES = {
     "3": ((688.5, 107.0), (720.0, 127.0)),
     "5": ((640.0, 147.0), (676.0, 167.0)),
 }
+# Where the Army posted the two maps (DVIDS, Nov. 25, 2026): "Deposition Map 2 at 8:00 AM
+# (CST)" is the air map, "Deposition Map 1 as of 8:00 AM (CST)" the ground map.
+LINKS = [
+    {
+        "text": "air map",
+        "url": "https://www.dvidshub.net/image/10118629/deposition-map-2-800-am-cst",
+    },
+    {
+        "text": "ground map",
+        "url": "https://www.dvidshub.net/image/10118630/deposition-map-1-800-am-cst",
+    },
+]
 Mask = np.ndarray
 Line = list[list[float]]
 
@@ -163,6 +175,7 @@ def main(args: list[str]) -> None:
     out: dict[str, Any] = {
         "name": NAME,
         "note": NOTE,
+        "links": LINKS,
         "stamp": STAMP,
         "pixelsPerMile": round(px_mi, 2),
         # "air" goes with the map's air views, "dep" with its deposition view

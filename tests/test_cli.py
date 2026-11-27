@@ -84,9 +84,15 @@ def test_reference_outlines_are_checked(tmp_path: Path) -> None:
     assert out is not None
     assert out["name"] == "Agency map"
     assert out["note"] == ""
+    assert out["links"] == []
     assert "dep" not in out
     assert puff._reference_outlines(argparse.Namespace(reference_outlines=None)) is None
-    for bad in ({"name": "x"}, {"name": "x", "air": {"zones": [{"label": "", "lines": []}]}}):
+    unsafe = {**good, "links": [{"text": "map", "url": "javascript:alert(1)"}]}
+    for bad in (
+        {"name": "x"},
+        {"name": "x", "air": {"zones": [{"label": "", "lines": []}]}},
+        unsafe,  # a link that isn't https would run in the page
+    ):
         path.write_text(json.dumps(bad), encoding="utf-8")
         with pytest.raises(SystemExit, match="--reference-outlines"):
             puff._reference_outlines(ns)

@@ -1144,6 +1144,14 @@ ARMY_BOX = (
     "them by their county lines, to about 0.6 mile; the Army\u2019s plant marker hides their "
     "first miles."
 )
+#: Where the Army posted its final maps (DVIDS, Nov. 25, 2026; the pages were read Nov. 26).
+ARMY_AIR_MAP_URL = "https://www.dvidshub.net/image/10118629/deposition-map-2-800-am-cst"
+ARMY_GROUND_MAP_URL = "https://www.dvidshub.net/image/10118630/deposition-map-1-800-am-cst"
+ARMY_BOX_LINKS = f"The Army\u2019s maps: air, {ARMY_AIR_MAP_URL}; ground, {ARMY_GROUND_MAP_URL}."
+ARMY_BOX_LINKS_HTML = (
+    f'The Army&rsquo;s maps: <a href="{ARMY_AIR_MAP_URL}" rel="noopener">air</a> and '
+    f'<a href="{ARMY_GROUND_MAP_URL}" rel="noopener">ground</a> (DVIDS).'
+)
 FORECAST_HEAD = "What the forecast showed before the blast"
 FORECAST_NOTE = (
     "The sections below on where the cloud goes, how far lead on the ground could reach, lead "
@@ -1275,7 +1283,7 @@ def _archived_html(fa: Facts | None, pct: dict[str, str]) -> str:
   <h3>{ARCHIVED_HEAD}</h3>
   <p>{archived_wind_sentence(fa)} {path_sentence(fa)} {OBSERVED_WX}</p>
   <p>{HYSPLIT_BOX}</p>
-  <p>{ARMY_BOX}</p>
+  <p>{ARMY_BOX} {ARMY_BOX_LINKS_HTML}</p>
   <p>Farthest distance from the plant where lead on the ground reaches each EPA dust-lead
     action level by the end of the 8-hour run, for a blast at {BLAST_TIME} The smaller
     number, where there is one, is the farther of the two dry-deposition schemes.</p>
@@ -1296,7 +1304,7 @@ def _archived_plain(fa: Facts, pct: dict[str, str]) -> str:
         f"{path_sentence(fa, html=False)} {OBSERVED_WX} {_town_text(fa)} {TOWN_CAVEAT} "
         "Farthest reach of ground lead with archived weather: "
         + " ".join(r[2:] for r in rows)
-        + f" {HYSPLIT_BOX} {ARMY_BOX}"
+        + f" {HYSPLIT_BOX} {ARMY_BOX} {ARMY_BOX_LINKS}"
     )
 
 

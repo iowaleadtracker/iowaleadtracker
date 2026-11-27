@@ -533,7 +533,7 @@ def _add_display_args(p: argparse.ArgumentParser) -> None:
         default=None,
         metavar="FILE",
         help="add outlines from another source (for example an agency's published map) that "
-        'readers can switch on: a JSON file with a name, a note, and under "air" and '
+        'readers can switch on: a JSON file with a name, a note, links, and under "air" and '
         '"dep" a list of zones, each a label and lines of [latitude, longitude] points',
     )
     p.add_argument(
@@ -1074,6 +1074,14 @@ def _outline_layers(data: Json) -> Json:
     return layers
 
 
+def _https(url: str) -> str:
+    """Return a link's address, refusing anything but https (it goes into the page)."""
+    if not url.startswith("https://"):
+        msg = f"links must be https:// addresses, not {url!r}"
+        raise ValueError(msg)
+    return url
+
+
 def _reference_outlines(a: argparse.Namespace) -> Json | None:
     """Return the outlines of ``--reference-outlines`` for the page, or nothing without it."""
     path = getattr(a, "reference_outlines", None)
@@ -1081,7 +1089,13 @@ def _reference_outlines(a: argparse.Namespace) -> Json | None:
         return None
     try:
         data = json.loads(Path(path).read_text(encoding="utf-8"))
-        return {"name": data["name"], "note": data.get("note", ""), **_outline_layers(data)}
+        links = [(str(ln["text"]), str(ln["url"])) for ln in data.get("links", [])]
+        return {
+            "name": data["name"],
+            "note": data.get("note", ""),
+            "links": [{"text": t, "url": _https(u)} for t, u in links],
+            **_outline_layers(data),
+        }
     except (OSError, ValueError, KeyError, TypeError) as e:
         raise SystemExit(f"--reference-outlines: {e!r}") from None
 
