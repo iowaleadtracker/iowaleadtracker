@@ -19,11 +19,12 @@ Iowa scenario and every assumption in `scenarios/iowa-aap-lead-azide/README.md`.
 pre-commit run --all-files   # ruff, ruff format, mypy, fast tests, file checks
 pytest                       # the full suite
 pnpm install && pnpm lint    # front-end lint: oxlint (JS), ESLint (HTML, CSS); Node from .nvmrc
+pnpm test:map                # the map page in a browser (Playwright), with saved map data
 ```
 
 CI (`.github/workflows/ci.yml`) runs these, plus an offline site build, on every push
-(the front-end lint on every branch but `main`, so not on the merge); `main` only takes
-changes through a reviewed pull request.
+(the front-end lint and map tests on every branch but `main`, so not on the merge);
+`main` only takes changes through a reviewed pull request.
 
 If the change should not alter the published maps, prove it:
 

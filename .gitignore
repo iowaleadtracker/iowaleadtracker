@@ -73,3 +73,7 @@ scenarios/*/met_cache_retrieved_*/
 
 # front-end lint: pages and inline code written by tools/lint_pages.py
 .lint/
+
+# browser tests (Playwright) output
+test-results/
+playwright-report/

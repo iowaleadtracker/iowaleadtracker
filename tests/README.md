@@ -20,6 +20,24 @@ pytest                 # everything, including full model runs (about 10 s)
 | `test_cli.py` | `--help` and option checks |
 | `test_site.py` | the site's safety wording, headers and defaults |
 | `test_brief_page.py` | the monitor-placement page: warnings, no outside files, all of the README shown, written into the site and the mirror |
+| `test_map_fixtures.py` | the browser tests' saved map data still has every key the model writes |
+
+## Browser tests of the map page
+
+```bash
+pnpm install && pnpm test:map   # Node from .nvmrc; Chromium, desktop and phone, about 10 s
+```
+
+`frontend/map.spec.js` (Playwright) opens `template.html` with saved map data put in the
+way `dispersal/output.py` does it, served from memory with every outside request blocked:
+no build, no server, no Python. It checks that the page loads and every control works
+without errors, the units and peak values, the HYSPLIT and Army-zone boxes, escaping of
+text from the data, the basemap credit, dark mode, saved choices, and the phone layout.
+
+The data, `frontend/fixtures/forecast.json` and `archived.json`, is two real maps (the
+Army mitigated case at 9:00, forecast and archived weather) on a coarse grid. When the
+model starts writing a new key the page reads, `test_map_fixtures.py` fails; remake them
+with `python3 tools/refresh_map_fixtures.py` (about 20 s, from the saved forecasts).
 
 ## Rules
 

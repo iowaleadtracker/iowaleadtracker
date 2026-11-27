@@ -1,0 +1,204 @@
+// The map page in a real browser: template.html with saved map data put in the way
+// dispersal/output.py does it. No build, no server: the page is served from memory and
+// every other request (map tiles) is blocked.
+//
+// Fixtures: tests/frontend/fixtures/forecast.json (sky layer, Army outlines, model spread)
+// and archived.json (NOAA HYSPLIT overlay). Remake with tools/refresh_map_fixtures.py.
+import { test, expect } from "@playwright/test";
+import { readFileSync } from "node:fs";
+
+const TEMPLATE = readFileSync(new URL("../../template.html", import.meta.url), "utf8");
+const fixture = (name) => JSON.parse(readFileSync(new URL(`fixtures/${name}.json`, import.meta.url), "utf8"));
+const URL_ = "http://map.test/map.html";
+
+// As dispersal/output.py write_html: no string in the data can close the <script>.
+const embed = (data) => TEMPLATE.replace("/*__DATA__*/null", JSON.stringify(data)
+  .replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026")
+  .replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029"));
+
+// Open the map; return the errors it logs (blocked tiles aside).
+async function openMap(page, data, hash = "") {
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
+  page.on("console", (m) => {
+    if (m.type() === "error" && !m.text().startsWith("Failed to load resource")) errors.push(`console: ${m.text()}`);
+  });
+  const html = embed(data);
+  await page.route("**/*", (r) => (r.request().url().split("#")[0] === URL_
+    ? r.fulfill({ contentType: "text/html", body: html }) : r.abort()));
+  await page.goto(URL_ + hash);
+  await expect(page.locator("#loading")).toHaveCount(0);   // decoded and drawn
+  return errors;
+}
+
+const num = (text) => parseFloat(text.replace(/,/g, ""));
+const visible = async (loc) => (await loc.count()) > 0 && loc.isVisible();
+
+for (const name of ["forecast", "archived"]) {
+  test(`${name}: loads and every control works without errors`, async ({ page }) => {
+    const data = fixture(name);
+    const errors = await openMap(page, data);
+    await expect(page.locator("#title")).toHaveText(data.meta.title);
+    await page.locator("#hour").fill(String(data.hours.length));
+    await page.locator("#hour").fill("2");
+    for (const v of ["peak", "snap", "dep", "zones", "conc"]) await page.locator(`#fieldseg button[data-v="${v}"]`).click();
+    for (const v of ["metric", "us"]) await page.locator(`#sysseg button[data-v="${v}"]`).click();
+    for (const u of await page.locator("#units option").evaluateAll((os) => os.map((o) => o.value))) await page.selectOption("#units", u);
+    if (await visible(page.locator("#modelseg"))) {
+      await page.locator('#modelseg button[data-v="hysplit"]').click();
+      await page.locator("#ownbtn").click();
+    }
+    for (const b of ["imagery", "topo", "none", "dark", "light", "auto"]) await page.selectOption("#basemap", b);
+    for (const cb of await page.locator('input[type="checkbox"]').all()) {
+      if (await cb.isVisible()) { await cb.click(); await cb.click(); }
+    }
+    await page.locator("#decades").fill("7");
+    await page.locator("#play").click();
+    await page.waitForTimeout(400);
+    await page.locator("#play").click();
+    for (const z of ["#zin", "#zout", "#zfit"]) await page.locator(z).click();
+    const box = await page.locator("#map").boundingBox();
+    const [cx, cy] = [box.x + box.width / 2, box.y + box.height / 2];
+    await page.mouse.move(cx, cy);
+    await page.mouse.down();
+    await page.mouse.move(cx + 60, cy + 30);
+    await page.mouse.up();
+    await page.mouse.move(cx - 20, cy);   // hover: the value under the pointer
+    expect(errors).toEqual([]);
+  });
+}
+
+test("each fixture shows only the layers its data has", async ({ page }) => {
+  await openMap(page, fixture("forecast"));
+  await expect(page.locator("#skywrap")).toBeVisible();
+  await expect(page.locator("#refwrap")).toBeVisible();     // the Army's zones
+  await expect(page.locator("#envwrap")).toBeVisible();     // the model spread
+  await expect(page.locator("#modelseg")).toBeHidden();     // no saved HYSPLIT run
+  await openMap(page, fixture("archived"));
+  await expect(page.locator("#skywrap")).toBeHidden();      // built without the weather layer
+  await expect(page.locator("#modelseg")).toBeVisible();    // NOAA HYSPLIT
+});
+
+test("HYSPLIT is off until chosen, and labeled an estimate, not a NOAA forecast", async ({ page }) => {
+  const data = fixture("archived");
+  await openMap(page, data);
+  await expect(page.locator("#ownbtn")).toHaveText(data.meta.homeName);   // the site's own model
+  await expect(page.locator("#ownbtn")).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("#hynote")).toBeHidden();
+  await page.locator('#modelseg button[data-v="hysplit"]').click();
+  await expect(page.locator("#hynote")).toBeVisible();
+  await expect(page.locator("#legtitle")).toHaveText(/^NOAA HYSPLIT: /);
+  await expect(page.locator("#leghytext")).toContainText("Not a NOAA forecast.");
+  await expect(page.locator("#budgetsec")).toBeHidden();
+  for (const v of ["peak", "snap", "zones"]) await expect(page.locator(`#fieldseg button[data-v="${v}"]`)).toBeDisabled();
+  for (const v of ["conc", "dep"]) await expect(page.locator(`#fieldseg button[data-v="${v}"]`)).toBeEnabled();
+  await page.locator("#ownbtn").click();
+  await expect(page.locator("#hynote")).toBeHidden();
+  await expect(page.locator("#legtitle")).not.toHaveText(/HYSPLIT/);
+});
+
+test("the Army's zones are off until ticked", async ({ page }) => {
+  await openMap(page, fixture("forecast"));
+  await expect(page.locator("#showRef")).not.toBeChecked();
+  await expect(page.locator("#legref")).toBeHidden();
+  await page.locator("#showRef").check();
+  await expect(page.locator("#legref")).toBeVisible();
+});
+
+test("deposition opens at the map's minimum, with a box that brings lower values back", async ({ page }) => {
+  await openMap(page, fixture("forecast"));   // built with --dep-scale-min 5ug/ft2
+  await page.locator('#fieldseg button[data-v="dep"]').click();
+  await expect(page.locator("#fixtopwrap")).toBeVisible();
+  await expect(page.locator("#fixtop")).toBeChecked();
+  await expect(page.locator("#fixtoplabel")).toHaveText("show only ≥ 5 µg/ft²");
+  await page.locator('#fieldseg button[data-v="conc"]').click();   // air has its own minimum
+  await expect(page.locator("#fixtoplabel")).toHaveText(/^show only ≥ [\d.]+ µg\/m³$/);
+});
+
+test("opened on its own, the map says it's an unofficial estimate", async ({ page }) => {
+  const data = fixture("forecast");
+  await openMap(page, data);
+  await expect(page.locator("#standalone")).toBeVisible();
+  await expect(page.locator("#standalone")).toContainText("Unofficial estimate, not from the Army or any government agency");
+  await expect(page.locator("#legnote")).toContainText("Unofficial estimate");
+});
+
+test("the panel's peak values are the data's, in the units chosen", async ({ page }) => {
+  const data = fixture("forecast");
+  await openMap(page, data);
+  const h = data.hours[0];   // hour 1; kg/m³ and kg/m² in the data
+  const dd = (label) => page.locator("#peak dt", { hasText: label }).locator("xpath=following-sibling::dd[1]");
+  // the map was built for U.S. units: deposition in µg/ft², air in µg/m³
+  await expect(dd("Air, hourly mean")).toHaveText(/µg\/m³$/);
+  const air = num(await dd("Air, hourly mean").textContent());
+  expect(Math.abs(air / (h.cmax * 1e9) - 1)).toBeLessThan(0.01);
+  await expect(dd("Deposition")).toHaveText(/µg\/ft²$/);
+  const ugft2 = num(await dd("Deposition").textContent());
+  expect(Math.abs(ugft2 / (h.dmax * 1e9 * 0.09290304) - 1)).toBeLessThan(0.01);
+  await page.locator('#sysseg button[data-v="metric"]').click();
+  await expect(dd("Deposition")).toHaveText(/µg\/m²$/);
+  const ugm2 = num(await dd("Deposition").textContent());
+  expect(Math.abs(ugm2 / (h.dmax * 1e9) - 1)).toBeLessThan(0.01);
+});
+
+test("text from the data can't inject markup or script", async ({ page }) => {
+  const data = fixture("forecast");
+  const evil = '<img src=x onerror="window.__xss=1">';
+  data.meta.title = evil;
+  data.meta.outlines.name = evil;
+  data.meta.outlines.links = [{ url: "javascript:window.__xss=1", text: evil }];
+  data.hours.forEach((h) => { h.stab = evil; });
+  if (data.meta.explosionOpts) data.meta.explosionOpts.layers = evil;
+  const errors = await openMap(page, data);
+  await expect(page.locator("#title")).toHaveText(evil);           // shown as text
+  await page.locator("#showRef").check();
+  await expect(page.locator("#legref")).toContainText(evil);
+  for (const id of ["#legref", "#met", "#expl", "#title"]) await expect(page.locator(`${id} img`)).toHaveCount(0);
+  await expect(page.locator('#legref a[href^="javascript:"]')).toHaveCount(0);
+  expect(await page.evaluate(() => window.__xss)).toBeUndefined();
+  expect(errors).toEqual([]);
+});
+
+test("the attribution follows the basemap", async ({ page }) => {
+  await openMap(page, fixture("forecast"));
+  await page.selectOption("#basemap", "none");
+  await expect(page.locator("#attrib")).toHaveText("Weather: Open-Meteo");
+  await page.selectOption("#basemap", "light");
+  await expect(page.locator("#attrib")).toContainText("©");
+  await expect(page.locator("#attrib")).toContainText("Weather: Open-Meteo");
+});
+
+test("switching to dark mode redraws the map", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "light" });
+  await openMap(page, fixture("forecast"));
+  // the canvas's own pixels: a screenshot would change with the page's dark CSS alone
+  const pixels = () => page.locator("#map").evaluate((c) => c.toDataURL());
+  const light = await pixels();
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect.poll(pixels).not.toBe(light);
+});
+
+test("saved basemap and unit choices are used", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("puffmap.prefs", JSON.stringify({ base: "none", sys: "metric" })));
+  await openMap(page, fixture("forecast"));
+  await expect(page.locator("#basemap")).toHaveValue("none");
+  await expect(page.locator('#sysseg button[data-v="metric"]')).toHaveAttribute("aria-pressed", "true");
+});
+
+test("bad saved data is ignored, and #u= picks the units", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("puffmap.prefs", "{not json"));
+  const errors = await openMap(page, fixture("forecast"), "#u=metric");
+  await expect(page.locator('#sysseg button[data-v="metric"]')).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("#basemap")).toHaveValue("auto");
+  expect(errors).toEqual([]);
+});
+
+test("the page fits the screen, with the legend below the map on narrow screens", async ({ page, isMobile }) => {
+  await openMap(page, fixture("forecast"));
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  const below = await page.evaluate(() => {
+    const legend = document.querySelector(".legend");
+    return { cls: legend.classList.contains("below"), inMap: document.getElementById("mapwrap").contains(legend) };
+  });
+  expect(below).toEqual(isMobile ? { cls: true, inMap: false } : { cls: false, inMap: true });
+});

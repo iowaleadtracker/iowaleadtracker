@@ -469,18 +469,11 @@ def test_hashed_names_cover_both_weather_sets(
 def test_hysplit_view_is_offered_and_described() -> None:
     """The archived maps' HYSPLIT button: off by default, labeled, explained as an estimate."""
     assert site.HYSPLIT_OVERLAY.exists()  # saved in the repository: the build never runs HYSPLIT
-    page = load_template()
-    assert '<div class="seg" id="modelseg" role="group" aria-label="Model" hidden>' in page
-    assert (
-        '<button type="button" data-v="hysplit" aria-pressed="false">NOAA HYSPLIT</button>' in page
-    )
-    assert "hy: false" in page  # the site's own model until the reader switches
-    assert 'const OWN = M.homeName || "This model";' in page  # its button: the site's name
-    assert "if (FIELDS.hy_conc) {" in page  # offered only on maps that carry the saved run
-    # the four fixed contour colors of HYSPLIT's own plots, lowest to highest
-    assert "HY_BANDS = [[0, 255, 255], [0, 255, 0], [0, 0, 255], [255, 255, 0]]" in page
-    assert 'x.disabled = S.hy && !["conc", "dep"].includes(x.dataset.v)' in page  # no other views
-    assert "Not a NOAA forecast." in page  # in the legend whenever HYSPLIT shows
+    # The button's behavior (off by default, offered only with a saved run, other views
+    # disabled, "Not a NOAA forecast." in the legend) is checked in the browser:
+    # tests/frontend/map.spec.js. The four fixed contour colors of HYSPLIT's own plots,
+    # lowest to highest:
+    assert "HY_BANDS = [[0, 255, 255], [0, 255, 0], [0, 0, 255], [255, 255, 0]]" in load_template()
     for text in (fs.HYSPLIT_BOX, works_cited.HYSPLIT_METHOD):
         assert "not a measurement" in text
         assert "not a forecast from NOAA" in text
@@ -501,10 +494,7 @@ def test_deposition_view_opens_at_epas_lowest_action_level() -> None:
     args = site.MODEL_ARGS
     assert args[args.index("--dep-scale-min") + 1] == "5ug/ft2"
     assert fs.DEP_LEVELS[0] == ("yellow", 5)  # the level the page already compares against
-    page = load_template()
-    assert "fixDepMin: !!M.depScaleMin" in page  # on when the map carries a minimum
-    assert "function syncMinBox()" in page  # the box follows the view: air or deposition
-    assert 'S.field === "dep" ? (S.fixDepMin && M.depScaleMin) || 0' in page
+    # the box on the map, on by default and following the view: tests/frontend/map.spec.js
     what = next(w for _, w in works_cited.CHANGES if "deposition view" in w)
     assert "hidden, not zero" in what
     assert "not a line between safe and unsafe" in what
@@ -520,10 +510,7 @@ def test_armys_final_maps_are_offered_for_the_blast_they_were_made_for() -> None
     assert site.army_outlines("2026-11-27", "09:00") == []
     for run in site.archived_runs("python"):
         assert "--reference-outlines" in run.cmd
-    page = load_template()
-    assert '<label class="opt" id="refwrap" hidden><input type="checkbox" id="showRef">' in page
-    assert "ref: false" in page  # off until the reader ticks it
-    assert "if (M.outlines) {" in page  # offered only on maps that carry outlines
+    # the box: off until ticked, offered only with outlines: tests/frontend/map.spec.js
     log = next(w for _, w in works_cited.CHANGES if "final forecast&rdquo;" in w)
     for text in (fs.ARMY_BOX, works_cited.ARMY_BOX_METHOD, log):
         assert "26% of the lead airborne" in text
