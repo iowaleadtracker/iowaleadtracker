@@ -56,7 +56,11 @@ python3 scenarios/iowa-aap-lead-azide/make_map_picker.py --build
 Open the HTML file in a browser. The saved forecasts in `met_cache/` reproduce the live
 site on any date (the site build passes `--as-of`, the time they were pulled); delete the
 cache file to download fresh forecasts from Open-Meteo. `--weather-at LAT,LON` centers the
-weather grid on another point, so a run can reuse weather saved for a nearby release point. A mirror of the site, built from
+weather grid on another point, so a run can reuse weather saved for a nearby release point.
+`--dep-scale-min 5ug/ft2` hides deposition below a level until the reader unticks a box, as
+`--scale-min` does for air. `--reference-outlines FILE` adds outlines from another source, such as an agency's published
+map, that readers can switch on. `--hysplit-overlay FILE` adds a saved NOAA HYSPLIT run for the same release to the map, as a
+second view readers can switch to (see `scenarios/iowa-aap-lead-azide/hysplit-archived/`). A mirror of the site, built from
 this repository, is at https://iowaleadtracker.github.io/ for readers who can't reach
 iowaleadtracker.com. The `--publish`
 and `--deploy` options are for the maintainer (merges to `main` deploy through

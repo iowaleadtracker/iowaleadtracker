@@ -66,7 +66,7 @@ from dispersal.met import (
     rotated_met,
 )
 from dispersal.model import run_model
-from dispersal.output import hysplit_files, pack, write_html
+from dispersal.output import hysplit_files, hysplit_overlay, pack, write_html
 from dispersal.particles import particle_properties
 from dispersal.source_term import (
     COARSE_BINS,
@@ -501,10 +501,46 @@ def _add_display_args(p: argparse.ArgumentParser) -> None:
         "are hidden (toggle in page)",
     )
     p.add_argument(
+        "--dep-scale-min",
+        type=parse_areal,
+        default=None,
+        help="minimum deposition to show, e.g. 5ug/ft2: the deposition color scale starts "
+        "here and runs --decades above it; lower values are hidden (toggle in page)",
+    )
+    p.add_argument(
         "--home-url",
         default=None,
         help="site the map belongs to; shown in a banner when the map page is "
         "opened on its own instead of inside that site",
+    )
+    p.add_argument(
+        "--home-name",
+        default=None,
+        metavar="NAME",
+        help="name of that site; with --hysplit-overlay, the button for this model's own "
+        'result carries it (default: "This model")',
+    )
+    p.add_argument(
+        "--hysplit-overlay",
+        default=None,
+        metavar="FILE",
+        help="add a saved NOAA HYSPLIT run for the same release (a file made by a "
+        "scenario's make_overlay.py) to the map as a second view readers can switch to; it "
+        "is scaled to this run's release mass",
+    )
+    p.add_argument(
+        "--reference-outlines",
+        default=None,
+        metavar="FILE",
+        help="add outlines from another source (for example an agency's published map) that "
+        'readers can switch on: a JSON file with a name, a note, links, and under "air" and '
+        '"dep" a list of zones, each a label and lines of [latitude, longitude] points',
+    )
+    p.add_argument(
+        "--hysplit-overlay-note",
+        default=None,
+        metavar="TEXT",
+        help="what the saved HYSPLIT run used, shown in the legend of its view",
     )
     p.add_argument(
         "--legend-note",
@@ -1007,6 +1043,81 @@ def _wind_from(u: float, v: float) -> int:
     return round((math.degrees(math.atan2(-u, -v)) + 360) % 360)
 
 
+def _hysplit_overlay(
+    a: argparse.Namespace, xe: FloatArray, ye: FloatArray, coslat0: float
+) -> tuple[dict[str, FloatArray], Json | None]:
+    """Return ``--hysplit-overlay`` on the map's grid and its note, or nothing without it."""
+    path = getattr(a, "hysplit_overlay", None)
+    if not path:
+        return {}, None
+    rows = a.lat + np.degrees((ye[:-1] + ye[1:]) / 2 / R_EARTH)
+    cols = a.lon + np.degrees((xe[:-1] + xe[1:]) / 2 / (R_EARTH * coslat0))
+    try:
+        fields, note = hysplit_overlay(path, a.start, a.hours, a.release_mass, (rows, cols))
+    except (OSError, ValueError, KeyError) as e:
+        raise SystemExit(f"--hysplit-overlay: {e}") from None
+    note["note"] = getattr(a, "hysplit_overlay_note", None) or ""
+    return fields, note
+
+
+def _is_line(line: object, points: int = 0) -> bool:
+    """Tell whether ``line`` is a list of [latitude, longitude] number pairs."""
+    return (
+        isinstance(line, list)
+        and (len(line) == points if points else len(line) > 0)
+        and all(
+            isinstance(pt, list)
+            and len(pt) == 2
+            and all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in pt)
+            for pt in line
+        )
+    )
+
+
+def _outline_layers(data: Json) -> Json:
+    """Return the "air" and "dep" outlines of a file, checked for labels and point pairs."""
+    layers: Json = {k: data[k] for k in ("air", "dep") if k in data}
+    if not layers:
+        msg = 'no "air" or "dep" outlines in the file'
+        raise ValueError(msg)
+    for layer in layers.values():
+        for zone in layer["zones"]:
+            if not zone["label"] or not all(_is_line(ln) for ln in zone["lines"]):
+                msg = "each zone needs a label and lines of [latitude, longitude] points"
+                raise ValueError(msg)
+        for mark in layer.get("marks", []):
+            if not mark["label"] or not _is_line(mark["line"], points=2):
+                msg = "each mark needs a label and a line of two [latitude, longitude] points"
+                raise ValueError(msg)
+    return layers
+
+
+def _https(url: str) -> str:
+    """Return a link's address, refusing anything but https (it goes into the page)."""
+    if not url.startswith("https://"):
+        msg = f"links must be https:// addresses, not {url!r}"
+        raise ValueError(msg)
+    return url
+
+
+def _reference_outlines(a: argparse.Namespace) -> Json | None:
+    """Return the outlines of ``--reference-outlines`` for the page, or nothing without it."""
+    path = getattr(a, "reference_outlines", None)
+    if not path:
+        return None
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+        links = [(str(ln["text"]), str(ln["url"])) for ln in data.get("links", [])]
+        return {
+            "name": str(data["name"]),
+            "note": str(data.get("note", "")),
+            "links": [{"text": t, "url": _https(u)} for t, u in links],
+            **_outline_layers(data),
+        }
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as e:
+        raise SystemExit(f"--reference-outlines: {e!r}") from None
+
+
 def _hours_output(
     a: argparse.Namespace, met: MetField, hourly: Sequence[Json], F: dict[str, FloatArray]
 ) -> list[Json]:
@@ -1215,6 +1326,7 @@ def _meta(
         "zUp": met.z_up,
         "generated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "homeUrl": a.home_url,
+        "homeName": getattr(a, "home_name", None),
         "legendNote": a.legend_note,
         "caseRange": getattr(a, "case_range", None),
         "scavenging": a.scavenging,
@@ -1252,6 +1364,7 @@ def _meta(
         ),
         "scaleMax": a.scale_max,
         "scaleMin": a.scale_min,
+        "depScaleMin": getattr(a, "dep_scale_min", None),
         "decades": max(2, min(8, a.decades)),
         "units": a.units,
         "zoneMetric": a.zone_metric,
@@ -1305,6 +1418,7 @@ def simulate(a: argparse.Namespace, log: TextIO = sys.stderr) -> Json:
     print(f"grid: {conc.shape[2]}x{conc.shape[1]} cells of {dx / 1000:.3g} km", file=log)
 
     coslat0 = math.cos(math.radians(a.lat))
+    overlay, overlay_note = _hysplit_overlay(a, xe, ye, coslat0)
     hours_out = _hours_output(a, met, hourly, F)
     sky_meta, sky_hours = _sky_grid_output(a)
     for h, sh in zip(hours_out, sky_hours, strict=False):
@@ -1323,9 +1437,15 @@ def simulate(a: argparse.Namespace, log: TextIO = sys.stderr) -> Json:
             "west": a.lon + math.degrees(xe[0] / (R_EARTH * coslat0)),
             "east": a.lon + math.degrees(xe[-1] / (R_EARTH * coslat0)),
             **{k: pack(v) for k, v in F.items()},
+            **{k: pack(v) for k, v in overlay.items()},
         },
         "hours": hours_out,
     }
+    if overlay_note:
+        payload["meta"]["hysplitOverlay"] = overlay_note
+    outlines = _reference_outlines(a)
+    if outlines:
+        payload["meta"]["outlines"] = outlines
     payload["meta"]["hysplit"] = hysplit_files(a, bins_out, payload["grid"])
     if sky_meta:
         payload["meta"]["skyGrid"] = sky_meta

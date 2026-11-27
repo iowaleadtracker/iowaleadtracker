@@ -8,15 +8,18 @@ and check that every place the text is generated still carries them.
 
 from __future__ import annotations
 
+import copy
 import datetime as dt
 import html
 import json
+import math
 import re
 from pathlib import Path
 from typing import Any
 
 import forecast_summary as fs
 import make_map_picker as site
+import numpy as np
 import pytest
 import staged
 import works_cited
@@ -140,6 +143,46 @@ def test_analysis_after_the_blast_is_reported_with_its_caveat(
 
 
 @pytest.mark.slow
+def test_summary_explains_noaa_and_hysplit_and_compares_the_models(
+    facts_ctx: tuple[dict[str, Any], dict[str, Any]],
+) -> None:
+    """The section under the Army comparison: what NOAA and HYSPLIT are, then the numbers.
+
+    It appears only when the archived maps carry a HYSPLIT result, says this site ran the
+    model, and ends by saying that agreement doesn't show either model is right.
+    """
+    facts, ctx = facts_ctx
+    plain = fs.render(facts, {**ctx, "archived": facts})
+    assert fs.HYSPLIT_HEAD not in plain[0]  # these maps carry no HYSPLIT result
+    assert fs.HYSPLIT_QUESTION not in dict(plain[1])
+    with_hy = copy.deepcopy(facts)
+    for c in with_hy["cases"].values():
+        c["hy_dep"] = {k: v[0] * 0.8 for k, v in c["dep"].items()}  # HYSPLIT: four-fifths as far
+        c["dep_bearing"], c["hy_bearing"] = 218.0, 221.0
+    summary, faq, llms = fs.render(facts, {**ctx, "archived": with_hy})
+    army, noaa = summary.index("How this compares with the Army"), summary.index(fs.HYSPLIT_HEAD)
+    assert army < noaa < summary.index(fs.ANALYSIS_QUESTION)  # right under the Army comparison
+    section = summary[noaa : summary.index(fs.ANALYSIS_QUESTION)]
+    for text in (fs.NOAA_WHAT, fs.HYSPLIT_HOW, fs.HYSPLIT_LIMIT):
+        assert text in section
+    assert "National Oceanic and Atmospheric Administration" in fs.NOAA_WHAT
+    assert "National Weather Service" in fs.NOAA_WHAT
+    assert "It is not a measurement, and it is not a forecast from NOAA." in fs.HYSPLIT_HOW
+    assert f'<a href="{fs.HYSPLIT_URL}" rel="noopener">{fs.HYSPLIT_CITE}</a>' in section
+    assert "nearly the same line" in section
+    assert "218\u00b0 for this site\u2019s model and 221\u00b0 for HYSPLIT" in section
+    assert "This site\u2019s model reaches farther in every case." in section
+    assert section.count("<tr>") == 1 + len(with_hy["cases"])  # a row for each case
+    answer = dict(faq)[fs.HYSPLIT_QUESTION]
+    assert answer.startswith(fs.NOAA_WHAT)
+    assert answer.endswith(fs.CAVEAT)
+    assert "- NOAA HYSPLIT comparison: " in llms
+    assert "safe" not in (section + answer).lower().replace("follow official instructions", "")
+    refs = [r for r in works_cited.REFERENCES if isinstance(r, str)]
+    assert any(r.startswith("NOAA Air Resources Laboratory, 2026:") for r in refs)
+
+
+@pytest.mark.slow
 def test_summary_questions_and_llms_describe_the_default_view(
     facts_ctx: tuple[dict[str, Any], dict[str, Any]],
 ) -> None:
@@ -209,7 +252,7 @@ def test_header_and_about_box_name_the_weather() -> None:
         "The winds come from four weather forecasts, current as of X."
     )
     nov26 = [what for when, what in works_cited.CHANGES if when == "Nov. 26"]
-    assert works_cited.CHANGES[0][0] == "Nov. 26"
+    assert works_cited.CHANGES[0][0] == "Nov. 27"  # the newest entry (the HYSPLIT comparison)
     assert any("opens on a 9 a.m. blast, the low case, and archived weather" in w for w in nov26)
     assert any(
         "Opening on the low case is not a finding that little lead got out." in w for w in nov26
@@ -367,6 +410,21 @@ def test_archived_map_runs_offline_from_the_new_release_point(
     assert not spread["spread"]
     assert len(spread["deposition"]) == 2
     assert out["hours"][0]["ws"] > 0
+    # the saved HYSPLIT run rides along, on the map's grid and scaled to this case
+    grid = out["grid"]
+    assert {"hy_conc", "hy_dep"} <= set(grid)
+    note = meta["hysplitOverlay"]
+    assert note["file"] == site.HYSPLIT_OVERLAY.name
+    assert note["note"] == site.HYSPLIT_NOTE
+    assert note["scaledBy"] == pytest.approx(meta["explosionOpts"]["airborneFraction"], rel=1e-4)
+    assert len(note["airMax"]) == len(note["depMax"]) == len(out["hours"])  # HYSPLIT's peaks
+    # the Army's final maps ride along as outlines for the box under the map
+    assert meta["outlines"]["name"] == "Army\u2019s final forecast"
+    assert len(meta["outlines"]["dep"]["zones"]) == 2
+    # the deposition view's minimum, 5 ug/ft2 in the page's kg/m2
+    assert meta["depScaleMin"] == pytest.approx(5e-9 / 0.09290304)
+    # two models, one release: their highest hourly means agree within a factor of 3
+    assert 1 / 3 < grid["hy_conc"]["max"] / grid["conc"]["max"] < 3
     i = argv.index("--weather-at")
     with pytest.raises(met.NotSaved):
         run_puff(argv[:i] + argv[i + 2 :])
@@ -402,6 +460,108 @@ def test_hashed_names_cover_both_weather_sets(
     assert '"low-0900"' in cleaned
 
 
+def test_hysplit_view_is_offered_and_described() -> None:
+    """The archived maps' HYSPLIT button: off by default, labeled, explained as an estimate."""
+    assert site.HYSPLIT_OVERLAY.exists()  # saved in the repository: the build never runs HYSPLIT
+    page = load_template()
+    assert '<div class="seg" id="modelseg" role="group" aria-label="Model" hidden>' in page
+    assert '<button data-v="hysplit" aria-pressed="false">NOAA HYSPLIT</button>' in page
+    assert "hy: false" in page  # the site's own model until the reader switches
+    assert 'const OWN = M.homeName || "This model";' in page  # its button: the site's name
+    assert "if (FIELDS.hy_conc) {" in page  # offered only on maps that carry the saved run
+    # the four fixed contour colors of HYSPLIT's own plots, lowest to highest
+    assert "HY_BANDS = [[0, 255, 255], [0, 255, 0], [0, 0, 255], [255, 255, 0]]" in page
+    assert 'x.disabled = S.hy && !["conc", "dep"].includes(x.dataset.v)' in page  # no other views
+    assert "Not a NOAA forecast." in page  # in the legend whenever HYSPLIT shows
+    for text in (fs.HYSPLIT_BOX, works_cited.HYSPLIT_METHOD):
+        assert "not a measurement" in text
+        assert "not a forecast from NOAA" in text
+        assert "safe" not in text.lower()
+    assert "\u201cNOAA HYSPLIT\u201d button under the map" in fs.HYSPLIT_BOX
+    assert "Stein et al. 2015" in works_cited.HYSPLIT_METHOD
+    when, what = next(c for c in works_cited.CHANGES if "new button under the map" in c[1])
+    assert when == "Nov. 27"
+    assert "HYSPLIT" in what
+    assert "numbers did not change" in what
+    readme = (site.HYSPLIT_OVERLAY.parent / "README.md").read_text(encoding="utf-8")
+    flat = " ".join(readme.split())
+    assert "don't use it to decide if you're safe; follow official instructions" in flat
+
+
+def test_deposition_view_opens_at_epas_lowest_action_level() -> None:
+    """Deposition has a minimum like air's, with a box that brings the lower values back."""
+    args = site.MODEL_ARGS
+    assert args[args.index("--dep-scale-min") + 1] == "5ug/ft2"
+    assert fs.DEP_LEVELS[0] == ("yellow", 5)  # the level the page already compares against
+    page = load_template()
+    assert "fixDepMin: !!M.depScaleMin" in page  # on when the map carries a minimum
+    assert "function syncMinBox()" in page  # the box follows the view: air or deposition
+    assert 'S.field === "dep" ? (S.fixDepMin && M.depScaleMin) || 0' in page
+    what = next(w for _, w in works_cited.CHANGES if "deposition view" in w)
+    assert "hidden, not zero" in what
+    assert "not a line between safe and unsafe" in what
+
+
+def test_armys_final_maps_are_offered_for_the_blast_they_were_made_for() -> None:
+    """The box: off by default, on the 9 a.m. maps only, and described as the Army's forecast."""
+    assert site.army_outlines(site.DATE, "09:00") == [
+        "--reference-outlines",
+        str(site.ARMY_OUTLINES),
+    ]
+    assert site.army_outlines(site.DATE, "09:30") == []  # another blast time: not its maps
+    assert site.army_outlines("2026-11-27", "09:00") == []
+    for run in site.archived_runs("python"):
+        assert "--reference-outlines" in run.cmd
+    page = load_template()
+    assert '<label class="opt" id="refwrap" hidden><input type="checkbox" id="showRef">' in page
+    assert "ref: false" in page  # off until the reader ticks it
+    assert "if (M.outlines) {" in page  # offered only on maps that carry outlines
+    log = next(w for _, w in works_cited.CHANGES if "final forecast&rdquo;" in w)
+    for text in (fs.ARMY_BOX, works_cited.ARMY_BOX_METHOD, log):
+        assert "26% of the lead airborne" in text
+        assert "0.6 mile" in text  # how well the pictures could be placed
+        assert "safe" not in text.lower()
+    readme = (site.ARMY_OUTLINES.parent / "README.md").read_text(encoding="utf-8")
+    flat = " ".join(readme.split())
+    assert "don't use this to decide if you're safe; follow official instructions" in flat
+
+
+def test_armys_outlines_are_southwest_of_the_plant() -> None:
+    """The traced file: an air path with four time marks, two ground zones, all near the plant."""
+    data = json.loads(site.ARMY_OUTLINES.read_text(encoding="utf-8"))
+    assert data["name"] == "Army\u2019s final forecast"
+    assert "Traced and placed by this site" in data["note"]
+    # how far the Army's marker hides its zones: measured, and said the same way everywhere
+    miles = data["hiddenMiles"]
+    starts = [
+        min(math.hypot((la - 40.8096) * 69.09, (lo + 91.2692) * 69.09 * 0.757) for la, lo in ln)
+        for kind in ("air", "dep")
+        for z in data[kind]["zones"]
+        for ln in z["lines"]
+    ]
+    assert miles - 1 < min(starts) < max(starts) < miles + 1
+    assert f"first {miles} miles" in data["note"]
+    assert f"first {miles} miles" in fs.ARMY_BOX
+    assert f"first {miles} miles" in works_cited.ARMY_BOX_METHOD
+    # where the Army posted the two maps, linked from the legend, the summary and the references
+    assert [ln["url"] for ln in data["links"]] == [fs.ARMY_AIR_MAP_URL, fs.ARMY_GROUND_MAP_URL]
+    assert fs.ARMY_AIR_MAP_URL.endswith("/image/10118629/deposition-map-2-800-am-cst")
+    assert fs.ARMY_GROUND_MAP_URL.endswith("/image/10118630/deposition-map-1-800-am-cst")
+    assert fs.ARMY_AIR_MAP_URL in fs.ARMY_BOX_LINKS_HTML
+    assert fs.ARMY_GROUND_MAP_URL in fs.ARMY_BOX_LINKS
+    refs = [r for r in works_cited.REFERENCES if isinstance(r, str)]
+    assert any(r.startswith("McFate, L., 2026e:") and fs.ARMY_GROUND_MAP_URL in r for r in refs)
+    assert any(r.startswith("McFate, L., 2026f:") and fs.ARMY_AIR_MAP_URL in r for r in refs)
+    assert [m["label"] for m in data["air"]["marks"]] == ["T+0.5 h", "T+2 h", "T+3 h", "T+5 h"]
+    assert [z["label"].split()[0] for z in data["dep"]["zones"]] == ["5", "100"]
+    for kind in ("air", "dep"):
+        for zone in data[kind]["zones"]:
+            pts = [pt for line in zone["lines"] for pt in line]
+            assert len(pts) > 20
+            # the Army's forecast went southwest: nothing north or east of the plant point
+            assert all(39.5 < lat < site.LAT and -93.0 < lon < site.LON for lat, lon in pts)
+
+
 def test_staged_page_keeps_the_permit_case_first() -> None:
     """The Wednesday-to-Friday forecasts from before the blast open as they did then."""
     assert staged.DEFAULT_CASE == "permit"
@@ -418,6 +578,10 @@ def test_archived_runs_use_only_the_saved_weather() -> None:
         assert cmd[cmd.index("--as-of") + 1] == site.ARCHIVED_AS_OF
         assert "--sky-grid" not in cmd  # the sky grid is a forecast
         assert "--no-sky-layer" in cmd  # and so is the map's own sky layer, by its label
+        # NOAA's HYSPLIT result for the same blast, for the "NOAA HYSPLIT" button
+        assert cmd[cmd.index("--hysplit-overlay") + 1] == str(site.HYSPLIT_OVERLAY)
+        assert cmd[cmd.index("--hysplit-overlay-note") + 1] == site.HYSPLIT_NOTE
+        assert cmd[cmd.index("--home-name") + 1] == "Iowa Lead Tracker"  # the other button
         assert cmd[cmd.index("--weather-label") + 1].startswith("archived NOAA HRRR")
         # from midway between the two magazines, on the weather saved around the plant point
         assert cmd[cmd.index("--lat") + 1] == "40.8096"
@@ -1496,3 +1660,17 @@ def test_about_safety_paragraph_says_no_warranty_and_no_verdicts() -> None:
         "follow $who",
     ):
         assert part in para
+
+
+def test_farthest_reach_ignores_stray_cells_past_the_edge() -> None:
+    """HYSPLIT's grainy edge: only the area joined to the peak counts toward its reach."""
+    a = np.zeros((6, 8))
+    a[1, 1], a[1, 2], a[2, 2] = 9.0, 6.0, 5.0  # the main area, joined edge to edge
+    a[3, 3] = 7.0  # touches it only at a corner
+    a[4, 6] = 8.0  # a stray cell far away
+    kept = fs.joined_to_peak(a, 5.0)
+    assert kept[1, 1] == 9.0
+    assert kept[2, 2] == 5.0
+    assert kept[3, 3] == 0.0
+    assert kept[4, 6] == 0.0
+    assert not fs.joined_to_peak(a, 10.0).any()  # nothing reaches the level

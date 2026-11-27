@@ -65,6 +65,71 @@ def gdas1_files(start: dt.datetime, hours: int) -> list[str]:
     return names
 
 
+def hysplit_overlay(
+    path: str | Path,
+    start: dt.datetime,
+    hours: int,
+    release_kg: float,
+    centers: tuple[FloatArray, FloatArray],
+) -> tuple[dict[str, FloatArray], Json]:
+    """Put a saved NOAA HYSPLIT run on the map's grid, scaled to this run's release.
+
+    ``path`` is a file made by a scenario's ``make_overlay.py``: HYSPLIT's hourly mean air
+    concentration near the ground and its deposition since the release, on a latitude and
+    longitude grid, for a stated mass released at a stated time. HYSPLIT's results scale
+    with the mass released, so they are multiplied by ``release_kg`` over the file's mass,
+    then read at the map's cell centers (``centers``: latitudes and longitudes of the rows
+    and columns) by interpolating between HYSPLIT's cells.
+
+    Returns
+    -------
+    tuple
+        The fields ``hy_conc`` and ``hy_dep``, shaped like the map's own (hour, row,
+        column), and a note for the page: the mass ratio used, the file's name, and each
+        hour's highest value on the map (``airMax``, ``depMax``).
+
+    Raises
+    ------
+    ValueError
+        If the file is for another release time or covers fewer hours than the run.
+    """
+    with np.load(path) as z:
+        lat, lon, air, dep = z["lat"], z["lon"], z["air"], z["dep"]
+        file_start, file_kg = str(z["start_utc"]), float(z["released_kg"])
+    want = start.astimezone(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M")
+    if file_start != want:
+        msg = f"the HYSPLIT overlay is for a release at {file_start} UTC, not {want} UTC"
+        raise ValueError(msg)
+    if air.shape[0] < hours:
+        msg = f"the HYSPLIT overlay covers {air.shape[0]} hours, fewer than the run's {hours}"
+        raise ValueError(msg)
+    rows, cols = centers
+    # position of each map row and column on HYSPLIT's grid, in cells; outside it, nothing
+    fj = (rows - lat[0]) / (lat[1] - lat[0])
+    fi = (cols - lon[0]) / (lon[1] - lon[0])
+    inside = ((fj >= 0) & (fj <= len(lat) - 1))[:, None] & ((fi >= 0) & (fi <= len(lon) - 1))
+    j0 = np.clip(np.floor(fj).astype(int), 0, len(lat) - 2)
+    i0 = np.clip(np.floor(fi).astype(int), 0, len(lon) - 2)
+    wj = np.clip(fj - j0, 0.0, 1.0)[:, None]
+    wi = np.clip(fi - i0, 0.0, 1.0)[None, :]
+
+    def on_map(field: FloatArray) -> FloatArray:
+        a = field[:hours].astype(float)
+        top = a[:, j0][:, :, i0] * (1 - wi) + a[:, j0][:, :, i0 + 1] * wi
+        bottom = a[:, j0 + 1][:, :, i0] * (1 - wi) + a[:, j0 + 1][:, :, i0 + 1] * wi
+        return np.where(inside, top * (1 - wj) + bottom * wj, 0.0) * (release_kg / file_kg)
+
+    fields = {"hy_conc": on_map(air), "hy_dep": on_map(dep)}
+    note = {
+        "file": Path(path).name,
+        "scaledBy": release_kg / file_kg,
+        "releasedKg": file_kg,
+        "airMax": [float(v) for v in fields["hy_conc"].max(axis=(1, 2))],
+        "depMax": [float(v) for v in fields["hy_dep"].max(axis=(1, 2))],
+    }
+    return fields, note
+
+
 def hysplit_files(a: argparse.Namespace, bins: Sequence[Json], grid: Json) -> dict[str, str]:
     """CONTROL and SETUP.CFG for an equivalent NOAA HYSPLIT concentration run.
 

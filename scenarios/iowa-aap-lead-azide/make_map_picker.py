@@ -119,6 +119,15 @@ ARCHIVED_LABEL = "archived NOAA HRRR (ncep_hrrr_conus, served Nov. 25, 6:51 p.m.
 # site used before the blast, about 1.1 miles north, so they stay as they were shown. The
 # archived weather was saved for a grid centered on LAT, LON; --weather-at reuses it.
 ARCHIVED_LAT, ARCHIVED_LON = 40.8096, -91.2692
+# The zones on the Army's final maps for the 9 a.m. blast, traced and placed on the ground
+# (army-final-maps/README.md). A box under the maps for that blast draws them.
+ARMY_OUTLINES = HERE / "army-final-maps" / "outlines.json"
+ARMY_BLAST = (DATE, "09:00")  # the blast the Army's final maps are for
+# NOAA's HYSPLIT model for the same blast on NOAA ARL's archive of HRRR, saved as fields the
+# archived-weather maps can show (hysplit-archived/README.md). A button under the map
+# switches to it. HYSPLIT isn't run by the build; the saved file is read.
+HYSPLIT_OVERLAY = HERE / "hysplit-archived" / "overlay_0900.npz"
+HYSPLIT_NOTE = "on NOAA\u2019s archived weather"
 # The first model with data for the whole run is shown; the rest make up the spread.
 # RRFS first (3 km, gives the mixing height), then GFS (also gives it, reaches farthest),
 # HRRR (when it covers the run) and ECMWF (best global model, but no mixing height, so it
@@ -150,6 +159,10 @@ MODEL_ARGS = [
     *("--dt", "60"),
     *("--grid", "360"),
     *("--scale-min", "0.15ug"),
+    # Deposition below EPA's lowest dust-lead action level (5 ug/ft2, floors) is hidden until
+    # the reader unticks the box. Without a minimum the view ran four powers of ten below its
+    # peak, to amounts no routine test would report (README, "Deposition minimum").
+    *("--dep-scale-min", "5ug/ft2"),
     *("--decades", "4"),
     *("--weather-model", WEATHER),
     *("--met-cache", str(MET_CACHE)),
@@ -651,6 +664,8 @@ def archived_runs(py: str) -> list[Run]:
     args = list(MODEL_ARGS) + temperature_args(ARCHIVED_CACHE)
     args[args.index("--weather-model") + 1] = ARCHIVED_MODEL
     args[args.index("--met-cache") + 1] = str(ARCHIVED_CACHE)
+    if HYSPLIT_OVERLAY.exists():
+        args += ["--hysplit-overlay", str(HYSPLIT_OVERLAY), "--hysplit-overlay-note", HYSPLIT_NOTE]
     runs = []
     for case, release_case, name in CASES:
         for t in TIMES:
@@ -668,11 +683,20 @@ def archived_runs(py: str) -> list[Run]:
                 *("--weather-label", ARCHIVED_LABEL),
                 "--no-sky-layer",  # that layer is labeled a forecast
                 *("--home-url", SITE_URL),
+                *("--home-name", SITE_NAME),  # the button beside "NOAA HYSPLIT"
+                *army_outlines(DATE, t),
                 *("--legend-note", f"{name} case, blast {blast_label(t, DATE)}, {ARCHIVED_NOTE}"),
                 *("-o", str(out)),
             ]
             runs.append(Run(f"archived {case} {t}", cmd, out))
     return runs
+
+
+def army_outlines(day: str, t: str) -> list[str]:
+    """Return the option that adds the Army's final maps, for the blast they were made for."""
+    if (day, t) != ARMY_BLAST or not ARMY_OUTLINES.exists():
+        return []
+    return ["--reference-outlines", str(ARMY_OUTLINES)]
 
 
 def build_archived(py: str) -> None:
@@ -718,6 +742,7 @@ def build() -> None:
                     *as_of,
                     *sky,
                     *("--home-url", SITE_URL),
+                    *army_outlines(day, t),
                     *("--legend-note", f"{name} case, blast {blast_label(t, day)}{forecast}"),
                     *("-o", str(out)),
                 ]

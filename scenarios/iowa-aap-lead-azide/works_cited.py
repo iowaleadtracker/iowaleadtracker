@@ -173,10 +173,17 @@ REFERENCES = [
         "Regist.</i>, <b>81</b>, 71906."
     ),
     (
-        "EPA, 2024: Reconsideration of the dust-lead hazard standards and dust-lead "
+        "EPA, 2024a: Reconsideration of the dust-lead hazard standards and dust-lead "
         "post-abatement clearance levels. <i>Fed. Regist.</i>, <b>89</b>, 89456. Codified at "
         "40 CFR 745.227(e)(8)(viii)."
     ),
+    "EPA, 2024b: National Lead Laboratory Accreditation Program: Laboratory quality standards "
+    "for recognition, revision 4.0. U.S. Environmental Protection Agency, October 2024, "
+    "accessed 26 November 2026, "
+    + _a(
+        "https://www.epa.gov/system/files/documents/2024-10/final-lqsr-4.0_document_10.10.2024.pdf"
+    )
+    + ".",
     "EPA, 2026: Emergency hazardous waste management facility permit for storage and treatment "
     "of lead azide, Iowa Army Ammunition Plant. EPA RCRA ID IA7213820445, U.S. EPA Region 7, "
     "13 November 2026, "
@@ -266,11 +273,23 @@ REFERENCES = [
     "Sustainment Command, 25 November 2026, accessed 25 November 2026, "
     + _a("https://www.army.mil/article/297109")
     + ".",
+    "McFate, L., 2026e: Deposition map 1 as of 8:00 AM (CST). Image, &ldquo;Mitigated 0.26 "
+    "Deposition&rdquo; (lead on the ground). Iowa Army Ammunition Plant, DVIDS, 25 November "
+    "2026, accessed 26 November 2026, "
+    + _a("https://www.dvidshub.net/image/10118630/deposition-map-1-800-am-cst")
+    + ".",
+    "McFate, L., 2026f: Deposition map 2 at 8:00 AM (CST). Image, &ldquo;Mitigated 0.26 "
+    "Dispersion&rdquo; (lead in air, with times T+0.5 to T+5 hours). Iowa Army Ammunition "
+    "Plant, DVIDS, 25 November 2026, accessed 26 November 2026, "
+    + _a("https://www.dvidshub.net/image/10118629/deposition-map-2-800-am-cst")
+    + ".",
     "New York Times, 2026: Live coverage of the Iowa lead azide detonation. <i>The New York "
     "Times</i>, 25 November 2026 (read by the maintainer; not fetched by this site&rsquo;s "
     "tools, which nytimes.com blocks), "
     + _a("https://www.nytimes.com/live/2026/11/25/us/iowa-detonation-ammunition-news")
     + ".",
+    "NOAA Air Resources Laboratory, 2026: HYSPLIT. Web page describing the model and its uses, "
+    "accessed 26 November 2026, " + _a("https://www.arl.noaa.gov/hysplit/") + ".",
     "NOAA, 2025: Radar images: Reflectivity. NOAA JetStream, last updated 11 March 2025, "
     "accessed 23 November 2026, " + _a("https://www.noaa.gov/jetstream/reflectivity") + ".",
     (
@@ -656,10 +675,98 @@ ANALYSIS_METHOD = (
     f"reviewed them. The text, the code, and the data are on {_a(ANALYSIS_FOLDER_URL, 'GitHub')}."
 )
 
+#: The HYSPLIT view of the archived-weather maps, shown under the method note.
+HYSPLIT_HEAD = "The HYSPLIT view."
+HYSPLIT_METHOD = (
+    "On the archived-weather maps, the &ldquo;NOAA HYSPLIT&rdquo; button under the map shows "
+    "the result of NOAA&rsquo;s HYSPLIT model (Stein et al. 2015) for the same blast in place "
+    "of this site&rsquo;s: the same amount of lead in the same four particle sizes, released "
+    "at 9 a.m. from the two magazines, on NOAA Air Resources Laboratory&rsquo;s archive of the "
+    "HRRR weather model. It shows HYSPLIT&rsquo;s hourly mean near the ground, or its lead on "
+    "the ground, scaled to the case chosen. The colors are the four of HYSPLIT&rsquo;s own "
+    "plots (cyan, green, blue, and yellow, lowest to highest), between the same lowest and "
+    "highest levels as this site&rsquo;s map, so switching back and forth compares the two. "
+    "The saved file holds hourly means and lead on the ground, so the peak, end-of-hour, and "
+    "levels-of-concern views are off while it shows. This site ran HYSPLIT once, ahead of "
+    "time, and reads its saved output. It is a second model&rsquo;s estimate, not a "
+    "measurement, and not a forecast from NOAA. The inputs and the output are on "
+    f"{_a(SOURCE_URL + '/tree/main/scenarios/iowa-aap-lead-azide/hysplit-archived', 'GitHub')}."
+)
+
+#: The Army's final maps drawn on the site's maps, shown under the HYSPLIT note.
+ARMY_BOX_HEAD = "The Army&rsquo;s final forecast on the map."
+ARMY_BOX_METHOD = (
+    "On the maps for the 9 a.m. blast, the &ldquo;Army&rsquo;s final forecast&rdquo; box draws "
+    "the zones of the U.S. Army&rsquo;s final &ldquo;Mitigated 0.26&rdquo; maps (stamped a/o "
+    "250700NOV26; McFate 2026e,f): on the air views, the path it shaded for lead in air of 0.18 "
+    "&micro;g/m&sup3; or more and the times it marked along it; on the deposition view, its "
+    "zones for lead on the ground of 5 and 100 &micro;g/ft&sup2; or more. Each map is a small "
+    "picture, about 0.6 mile (1 km) per pixel, and the copies traced match the ones the Army "
+    "posted on DVIDS. This site picked the zones out by color and placed "
+    "each picture by fitting public county boundaries to the county lines drawn on it, good "
+    "to about a pixel. The Army&rsquo;s plant marker covers about the first 8 miles (13 km) "
+    "of every zone, "
+    "so the lines stop there. The Army&rsquo;s maps are its forecast for 26% of the lead "
+    "airborne and stay the same whichever case the map shows. The tracing and placing are "
+    "this site&rsquo;s, not the Army&rsquo;s. The pictures, the lines, and the code are on "
+    f"{_a(SOURCE_URL + '/tree/main/scenarios/iowa-aap-lead-azide/army-final-maps', 'GitHub')}."
+)
+
 #: What changed in the maps and their method, newest first (Central time dates). Add an
 #: entry for every change to the model, its settings or its sources.
 CHANGES_HEAD = "Change log"
 CHANGES = [
+    (
+        "Nov. 27",
+        (
+            "The summary has a new section, &ldquo;How this compares with the NOAA HYSPLIT "
+            "model&rdquo;. It says in plain words what NOAA and HYSPLIT are, that this site "
+            "ran HYSPLIT itself, and how the two models&rsquo; results compare: the direction "
+            "of the lead on the ground and how far 5 &micro;g/ft&sup2; reaches in each case. "
+            "The numbers come from the maps. The maps did not change."
+        ),
+    ),
+    (
+        "Nov. 27",
+        (
+            "The maps for the 9 a.m. blast have a new box under the map, &ldquo;Army&rsquo;s "
+            "final forecast&rdquo;. It draws the zones from the Army&rsquo;s own final forecast "
+            "maps, for 26% of the lead airborne, over either model&rsquo;s result: lead in "
+            "air of 0.18 &micro;g/m&sup3; or more with the Army&rsquo;s time marks, and lead "
+            "on the ground of 5 and 100 &micro;g/ft&sup2; or more. This site traced them "
+            "from the Army&rsquo;s pictures and placed them by county lines, to about 0.6 "
+            "mile. The maps&rsquo; own numbers did not change."
+        ),
+    ),
+    (
+        "Nov. 27",
+        (
+            "The archived-weather maps have a new button under the map, &ldquo;NOAA "
+            "HYSPLIT&rdquo;, beside &ldquo;Iowa Lead Tracker&rdquo;. It switches the map from "
+            "this site&rsquo;s model to NOAA&rsquo;s HYSPLIT model, run on NOAA&rsquo;s archive "
+            "of the same weather model for the same assumed release, in the colors of "
+            "HYSPLIT&rsquo;s own plots. It is a second model&rsquo;s estimate, not a "
+            "measurement. The deposition view now opens showing 5 &micro;g/ft&sup2; or more, "
+            "EPA&rsquo;s lowest dust-lead action level (for indoor floors), the way the air "
+            "views open at 0.15 &micro;g/m&sup3;. Before, its colors ran down to one "
+            "ten-thousandth of the map&rsquo;s highest value, amounts far below what a lab "
+            "must be able to measure on a dust wipe (80% of the action level; EPA 2024b). "
+            "Untick &ldquo;show only&rdquo; under the map to see the lower values: they are "
+            "hidden, not zero, and the level is a choice about what to draw, not a line between "
+            "safe and unsafe. The maps&rsquo; own numbers did not change."
+        ),
+    ),
+    (
+        "Nov. 26",
+        (
+            f'Correction to the <a href="{ANALYSIS_PATH}">preliminary analysis</a> of '
+            "EPA&rsquo;s monitors. It said soil samples would show lead that came down. For "
+            "the amounts the models put on the ground, soil samples probably can&rsquo;t: "
+            "even the highest would add less than 0.1 mg/kg to soil that already holds about "
+            "22 mg/kg. Wipes of surfaces near the path can. The analysis and its summary on "
+            "this page now say so. The maps did not change."
+        ),
+    ),
     (
         "Nov. 26",
         "Snopes (Nov. 25) added to the mentions of the Iowa Lead Tracker. The maps did not change.",
@@ -884,6 +991,8 @@ def render(ctx: dict[str, Any], site_url: str, built_txt: str) -> str:
     return f"""
   <p><b>{METHOD_HEAD}</b> {method_intro(ctx["pct"])}</p>
   <p><b>{ANALYSIS_HEAD}</b> {ANALYSIS_METHOD}</p>
+  <p><b>{HYSPLIT_HEAD}</b> {HYSPLIT_METHOD}</p>
+  <p><b>{ARMY_BOX_HEAD}</b> {ARMY_BOX_METHOD}</p>
   <h3>{CHANGES_HEAD}</h3>
   {changes_html()}
   <h3>References</h3>

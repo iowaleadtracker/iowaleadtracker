@@ -29,6 +29,8 @@ not official guidance.
 | `index_template.html` | the landing page's HTML, CSS and script, filled in by `make_map_picker.py` |
 | `met_cache/map_met_all.json` | saved Open-Meteo forecasts for Monday at the new site (download times in `__fetched__`; the page shows when) |
 | `met_cache/archived_hrrr.json` | archived weather for the 9 a.m. blast: NOAA's HRRR as Open-Meteo served it at 6:51 p.m. CST on Nov. 25, after the eight modeled hours had passed. The map opens on the maps built from it (see "What the page opens on") |
+| `hysplit-archived/` | NOAA's HYSPLIT model for the same blast on NOAA ARL's archive of HRRR: the run's inputs, its output as fields the maps can read (`overlay_0900.npz`), and the script that made them. The archived-weather maps show it when the "NOAA HYSPLIT" button is chosen |
+| `army-final-maps/` | the zones on the Army's final "Mitigated 0.26" air and ground maps, traced and placed on the ground (`outlines.json`), with the script that made them. The maps for the 9 a.m. blast draw them when the "Army's final forecast" box is ticked |
 | `sky_grid.py`, `met_cache/sky_grid.json` | the maps' "sky cover & rain" layer: forecast cloud cover and precipitation on a finer grid, display only (see "The weather layer" below) |
 | `make_icons.py` | builds the site icons and profile images |
 | `outputs/site/` | the site. The repo holds only the hand-made files (`og.png`, icons, `brand/`); `make_map_picker.py --build` writes the page and the maps |
@@ -211,6 +213,30 @@ case, the most conservative one, and showed only the forecast.
   The forecast maps keep the point for the whole plant (`LAT`, `LON`), about 1.1 miles
   north, so they stay as they were shown. The archived weather was saved for a grid
   centered on the plant point; `--weather-at` lets the run reuse it from the new point.
+- **HYSPLIT view.** The archived-weather maps carry NOAA's HYSPLIT result for the same
+  blast (`hysplit-archived/overlay_0900.npz`, `--hysplit-overlay`). Under the map, a button
+  switches between "Iowa Lead Tracker" (the default) and "NOAA HYSPLIT". The HYSPLIT view
+  uses the four colors of HYSPLIT's own plots, between the same lowest and highest levels
+  as the site's map. It has the hourly mean and deposition only.
+  The build reads the saved file; it doesn't run HYSPLIT. See `hysplit-archived/README.md`.
+- **Army's final forecast.** The maps for the 9 a.m. blast, on either weather, carry the zones
+  of the Army's final maps (`army-final-maps/outlines.json`, `--reference-outlines`). A
+  box under the map, off by default, shades them green over either model's result: the 0.18 µg/m³
+  path and its time marks on the air views, the 5 and 100 µg/ft² zones on the deposition
+  view. They are the Army's forecast for 26% of the lead airborne, whichever case is
+  shown. See `army-final-maps/README.md`.
+- **Deposition minimum.** The deposition view opens showing 5 µg/ft² or more
+  (`--dep-scale-min 5ug/ft2`), in both models' views, the way the air views open at
+  0.15 µg/m³. 5 µg/ft² is EPA's lowest dust-lead action level, for indoor floors
+  (40 CFR 745.227), which the page already uses as a rough comparison. Labs in EPA's lead
+  accreditation program must be able to measure a dust wipe at 80% of the lowest action
+  level for the surface sampled, so 4 µg/ft² for a floor wipe, and need not go lower
+  ([EPA NLLAP, Laboratory Quality Standards for Recognition 4.0, 2024](https://www.epa.gov/system/files/documents/2024-10/final-lqsr-4.0_document_10.10.2024.pdf)).
+  Before, the view's colors ran four powers of ten below the map's highest value: in the
+  Low case, down to 0.012 µg/ft², over about 4,000 square miles, of which about 26 are at
+  5 µg/ft² or more. The "show only" box under the map brings the lower values back. They
+  are hidden, not zero, and the level is a display choice, not a line between safe and
+  unsafe.
 - **Blast time.** Only 9:00 a.m. is built (`TIMES`), so the time menu and its Earlier and
   Later buttons are hidden. The 8:30 and 9:30 maps are gone; an old link to one opens
   9:00.
