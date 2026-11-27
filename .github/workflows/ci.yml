@@ -7,8 +7,9 @@
 # pushes made with the workflow token don't start other workflows. A pull request from a
 # fork gets no automatic CI; run this workflow on its branch by hand.
 #
-# The front-end lint job runs on pull request branches only, not on the merge to main:
-# main only takes reviewed pull requests, whose branches it has already checked.
+# The front-end lint job runs on every branch push except main, so a pull request shows
+# it but the merge to main doesn't run it again. A merge that resolves conflicts in the
+# pages isn't linted before it deploys: run `pnpm lint` on the merged branch first.
 name: CI
 
 on:
