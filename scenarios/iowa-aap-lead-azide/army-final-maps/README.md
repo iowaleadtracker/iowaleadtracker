@@ -17,10 +17,10 @@ Ammunition Plant; marked public domain there):
 - Air map, "Mitigated 0.26 Dispersion": [Deposition Map 2 at 8:00 AM (CST)](https://www.dvidshub.net/image/10118629/deposition-map-2-800-am-cst)
 - Ground map, "Mitigated 0.26 Deposition": [Deposition Map 1 as of 8:00 AM (CST)](https://www.dvidshub.net/image/10118630/deposition-map-1-800-am-cst)
 
-Those pages were read on Nov. 26; their descriptions match the maps traced here (the same
-model name, issue date, and time marks). The pictures themselves could not be downloaded
-from DVIDS by this project's tools, so the copies traced here, stamped a/o 250700NOV26,
-were not compared with DVIDS's pixel by pixel.
+The copies traced here were compared with DVIDS's on Nov. 26. Scaled to the same size,
+they differ only by compression noise (about 1% of full brightness on average; one pixel
+in ten thousand differs noticeably), and DVIDS's carry the same stamp, a/o 250700NOV26.
+The "8:00 AM" in DVIDS's titles is not a different version.
 
 ## What is here
 
@@ -42,14 +42,15 @@ were not compared with DVIDS's pixel by pixel.
 
 ## How it was made
 
-1. **Placing.** Each map is a small picture, about 0.6 mile per pixel, over a base map
+1. **Placing.** Each map is a small picture, about 0.6 mile (1 km) per pixel, over a base map
    with county lines. `place_army_map.py` in the brief's folder fits a Mercator scale and
    an offset so that public county boundaries fall on the picture's county lines. The fit
    is good to about a pixel.
 2. **Tracing.** Each zone is picked out by its color. Gaps left by the county names
    printed over it are closed, and the edge is taken where the smoothed zone is half
    covered.
-3. **Hidden part.** The Army's magenta plant marker covers the first miles of every zone.
+3. **Hidden part.** The Army's magenta plant marker is about 14 miles wide on the picture
+   and covers about the first 8 miles of every zone, measured from the modeled source.
    The edges stop where the marker begins. The shading closes straight across that gap.
 
 ```bash

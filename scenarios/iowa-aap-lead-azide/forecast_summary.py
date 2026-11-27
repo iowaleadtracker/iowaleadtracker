@@ -1141,8 +1141,8 @@ ARMY_BOX = (
     "marked along the path, and lead on the ground at 5 and 100 micrograms per square foot "
     "or more. The Army\u2019s maps are a forecast for 26% of the lead airborne, whichever "
     "case this map shows. This site traced the zones from the Army\u2019s pictures and placed "
-    "them by their county lines, to about 0.6 mile; the Army\u2019s plant marker hides their "
-    "first miles."
+    "them by their county lines, to about 0.6 mile (1 km); the Army\u2019s plant marker hides "
+    "about their first 8 miles (13 km)."
 )
 #: Where the Army posted its final maps (DVIDS, Nov. 25, 2026; the pages were read Nov. 26).
 ARMY_AIR_MAP_URL = "https://www.dvidshub.net/image/10118629/deposition-map-2-800-am-cst"

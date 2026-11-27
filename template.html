@@ -61,7 +61,7 @@ dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
 .legend .ticks { position: relative; height: 16px; font-size: 11px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 .legend .ticks span { position: absolute; transform: translateX(-50%); top: 2px; white-space: nowrap; }
 .attrib { position: absolute; right: 0; bottom: 0; font-size: 10.5px; background: color-mix(in srgb, var(--surface) 80%, transparent); color: var(--ink-2); padding: 1px 6px; border-top-left-radius: 6px; }
-.attrib a { color: inherit; }
+.attrib a, .legend a { color: inherit; }
 #nodata {
   position: absolute; top: 12px; left: 56px; right: 12px; max-width: 520px; background: var(--surface); color: var(--ink);
   border: 1px solid var(--line); border-left: 4px solid #fab219; border-radius: 8px; padding: 8px 12px; font-size: 13px;
@@ -84,6 +84,7 @@ dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
 .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.15); }
 .seg button:disabled { opacity: .4; cursor: default; }
 .opt { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); font-size: 13px; }
+.opt.off { opacity: .4; }
 .opt select, .opt input[type=range] { font: inherit; accent-color: var(--accent); }
 .opt select { background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 3px 6px; }
 .budget { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--chip); margin: 6px 0 8px; gap: 2px; }
@@ -694,7 +695,7 @@ function buildZones() {
 // shows it in place of this model's result, between the same lowest and highest levels, so the
 // two can be compared by switching. It is drawn the way HYSPLIT's own plots are: four bands,
 // cyan, green, blue and yellow from lowest to highest (the fixed contour colors in HYSPLIT's
-// CLRTBL.CFG), with a line where one band meets the next. HYSPLIT saved hourly means and
+// CLRTBL.CFG), with a line where one band meets the next. The saved file holds hourly means and
 // deposition, so the peak, end-of-hour and levels-of-concern views are off while it shows,
 // and so is everything that belongs to this model: puffs, path, wind, and the spread of runs.
 const HY_BANDS = [[0, 255, 255], [0, 255, 0], [0, 0, 255], [255, 255, 0]], HY_ALPHA = 0.6;
@@ -780,7 +781,7 @@ function drawReference() {
     $("legref").hidden = !L;
     if (L) $("legref").innerHTML = L.zones.map((z, k) =>
       `<div class="lz"><span class="zsw" style="background:rgba(${REF_RGB},${k ? 0.6 : 0.3});border:1.5px solid ${REF_COLOR};margin-right:0;box-sizing:border-box"></span>${esc(M.outlines.name)}: ${esc(z.label)}</div>`).join("") +
-      (M.outlines.note ? `<div class="legnote" style="border-top:0;padding-top:0;margin-top:3px">${esc(M.outlines.note)}${refLinks()}</div>` : "");
+      (M.outlines.note || refLinks() ? `<div class="legnote" style="border-top:0;padding-top:0;margin-top:3px">${esc(M.outlines.note || "")}${refLinks()}</div>` : "");
   }
   if (!L) return;
   const trace = (line) => { ctx.beginPath(); line.forEach(([la, lo], i) => { const [x, y] = toScreen(la, lo); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); }); };
@@ -814,7 +815,7 @@ function buildOverlay() {
   $("rangewrap").hidden = zones;                 // threat zones use fixed levels
   $("legzones").hidden = !zones;
   if (zones) { putWarped(buildZones()); return; }
-  const F = FIELDS[fkey(S.field)], lut = rampLUT(S.field);
+  const F = FIELDS[S.hy ? S.field : fkey(S.field)], lut = rampLUT(S.field);
   const px = new Uint8ClampedArray(NCELL * 4);
   const air = S.field !== "dep" && S.units !== "count";
   const minV = shownMin(), useMin = !!minV, fixed = air && !useMin && S.fixTop && M.scaleMax;
@@ -1387,10 +1388,10 @@ function hover(x, y) {
   const here = (name) => { const F = FIELDS[name], q = F.q[(S.hour - 1) * NCELL + j * NX + i]; return q ? 10 ** qToLog(F, q) : 0; };
   if (S.hy) {
     // HYSPLIT's two values first, then this model's for the same cell
-    const none = "below its lowest stored value", own = { conc: here(eKey("conc")), dep: here(eKey("dep")) };
+    const none = "below its lowest stored value", own = { conc: here("conc"), dep: here("dep") };
     const hv = { conc: here("hy_conc"), dep: here("hy_dep") };
     for (const f of ["conc", "dep"]) lines.push(`HYSPLIT, ${f === "dep" ? "deposited" : "air, hourly mean"}: <b>${hv[f] ? fmtVal(hv[f], f, 0) : none}</b>`);
-    for (const f of ["conc", "dep"]) lines.push(`<span class="muted">${OWN}, ${f === "dep" ? "deposited" : "air, hourly mean"}: ${own[f] ? fmtVal(own[f], f, 0) : BELOW}</span>`);
+    for (const f of ["conc", "dep"]) lines.push(`<span class="muted">${esc(OWN)}, ${f === "dep" ? "deposited" : "air, hourly mean"}: ${own[f] ? fmtVal(own[f], f, 0) : BELOW}</span>`);
   }
   for (const f of (S.hy ? [] : S.field === "snap" ? ["snap", "conc", "peak", "dep"] : ["conc", "peak", "dep"])) {
     const F = FIELDS[fkey(f)], q = F.q[(S.hour - 1) * NCELL + j * NX + i];
@@ -1418,7 +1419,7 @@ function hover(x, y) {
       let lo = fmtVal(main * cr[0] / af, kind, 0);
       const hi = fmtVal(main * cr[1] / af, kind, 0), unit = hi.slice(hi.lastIndexOf(" "));
       if (lo.endsWith(unit)) lo = lo.slice(0, -unit.length);          // "0.7 – 10 µg/ft²"
-      lines.push(`Across release cases (${fmt(cr[0] * 100, 3)}\u2013${fmt(cr[1] * 100, 3)}% airborne): <b>${lo} \u2013 ${hi}</b>`);
+      lines.push(`${S.hy ? "HYSPLIT, across" : "Across"} release cases (${fmt(cr[0] * 100, 3)}\u2013${fmt(cr[1] * 100, 3)}% airborne): <b>${lo} \u2013 ${hi}</b>`);
     }
   }
   // The model works on grid cells, so say so and don't show street-level coordinates.
@@ -1441,7 +1442,7 @@ $("fieldseg").addEventListener("click", (e) => {
   setField(b.dataset.v);
   render();
 });
-// This model or NOAA HYSPLIT. HYSPLIT saved hourly means and deposition in mass units, so the
+// This model or NOAA HYSPLIT. The saved HYSPLIT file holds hourly means and deposition, so the
 // other views, the particle count and this model's own layers are off while it shows.
 function setModel(hy) {
   S.hy = hy && !!FIELDS.hy_conc;
@@ -1450,8 +1451,8 @@ function setModel(hy) {
   if (S.hy && !["conc", "dep"].includes(S.field)) setField("conc");
   $("units").querySelector('option[value="count"]').disabled = S.hy;
   if (S.hy && S.units === "count") { S.units = "mass"; $("units").value = S.units; syncLocInputs(); }
-  for (const id of ["showPuffs", "showWind", "showTrack"]) $(id).parentElement.hidden = S.hy;
-  $("envwrap").hidden = S.hy || !M.ensemble;
+  // this model's own layers: dimmed and switched off, not hidden, so the map doesn't shift
+  for (const id of ["showPuffs", "showWind", "showTrack", "showEnv"]) { $(id).disabled = S.hy; $(id).parentElement.classList.toggle("off", S.hy); }
   $("legpath").hidden = S.hy;
   $("peakhead").textContent = S.hy ? "Peak on map (HYSPLIT)" : "Peak on map";
   render();

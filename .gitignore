@@ -35,7 +35,7 @@ htmlcov/
 *.npz
 # ...except the small saved fields behind the monitor-placement brief
 !scenarios/iowa-aap-lead-azide/postmortem/monitor-placement-brief/data/model_fields.npz
-# ...and the saved HYSPLIT run the archived-weather maps outline
+# ...and the saved HYSPLIT run the archived-weather maps can show
 !scenarios/iowa-aap-lead-azide/hysplit-archived/overlay_0900.npz
 *.pkl
 

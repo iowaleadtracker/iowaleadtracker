@@ -57,7 +57,9 @@ The site build does not run HYSPLIT. It reads `overlay_0900.npz` (`--hysplit-ove
 
 - HYSPLIT follows particles, so its edges are grainy at low levels. The far end of the
   cloud, and the lowest deposition band, show that grain.
-- The run saved hourly means and deposition. The map's "Peak", "Snapshot", and "Levels of
+- The file the maps read keeps the run's hourly means near the ground and its deposition
+  (the run also wrote 30-minute snapshots and a 10 to 100 m layer, which the maps don't
+  use). The map's "Peak", "Snapshot", and "Levels of
   concern" views are off while HYSPLIT shows, and so are the site's own puffs, path, and
   wind arrows.
 - The four colors each cover a quarter of the map's range. With the map's usual range of

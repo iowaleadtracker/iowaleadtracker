@@ -96,14 +96,23 @@ def coarsen(a: np.ndarray) -> np.ndarray:
     )
 
 
+def centers(first: float, dx: float, n: int) -> np.ndarray:
+    """Return the middle of each averaged block: ``n`` of them, from the node at ``first``.
+
+    Block ``b`` averages output nodes ``b * BLOCK`` to ``b * BLOCK + BLOCK - 1``, which are
+    ``dx`` apart, so its middle is ``(BLOCK - 1) / 2`` nodes past its first node.
+    """
+    return np.asarray(first + (np.arange(n) * BLOCK + (BLOCK - 1) / 2) * dx)
+
+
 def main(args: list[str]) -> None:
     """Write the overlay file."""
     run, out = Path(args[0]), Path(args[1])
     c = control(run)
     air, dep = (coarsen(a) for a in read_hours(run, c))
     step = c["dx"] * BLOCK
-    lat = c["south"] + (np.arange(air.shape[1]) + (BLOCK - 1) / 2) * step
-    lon = c["west"] + (np.arange(air.shape[2]) + (BLOCK - 1) / 2) * step
+    lat = centers(c["south"], c["dx"], air.shape[1])
+    lon = centers(c["west"], c["dx"], air.shape[2])
     used = (air.max(0) > 0) | (dep[-1] > 0)
     rows, cols = np.nonzero(used.any(1))[0], np.nonzero(used.any(0))[0]
     j0, j1 = max(rows[0] - MARGIN, 0), min(rows[-1] + MARGIN + 1, len(lat))

@@ -138,3 +138,22 @@ def test_hysplit_overlay_refuses_another_release(tmp_path: Path) -> None:
         hysplit_overlay(path, dt.datetime(2026, 11, 25, 16, 0, tzinfo=utc), 2, 25.0, grid)
     with pytest.raises(ValueError, match="covers 2 hours"):
         hysplit_overlay(path, dt.datetime(2026, 11, 25, 15, 0, tzinfo=utc), 3, 25.0, grid)
+
+
+def test_saved_hysplit_cells_sit_between_the_cells_they_average() -> None:
+    """make_overlay.py averages HYSPLIT's output 2 x 2; each value belongs midway between."""
+    import importlib.util  # noqa: PLC0415
+
+    folder = Path(__file__).resolve().parents[1] / "scenarios/iowa-aap-lead-azide/hysplit-archived"
+    spec = importlib.util.spec_from_file_location("make_overlay", folder / "make_overlay.py")
+    assert spec is not None
+    assert spec.loader is not None
+    mo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mo)
+    # nodes 0.003 apart from 38.0: blocks of nodes (0, 1), (2, 3), (4, 5)
+    assert mo.centers(38.0, 0.003, 3) == pytest.approx([38.0015, 38.0075, 38.0135])
+    c = mo.control(folder)
+    with np.load(folder / "overlay_0900.npz") as z:
+        for first, origin in ((z["lat"][0], c["south"]), (z["lon"][0], c["west"])):
+            nodes = (float(first) - origin) / c["dx"]  # the saved file's first cell, in nodes
+            assert nodes % mo.BLOCK == pytest.approx((mo.BLOCK - 1) / 2, abs=1e-6)

@@ -50,7 +50,8 @@ STAMP = "a/o 250700NOV26"
 NAME = "Army\u2019s final forecast"
 NOTE = (
     "Traced and placed by this site from the U.S. Army\u2019s final forecast maps (26% of the "
-    "lead airborne), to about 0.6 mile. The Army\u2019s plant marker hides the first miles."
+    "lead airborne), to about 0.6 mile (1 km). The Army\u2019s plant marker hides about the "
+    "first {miles} miles."
 )
 MIN_PIECE_PX = 15
 MIN_LINE_POINTS = 4
@@ -123,8 +124,9 @@ def edges(zone: Mask, marker: Mask, ref: dict[str, float]) -> list[Line]:
         shown = ~hidden[yi, xi]
         if shown.all():
             runs = [line]
-        else:  # start at a hidden point so a closed edge isn't cut in two at its seam
-            start = int(np.argmin(shown))
+        else:  # start a closed edge at a hidden point, so it isn't cut in two at its seam
+            closed = bool(np.allclose(line[0], line[-1]))
+            start = int(np.argmin(shown)) if closed else 0
             order = np.roll(np.arange(len(line)), -start)
             runs, run = [], []
             for i in order:
@@ -172,9 +174,16 @@ def main(args: list[str]) -> None:
     )
     dep5 = edges(solid(ground["dep5"], 4), ground["marker"], ground_ref)
     dep100 = edges(solid(ground["dep100"], 1), ground["marker"], ground_ref)
+    # how far from the modeled source the nearest traced point is: what the marker hides
+    starts = [
+        min(brief_lib.dist_brg(la, lo)[0] for line in lines for la, lo in line)
+        for lines in (edges(path, air["marker"], air_ref), dep5, dep100)
+    ]
+    hidden = round(sum(starts) / len(starts))
     out: dict[str, Any] = {
         "name": NAME,
-        "note": NOTE,
+        "note": NOTE.format(miles=hidden),
+        "hiddenMiles": hidden,
         "links": LINKS,
         "stamp": STAMP,
         "pixelsPerMile": round(px_mi, 2),

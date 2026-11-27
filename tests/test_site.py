@@ -11,6 +11,7 @@ from __future__ import annotations
 import datetime as dt
 import html
 import json
+import math
 import re
 from pathlib import Path
 from typing import Any
@@ -487,6 +488,18 @@ def test_armys_outlines_are_southwest_of_the_plant() -> None:
     data = json.loads(site.ARMY_OUTLINES.read_text(encoding="utf-8"))
     assert data["name"] == "Army\u2019s final forecast"
     assert "Traced and placed by this site" in data["note"]
+    # how far the Army's marker hides its zones: measured, and said the same way everywhere
+    miles = data["hiddenMiles"]
+    starts = [
+        min(math.hypot((la - 40.8096) * 69.09, (lo + 91.2692) * 69.09 * 0.757) for la, lo in ln)
+        for kind in ("air", "dep")
+        for z in data[kind]["zones"]
+        for ln in z["lines"]
+    ]
+    assert miles - 1 < min(starts) < max(starts) < miles + 1
+    assert f"first {miles} miles" in data["note"]
+    assert f"first {miles} miles" in fs.ARMY_BOX
+    assert f"first {miles} miles" in works_cited.ARMY_BOX_METHOD
     # where the Army posted the two maps, linked from the legend, the summary and the references
     assert [ln["url"] for ln in data["links"]] == [fs.ARMY_AIR_MAP_URL, fs.ARMY_GROUND_MAP_URL]
     assert fs.ARMY_AIR_MAP_URL.endswith("/image/10118629/deposition-map-2-800-am-cst")

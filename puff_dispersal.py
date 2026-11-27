@@ -1060,6 +1060,20 @@ def _hysplit_overlay(
     return fields, note
 
 
+def _is_line(line: object, points: int = 0) -> bool:
+    """Tell whether ``line`` is a list of [latitude, longitude] number pairs."""
+    return (
+        isinstance(line, list)
+        and (len(line) == points if points else len(line) > 0)
+        and all(
+            isinstance(pt, list)
+            and len(pt) == 2
+            and all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in pt)
+            for pt in line
+        )
+    )
+
+
 def _outline_layers(data: Json) -> Json:
     """Return the "air" and "dep" outlines of a file, checked for labels and point pairs."""
     layers: Json = {k: data[k] for k in ("air", "dep") if k in data}
@@ -1068,8 +1082,12 @@ def _outline_layers(data: Json) -> Json:
         raise ValueError(msg)
     for layer in layers.values():
         for zone in layer["zones"]:
-            if not zone["label"] or any(len(pt) != 2 for ln in zone["lines"] for pt in ln):
+            if not zone["label"] or not all(_is_line(ln) for ln in zone["lines"]):
                 msg = "each zone needs a label and lines of [latitude, longitude] points"
+                raise ValueError(msg)
+        for mark in layer.get("marks", []):
+            if not mark["label"] or not _is_line(mark["line"], points=2):
+                msg = "each mark needs a label and a line of two [latitude, longitude] points"
                 raise ValueError(msg)
     return layers
 
@@ -1091,12 +1109,12 @@ def _reference_outlines(a: argparse.Namespace) -> Json | None:
         data = json.loads(Path(path).read_text(encoding="utf-8"))
         links = [(str(ln["text"]), str(ln["url"])) for ln in data.get("links", [])]
         return {
-            "name": data["name"],
-            "note": data.get("note", ""),
+            "name": str(data["name"]),
+            "note": str(data.get("note", "")),
             "links": [{"text": t, "url": _https(u)} for t, u in links],
             **_outline_layers(data),
         }
-    except (OSError, ValueError, KeyError, TypeError) as e:
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as e:
         raise SystemExit(f"--reference-outlines: {e!r}") from None
 
 

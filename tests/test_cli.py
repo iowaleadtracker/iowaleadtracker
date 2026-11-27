@@ -88,10 +88,17 @@ def test_reference_outlines_are_checked(tmp_path: Path) -> None:
     assert "dep" not in out
     assert puff._reference_outlines(argparse.Namespace(reference_outlines=None)) is None
     unsafe = {**good, "links": [{"text": "map", "url": "javascript:alert(1)"}]}
+    zone = {"label": "1 or more", "lines": [[[40, -91]]]}
+    mark = {"label": "T", "line": [[40, -91]]}  # one point: the page draws between two
+    one_point_mark = {"name": "x", "air": {"zones": [zone], "marks": [mark]}}
+    text_point = {"name": "x", "air": {"zones": [{"label": "a", "lines": [[["40", "-91"]]]}]}}
     for bad in (
         {"name": "x"},
         {"name": "x", "air": {"zones": [{"label": "", "lines": []}]}},
         unsafe,  # a link that isn't https would run in the page
+        one_point_mark,  # the page draws a mark between two points
+        text_point,
+        [good],  # a list, not one object
     ):
         path.write_text(json.dumps(bad), encoding="utf-8")
         with pytest.raises(SystemExit, match="--reference-outlines"):

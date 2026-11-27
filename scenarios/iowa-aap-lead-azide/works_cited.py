@@ -173,10 +173,17 @@ REFERENCES = [
         "Regist.</i>, <b>81</b>, 71906."
     ),
     (
-        "EPA, 2024: Reconsideration of the dust-lead hazard standards and dust-lead "
+        "EPA, 2024a: Reconsideration of the dust-lead hazard standards and dust-lead "
         "post-abatement clearance levels. <i>Fed. Regist.</i>, <b>89</b>, 89456. Codified at "
         "40 CFR 745.227(e)(8)(viii)."
     ),
+    "EPA, 2024b: National Lead Laboratory Accreditation Program: Laboratory quality standards "
+    "for recognition, revision 4.0. U.S. Environmental Protection Agency, October 2024, "
+    "accessed 26 November 2026, "
+    + _a(
+        "https://www.epa.gov/system/files/documents/2024-10/final-lqsr-4.0_document_10.10.2024.pdf"
+    )
+    + ".",
     "EPA, 2026: Emergency hazardous waste management facility permit for storage and treatment "
     "of lead azide, Iowa Army Ammunition Plant. EPA RCRA ID IA7213820445, U.S. EPA Region 7, "
     "13 November 2026, "
@@ -677,7 +684,7 @@ HYSPLIT_METHOD = (
     "the ground, scaled to the case chosen. The colors are the four of HYSPLIT&rsquo;s own "
     "plots (cyan, green, blue, and yellow, lowest to highest), between the same lowest and "
     "highest levels as this site&rsquo;s map, so switching back and forth compares the two. "
-    "HYSPLIT saved hourly means and lead on the ground, so the peak, end-of-hour, and "
+    "The saved file holds hourly means and lead on the ground, so the peak, end-of-hour, and "
     "levels-of-concern views are off while it shows. This site ran HYSPLIT once, ahead of "
     "time, and reads its saved output. It is a second model&rsquo;s estimate, not a "
     "measurement, and not a forecast from NOAA. The inputs and the output are on "
@@ -692,9 +699,11 @@ ARMY_BOX_METHOD = (
     "250700NOV26; McFate 2026e,f): on the air views, the path it shaded for lead in air of 0.18 "
     "&micro;g/m&sup3; or more and the times it marked along it; on the deposition view, its "
     "zones for lead on the ground of 5 and 100 &micro;g/ft&sup2; or more. Each map is a small "
-    "picture, about 0.6 mile per pixel. This site picked the zones out by color and placed "
+    "picture, about 0.6 mile (1 km) per pixel, and the copies traced match the ones the Army "
+    "posted on DVIDS. This site picked the zones out by color and placed "
     "each picture by fitting public county boundaries to the county lines drawn on it, good "
-    "to about a pixel. The Army&rsquo;s plant marker covers the first miles of every zone, "
+    "to about a pixel. The Army&rsquo;s plant marker covers about the first 8 miles (13 km) "
+    "of every zone, "
     "so the lines stop there. The Army&rsquo;s maps are its forecast for 26% of the lead "
     "airborne and stay the same whichever case the map shows. The tracing and placing are "
     "this site&rsquo;s, not the Army&rsquo;s. The pictures, the lines, and the code are on "
@@ -728,11 +737,11 @@ CHANGES = [
             "measurement. The deposition view now opens showing 5 &micro;g/ft&sup2; or more, "
             "EPA&rsquo;s lowest dust-lead action level (for indoor floors), the way the air "
             "views open at 0.15 &micro;g/m&sup3;. Before, its colors ran down to one "
-            "ten-thousandth of the map&rsquo;s highest value, amounts far too small for a "
-            "routine wipe test to report. Untick &ldquo;show only&rdquo; under the map to see "
-            "the lower values: they are hidden, not zero, and the level is a choice about "
-            "what to draw, not a line between safe and unsafe. The maps&rsquo; own numbers "
-            "did not change."
+            "ten-thousandth of the map&rsquo;s highest value, amounts far below what a lab "
+            "must be able to measure on a dust wipe (80% of the action level; EPA 2024b). "
+            "Untick &ldquo;show only&rdquo; under the map to see the lower values: they are "
+            "hidden, not zero, and the level is a choice about what to draw, not a line between "
+            "safe and unsafe. The maps&rsquo; own numbers did not change."
         ),
     ),
     (
