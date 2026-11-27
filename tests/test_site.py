@@ -713,7 +713,7 @@ def test_key_facts_lead_the_summary_and_faq(rendered: tuple[str, list, str]) -> 
     assert summary.index("How the date was set") < summary.index("Court case")
     assert fs.COURT_URL in summary
     when = dict(faq)["When was the lead azide blast at the Iowa Army Ammunition Plant?"]
-    assert when.startswith("As of this update (")
+    assert when.startswith("The Army carried out the controlled detonation at 9:00 a.m.")
     assert when.index("at 9:00 a.m. CST on Wednesday, Nov. 25") < when.index(fs.TRUMP_HOLD)
     assert "had planned it for about 9 a.m." not in when  # said once, in the first sentence
     assert fs.ADVISORY_NOV24_URL in when
@@ -971,16 +971,27 @@ def test_about_box_leads_with_when() -> None:
     assert cite.index("$why_monday") < cite.index("$cite_html")
     assert fs.TIME_HEAD == "When."
     note = fs.time_note("X")
+    # in reading order: the blast and the advice before it, what officials reported since,
+    # then the Army's maps and where to get help
     assert note.startswith(
-        "As of this update (X), the Army carried out the controlled detonation at 9:00 a.m. "
-        "CST on Wednesday, Nov. 25. In its 3 p.m. CST update, which gives that time, the Army "
-        "said air sensors report no lead detection "
-        "at this time, and that sampling of the ground after the detonation is underway, with "
-        "results to be published when available (Army maps, Nov. 25, 3 p.m.). "
+        "The Army carried out the controlled detonation at 9:00 a.m. CST on Wednesday, Nov. 25 "
+        "(Army maps, Nov. 25, 3 p.m.). Before the blast, FEMA supported relocating residents"
     )
-    resume = " On Wednesday evening, Middletown\u2019s city clerk said the Army, CDC, EPA and"
-    assert f"{fs.EARLY_AIR}{resume} FEMA had confirmed normal activities could resume" in note
-    assert note.count("Follow official instructions.") == 1
+    order = [
+        "Before the blast",
+        "At 3 p.m. CST that day",
+        fs.EARLY_AIR,
+        "That evening",
+        "latest maps",
+        "1-800-621-3362",
+        "(As of X.)",
+    ]
+    assert [note.index(o) for o in order] == sorted(note.index(o) for o in order)
+    assert "Follow official instructions." not in note  # said in the header, caveat and FAQ
+    assert "As of this update" not in note
+    paras = fs.time_note_paragraphs_html("X")
+    assert len(paras) == 3
+    assert paras[1].startswith("At 3 p.m. CST that day")
 
 
 def test_blast_status_says_to_wait_for_the_army() -> None:
@@ -998,9 +1009,14 @@ def test_blast_status_says_to_wait_for_the_army() -> None:
     assert f'href="{fs.ARMY_MAPS_URL}"' in fs.BLAST_STATUS_HTML
     assert f'href="{fs.EPA_VIEWER_URL}"' in fs.BLAST_STATUS_HTML
     assert fs.BLAST_STATUS_HTML.startswith("<b>Official:</b>")
+    # The deference to official instructions is in the header, the About box's When, the
+    # summary's opening caveat and the questions' last answer; the When section itself
+    # reads as facts (Nov. 27).
+    assert "<b>Follow official instructions.</b>" in fs.BLAST_STATUS_HTML
+    assert fs.ABOUT_WHEN.endswith("Follow official instructions.")
+    assert fs.CAVEAT.endswith("Follow official instructions.")
+    assert "Follow instructions from the Army" in fs.SAFETY_ANSWER
     for text in (fs.BLAST_DONE, fs.BLAST_STATUS_HTML):
-        plain = text.replace("<b>", "").replace("</b>", "")
-        assert "Follow official instructions." in plain
         assert "no lead detection at this time" in text
         assert "safe" not in text.lower()  # no verdicts about anyone's safety
     for text in (fs.BLAST_DONE, fs.BLAST_STATUS_HTML):
@@ -1032,7 +1048,7 @@ def test_early_air_readings_say_lab_results_are_pending() -> None:
         assert "still pending and are needed" in text.replace("</b>", "")
         assert "safe" not in text.lower()  # no verdicts about anyone's safety
     assert "soil and water sampling" in fs.EARLY_AIR
-    assert "air filters and surface wipes along that path" in fs.EARLY_AIR_HTML
+    assert "air-sample cassettes and surface wipes along that path" in fs.EARLY_AIR_HTML
     assert fs.EARLY_AIR in fs.time_note("X")
     assert fs.EPA_VIEWER_URL in fs.time_note_html("X")
     assert any(r.startswith("EPA Region 7, 2026:") for r in works_cited.REFERENCES)
@@ -1046,7 +1062,7 @@ def test_window_words_match_the_blast_times() -> None:
     """
     assert site.TIMES == ["09:00"]
     assert fs.BLAST_TIME == "9 a.m."
-    assert f"a blast at {fs.BLAST_TIME}, the time the Army had set." in fs.time_note("X")
+    assert f"a blast at {fs.BLAST_TIME}, the time the Army set." in fs.time_note("X")
     assert [site.label(t) for t in (staged.TIMES[0], staged.TIMES[-1])] == [
         "8:30 a.m.",
         "9:30 a.m.",

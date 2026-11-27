@@ -500,16 +500,19 @@ EPA_VIEWER_CITE = "EPA response data viewer, Nov. 25"
 # brief_page.py from the brief's README; the numbers are in that brief's tables). Every
 # place that reports it uses these words, with the caveat that it is unofficial.
 ANALYSIS_HEAD = "EPA\u2019s monitors and the cloud\u2019s path."
-ANALYSIS_QUESTION = "Were EPA\u2019s real-time lead monitors on the cloud\u2019s path?"
+ANALYSIS_QUESTION = "Were EPA\u2019s continuous lead monitors on the cloud\u2019s path?"
 ANALYSIS = (
-    "After the blast, this site checked where EPA\u2019s four real-time lead monitors sat. "
+    "After the blast, this site checked where EPA\u2019s four continuous lead monitors sat "
+    "(Xact analyzers at stations AS01\u2013AS04, which measure lead directly as air passes "
+    "through; not the air-sample cassettes at its other stations, such as AS-06 and AS-12, "
+    "whose lead results need lab analysis). "
     "The forecasts, including the Army\u2019s, pointed the cloud to the southwest (toward "
     "about 230\u00b0), and the four monitors lined up along that path. Models rerun on "
     "NOAA\u2019s analysis of that morning\u2019s weather put the cloud farther south (toward "
     "about 215\u00b0). On that path, three of the monitors were outside the modeled cloud and "
     "the nearest was on its edge. So the near-zero readings can\u2019t show, by themselves, "
     "whether little lead got out or a cloud passed just south of the monitors. Lab results "
-    "from EPA\u2019s filter samplers on the more southerly path, and from wipes of surfaces "
+    "from EPA\u2019s air-sample cassettes on the more southerly path, and from wipes of surfaces "
     "along it, can; soil samples probably can\u2019t, because the modeled amounts are far "
     "less than soil already holds. "
     "This is a preliminary, unofficial analysis of model estimates, not measurements, and no "
@@ -528,10 +531,12 @@ OFFICIAL_HTML = (
     f'<a href="{ARMY_MAPS_URL}" rel="noopener">Army updates and maps</a> (army.mil/asc).'
 )
 EARLY_AIR = (
-    "Every reading from EPA\u2019s four real-time lead monitors southwest of the plant, "
+    "Every reading from EPA\u2019s four continuous lead monitors (Xact, stations "
+    "AS01\u2013AS04) southwest of the plant, "
     "through 4 p.m. CST, was below the 0.18 micrograms per cubic meter detection limit the "
     f"Army cites ({EPA_VIEWER_CITE}). These are early readings only. Lab results from "
-    "EPA\u2019s other air samples, and soil and water sampling, are still pending and are "
+    "the air-sample cassettes at EPA\u2019s other stations, and soil and water sampling, are "
+    "still pending and are "
     "needed before anyone knows where lead settled."
 )
 # When the blast happened: the Army's 3 p.m. map slides (ARMY_3PM_URL) give the
@@ -540,15 +545,18 @@ EARLY_AIR = (
 # live blogs ("At 9:00am CT, @USArmy Sustainment Command executed the controlled mitigated
 # detonation"; not read first-hand), and Newsweek's report of two bangs at about 9:01 a.m.
 # on a livestream about 5 miles away (sound takes about 25 seconds to travel that far).
-BLAST_DONE = (
-    "The Army carried out the controlled detonation at 9:00 a.m. CST on Wednesday, Nov. 25. "
-    "In its 3 p.m. CST update, which gives that time, the Army said air sensors report no "
-    "lead detection at this time, and that sampling of the ground after the detonation is "
-    "underway, with results to be published when "
-    f"available ({ARMY_3PM_CITE}). {EARLY_AIR} On Wednesday evening, Middletown\u2019s city "
-    "clerk said the Army, CDC, EPA and FEMA had confirmed normal activities could resume "
-    f"({CBS2_RESUME_CITE}). Follow official instructions."
+BLAST_TIME_SENTENCE = (
+    "The Army carried out the controlled detonation at 9:00 a.m. CST on Wednesday, Nov. 25 "
+    f"({ARMY_3PM_CITE})."
 )
+#: What officials reported after the blast, in order.
+AFTER_BLAST = (
+    "At 3 p.m. CST that day, the Army said air sensors report no lead detection at this time, "
+    "and that sampling of the ground is underway, with results to be published when available "
+    f"({ARMY_3PM_CITE}). {EARLY_AIR} That evening, Middletown\u2019s city clerk said the Army, "
+    f"CDC, EPA and FEMA had confirmed normal activities could resume ({CBS2_RESUME_CITE})."
+)
+BLAST_DONE = f"{BLAST_TIME_SENTENCE} {AFTER_BLAST}"
 BLAST_STATUS_HTML = (
     "<b>Official:</b> the Army carried out the detonation at 9:00 a.m. CST Wednesday, "
     "Nov. 25. At 3 p.m. it said air sensors report no lead detection at this time and ground "
@@ -559,12 +567,13 @@ BLAST_STATUS_HTML = (
     "<b>Follow official instructions.</b>"
 )
 EARLY_AIR_HTML = (
-    "<b>Preliminary analysis (unofficial):</b> EPA&rsquo;s four real-time lead monitors read "
+    "<b>Preliminary analysis (unofficial):</b> EPA&rsquo;s four continuous lead monitors "
+    "(Xact, stations AS01&ndash;AS04; not the lab-analyzed samplers such as AS-06 and AS-12) read "
     "below detection, but models rerun on NOAA&rsquo;s weather analysis put the cloud south of "
     f'them (<a href="{ANALYSIS_PATH}">preliminary analysis</a>). The readings are early '
     "readings only, and the paths are unofficial model estimates, not measurements: "
-    "<b>lab results from EPA&rsquo;s air filters and surface wipes along that path are still "
-    "pending and are needed</b> before anyone knows where lead settled."
+    "<b>lab results from EPA&rsquo;s air-sample cassettes and surface wipes along that path are "
+    "still pending and are needed</b> before anyone knows where lead settled."
 )
 # FEMA and the Army's advice, for the page header (Army public safety advisory, Nov. 24).
 FEMA_HEADER_HTML = (
@@ -947,18 +956,17 @@ EARLIER_HEAD = "Earlier dates."
 
 
 def _time_parts(built_txt: str) -> dict[str, str]:
-    """Return the time paragraph's sentences by topic: when, evacuation, maps, window."""
+    """Return the When section's sentences by topic, in reading order (TIME_PARAGRAPHS)."""
     return {
-        "when": (f"As of this update ({built_txt}), {BLAST_DONE[0].lower()}{BLAST_DONE[1:]}"),
+        "when": BLAST_TIME_SENTENCE,
         "evacuation": (
-            "Before the blast, FEMA supported relocating all residents of Middletown and the "
-            "immediate surrounding areas, starting Nov. 24; the evacuation zone was a 5-mile cone"
-            " extending southwest of the plant, reaching one mile beyond the Army\u2019s modeled "
-            "dispersion path. The Army encouraged people outside the zone to shelter in place, "
-            "closing all windows and doors (Army public safety advisory, Nov. 24). Questions "
-            "about the evacuation area or help: FEMA Helpline 1-800-621-3362 (24/7) or "
-            "DisasterAssistance.gov."
+            "Before the blast, FEMA supported relocating residents of Middletown and the "
+            "immediate surrounding areas, starting Nov. 24, within a 5-mile cone extending "
+            "southwest of the plant, and the Army encouraged people outside that zone to "
+            "shelter in place, closing all windows and doors (Army public safety advisory, "
+            "Nov. 24)."
         ),
+        "after": AFTER_BLAST,
         "maps": (
             "The Army\u2019s latest maps still show its model estimate for the mitigated "
             "blast, using an emission factor of 0.26: lead on surfaces above 100 \u00b5g/ft\u00b2 "
@@ -967,18 +975,36 @@ def _time_parts(built_txt: str) -> dict[str, str]:
             f"same 0.26 ({ARMY_MAPS_CITE}). The Army\u2019s maps and updates are at "
             f"{ARMY_MAPS_URL}."
         ),
-        "window": (f"These maps model a blast at {BLAST_TIME}, the time the Army had set."),
+        "help": (
+            "For questions or help, FEMA\u2019s helpline is 1-800-621-3362 (24/7), and "
+            "DisasterAssistance.gov has more."
+        ),
+        "window": (
+            f"This site\u2019s maps model a blast at {BLAST_TIME}, the time the Army set. "
+            f"(As of {built_txt}.)"
+        ),
     }
 
 
+#: The When section's paragraphs: the blast and the advice before it, what officials have
+#: reported since, then the Army's maps and where to get help.
+TIME_PARAGRAPHS = (("when", "evacuation"), ("after",), ("maps", "help", "window"))
+
+
 def time_note(built_txt: str) -> str:
-    """Give the key facts first: the time, the official evacuation and shelter advice, the maps.
+    """Give the key facts first: the blast, the official advice and reports, the Army's maps.
 
     The timeline that led here (court case, presidential hold, earlier dates) comes after it
     on the page, under its own headings.
     """
     p = _time_parts(built_txt)
-    return " ".join(p[k] for k in ("when", "evacuation", "maps", "window"))
+    return " ".join(p[k] for para in TIME_PARAGRAPHS for k in para)
+
+
+def time_note_paragraphs_html(built_txt: str) -> list[str]:
+    """Return the When section as linked paragraphs, for the summary."""
+    p = _time_parts(built_txt)
+    return [_link_sources(" ".join(p[k] for k in para)) for para in TIME_PARAGRAPHS]
 
 
 def _link_sources(text: str) -> str:
@@ -1017,10 +1043,13 @@ ABOUT_WHEN = (
 ANALYSIS_SHORT_HEAD = "Preliminary analysis."
 ANALYSIS_SHORT = (
     "The forecasts, including the Army\u2019s, pointed the cloud southwest, along EPA\u2019s "
-    "four real-time lead monitors. Models rerun on NOAA\u2019s analysis of that morning\u2019s "
+    "four continuous lead monitors (Xact analyzers at stations AS01\u2013AS04, which measure "
+    "lead directly as air passes through; not the air-sample cassettes at its other stations, "
+    "such as AS-06 and AS-12, whose lead results need lab analysis). Models rerun on "
+    "NOAA\u2019s analysis of that morning\u2019s "
     "weather put it farther south, where three of the monitors were outside the modeled cloud. "
     "So their near-zero readings can\u2019t show by themselves whether little lead got out. "
-    "Lab results from EPA\u2019s filter samplers and surface wipes on that path are still "
+    "Lab results from EPA\u2019s air-sample cassettes and surface wipes on that path are still "
     "needed. This is a preliminary, unofficial analysis of model estimates, not measurements, "
     "and no one outside the project has reviewed it."
 )
@@ -1043,7 +1072,7 @@ def methodology_time_html(built_txt: str) -> str:
     """Return the evacuation and the Army's maps, for Methodology and References."""
     p = {k: _link_sources(v) for k, v in _time_parts(built_txt).items()}
     return (
-        f"<p><b>{EVACUATION_HEAD}</b> {p['evacuation']}</p>\n"
+        f"<p><b>{EVACUATION_HEAD}</b> {p['evacuation']} {p['help']}</p>\n"
         f"  <p><b>{ARMY_MAPS_HEAD}</b> {p['maps']}</p>"
     )
 
@@ -1589,7 +1618,7 @@ def _summary_html(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) ->
     lead = f.get("day", PLANNED_DAY)
     on = f" on {lead}" if more else ""  # label the lead day's parts when there are more
     note = window_note(lead)
-    no_time = time_note_html(built)
+    no_time = "</p>\n  <p>".join(time_note_paragraphs_html(built))
     return f"""<section id="summary" aria-labelledby="summary-h">
   <h2 id="summary-h">What the maps show</h2>
   <p class="caveat"><b>{CAVEAT}</b></p>
@@ -1829,8 +1858,9 @@ def _llms(f: Facts, ctx: dict[str, Any], t: _Text, more: list[Facts]) -> str:
             "",
             f"- [Map]({ctx['site_url']}): interactive map by weather and case",
             (
-                f"- [Preliminary analysis]({ANALYSIS_URL}): where EPA\u2019s real-time lead "
-                "monitors sat, compared with the forecast and analyzed-weather paths"
+                f"- [Preliminary analysis]({ANALYSIS_URL}): where EPA\u2019s four continuous "
+                "lead monitors (Xact, AS01\u2013AS04) sat, compared with the forecast and "
+                "analyzed-weather paths"
             ),
             f"- [Source code]({SOURCE_URL}): the model, saved forecasts, assumptions and tests",
             f"- [Instagram @{INSTAGRAM_HANDLE}]({INSTAGRAM_URL}): updates",

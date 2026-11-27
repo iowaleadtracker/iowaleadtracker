@@ -218,7 +218,11 @@ def tables(n: dict[str, Any]) -> dict[str, str]:
     head = "| Site | Kind | From the modeled source | " + " | ".join(RUNS.values())
     rows = [head + " | On the Army's ground map |", "|---" * (len(RUNS) + 4) + "|"]
     for name, s in n["sites"].items():
-        kind = "real-time lead monitor" if name in XACT else "filter sampler, no results posted"
+        kind = (
+            "continuous lead monitor (Xact)"
+            if name in XACT
+            else "filter sampler, no results posted"
+        )
         gap = s["army_map"]["miles_to_zone"]
         zone = "in the zone" if gap <= PIXEL_MI / 2 else f"{gap:.1f} mi outside the zone"
         if s["army_map"]["under_marker"]:
@@ -232,14 +236,16 @@ def tables(n: dict[str, Any]) -> dict[str, str]:
     for k, label in RUNS.items():
         cells = [f"{b:.0f}°" if b is not None else "below 0.18" for b in n["paths"][k].values()]
         paths.append(f"| {label} | " + " | ".join(cells) + " |")
-    near = []  # the real-time monitor nearest each distance
+    near = []  # the continuous lead monitor nearest each distance
     for m in RINGS_MI:
         name, s = min(
             ((k, s) for k, s in n["sites"].items() if k in XACT),
             key=lambda ks: abs(ks[1]["miles"] - m),
         )
         near.append(f"{s['bearing']:.0f}° ({name}, {s['miles']:.1f} mi)")
-    paths.append("| EPA's real-time monitor nearest that distance | " + " | ".join(near) + " |")
+    paths.append(
+        "| EPA's continuous lead monitor nearest that distance | " + " | ".join(near) + " |"
+    )
     read = ["| Monitor | Readings posted | Zero | Highest, µg/m³ | Highest before, µg/m³ |"]
     read.append("|---|---|---|---|---|")
     for name, r in n["readings"].items():
@@ -256,8 +262,8 @@ def tables(n: dict[str, Any]) -> dict[str, str]:
         air = " | ".join(num(s["air_ugm3"][k]) for k in ("analysis", "hysplit"))
         kit = s["instruments"].replace("Dust Trak", "DustTrak").replace("Cannister", "canister")
         if name in XACT:
-            kit = "Xact real-time lead monitor, " + kit
-        public = "real-time lead only" if name in XACT else "none"
+            kit = "Xact continuous lead monitor, " + kit
+        public = "continuous lead only" if name in XACT else "none"
         need.append(
             f"| {name} | {s['miles']:.1f} mi at {s['bearing']:.0f}° | {air} | {kit} | {public} |"
         )

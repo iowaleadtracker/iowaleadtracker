@@ -201,7 +201,7 @@ def draw(grids: dict[str, brief_lib.Grid], out: Path) -> None:
             mec=INK,
             mew=2,
             ms=9,
-            label="EPA real-time lead monitor",
+            label="EPA continuous lead monitor (Xact)",
         ),
         Line2D([], [], **square, mew=1.2, ms=6, label="EPA sampling site, no results posted"),
         Line2D([], [], marker="*", ls="", mfc="#ffd400", mec=INK, ms=16, label="Modeled source"),
