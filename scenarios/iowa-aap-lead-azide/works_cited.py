@@ -719,6 +719,16 @@ CHANGES = [
     (
         "Nov. 27",
         (
+            "The map opens on the U.S. Army mitigated case (26%), the Army&rsquo;s own estimate, "
+            "since its deposition maps haven&rsquo;t been updated. The header and About box are "
+            "shorter: the official word and links, this site&rsquo;s preliminary analysis, and "
+            "the lab results still needed. The Nov. 24 evacuation and the Army&rsquo;s maps "
+            "moved here, under Timeline; the court case is here too. The maps did not change."
+        ),
+    ),
+    (
+        "Nov. 27",
+        (
             "The summary has a new section, &ldquo;How this compares with the NOAA HYSPLIT "
             "model&rdquo;. It says in plain words what NOAA and HYSPLIT are, that this site "
             "ran HYSPLIT itself, and how the two models&rsquo; results compare: the direction "

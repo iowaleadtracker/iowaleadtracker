@@ -550,26 +550,21 @@ BLAST_DONE = (
     f"({CBS2_RESUME_CITE}). Follow official instructions."
 )
 BLAST_STATUS_HTML = (
-    "<b>Blast done:</b> the Army carried out the detonation at 9:00 a.m. CST Wednesday, "
-    "Nov. 25. At 3 p.m. CST the Army said air sensors report no lead detection at this time "
-    "and ground sampling is underway "
-    f'(<a href="{ARMY_3PM_URL}" rel="noopener">{ARMY_3PM_CITE}</a>). '
-    "On Wednesday evening, Middletown&rsquo;s city clerk said the Army, CDC, EPA and FEMA had "
-    "confirmed normal activities could resume "
-    f'(<a href="{CBS2_RESUME_URL}" rel="noopener">{CBS2_RESUME_CITE}</a>). '
+    "<b>Official:</b> the Army carried out the detonation at 9:00 a.m. CST Wednesday, "
+    "Nov. 25. At 3 p.m. it said air sensors report no lead detection at this time and ground "
+    "sampling is underway, with results to be published when available "
+    f'(<a href="{ARMY_3PM_URL}" rel="noopener">{ARMY_3PM_CITE}</a>). Updates: '
+    f'<a href="{ARMY_MAPS_URL}" rel="noopener">Army (army.mil/asc)</a> &middot; '
+    f'<a href="{EPA_VIEWER_URL}" rel="noopener">EPA air monitoring</a>. '
     "<b>Follow official instructions.</b>"
 )
 EARLY_AIR_HTML = (
-    "<b>Early air readings:</b> every reading from EPA&rsquo;s four real-time lead monitors "
-    "southwest of the plant, through 4 p.m. CST, was below the 0.18 &micro;g/m&sup3; "
-    "detection limit the Army cites "
-    f'(<a href="{EPA_VIEWER_URL}" rel="noopener">{EPA_VIEWER_CITE}</a>). These are early '
-    "readings only: <b>lab results from EPA&rsquo;s other air samples, and soil and water "
-    "sampling, are still pending and are needed</b> before anyone knows where lead settled. "
-    f'A <a href="{ANALYSIS_PATH}">preliminary analysis</a> by this site finds those four '
-    "monitors sat along the forecast path, and that models rerun on NOAA&rsquo;s weather "
-    "analysis put the cloud south of them. Those are unofficial model estimates, not "
-    "measurements."
+    "<b>Preliminary analysis (unofficial):</b> EPA&rsquo;s four real-time lead monitors read "
+    "below detection, but models rerun on NOAA&rsquo;s weather analysis put the cloud south of "
+    f'them (<a href="{ANALYSIS_PATH}">preliminary analysis</a>). The readings are early '
+    "readings only, and the paths are unofficial model estimates, not measurements: "
+    "<b>lab results from EPA&rsquo;s air filters and surface wipes along that path are still "
+    "pending and are needed</b> before anyone knows where lead settled."
 )
 # FEMA and the Army's advice, for the page header (Army public safety advisory, Nov. 24).
 FEMA_HEADER_HTML = (
@@ -1005,20 +1000,50 @@ def time_note_html(built_txt: str) -> str:
 
 
 #: The About box's first three headings (its short form of the time paragraph).
-EVACUATION_HEAD = "Evacuation and help."
+EVACUATION_HEAD = "Evacuation and help (Nov. 24)."
 ARMY_MAPS_HEAD = "The Army\u2019s maps."
 
 
-def about_time_html(built_txt: str) -> str:
-    """Return time_note()'s sentences as three short About-box paragraphs, linked.
+#: The About box's short form of the time paragraph: the official word only. The 4 p.m.
+#: readings, the evacuation and the Army's maps are in time_note (summary, questions,
+#: llms.txt) and under Methodology and References (methodology_time_html).
+ABOUT_WHEN = (
+    "The Army carried out the controlled detonation at 9:00 a.m. CST on Wednesday, Nov. 25. "
+    "At 3 p.m. CST it said air sensors report no lead detection at this time and ground "
+    f"sampling is underway, with results to be published when available ({ARMY_3PM_CITE}). "
+    "That evening, Middletown\u2019s city clerk said the Army, CDC, EPA and FEMA had confirmed "
+    f"normal activities could resume ({CBS2_RESUME_CITE}). Follow official instructions."
+)
+ANALYSIS_SHORT_HEAD = "Preliminary analysis."
+ANALYSIS_SHORT = (
+    "The forecasts, including the Army\u2019s, pointed the cloud southwest, along EPA\u2019s "
+    "four real-time lead monitors. Models rerun on NOAA\u2019s analysis of that morning\u2019s "
+    "weather put it farther south, where three of the monitors were outside the modeled cloud. "
+    "So their near-zero readings can\u2019t show by themselves whether little lead got out. "
+    "Lab results from EPA\u2019s filter samplers and surface wipes on that path are still "
+    "needed. This is a preliminary, unofficial analysis of model estimates, not measurements, "
+    "and no one outside the project has reviewed it."
+)
 
-    When (with the FEMA alert and the times modeled), then the evacuation zone and helpline,
-    then the Army's own maps, so a reader on a phone finds the official help at a glance.
-    """
+
+def about_time_html(built_txt: str) -> str:
+    """Return the About box's When paragraph: the official word, briefly, linked."""
+    return f"<p><b>{TIME_HEAD}</b> {_link_sources(ABOUT_WHEN)} (Updated {built_txt}.)</p>"
+
+
+def analysis_short_html() -> str:
+    """Return the About box's short form of the analysis, linked to the full one."""
+    return (
+        f"{html.escape(ANALYSIS_SHORT, quote=False)} "
+        f'<a href="{ANALYSIS_PATH}">Read the preliminary analysis</a>.'
+    )
+
+
+def methodology_time_html(built_txt: str) -> str:
+    """Return the evacuation and the Army's maps, for Methodology and References."""
     p = {k: _link_sources(v) for k, v in _time_parts(built_txt).items()}
     return (
-        f"<p><b>{TIME_HEAD}</b> {p['when']} {p['window']}</p>\n"
-        f"  <p><b>{EVACUATION_HEAD}</b> {p['evacuation']}</p>\n"
+        f"<p><b>{EVACUATION_HEAD}</b> {p['evacuation']}</p>\n"
         f"  <p><b>{ARMY_MAPS_HEAD}</b> {p['maps']}</p>"
     )
 
@@ -1254,16 +1279,17 @@ FORECAST_NOTE = (
 FORECAST_PREFIX = "With the forecast from before the blast: "
 
 
-def default_view(pct_low: str) -> str:
+def default_view(pct_mid: str) -> str:
     """Say what the page shows when it opens, and that this is not a finding."""
     return (
-        f"The map opens on a blast at {BLAST_TIME}, the low case ({pct_low} of the lead in "
-        f"the air), and archived weather: {ARCHIVED_SOURCE}. The Weather menu also has the "
+        f"The map opens on a blast at {BLAST_TIME}, the U.S. Army mitigated case ({pct_mid} of "
+        "the lead in the air, the Army\u2019s own estimate, which its latest deposition maps "
+        f"still use), and archived weather: {ARCHIVED_SOURCE}. The Weather menu also has the "
         "forecast the site showed before the blast, and the \u201cLead in the air\u201d menu "
-        "has the three larger cases, up to the EPA permit case, which assumes all of the lead "
-        "got into the air. Opening on the low case is not a finding that little lead got "
-        "out: no one has published how much did. Archived weather is a weather model\u2019s "
-        "account of the day, not a measurement of where the cloud went."
+        "has the other three cases, from low to the EPA permit case, which assumes all of the "
+        "lead got into the air. No one has published how much lead actually got out. "
+        "Archived weather is a weather model\u2019s account of the day, not a measurement of "
+        "where the cloud went."
     )
 
 
@@ -1273,9 +1299,8 @@ def about_weather(n_models: str, got_txt: str, *, archived: bool) -> str:
     if not archived:
         return f"The winds come from {forecast}."
     return (
-        "The map opens on the low case, the smallest of the four; that is not a finding "
-        "that little lead got out. It opens on archived weather: "
-        f"{ARCHIVED_SOURCE}. The Weather menu also has "
+        "The map opens on the U.S. Army mitigated case, the Army\u2019s own estimate, and on "
+        f"archived weather: {ARCHIVED_SOURCE}. The Weather menu also has "
         f"the forecast shown before the blast, from {forecast}. Archived weather is a weather "
         "model\u2019s account of the day, not a measurement."
     )
@@ -1370,7 +1395,7 @@ def _archived_html(fa: Facts | None, pct: dict[str, str]) -> str:
         return ""
     rows, _ = _archived_rows(fa, pct)
     return f"""<h3>{DEFAULT_VIEW_HEAD}</h3>
-  <p>{default_view(pct["low"])}</p>
+  <p>{default_view(pct["mid"])}</p>
   <h3>{ARCHIVED_HEAD}</h3>
   <p>{archived_wind_sentence(fa)} {path_sentence(fa)} {OBSERVED_WX}</p>
   <p>{HYSPLIT_BOX}</p>
@@ -1391,7 +1416,7 @@ def _archived_plain(fa: Facts, pct: dict[str, str]) -> str:
     """Return the default view and the archived-weather facts as one plain paragraph."""
     _, rows = _archived_rows(fa, pct)
     return (
-        f"{default_view(pct['low'])} {archived_wind_sentence(fa)} "
+        f"{default_view(pct['mid'])} {archived_wind_sentence(fa)} "
         f"{path_sentence(fa, html=False)} {OBSERVED_WX} {_town_text(fa)} {TOWN_CAVEAT} "
         "Farthest reach of ground lead with archived weather: "
         + " ".join(r[2:] for r in rows)
