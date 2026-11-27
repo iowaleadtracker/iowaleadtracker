@@ -19,8 +19,8 @@ import re
 import subprocess
 import sys
 import tempfile
-from collections.abc import Iterable
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 ROOT = Path(__file__).resolve().parent.parent
 SCENARIO = ROOT / "scenarios" / "iowa-aap-lead-azide"
@@ -30,6 +30,9 @@ sys.path.insert(0, str(ROOT))
 
 import make_map_picker as site  # noqa: E402 - the scenario's modules, found through the path above
 import staged  # noqa: E402
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 GRID = "50"  # cells along the longer side (the site uses 360)
 MAPS = {"forecast": "mid 09:00", "archived": "archived mid 09:00"}
@@ -77,14 +80,16 @@ def main() -> None:
             path.write_text(json.dumps(data, separators=(",", ":")) + "\n", encoding="utf-8")
             print(f"wrote {path.relative_to(ROOT)} ({path.stat().st_size // 1024} KB)")
     # The saved forecasts must be enough: a download would change them.
-    changed = subprocess.run(
+    changed = subprocess.run(  # noqa: S603 - fixed arguments
         ["git", "status", "--porcelain", "--", str(cache)],  # noqa: S607
         capture_output=True,
         text=True,
         check=True,
     ).stdout
     if changed:
-        raise SystemExit(f"the model downloaded weather and changed {cache}; restore it:\n{changed}")
+        raise SystemExit(
+            f"the model downloaded weather and changed {cache}; restore it:\n{changed}"
+        )
 
 
 if __name__ == "__main__":

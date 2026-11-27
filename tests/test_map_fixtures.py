@@ -26,7 +26,7 @@ def _load(name: str) -> dict[str, Any]:
 
 @pytest.fixture(scope="module")
 def plain_run() -> dict[str, Any]:
-    """A small model run with no site options: the keys every map has."""
+    """Return a small model run with no site options: the keys every map has."""
     _, payload = run_puff([*STEADY, "--grid", "40"])
     return {k: v for k, v in payload.items() if not k.startswith("_")}
 
