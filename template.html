@@ -759,15 +759,17 @@ function drawHysplitEdges() {
 // air views, --dep-scale-min for deposition (kg/m3 or kg/m2). Lower values are hidden, not zero.
 const shownMin = () => (S.units === "count" || S.field === "zones" ? 0
   : S.field === "dep" ? (S.fixDepMin && M.depScaleMin) || 0 : (S.fixMin && M.scaleMin) || 0);
-// ---------- outlines from another source (--reference-outlines) ----------
+// ---------- zones from another source (--reference-outlines) ----------
 // Zones traced from someone else's published map, for example an agency's, as lines of
 // [latitude, longitude]: M.outlines.air goes with the air views, .dep with deposition. A box
-// under the map shows them over either model's result. The highest zone is drawn solid and
-// the ones below it dashed; "marks" are short labeled lines (times along a path).
-const REF_COLOR = "#b5179e";
+// under the map shades them green over either model's result, each zone a little darker
+// than the one it sits in, with its edge drawn; "marks" are short labeled lines (times
+// along a path). A zone's line may stop short of closing (where the source map hides it):
+// the shading closes straight across the gap, and no edge is drawn there.
+const REF_RGB = "0,184,148", REF_COLOR = `rgb(${REF_RGB})`, REF_INK = "#00735a";
 const refKind = () => (S.field === "dep" || (S.field === "zones" && S.zoneMetric === "dep") ? "dep" : "air");
 const refLayer = () => (S.ref && M.outlines && M.outlines[refKind()]) || null;
-const refDash = (k, n) => (k === n - 1 ? [] : [7, 5]);
+const refAlpha = (k) => (k ? 0.35 : 0.25);
 let refLegendKey = "";
 function drawReference() {
   const L = refLayer(), key = L ? refKind() : "";
@@ -775,24 +777,24 @@ function drawReference() {
     refLegendKey = key;
     $("legref").hidden = !L;
     if (L) $("legref").innerHTML = L.zones.map((z, k) =>
-      `<div class="lz"><svg width="26" height="8" aria-hidden="true" style="flex:none"><line x1="1" y1="4" x2="25" y2="4" stroke="${REF_COLOR}" stroke-width="2.5"${refDash(k, L.zones.length).length ? ' stroke-dasharray="6 4"' : ""}/></svg>${esc(M.outlines.name)}: ${esc(z.label)}</div>`).join("") +
+      `<div class="lz"><span class="zsw" style="background:rgba(${REF_RGB},${k ? 0.6 : 0.3});border:1.5px solid ${REF_COLOR};margin-right:0;box-sizing:border-box"></span>${esc(M.outlines.name)}: ${esc(z.label)}</div>`).join("") +
       (M.outlines.note ? `<div class="legnote" style="border-top:0;padding-top:0;margin-top:3px">${esc(M.outlines.note)}</div>` : "");
   }
   if (!L) return;
-  const path = (line) => { ctx.beginPath(); line.forEach(([la, lo], i) => { const [x, y] = toScreen(la, lo); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); }); ctx.stroke(); };
+  const trace = (line) => { ctx.beginPath(); line.forEach(([la, lo], i) => { const [x, y] = toScreen(la, lo); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); }); };
+  L.zones.forEach((z, k) => { ctx.fillStyle = `rgba(${REF_RGB},${refAlpha(k)})`; for (const line of z.lines) { trace(line); ctx.closePath(); ctx.fill(); } });
   ctx.lineJoin = "round"; ctx.lineCap = "round";
-  for (const [color, width] of [["rgba(255,255,255,0.9)", 5], [REF_COLOR, 2.4]]) {   // white under the color, to show on any map
+  for (const [color, width] of [["rgba(255,255,255,0.85)", 4], [REF_COLOR, 2]]) {   // white under the color, to show on any map
     ctx.strokeStyle = color; ctx.lineWidth = width;
-    L.zones.forEach((z, k) => { ctx.setLineDash(refDash(k, L.zones.length)); z.lines.forEach(path); });
-    ctx.setLineDash([]);
-    for (const m of L.marks || []) path(m.line);
+    for (const z of L.zones) for (const line of z.lines) { trace(line); ctx.stroke(); }
+    for (const m of L.marks || []) { trace(m.line); ctx.stroke(); }
   }
   ctx.lineJoin = "miter"; ctx.lineCap = "butt";
   ctx.font = "600 11.5px system-ui, sans-serif"; ctx.textBaseline = "middle"; ctx.textAlign = "right";
   for (const m of L.marks || []) {                // label each mark beyond its western end
     const end = m.line[0][1] < m.line[1][1] ? m.line[0] : m.line[1], [x, y] = toScreen(end[0], end[1]);
     ctx.lineWidth = 3.5; ctx.strokeStyle = "rgba(255,255,255,0.92)"; ctx.strokeText(m.label, x - 7, y - 2);
-    ctx.fillStyle = REF_COLOR; ctx.fillText(m.label, x - 7, y - 2);
+    ctx.fillStyle = REF_INK; ctx.fillText(m.label, x - 7, y - 2);
   }
   ctx.textAlign = "left";
 }

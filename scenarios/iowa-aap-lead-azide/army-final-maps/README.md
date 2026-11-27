@@ -2,8 +2,8 @@
 
 The zones on the U.S. Army's final "Mitigated 0.26" maps for the Nov. 25, 2026 blast
 (stamped a/o 250700NOV26), traced and placed on the ground so the site's maps can draw
-them. On the maps for the 9 a.m. blast, the "Army's final maps" box under the map draws
-them over either model's result.
+them. On the maps for the 9 a.m. blast, the "Army's final maps" box under the map shades
+them green over either model's result, as on the map in the monitor-placement brief.
 
 They are the Army's forecast, made before the blast, for 26% of the lead becoming
 airborne. They are not measurements, and the tracing and placing are this project's, not
@@ -22,12 +22,12 @@ https://www.army.mil/asc#org-iowa-army-ammunition-plant.
 
 ## What is drawn
 
-- **On the air views:** the edge of the path the Army shaded for lead in air of
+- **On the air views:** the path the Army shaded for lead in air of
   0.18 µg/m³ or more (the detection limit of its lead air sampling method, by the map's
   legend), and the lines the Army labeled T+0.5, T+2, T+3, and T+5 hours where they cross
   that path.
-- **On the deposition view:** the edges of the Army's zones for lead on the ground of
-  5 µg/ft² or more (dashed) and 100 µg/ft² or more (solid).
+- **On the deposition view:** the Army's zones for lead on the ground of 5 µg/ft² or more
+  and, shaded darker inside it, 100 µg/ft² or more.
 
 ## How it was made
 
@@ -39,7 +39,7 @@ https://www.army.mil/asc#org-iowa-army-ammunition-plant.
    printed over it are closed, and the edge is taken where the smoothed zone is half
    covered.
 3. **Hidden part.** The Army's magenta plant marker covers the first miles of every zone.
-   The edges stop where the marker begins; nothing is drawn under it.
+   The edges stop where the marker begins. The shading closes straight across that gap.
 
 ```bash
 pip install numpy scipy matplotlib pillow

@@ -221,7 +221,7 @@ case, the most conservative one, and showed only the forecast.
   The build reads the saved file; it doesn't run HYSPLIT. See `hysplit-archived/README.md`.
 - **Army's final maps.** The maps for the 9 a.m. blast, on either weather, carry the zones
   of the Army's final maps (`army-final-maps/outlines.json`, `--reference-outlines`). A
-  box under the map, off by default, draws them over either model's result: the 0.18 µg/m³
+  box under the map, off by default, shades them green over either model's result: the 0.18 µg/m³
   path and its time marks on the air views, the 5 and 100 µg/ft² zones on the deposition
   view. They are the Army's forecast for 26% of the lead airborne, whichever case is
   shown. See `army-final-maps/README.md`.
