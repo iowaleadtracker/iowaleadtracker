@@ -675,9 +675,9 @@ HYSPLIT_METHOD = (
 )
 
 #: The Army's final maps drawn on the site's maps, shown under the HYSPLIT note.
-ARMY_BOX_HEAD = "The Army&rsquo;s final maps on the map."
+ARMY_BOX_HEAD = "The Army&rsquo;s final forecast on the map."
 ARMY_BOX_METHOD = (
-    "On the maps for the 9 a.m. blast, the &ldquo;Army&rsquo;s final maps&rdquo; box draws "
+    "On the maps for the 9 a.m. blast, the &ldquo;Army&rsquo;s final forecast&rdquo; box draws "
     "the zones of the U.S. Army&rsquo;s final &ldquo;Mitigated 0.26&rdquo; maps (stamped a/o "
     "250700NOV26): on the air views, the path it shaded for lead in air of 0.18 "
     "&micro;g/m&sup3; or more and the times it marked along it; on the deposition view, its "
@@ -699,7 +699,7 @@ CHANGES = [
         "Nov. 27",
         (
             "The maps for the 9 a.m. blast have a new box under the map, &ldquo;Army&rsquo;s "
-            "final maps&rdquo;. It draws the zones from the Army&rsquo;s own final forecast "
+            "final forecast&rdquo;. It draws the zones from the Army&rsquo;s own final forecast "
             "maps, for 26% of the lead airborne, over either model&rsquo;s result: lead in "
             "air of 0.18 &micro;g/m&sup3; or more with the Army&rsquo;s time marks, and lead "
             "on the ground of 5 and 100 &micro;g/ft&sup2; or more. This site traced them "

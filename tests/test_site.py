@@ -209,7 +209,7 @@ def test_header_and_about_box_name_the_weather() -> None:
         "The winds come from four weather forecasts, current as of X."
     )
     nov26 = [what for when, what in works_cited.CHANGES if when == "Nov. 26"]
-    assert works_cited.CHANGES[0][0] == "Nov. 27"  # the newest entry (the Army's final maps)
+    assert works_cited.CHANGES[0][0] == "Nov. 27"  # the newest entry (the Army's final forecast)
     assert any("opens on a 9 a.m. blast, the low case, and archived weather" in w for w in nov26)
     assert any(
         "Opening on the low case is not a finding that little lead got out." in w for w in nov26
@@ -376,7 +376,7 @@ def test_archived_map_runs_offline_from_the_new_release_point(
     assert note["scaledBy"] == pytest.approx(meta["explosionOpts"]["airborneFraction"], rel=1e-4)
     assert len(note["airMax"]) == len(note["depMax"]) == len(out["hours"])  # HYSPLIT's peaks
     # the Army's final maps ride along as outlines for the box under the map
-    assert meta["outlines"]["name"] == "Army\u2019s final maps"
+    assert meta["outlines"]["name"] == "Army\u2019s final forecast"
     assert len(meta["outlines"]["dep"]["zones"]) == 2
     # the deposition view's minimum, 5 ug/ft2 in the page's kg/m2
     assert meta["depScaleMin"] == pytest.approx(5e-9 / 0.09290304)
@@ -485,7 +485,7 @@ def test_armys_final_maps_are_offered_for_the_blast_they_were_made_for() -> None
 def test_armys_outlines_are_southwest_of_the_plant() -> None:
     """The traced file: an air path with four time marks, two ground zones, all near the plant."""
     data = json.loads(site.ARMY_OUTLINES.read_text(encoding="utf-8"))
-    assert data["name"] == "Army\u2019s final maps"
+    assert data["name"] == "Army\u2019s final forecast"
     assert "Traced and placed by this site" in data["note"]
     assert [m["label"] for m in data["air"]["marks"]] == ["T+0.5 h", "T+2 h", "T+3 h", "T+5 h"]
     assert [z["label"].split()[0] for z in data["dep"]["zones"]] == ["5", "100"]

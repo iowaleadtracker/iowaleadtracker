@@ -2,7 +2,7 @@
 
 The zones on the U.S. Army's final "Mitigated 0.26" maps for the Nov. 25, 2026 blast
 (stamped a/o 250700NOV26), traced and placed on the ground so the site's maps can draw
-them. On the maps for the 9 a.m. blast, the "Army's final maps" box under the map shades
+them. On the maps for the 9 a.m. blast, the "Army's final forecast" box under the map shades
 them green over either model's result, as on the map in the monitor-placement brief.
 
 They are the Army's forecast, made before the blast, for 26% of the lead becoming

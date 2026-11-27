@@ -1135,7 +1135,7 @@ HYSPLIT_BOX = (
 )
 #: The box under the blast's maps that draws the zones of the Army's own final maps.
 ARMY_BOX = (
-    "Under the map, the \u201cArmy\u2019s final maps\u201d box draws the zones from the "
+    "Under the map, the \u201cArmy\u2019s final forecast\u201d box draws the zones from the "
     "Army\u2019s own final maps over either model\u2019s result: where the Army\u2019s "
     "forecast put lead in air at 0.18 micrograms per cubic meter or more, with the times it "
     "marked along the path, and lead on the ground at 5 and 100 micrograms per square foot "

@@ -47,7 +47,7 @@ import brief_lib  # noqa: E402
 AIR_MAP = HERE / "army_mitigated026_air_a-o_250700NOV26.jpg"
 STAMP = "a/o 250700NOV26"
 # What the map page shows with the outlines: the box's name and the legend's note.
-NAME = "Army\u2019s final maps"
+NAME = "Army\u2019s final forecast"
 NOTE = (
     "Traced and placed by this site from the U.S. Army\u2019s final forecast maps (26% of the "
     "lead airborne), to about 0.6 mile. The Army\u2019s plant marker hides the first miles."
