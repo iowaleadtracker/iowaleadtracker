@@ -35,7 +35,7 @@ def doi(d: str) -> str:
 SOURCE_URL = "https://github.com/iowaleadtracker/iowaleadtracker"
 # The spread-method cross-check (HYSPLIT and tracer data) linked from the methodology table.
 TURBULENCE_URL = SOURCE_URL + "/blob/main/TURBULENCE.md"
-# The preliminary analysis of where EPA's real-time monitors sat: its page on the site
+# The preliminary analysis of where EPA's continuous lead monitors sat: its page on the site
 # (built by brief_page.py from the brief's README) and its folder in the repository.
 ANALYSIS_PATH = "/monitor-placement/"
 ANALYSIS_URL = "https://iowaleadtracker.com" + ANALYSIS_PATH
@@ -664,8 +664,9 @@ def method_intro(pct: dict[str, str]) -> str:
 #: How the analysis after the blast was made, shown under the method note.
 ANALYSIS_HEAD = "The analysis after the blast."
 ANALYSIS_METHOD = (
-    f'The <a href="{ANALYSIS_PATH}">preliminary analysis</a> of where EPA&rsquo;s real-time '
-    "lead monitors sat runs this model twice: on the forecast the map showed at 9 a.m. on "
+    f'The <a href="{ANALYSIS_PATH}">preliminary analysis</a> of where EPA&rsquo;s four '
+    "continuous lead monitors (Xact, stations AS01&ndash;AS04) sat runs this model twice: "
+    "on the forecast the map showed at 9 a.m. on "
     "Nov. 25, and on NOAA&rsquo;s hourly analyses of that morning&rsquo;s weather from the "
     "HRRR system (Dowell et al. 2022). It also runs NOAA&rsquo;s HYSPLIT model (Stein et al. "
     "2015) on NOAA&rsquo;s archive of HRRR. It models the release from two magazines that a "
@@ -724,8 +725,8 @@ CHANGES = [
             "AS01&ndash;AS04, which measure lead directly, not the air-sample cassettes at "
             "EPA&rsquo;s other stations (such as AS-06 and AS-12), whose lead results need lab "
             "analysis. Some of those stations also have real-time dust monitors, which don&rsquo;t "
-            "measure lead. Same on the preliminary analysis page and its map. The maps did not "
-            "change."
+            "measure lead. The lab-analyzed samplers are called air-sample cassettes throughout. "
+            "Same on the preliminary analysis page and its map. The maps did not change."
         ),
     ),
     (

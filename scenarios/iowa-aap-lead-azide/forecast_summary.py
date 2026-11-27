@@ -512,7 +512,7 @@ ANALYSIS = (
     "about 215\u00b0). On that path, three of the monitors were outside the modeled cloud and "
     "the nearest was on its edge. So the near-zero readings can\u2019t show, by themselves, "
     "whether little lead got out or a cloud passed just south of the monitors. Lab results "
-    "from EPA\u2019s filter samplers on the more southerly path, and from wipes of surfaces "
+    "from EPA\u2019s air-sample cassettes on the more southerly path, and from wipes of surfaces "
     "along it, can; soil samples probably can\u2019t, because the modeled amounts are far "
     "less than soil already holds. "
     "This is a preliminary, unofficial analysis of model estimates, not measurements, and no "
@@ -535,7 +535,8 @@ EARLY_AIR = (
     "AS01\u2013AS04) southwest of the plant, "
     "through 4 p.m. CST, was below the 0.18 micrograms per cubic meter detection limit the "
     f"Army cites ({EPA_VIEWER_CITE}). These are early readings only. Lab results from "
-    "EPA\u2019s other air samples, and soil and water sampling, are still pending and are "
+    "the air-sample cassettes at EPA\u2019s other stations, and soil and water sampling, are "
+    "still pending and are "
     "needed before anyone knows where lead settled."
 )
 # When the blast happened: the Army's 3 p.m. map slides (ARMY_3PM_URL) give the
@@ -568,8 +569,8 @@ EARLY_AIR_HTML = (
     "below detection, but models rerun on NOAA&rsquo;s weather analysis put the cloud south of "
     f'them (<a href="{ANALYSIS_PATH}">preliminary analysis</a>). The readings are early '
     "readings only, and the paths are unofficial model estimates, not measurements: "
-    "<b>lab results from EPA&rsquo;s air filters and surface wipes along that path are still "
-    "pending and are needed</b> before anyone knows where lead settled."
+    "<b>lab results from EPA&rsquo;s air-sample cassettes and surface wipes along that path are "
+    "still pending and are needed</b> before anyone knows where lead settled."
 )
 # FEMA and the Army's advice, for the page header (Army public safety advisory, Nov. 24).
 FEMA_HEADER_HTML = (
@@ -1028,7 +1029,7 @@ ANALYSIS_SHORT = (
     "NOAA\u2019s analysis of that morning\u2019s "
     "weather put it farther south, where three of the monitors were outside the modeled cloud. "
     "So their near-zero readings can\u2019t show by themselves whether little lead got out. "
-    "Lab results from EPA\u2019s filter samplers and surface wipes on that path are still "
+    "Lab results from EPA\u2019s air-sample cassettes and surface wipes on that path are still "
     "needed. This is a preliminary, unofficial analysis of model estimates, not measurements, "
     "and no one outside the project has reviewed it."
 )

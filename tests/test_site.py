@@ -1032,7 +1032,7 @@ def test_early_air_readings_say_lab_results_are_pending() -> None:
         assert "still pending and are needed" in text.replace("</b>", "")
         assert "safe" not in text.lower()  # no verdicts about anyone's safety
     assert "soil and water sampling" in fs.EARLY_AIR
-    assert "air filters and surface wipes along that path" in fs.EARLY_AIR_HTML
+    assert "air-sample cassettes and surface wipes along that path" in fs.EARLY_AIR_HTML
     assert fs.EARLY_AIR in fs.time_note("X")
     assert fs.EPA_VIEWER_URL in fs.time_note_html("X")
     assert any(r.startswith("EPA Region 7, 2026:") for r in works_cited.REFERENCES)
