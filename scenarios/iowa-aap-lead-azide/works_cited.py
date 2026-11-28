@@ -153,6 +153,15 @@ REFERENCES = [
     "Emerson, E. W., and Coauthors, 2020: Revisiting particle dry deposition and its role in "
     "radiative effect estimates. <i>Proc. Natl. Acad. Sci. USA</i>, <b>117</b>, "
     "26&thinsp;076&ndash;26&thinsp;082, " + doi("10.1073/pnas.2014761117") + ".",
+    "EPA Press Office, 2026: EPA releases initial water source lab results indicating "
+    "Wednesday&rsquo;s controlled detonation in Iowa did not result in an elevation of lead "
+    "in water bodies that serve as sources of drinking water. News release, 28 November 2026, "
+    "accessed 28 November 2026, "
+    + _a(
+        "https://www.epa.gov/newsreleases/"
+        "epa-releases-initial-water-source-lab-results-indicating-wednesdays-controlled"
+    )
+    + ".",
     "EPA Region 7, 2026: Iowa Army Ammunition Plant response data viewer (real-time lead "
     "monitors and air sampling stations). ArcGIS Experience, U.S. Environmental Protection "
     "Agency, accessed 25 November 2026, "
@@ -716,6 +725,20 @@ ARMY_BOX_METHOD = (
 #: entry for every change to the model, its settings or its sources.
 CHANGES_HEAD = "Change log"
 CHANGES = [
+    (
+        "Nov. 28",
+        (
+            "EPA posted its first lab results and said more about its real-time monitors (EPA "
+            "Press Office 2026). The page now says that EPA found no lead in 38 water samples "
+            "taken at public water supplies after the blast, that results for its air filters, "
+            "soil, dust wipes, and tap water are still pending, and that the real-time "
+            f'monitors were switched off at 3 p.m. on Nov. 26. The <a href="{ANALYSIS_PATH}">'
+            "preliminary analysis</a> no longer lists an inlet too small for coarse particles "
+            "as a possible reason for the near-zero readings: EPA says the monitors used "
+            "total-suspended-particulate inlets. Its finding about where the monitors sat is "
+            "unchanged. The maps did not change."
+        ),
+    ),
     (
         "Nov. 27",
         (

@@ -19,6 +19,7 @@ import make_map_picker as site
 import mirror
 import pytest
 import staged
+import works_cited
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -179,3 +180,16 @@ def test_brief_says_what_ground_samples_can_show(page: str) -> None:
     assert "Table B." in page
     assert "soil sampling, can" not in fs.ANALYSIS
     assert "soil samples probably can\u2019t" in fs.ANALYSIS
+
+
+def test_brief_reports_what_epa_said_about_the_monitors_inlets() -> None:
+    """Updated Nov. 28: TSP inlets, so a too-small inlet is no longer offered as a reason."""
+    readme = " ".join(brief_page.README.read_text(encoding="utf-8").split())
+    assert "Updated Nov. 28, 2026" in readme
+    assert "total-suspended-particulate (TSP) inlets" in readme
+    assert "so that one no longer stands" in readme
+    assert "inlet size" not in readme  # it is no longer something EPA hasn't said
+    assert "- EPA, 2026d:" in readme
+    assert fs.EPA_NOV28_URL in readme
+    refs = [r for r in works_cited.REFERENCES if isinstance(r, str)]
+    assert any(r.startswith("EPA Press Office, 2026:") and fs.EPA_NOV28_URL in r for r in refs)

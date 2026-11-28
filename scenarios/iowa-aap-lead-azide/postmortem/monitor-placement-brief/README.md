@@ -9,6 +9,15 @@ after the Army detonated its lead azide stockpile at the Iowa Army Ammunition Pl
 that came down. For the amounts modeled here, bulk soil samples probably can't show it;
 wipes of surfaces near the path can. See "What is needed now."*
 
+*Updated Nov. 28, 2026: EPA said that day that the real-time monitors used
+total-suspended-particulate (TSP) inlets, which take in large particles as well as fine
+ones, and that it switched them off at 3 p.m. on Nov. 26. An inlet too small for coarse
+particles is therefore no longer one of the explanations for the near-zero readings. EPA
+also posted its first lab results: no lead found in 38 water samples taken at public water
+supplies after the detonation. Results for its air filters, soil, dust wipes, and tap
+water were still pending. EPA's release refers to "the area that the plume actually
+traveled" without saying where that was (EPA 2026d).*
+
 > **Unofficial.** This is a screening analysis by a private citizen, not from the Army or
 > any government agency. Don't use it to decide if you're safe; follow official
 > instructions. The map shows model estimates for an assumed release. It is not a
@@ -69,7 +78,8 @@ neither is public yet.**
 
 **1. Lab results from surfaces on the ground.** A sample of what came down doesn't depend
 on an instrument having been in the right place at the right minute, and it catches lead
-on particles too coarse for an air monitor's inlet. But the kind of sample matters,
+on particles that fell out of the air before they reached a monitor. But the kind of
+sample matters,
 because the amounts the models put on the ground are small:
 
 *Table A. Modeled lead on the ground eight hours after the blast, for the 7% case, and
@@ -216,8 +226,13 @@ measurements. The last column says where the site falls on the Army's final grou
 | All four | 263 | 246 | 0.010 | 0.006 |
 <!-- /table:readings -->
 
-EPA calls these "Xact stations monitoring for lead." It has not published their model,
-inlet size, or detection limit, or how the public feed treats small values.
+EPA calls these "Xact stations monitoring for lead." On Nov. 28 it said they used
+total-suspended-particulate (TSP) inlets "to ensure larger particles would be captured if
+detected," averaged over five minutes from 7 a.m. to 2 p.m. on the day of the detonation
+and over an hour otherwise, and were switched off at 3 p.m. on Nov. 26 (EPA 2026d). EPA
+describes the readings as 0.0 µg/m³, "zero detect or non-detect"; the public feed's
+values in Table 3 are small, and not all of them are zero. EPA has not published the
+monitors' model or detection limit, or how the public feed treats small values.
 
 **4. So the readings alone can't say what happened.** A line of monitors along one
 direction sees a cloud only over a narrow range of directions. In the full analysis the
@@ -354,14 +369,17 @@ actually released, and it may have been much less.
 
 **What can the monitors detect?**
 EPA says they are Xact monitors, which measure metals on a filter tape by X-ray
-fluorescence. It hasn't said which model, what inlet size, or what detection limit. The
-full analysis covers what is published for this kind of instrument.
+fluorescence, and that they were fitted with total-suspended-particulate inlets so that
+larger particles would be captured too (EPA 2026d). It hasn't said which model or what
+detection limit. The full analysis covers what is published for this kind of instrument.
 
 **What other explanations fit the near-zero readings?**
 The full analysis lists them without ranking: little fine lead became
-airborne; the lead was on particles too coarse to stay up or to pass the monitors' inlet;
-a cloud passed south of or over the monitors; the detonation was somewhere else; or the
-public feed doesn't show what the instruments measured.
+airborne; the lead was on particles too coarse to stay up as far as the monitors; a
+cloud passed south of or over the monitors; the detonation was somewhere else; or the
+public feed doesn't show what the instruments measured. An earlier version also listed
+particles too coarse to pass the monitors' inlet. EPA has since said the inlets took in
+particles of all sizes (EPA 2026d), so that one no longer stands.
 
 **What would settle it?**
 Lab results from the ground and from the instruments in the analyzed-weather path; see
@@ -369,8 +387,8 @@ Lab results from the ground and from the instruments in the analyzed-weather pat
 record at AS06 for the morning of Nov. 25, and wipes of surfaces between about
 205° and 245° from the magazines out to 15 miles. Bulk soil samples probably can't: the
 modeled lead on the ground is far less than soil already holds. Also an official
-statement of where the detonation was, and the monitors' model, inlet, and detection
-limit.
+statement of where the detonation was and where the plume traveled, and the monitors'
+model and detection limit.
 
 **Has anyone checked this?**
 No one outside the project. It has had AI referee reviews, which found and led to
@@ -412,6 +430,12 @@ Iowa Lead Tracker, an unofficial public project by a private citizen
 - EPA, 2026c: EPA collects over 1,200 air, land, and water samples ahead of Iowa Army
   Ammunition Plant controlled detonation. News release, Nov. 25, 2026,
   https://www.epa.gov/newsreleases/epa-collects-over-1200-air-land-and-water-samples-ahead-iowa-army-ammunition-plant.
+- EPA, 2026d: EPA releases initial water source lab results indicating Wednesday's
+  controlled detonation in Iowa did not result in an elevation of lead in water bodies
+  that serve as sources of drinking water. News release, Nov. 28, 2026,
+  https://www.epa.gov/newsreleases/epa-releases-initial-water-source-lab-results-indicating-wednesdays-controlled.
+  Source of the monitors' inlets, averaging times, and shutdown, and of the first lab
+  results.
 - Esri: World Imagery (Esri, Maxar, Earthstar Geographics), and USA Counties Generalized
   Boundaries, from the Census Bureau's county boundaries.
 - Iowa's News Now, 2026: Understanding the lead plume: What the Army's projected

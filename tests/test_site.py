@@ -252,7 +252,7 @@ def test_header_and_about_box_name_the_weather() -> None:
         "The winds come from four weather forecasts, current as of X."
     )
     nov26 = [what for when, what in works_cited.CHANGES if when == "Nov. 26"]
-    assert works_cited.CHANGES[0][0] == "Nov. 27"  # the newest entry (the HYSPLIT comparison)
+    assert works_cited.CHANGES[0][0] == "Nov. 28"  # the newest entry (EPA's first lab results)
     assert any("opens on a 9 a.m. blast, the low case, and archived weather" in w for w in nov26)
     assert any(
         "Opening on the low case is not a finding that little lead got out." in w for w in nov26
@@ -1031,7 +1031,9 @@ def test_early_air_readings_say_lab_results_are_pending() -> None:
         assert "early readings only" in text.lower()
         assert "still pending and are needed" in text.replace("</b>", "")
         assert "safe" not in text.lower()  # no verdicts about anyone's safety
-    assert "soil and water sampling" in fs.EARLY_AIR
+    assert "air filters, soil, dust wipes, and tap water" in fs.EARLY_AIR  # what is still out
+    assert "no lead in 38 water samples" in fs.EARLY_AIR  # EPA's first lab results, Nov. 28
+    assert (fs.EPA_NOV28_CITE, fs.EPA_NOV28_URL) in fs.NAMED_SOURCES
     assert "air filters and surface wipes along that path" in fs.EARLY_AIR_HTML
     assert fs.EARLY_AIR in fs.time_note("X")
     assert fs.EPA_VIEWER_URL in fs.time_note_html("X")

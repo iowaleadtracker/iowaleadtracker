@@ -527,11 +527,24 @@ OFFICIAL_HTML = (
     "response data viewer</a> (air monitoring) &middot; "
     f'<a href="{ARMY_MAPS_URL}" rel="noopener">Army updates and maps</a> (army.mil/asc).'
 )
+# EPA news release, Nov. 28, 2026 (read in full that day): no lead found in 38 water samples
+# taken post-detonation at public water supplies; results for tap water, soil, dust and air
+# samples not yet released; the Xact monitors used TSP inlets, averaged over five minutes
+# from 7 a.m. to 2 p.m. CT on Nov. 25 and hourly otherwise, and were deactivated at 3 p.m.
+# CT on Nov. 26.
+EPA_NOV28_URL = (
+    "https://www.epa.gov/newsreleases/"
+    "epa-releases-initial-water-source-lab-results-indicating-wednesdays-controlled"
+)
+EPA_NOV28_CITE = "EPA news release, Nov. 28"
 EARLY_AIR = (
     "Every reading from EPA\u2019s four real-time lead monitors southwest of the plant, "
     "through 4 p.m. CST, was below the 0.18 micrograms per cubic meter detection limit the "
-    f"Army cites ({EPA_VIEWER_CITE}). These are early readings only. Lab results from "
-    "EPA\u2019s other air samples, and soil and water sampling, are still pending and are "
+    f"Army cites ({EPA_VIEWER_CITE}). These are early readings only, and EPA switched those "
+    "monitors off at 3 p.m. on Nov. 26. On Nov. 28 EPA posted its first lab results: it "
+    "found no lead in 38 water samples "
+    f"taken at public water supplies after the blast ({EPA_NOV28_CITE}). Lab results from "
+    "EPA\u2019s air filters, soil, dust wipes, and tap water are still pending and are "
     "needed before anyone knows where lead settled."
 )
 # When the blast happened: the Army's 3 p.m. map slides (ARMY_3PM_URL) give the
@@ -586,6 +599,7 @@ NAMED_SOURCES = (
     (NYT_BLAST_CITE, NYT_BLAST_URL),
     (ARMY_NOV25_CITE, ARMY_NOV25_URL),
     (EPA_VIEWER_CITE, EPA_VIEWER_URL),
+    (EPA_NOV28_CITE, EPA_NOV28_URL),
     (ARMY_3PM_CITE, ARMY_3PM_URL),
     (CBS2_RESUME_CITE, CBS2_RESUME_URL),
     (IEM_CITE, IEM_URL),
