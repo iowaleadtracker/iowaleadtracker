@@ -123,7 +123,7 @@ test("EPA's sites are off until ticked, with a key, and open in the legend when 
   await expect(detail).toContainText("Continuous lead monitor");
   const xact = as01.readings.xact;
   await expect(detail).toContainText(`${xact.max.v.toFixed(3)} ${xact.unit}`);
-  await expect(detail).toContainText(`Measurements collected${xact.posted} total, ${xact.zero} of them zero`);
+  await expect(detail).toContainText(`Measurements collected${xact.posted} total, ${xact.zero} posted as 0`);
   // beside the air results: the published limit, linked to where its source is listed
   await expect(detail).toContainText("Published detection limit0.18 µg/m³");
   const limit = detail.locator("a.reflink");
@@ -170,7 +170,7 @@ test("a site shows each instrument's results, and says which have none", async (
   await page.selectOption("#sitepick", "AS06");
   await expect(detail.locator(".insthead").first()).toHaveText("Air cassette");
   await expect(detail).toContainText("0.123 µg/m³");
-  await expect(detail).toContainText("Measurements collected1 total, 0 of them zero");
+  await expect(detail).toContainText("Measurements collected1 total, 0 posted as 0");
   await expect(detail).toContainText("Also here, no results posted: DustTrak, AreaRAE, Summa canister.");
   await expect(detail).not.toContainText("No results posted.");
   // a lead monitor with a cassette result too: both instruments' results, the rest named
@@ -180,8 +180,8 @@ test("a site shows each instrument's results, and says which have none", async (
   await expect(detail.locator(".insthead")).toHaveText([sites.instruments.xact.name, "Air cassette"]);   // each result under its symbol and name
   await expect(detail.locator(".insthead svg")).toHaveCount(2);
   await expect(detail.locator("dt", { hasText: "Published detection limit" })).toHaveCount(2);   // both are lead in air
-  await expect(detail).toContainText(`${as01.readings.xact.posted} total, ${as01.readings.xact.zero} of them zero`);
-  await expect(detail).toContainText("1 total, 1 of them zero");
+  await expect(detail).toContainText(`${as01.readings.xact.posted} total, ${as01.readings.xact.zero} posted as 0`);
+  await expect(detail).toContainText("1 total, 1 posted as 0");
   await expect(detail).toContainText("Also here, no results posted: DustTrak, AreaRAE, Summa canister.");
   // a site with nothing posted says so
   await page.locator("#siteclose").click();
