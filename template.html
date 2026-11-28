@@ -877,13 +877,15 @@ const siteLinks = () => ((SITES.links || []).length ? " Source: " + SITES.links.
 const mainInst = (s) => { const K = SITES.kinds[s.kind], ids = s.instruments || []; return K.instrument && ids.includes(K.instrument) ? K.instrument : ids[0]; };
 const resultOf = (s, id) => (s.readings && s.readings[id]) || null;
 const headline = (s) => resultOf(s, mainInst(s));
-function resultsDl(r) {
+function resultsDl(r, inst) {
+  const L = inst && inst.limit;                   // a detection limit for this kind of result, if one is published
   const u = esc(r.unit || ""), when = (p) => (p ? `${fmtReading(p.v)} ${u}<br><span class="muted">${fmtWhen(p.t)}</span>` : "none posted");
   const age = SITES.retrieved && r.last ? hoursBetween(r.last.t, SITES.retrieved) : 0;
   return `<dl><dt>Highest since the blast</dt><dd>${when(r.max)}</dd>` +
     `<dt>Highest before it</dt><dd>${when(r.maxBefore)}</dd>` +
     `<dt>Latest</dt><dd>${when(r.last)}${age >= 2 ? `<br><span class="muted">${Math.round(age)} h before this copy was saved</span>` : ""}</dd>` +
-    `<dt>Measurements collected</dt><dd>${r.posted} total, ${r.zero} of them zero</dd></dl>`;
+    `<dt>Measurements collected</dt><dd>${r.posted} total, ${r.zero} of them zero</dd>` +
+    (L ? `<dt>Detection limit</dt><dd>${esc(L.v)} ${esc(L.unit)}${L.label ? `<br><span class="muted">${esc(L.label)}</span>` : ""}</dd>` : "") + "</dl>";
 }
 function siteLegend() {
   $("legsites").hidden = !S.sites || !!siteSel;
@@ -919,9 +921,9 @@ function siteLegend() {
     `<div class="sitesub">${s.id ? esc(K.label) + " · " : ""}${fromSource(s)}</div>` +
     (s.start ? `<dl><dt>Sampling started</dt><dd>${fmtWhen(s.start)}</dd></dl>` : "") +
     // the kind's own instrument: described, then its results
-    (main ? `<div class="insthead">${icon(mainId)}<b>${esc(main.name)}</b></div><p class="inst">${esc(main.text)}</p>` + (r ? resultsDl(r) : '<p class="inst muted">No results posted.</p>') : "") +
+    (main ? `<div class="insthead">${icon(mainId)}<b>${esc(main.name)}</b></div><p class="inst">${esc(main.text)}</p>` + (r ? resultsDl(r, main) : '<p class="inst muted">No results posted.</p>') : "") +
     // the others: their results under their names; the ones without results only named
-    withResults.map((i) => `<div class="insthead">${icon(i)}<b>${named(i)}</b></div>${resultsDl(resultOf(s, i))}`).join("") +
+    withResults.map((i) => `<div class="insthead">${icon(i)}<b>${named(i)}</b></div>${resultsDl(resultOf(s, i), SITES.instruments[i])}`).join("") +
     (without.length ? `<p class="inst">Also here, no results posted: ${without.map(named).join(", ")}.</p>` : "") +
     `<div class="legnote">${esc(SITES.note || "")}${siteLinks()}${M.tzOffsetMin ? ` Times are local (${fmtTime(s.start || (first && first.last.t) || SITES.retrieved, M.tzOffsetMin).replace(/^.*\(|\)$/g, "")}).` : ""}</div>`;
   $("siteclose").addEventListener("click", () => selectSite(null));

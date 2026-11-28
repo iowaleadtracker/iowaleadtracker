@@ -104,6 +104,8 @@ def test_reference_sites_are_checked(tmp_path: Path) -> None:
         {**good, "sites": [{**site, "instruments": ["y"]}]},  # an instrument not described
         {**good, "sites": [{**site, "lat": "40.7"}]},
         {**good, "instruments": {"x": {"name": "X", "shape": "star"}}},  # no such shape
+        {**good, "instruments": {"x": {"name": "X", "limit": {"v": "0.18", "unit": "u"}}}},
+        {**good, "instruments": {"x": {"name": "X", "limit": {"v": 0, "unit": "u"}}}},
         {**good, "sites": [{**site, "readings": {"y": None}}]},  # not an instrument there
         {**good, "sites": [{**site, "readings": {"x": 0.002}}]},  # a number, not a summary
         {**good, "sites": [{**site, "readings": [None]}]},
@@ -124,6 +126,10 @@ def test_the_saved_epa_sites_load() -> None:
     lead = [s for s in out["sites"] if s["kind"] == "lead"]
     assert [s["id"] for s in lead] == ["AS01", "AS02", "AS03", "AS04"]
     assert all(s["readings"]["xact"]["max"]["v"] < 0.1 for s in lead)  # µg/m³, as EPA posts
+    # the Army's 0.18 µg/m³ beside lead-in-air results only (Xact, air cassette)
+    limits = {k: i["limit"]["v"] for k, i in out["instruments"].items() if "limit" in i}
+    assert limits == {"xact": 0.18, "cassette": 0.18}
+    assert out["instruments"]["xact"]["limit"]["unit"] == "µg/m³"
     for s in out["sites"]:  # every instrument has an entry; only the Xact monitors have results
         assert set(s["readings"]) == set(s["instruments"])
         assert all((r is not None) == (i == "xact") for i, r in s["readings"].items())

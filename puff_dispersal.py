@@ -544,9 +544,9 @@ def _add_display_args(p: argparse.ArgumentParser) -> None:
         "sites) that readers can switch on and tap for details: a JSON file with a name, a "
         'note, links, "kinds" (a label, a shape and, optionally, the instrument a site\'s '
         'details describe), "instruments" (a name, a description and, optionally, a shape '
-        'for each) and "sites", each a kind, a latitude and longitude, its instruments and, '
-        'optionally, an id and "readings": for each instrument there, a summary of its '
-        "results or null",
+        'and a detection limit for each) and "sites", each a kind, a latitude and '
+        'longitude, its instruments and, optionally, an id and "readings": for each '
+        "instrument there, a summary of its results or null",
     )
     p.add_argument(
         "--hysplit-overlay-note",
@@ -1133,6 +1133,15 @@ def _reference_outlines(a: argparse.Namespace) -> Json | None:
 SITE_SHAPES = ("diamond", "square", "square-dot", "triangle", "circle")
 
 
+def _site_limit(limit: Json) -> Json:
+    """Return an instrument's detection limit: a positive number, its unit and whose it is."""
+    v = limit["v"]
+    if isinstance(v, bool) or not isinstance(v, (int, float)) or not v > 0:
+        msg = "a detection limit needs a positive number"
+        raise ValueError(msg)
+    return {"v": v, "unit": str(limit["unit"]), "label": str(limit.get("label", ""))}
+
+
 def _site_layers(data: Json) -> Json:
     """Return the kinds, instruments and sites of a file, checked against each other."""
     kinds = {
@@ -1151,6 +1160,7 @@ def _site_layers(data: Json) -> Json:
             "name": str(v["name"]),
             "text": str(v.get("text", "")),
             **({"shape": str(v["shape"])} if "shape" in v else {}),
+            **({"limit": _site_limit(v["limit"])} if "limit" in v else {}),
         }
         for k, v in data.get("instruments", {}).items()
     }

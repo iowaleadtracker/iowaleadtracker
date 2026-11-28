@@ -48,10 +48,20 @@ BRIEF_URL = "https://iowaleadtracker.com/monitor-placement/"
 #: DustTrak from TSI's DustTrak II 8530 page, AreaRAE from Honeywell's AreaRAE Pro RAEMet
 #: sensor page, the Summa canister from EPA Compendium Method TO-15 (EPA/625/R-96/010b,
 #: 1999). All three are in works_cited.py (checked 28 November 2026).
-INSTRUMENTS: dict[str, dict[str, str]] = {
+#: The detection limit shown beside lead-in-air results: the only one published, the
+#: Army's, from the legend of its 3 p.m. air map ("0.18 ug/m3 - Lead Air Sampling Method
+#: Detection Limit"; McFate 2026d in works_cited.py). It is for the Army's sampling method;
+#: EPA hasn't published the Xact monitors' own.
+AIR_LIMIT = {
+    "v": 0.18,
+    "unit": "µg/m³",
+    "label": "the Army's lead air sampling method (Army air map, Nov. 25)",
+}
+INSTRUMENTS: dict[str, dict[str, Any]] = {
     "xact": {
         "name": "Xact continuous lead monitor",
         "shape": "diamond",
+        "limit": AIR_LIMIT,
         "text": "Collects particles from the air on a filter tape and measures their metals "
         "by X-ray fluorescence as it runs, so its readings post without a lab. EPA "
         "hasn't published the model, inlet size or detection limit.",
@@ -59,6 +69,7 @@ INSTRUMENTS: dict[str, dict[str, str]] = {
     "cassette": {
         "name": "Air cassette",
         "shape": "square",
+        "limit": AIR_LIMIT,
         "text": "A filter that collects particles from the air. A lab measures the lead on it.",
     },
     "dusttrak": {

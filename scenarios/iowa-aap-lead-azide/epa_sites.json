@@ -7,6 +7,11 @@
    "text": "A wireless monitor for up to seven hazards, including gamma radiation, volatile organic compounds, combustible and toxic gases, and oxygen (Honeywell)."
   },
   "cassette": {
+   "limit": {
+    "label": "the Army's lead air sampling method (Army air map, Nov. 25)",
+    "unit": "µg/m³",
+    "v": 0.18
+   },
    "name": "Air cassette",
    "shape": "square",
    "text": "A filter that collects particles from the air. A lab measures the lead on it."
@@ -27,6 +32,11 @@
    "text": "A specially prepared stainless steel canister that takes in a sample of air for a lab to test for volatile organic compounds (EPA Method TO-15)."
   },
   "xact": {
+   "limit": {
+    "label": "the Army's lead air sampling method (Army air map, Nov. 25)",
+    "unit": "µg/m³",
+    "v": 0.18
+   },
    "name": "Xact continuous lead monitor",
    "shape": "diamond",
    "text": "Collects particles from the air on a filter tape and measures their metals by X-ray fluorescence as it runs, so its readings post without a lab. EPA hasn't published the model, inlet size or detection limit."
