@@ -31,6 +31,7 @@ sys.path.insert(0, str(ROOT))
 
 import brief_page  # noqa: E402 - the scenario's modules, found through the path above
 import make_map_picker as site  # noqa: E402
+import site_style  # noqa: E402
 import staged  # noqa: E402
 
 BLOCK = re.compile(r"<(script|style)\b([^>]*)>(.*?)</\1>", re.DOTALL | re.IGNORECASE)
@@ -42,7 +43,7 @@ class _StandIns(dict[str, str]):
     """Fill every $placeholder: ``null`` inside a script, nothing elsewhere."""
 
     def __init__(self, *, in_script: bool) -> None:
-        super().__init__(site_name=site.SITE_NAME)
+        super().__init__(site_name=site.SITE_NAME, base_css=site_style.BASE_CSS)
         self.value = "null" if in_script else ""
 
     def __missing__(self, key: str) -> str:

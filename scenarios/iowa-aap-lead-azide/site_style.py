@@ -9,6 +9,9 @@ from __future__ import annotations
 
 #: The site's colors, named by color rather than by use: several have more than one use
 #: (silver is both the table rules and the header's secondary text).
+#: Left as literals on purpose: plain white (#fff), the day note's near-black text
+#: (#1d1d1b, used once), and the <meta name="theme-color"> values, which can't use CSS
+#: variables: keep those equal to --ink by hand.
 PALETTE = """\
   :root {
     --ink: #1f2933;     /* text, the header bar */
