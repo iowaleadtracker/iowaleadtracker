@@ -140,7 +140,7 @@ body.embedded > header { display: none; }
 #mapwrap.coop { touch-action: pan-x pan-y; }
 /* narrow screens: the legend sits in a strip under the map instead of on top of it */
 .legend.below {
-  position: static; order: 1; min-width: 0; margin: 0; border-radius: 0; box-shadow: none; max-height: none;
+  position: static; order: 1; min-width: 0; margin: 0; border-radius: 0; box-shadow: none; max-height: none; overflow: visible;   /* below the map it never scrolls; a scroll box here can bounce a ResizeObserver loop in WebKit */
   border-width: 0 0 1px; padding: 8px 16px 6px;
 }
 .legend.below .lz { font-size: 12.5px; }
