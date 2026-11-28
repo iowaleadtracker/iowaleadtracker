@@ -45,7 +45,7 @@
    },
    "name": "Xact continuous lead monitor",
    "shape": "diamond",
-   "text": "Collects particles from the air on a filter tape and measures their metals by X-ray fluorescence as it runs, so its readings post without a lab. EPA hasn't published the model, inlet size or detection limit."
+   "text": "Collects particles from the air on a filter tape and measures their metals by X-ray fluorescence as it runs, so its readings post without a lab. EPA says it used total suspended particulate (TSP) inlets, to catch larger particles too; it hasn't published the model or detection limit (EPA, Nov. 28)."
   }
  },
  "kinds": {

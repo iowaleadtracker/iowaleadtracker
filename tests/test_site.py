@@ -1040,7 +1040,17 @@ def test_early_air_readings_say_lab_results_are_pending() -> None:
         assert "early readings only" in text.lower()
         assert "still pending and are needed" in text.replace("</b>", "")
         assert "safe" not in text.lower()  # no verdicts about anyone's safety
-    assert "soil and water sampling" in fs.EARLY_AIR
+    assert "soil, dust and tap-water sampling" in fs.EARLY_AIR
+    # EPA's Nov. 28 water results: attributed and linked wherever the official word is given
+    assert "no lead in the 38 water samples" in fs.EPA_WATER
+    assert "safe" not in fs.EPA_WATER.lower()
+    assert fs.EPA_WATER in fs.AFTER_BLAST
+    assert fs.EPA_WATER_URL in fs.BLAST_STATUS_HTML
+    assert fs.EPA_WATER_URL in fs.about_time_html("X")
+    assert any(
+        r.startswith("EPA Press Office, 2026:") and fs.EPA_WATER_URL in r
+        for r in works_cited.REFERENCES
+    )
     assert "air-sample cassettes and surface wipes along that path" in fs.EARLY_AIR_HTML
     assert fs.EARLY_AIR in fs.time_note("X")
     assert fs.EPA_VIEWER_URL in fs.time_note_html("X")

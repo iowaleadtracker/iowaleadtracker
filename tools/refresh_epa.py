@@ -78,7 +78,8 @@ BRIEF_URL = "https://iowaleadtracker.com/monitor-placement/"
 #: a circle); whether it has posted results is
 #: shown from the data (``readings``), not written here. Keep these to what the sources say,
 #: and don't say what an instrument can't measure unless its source says so:
-#: Xact and the air cassette from the monitor-placement brief (EPA 2026a, 2026b there);
+#: Xact and the air cassette from the monitor-placement brief (EPA 2026a, 2026b there), and
+#: the Xact's inlets from EPA's Nov. 28 news release (EPA Press Office 2026 in works_cited);
 #: DustTrak from TSI's DustTrak II 8530 page, AreaRAE from Honeywell's AreaRAE Pro RAEMet
 #: sensor page, the Summa canister from EPA Compendium Method TO-15 (EPA/625/R-96/010b,
 #: 1999). All three are in works_cited.py (checked 28 November 2026).
@@ -100,8 +101,9 @@ INSTRUMENTS: dict[str, dict[str, Any]] = {
         "shape": "diamond",
         "limit": AIR_LIMIT,
         "text": "Collects particles from the air on a filter tape and measures their metals "
-        "by X-ray fluorescence as it runs, so its readings post without a lab. EPA "
-        "hasn't published the model, inlet size or detection limit.",
+        "by X-ray fluorescence as it runs, so its readings post without a lab. EPA says it "
+        "used total suspended particulate (TSP) inlets, to catch larger particles too; it "
+        "hasn't published the model or detection limit (EPA, Nov. 28).",
     },
     "cassette": {
         "name": "Air cassette",

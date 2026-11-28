@@ -153,6 +153,14 @@ REFERENCES = [
     "Emerson, E. W., and Coauthors, 2020: Revisiting particle dry deposition and its role in "
     "radiative effect estimates. <i>Proc. Natl. Acad. Sci. USA</i>, <b>117</b>, "
     "26&thinsp;076&ndash;26&thinsp;082, " + doi("10.1073/pnas.2014761117") + ".",
+    "EPA Press Office, 2026: EPA releases initial water source lab results indicating "
+    "Wednesday&rsquo;s controlled detonation in Iowa did not result in an elevation of lead in "
+    "water bodies that serve as sources of drinking water. News release, U.S. Environmental "
+    "Protection Agency, 28 November 2026, accessed 28 November 2026, "
+    + _a(
+        "https://www.epa.gov/newsreleases/epa-releases-initial-water-source-lab-results-indicating-wednesdays-controlled"
+    )
+    + ".",
     "EPA Region 7, 2026: Iowa Army Ammunition Plant response data viewer (continuous lead "
     "monitors and air sampling stations). ArcGIS Experience, U.S. Environmental Protection "
     "Agency, accessed 25 November 2026, "
@@ -736,6 +744,15 @@ ARMY_BOX_METHOD = (
 #: entry for every change to the model, its settings or its sources.
 CHANGES_HEAD = "Change log"
 CHANGES = [
+    (
+        "Nov. 28",
+        (
+            "The header, the About box, the summary and the questions add EPA&rsquo;s Nov. 28 "
+            "news release: its first lab results found no lead in the 38 water samples it took "
+            "after the blast at public water supplies (EPA Press Office 2026). Results for tap "
+            "water, soil, dust and air samples are still to come. The maps did not change."
+        ),
+    ),
     (
         "Nov. 28",
         (
