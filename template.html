@@ -1298,7 +1298,8 @@ function syncMinBox() {
   $("fixtopwrap").hidden = !v;
   if (!v) return;
   $("fixtop").checked = dep ? S.fixDepMin : S.fixMin;
-  $("fixtoplabel").textContent = "show only ≥ " + (dep ? depText(v) : locText(v));   // in the menu's units
+  const U = unitInfo();   // the legend's unit, so the cutoff reads against the scale beside it
+  $("fixtoplabel").textContent = "show only ≥ " + unitText(v, [U.factor, U.label]);
 }
 function render() { syncMinBox(); updatePanel(); draw(); }
 

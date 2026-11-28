@@ -171,7 +171,8 @@ test("hovering the levels of concern gives mass, even with particle counts chose
   }
   expect(text, "no scanned point reached a cell the cloud reached").toMatch(/so far: \d/);
   // a mass in a readable unit (metric, or U.S. ounces, pounds, tons for big amounts), not particles
-  expect(text).toMatch(/so far: [\d.,]+ (?:[mµnpfk]?g|t|oz|lb|tons)\/m[²³]/);
+  // (big numbers may be written ×10⁴ and up; a negative power would mean a too-large unit)
+  expect(text).toMatch(/so far: [\d.,]+(?:×10[⁰-⁹]+)? (?:[mµnpfk]?g|t|oz|lb|tons)\/m[²³]/);
   await expect(page.locator("#units")).toHaveValue("count");   // the choice is untouched
 });
 
@@ -181,8 +182,12 @@ test("the air minimum's label follows the units", async ({ page }) => {
   await expect(label).toHaveText("show only ≥ 0.15 µg/m³");
   await page.selectOption("#units", "cm3");
   await expect(label).toHaveText("show only ≥ 1.5×10⁻⁷ µg/cm³");   // 1 m³ = 10⁶ cm³
-  await page.selectOption("#units", "mass");
-  await expect(label).toHaveText("show only ≥ 1.5×10⁻⁴ mg/m³");
+  await page.selectOption("#units", "mass");   // no fixed unit: the legend's, picked by size
+  const unit = (await page.locator("#legtitle").textContent()).match(/\(([^)]+)\)$/)[1];
+  await expect(label).toHaveText(new RegExp(`^show only ≥ [\\d.,]+ ${unit.replace("/", "\\/")}$`));
+  await page.locator('#fieldseg button[data-v="dep"]').click();   // deposition: its own minimum, same rule
+  const depUnit = (await page.locator("#legtitle").textContent()).match(/\(([^)]+)\)$/)[1];
+  await expect(label).toHaveText(new RegExp(`^show only ≥ [\\d.,]+ ${depUnit.replace("/", "\\/")}$`));
 });
 
 test("text from the data can't inject markup or script", async ({ page }) => {
