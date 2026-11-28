@@ -220,6 +220,46 @@ test("a map opened on its own works, including the HYSPLIT file download", async
   expect(errors).toEqual([]);
 });
 
+// A reader who changes two menus before the first map has loaded must end up on the map
+// the menus show. (Safari could drop the second change; the pages now load one map at a
+// time.) WebKit may log the abandoned first decode; that's allowed here, nothing else.
+const abandonedDecode = (e) => /NotReadableError|due to access control checks/.test(e);
+const otherChoice = async (page, sel) => page.locator(`${sel} option`).evaluateAll(
+  (os, cur) => os.map((o) => o.value).find((v) => v !== cur), await page.locator(sel).inputValue());
+// Wait until the frame's src is the file `fileExpr` names (evaluated in the page), then
+// until that map has loaded.
+async function endsOn(page, base, fileExpr) {
+  const file = await page.evaluate(fileExpr);
+  expect(file, "the menus name a map").toBeTruthy();
+  await expect.poll(async () => (await page.locator("iframe#map").getAttribute("src")).split("#")[0],
+    { message: "the frame moves to the map the menus show", timeout: 20000 }).toContain(file);
+  await mapReady(page, base);
+}
+
+test("two quick menu changes on the landing page end on the right map", async ({ page }) => {
+  const errors = await open(page, "/");
+  await page.keyboard.press("Escape");
+  await mapReady(page, origin + "/");
+  const [weather, cas] = [await otherChoice(page, "#w"), await otherChoice(page, "#c")];
+  await page.selectOption("#w", weather);   // no wait: the second change comes while the first loads
+  await page.selectOption("#c", cas);
+  // the key the page's show() builds from the menus
+  await endsOn(page, origin + "/", `MAP_FILES[(document.getElementById("w").value === "forecast" ? "" : document.getElementById("w").value + "-")
+    + document.getElementById("d").value + "-" + document.getElementById("c").value + "-" + document.getElementById("t").value.replace(":", "")]`);
+  expect(errors.filter((e) => !abandonedDecode(e))).toEqual([]);
+});
+
+test("two quick menu changes on the staged page end on the right map", async ({ page }) => {
+  const errors = await open(page, `/${STAGED}/`);
+  await mapReady(page, `${origin}/${STAGED}/`);
+  const [cas, time] = [await otherChoice(page, "#c"), await otherChoice(page, "#t")];
+  await page.selectOption("#c", cas);
+  await page.selectOption("#t", time);
+  await endsOn(page, `${origin}/${STAGED}/`, `FILES[document.getElementById("d").value + "-" + document.getElementById("c").value + "-"
+    + document.getElementById("t").value.replace(":", "")]`);
+  expect(errors.filter((e) => !abandonedDecode(e))).toEqual([]);
+});
+
 test("the Content-Security-Policy is in force in these tests", async ({ page }) => {
   const errors = await open(page, "/404.html");
   // a data: image, which the policy no longer allows: the browser must refuse it
