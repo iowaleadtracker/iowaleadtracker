@@ -169,7 +169,9 @@ test("hovering the levels of concern gives mass, even with particle counts chose
       text = (await page.locator("#tip").textContent()) || "";
     }
   }
-  expect(text).toMatch(/so far: [\d.,×⁰¹²³⁴⁵⁶⁷⁸⁹⁻]+ [mµnpf]?g\/m[²³]/);   // a mass, not particles
+  expect(text, "no scanned point reached a cell the cloud reached").toMatch(/so far: \d/);
+  // a mass (metric, or U.S. ounces, pounds, tons for big amounts), not particles
+  expect(text).toMatch(/so far: [\d.,×⁰¹²³⁴⁵⁶⁷⁸⁹⁻]+ (?:[mµnpfk]?g|t|oz|lb|tons)\/m[²³]/);
   await expect(page.locator("#units")).toHaveValue("count");   // the choice is untouched
 });
 
