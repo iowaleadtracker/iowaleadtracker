@@ -194,6 +194,31 @@ test("a site shows each instrument's results, and says which have none", async (
   expect(errors).toEqual([]);
 });
 
+test("closing a site's details: focus goes to the list, Escape closes too, and the × fits a finger", async ({ page, isMobile }) => {
+  const errors = await openMap(page, fixture("forecast"));
+  await page.locator("#showSites").check();
+  await page.selectOption("#sitepick", "AS01");
+  const close = page.locator("#siteclose");
+  await expect(close).toBeFocused();   // opened from the list: focus on the ×
+  const b = await close.boundingBox();
+  if (isMobile) expect(Math.min(b.width, b.height)).toBeGreaterThanOrEqual(44);   // touch: a finger-sized target
+  else expect(Math.min(b.width, b.height)).toBeGreaterThanOrEqual(24);   // the WCAG minimum
+  expect(await page.locator(".legend").evaluate((l) => l.scrollWidth <= l.clientWidth)).toBe(true);   // no sideways scroll
+  if (isMobile) { await close.scrollIntoViewIfNeeded(); const c = await close.boundingBox(); await page.touchscreen.tap(c.x + c.width / 2, c.y + c.height / 2); }
+  else await close.click();
+  await expect(page.locator("#legsite")).toBeHidden();
+  await expect(page.locator("#legsites")).toBeVisible();
+  await expect(page.locator("#sitepick")).toBeFocused();   // not lost to the page
+  await expect(page.locator("#sitepick")).toBeInViewport();   // the key in view, even where the legend shrank
+  // the keyboard: pick again, then Escape from inside the details
+  await page.selectOption("#sitepick", "AS02");
+  await expect(page.locator("#legsite")).toContainText("AS02");
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#legsite")).toBeHidden();
+  await expect(page.locator("#sitepick")).toBeFocused();
+  expect(errors).toEqual([]);
+});
+
 test("deposition opens at the map's minimum, with a box that brings lower values back", async ({ page }) => {
   await openMap(page, fixture("forecast"));   // built with --dep-scale-min 5ug/ft2
   await page.locator('#fieldseg button[data-v="dep"]').click();

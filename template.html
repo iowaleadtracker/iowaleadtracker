@@ -154,7 +154,9 @@ body.embedded > header { display: none; }
 #legsite .inst + dl { margin-top: 5px; }
 #legsite .sitehead { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; }
 #legsite .sitehead span { flex: 1; }
-#legsite .sitehead button { border: 0; background: var(--chip); color: var(--ink); border-radius: 6px; width: 24px; height: 24px; cursor: pointer; font-size: 15px; line-height: 1; }
+#legsite .sitehead button { border: 0; background: var(--chip); color: var(--ink); border-radius: 6px; width: 24px; height: 24px; cursor: pointer; font-size: 15px; line-height: 1; flex: none; }
+/* touch screens: a target a finger can hit (44px, the usual guidance for phones) */
+@media (pointer: coarse) { #legsite .sitehead button { width: 44px; height: 44px; font-size: 20px; } }
 #legsite .sitesub { color: var(--ink-2); margin: 1px 0 4px; }
 #legsite dl { font-size: 12px; gap: 2px 10px; }
 #legsite dd .muted { font-size: 11px; }
@@ -929,7 +931,7 @@ function siteLegend() {
     withResults.map((i) => `<div class="insthead">${icon(i)}<b>${named(i)}</b></div>${resultsDl(resultOf(s, i), SITES.instruments[i])}`).join("") +
     (without.length ? `<p class="inst">Also here, no results posted: ${without.map(named).join(", ")}.</p>` : "") +
     `<div class="legnote">${esc(SITES.note || "")}${siteLinks()}${M.tzOffsetMin ? ` Times are local (${fmtTime(s.start || (first && first.last.t) || SITES.retrieved, M.tzOffsetMin).replace(/^.*\(|\)$/g, "")}).` : ""}</div>`;
-  $("siteclose").addEventListener("click", () => selectSite(null));
+  $("siteclose").addEventListener("click", closeSite);
 }
 // Inside the site, a link to its own references opens that dialog on the page around the map
 // instead of a new tab.
@@ -942,6 +944,15 @@ $("legsite").addEventListener("click", (e) => {
   window.parent.postMessage({ puffOpen: "references" }, location.origin);
 });
 function selectSite(s) { siteSel = s; siteLegend(); schedule(); }
+// Closing the details (the × or Escape): the key comes back, focus goes to its "Details for"
+// list (the × is gone, and the next site is picked there), and on narrow screens, where the
+// legend sits under the map and shrinks, the page scrolls only if the key would be out of view.
+function closeSite() {
+  selectSite(null);
+  $("sitepick").focus({ preventScroll: true });
+  if (narrowMQ.matches) $("legsites").scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+}
+$("legsite").addEventListener("keydown", (e) => { if (e.key === "Escape" && siteSel) { e.preventDefault(); closeSite(); } });
 function drawSites() {
   if (!S.sites) return;
   const dark = isDark(), ink = "#1d1d1b", halo = "rgba(255,255,255,0.92)";
