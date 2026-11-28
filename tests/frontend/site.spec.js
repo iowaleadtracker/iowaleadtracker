@@ -73,6 +73,17 @@ async function open(page, path) {
   return errors;
 }
 const mapFrame = (page) => page.frameLocator("iframe#map");
+// Wait until the map frame shows its current src, decoded and drawn (a missing file would
+// get the 404 page, which never gets there). Switching maps before that abandons the
+// decode, which WebKit logs as errors, so each step waits for it, as a reader would.
+async function mapReady(page, base) {
+  const src = await page.locator("iframe#map").getAttribute("src");
+  const want = new URL(src, base).href.split("#")[0];
+  await expect.poll(async () => {
+    const f = page.frames().find((fr) => fr.url().split("#")[0] === want);
+    return f ? f.evaluate(() => !document.getElementById("loading") && !!document.getElementById("title")?.textContent).catch(() => false) : false;
+  }, { message: `the map ${src} loads` }).toBe(true);
+}
 const noSideScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
 
 test.describe("landing page", () => {
@@ -84,7 +95,7 @@ test.describe("landing page", () => {
     expect(await note.evaluate((d) => d.scrollTop)).toBe(0);
     await page.keyboard.press("Escape");
     await expect(note).not.toHaveAttribute("open", "");
-    await expect(mapFrame(page).locator("#title")).not.toBeEmpty();      // the map frame drew a map
+    await mapReady(page, origin + "/");                                    // the map frame drew a map
     await page.reload();                                                  // seen this build: stays closed
     await expect(page.locator("dialog#note")).not.toHaveAttribute("open", "");
     expect(errors).toEqual([]);
@@ -104,27 +115,26 @@ test.describe("landing page", () => {
     expect(errors).toEqual([]);
   });
 
-  test("every case, weather and time loads a map", async ({ page }) => {
+  test("every combination of weather, case and time loads a map", async ({ page }) => {
     const errors = await open(page, "/");
     await page.keyboard.press("Escape");
-    const frame = page.locator("iframe#map");
-    for (const sel of ["#w", "#c", "#t"]) {
-      if (!(await page.locator(sel).isVisible())) continue;   // one choice only: the menu is hidden
-      const values = await page.locator(`${sel} option`).evaluateAll((os) => os.map((o) => o.value));
-      for (const v of values) {
-        await page.selectOption(sel, v);
-        const src = await frame.getAttribute("src");
-        const res = await page.request.get(new URL(src.split("#")[0], origin + "/").href);
-        expect(res.status(), `${sel}=${v}: ${src}`).toBe(200);
-      }
+    await mapReady(page, origin + "/");
+    const choices = async (sel) => ((await page.locator(sel).isVisible())   // a hidden menu has one choice
+      ? page.locator(`${sel} option`).evaluateAll((os) => os.map((o) => o.value)) : [null]);
+    let n = 0;
+    for (const w of await choices("#w")) for (const c of await choices("#c")) for (const t of await choices("#t")) {
+      for (const [sel, v] of [["#w", w], ["#c", c], ["#t", t]]) if (v !== null) await page.selectOption(sel, v);
+      await mapReady(page, origin + "/");
+      n++;
     }
+    expect(n).toBeGreaterThan(1);
     expect(errors).toEqual([]);
   });
 
   test("the U.S./metric switch reaches the map", async ({ page }) => {
     const errors = await open(page, "/");
     await page.keyboard.press("Escape");
-    await expect(mapFrame(page).locator("#title")).not.toBeEmpty();
+    await mapReady(page, origin + "/");
     await page.locator('#sys button[data-v="metric"]').click();
     await expect(mapFrame(page).locator('#sysseg button[data-v="metric"]')).toHaveAttribute("aria-pressed", "true");
     await page.locator('#sys button[data-v="us"]').click();
@@ -144,16 +154,16 @@ test.describe("landing page", () => {
   });
 });
 
-test("the staged page's menus and buttons load maps", async ({ page }) => {
+test("every day, case and time on the staged page, and its buttons, load maps", async ({ page }) => {
   const errors = await open(page, `/${STAGED}/`);
-  const frame = page.locator("iframe#map");
-  const loads = async () => {
-    const res = await page.request.get(new URL(await frame.getAttribute("src"), `${origin}/${STAGED}/`).href);
-    expect(res.status()).toBe(200);
-  };
-  for (const sel of ["#d", "#c", "#t"]) {
-    for (const v of await page.locator(`${sel} option`).evaluateAll((os) => os.map((o) => o.value))) {
-      await page.selectOption(sel, v);
+  const loads = () => mapReady(page, `${origin}/${STAGED}/`);
+  await loads();
+  const choices = (sel) => page.locator(`${sel} option`).evaluateAll((os) => os.map((o) => o.value));
+  for (const d of await choices("#d")) {
+    await page.selectOption("#d", d);   // each day has its own times
+    for (const c of await choices("#c")) for (const t of await choices("#t")) {
+      await page.selectOption("#c", c);
+      await page.selectOption("#t", t);
       await loads();
     }
   }
