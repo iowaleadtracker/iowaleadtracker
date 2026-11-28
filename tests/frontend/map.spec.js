@@ -74,6 +74,7 @@ test("each fixture shows only the layers its data has", async ({ page }) => {
   await expect(page.locator("#refwrap")).toBeVisible();     // the Army's zones
   await expect(page.locator("#envwrap")).toBeVisible();     // the model spread
   await expect(page.locator("#modelseg")).toBeHidden();     // no saved HYSPLIT run
+  await expect(page.locator("#siteswrap")).toBeVisible();   // EPA's sampling sites
   await openMap(page, fixture("archived"));
   await expect(page.locator("#skywrap")).toBeHidden();      // built without the weather layer
   await expect(page.locator("#modelseg")).toBeVisible();    // NOAA HYSPLIT
@@ -103,6 +104,45 @@ test("the Army's zones are off until ticked", async ({ page }) => {
   await expect(page.locator("#legref")).toBeHidden();
   await page.locator("#showRef").check();
   await expect(page.locator("#legref")).toBeVisible();
+});
+
+test("EPA's sites are off until ticked, with a key, and open in the legend when tapped", async ({ page, isMobile }) => {
+  const data = fixture("forecast"), sites = data.meta.sites;
+  const errors = await openMap(page, data);
+  await expect(page.locator("#showSites")).not.toBeChecked();
+  await expect(page.locator("#legsites")).toBeHidden();
+  await page.locator("#showSites").check();
+  await expect(page.locator("#legsites")).toBeVisible();
+  for (const k of Object.values(sites.kinds)) await expect(page.locator("#legsites")).toContainText(k.label);
+  await expect(page.locator("#legsites")).toContainText("A reading near zero doesn't show");
+  // from the list: the map centers on the site and its details open
+  const as01 = sites.sites.find((s) => s.id === "AS01");
+  await page.selectOption("#sitepick", "AS01");
+  const detail = page.locator("#legsite");
+  await expect(detail).toBeVisible();
+  await expect(detail).toContainText("Continuous lead monitor");
+  await expect(detail).toContainText(`${as01.readings.max.v.toFixed(3)} ${sites.unit}`);
+  await expect(detail).toContainText(`${as01.readings.posted}, ${as01.readings.zero} of them zero`);
+  await expect(detail).toContainText("Xact continuous lead monitor.");
+  await expect(detail).toContainText("Measurements, not model estimates.");
+  await page.locator("#siteclose").click();
+  await expect(detail).toBeHidden();
+  // a click or tap on the site (now at the map's center) opens it again; a drag doesn't
+  await page.locator("#map").scrollIntoViewIfNeeded();
+  const box = await page.locator("#map").boundingBox();
+  const [cx, cy] = [box.x + box.width / 2, box.y + box.height / 2];
+  if (isMobile) await page.touchscreen.tap(cx, cy);   // one finger scrolls the page: no drag here
+  else {
+    await page.mouse.move(cx, cy); await page.mouse.down(); await page.mouse.move(cx + 40, cy + 20); await page.mouse.up();
+    await expect(detail).toBeHidden();
+    await page.mouse.move(cx + 40, cy + 20); await page.mouse.down(); await page.mouse.move(cx, cy); await page.mouse.up();   // and back
+    await page.mouse.click(cx, cy);
+  }
+  await expect(detail).toBeVisible();
+  await expect(detail.locator(".sitehead")).toContainText("AS01");
+  await page.locator("#showSites").uncheck();
+  await expect(detail).toBeHidden();
+  expect(errors).toEqual([]);
 });
 
 test("deposition opens at the map's minimum, with a box that brings lower values back", async ({ page }) => {

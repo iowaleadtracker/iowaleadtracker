@@ -537,6 +537,16 @@ def _add_display_args(p: argparse.ArgumentParser) -> None:
         '"dep" a list of zones, each a label and lines of [latitude, longitude] points',
     )
     p.add_argument(
+        "--reference-sites",
+        default=None,
+        metavar="FILE",
+        help="add measurement sites from another source (for example an agency's sampling "
+        "sites) that readers can switch on and tap for details: a JSON file with a name, a "
+        'note, links, "kinds" (a label and a shape for each), "instruments" (a name and a '
+        'description for each) and "sites", each a kind, a latitude and longitude, its '
+        "instruments and, optionally, an id and a summary of its readings",
+    )
+    p.add_argument(
         "--hysplit-overlay-note",
         default=None,
         metavar="TEXT",
@@ -1118,6 +1128,52 @@ def _reference_outlines(a: argparse.Namespace) -> Json | None:
         raise SystemExit(f"--reference-outlines: {e!r}") from None
 
 
+SITE_SHAPES = ("diamond", "square", "square-dot", "triangle", "circle")
+
+
+def _site_layers(data: Json) -> Json:
+    """Return the kinds, instruments and sites of a file, checked against each other."""
+    kinds = {
+        str(k): {"label": str(v["label"]), "shape": str(v["shape"])}
+        for k, v in data["kinds"].items()
+    }
+    if any(k["shape"] not in SITE_SHAPES for k in kinds.values()):
+        msg = f"each kind's shape must be one of {', '.join(SITE_SHAPES)}"
+        raise ValueError(msg)
+    instruments = {
+        str(k): {"name": str(v["name"]), "text": str(v.get("text", ""))}
+        for k, v in data.get("instruments", {}).items()
+    }
+    for s in data["sites"]:
+        if s["kind"] not in kinds or not _is_line([[s["lat"], s["lon"]]], points=1):
+            msg = "each site needs a listed kind and a latitude and longitude"
+            raise ValueError(msg)
+        if any(i not in instruments for i in s.get("instruments", [])):
+            msg = f"site {s.get('id', '?')} lists an instrument that isn't described"
+            raise ValueError(msg)
+    return {"kinds": kinds, "instruments": instruments, "sites": data["sites"]}
+
+
+def _reference_sites(a: argparse.Namespace) -> Json | None:
+    """Return the sites of ``--reference-sites`` for the page, or nothing without it."""
+    path = getattr(a, "reference_sites", None)
+    if not path:
+        return None
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+        links = [(str(ln["text"]), str(ln["url"])) for ln in data.get("links", [])]
+        keep = ("retrieved", "event", "unit")
+        return {
+            "name": str(data["name"]),
+            "note": str(data.get("note", "")),
+            "links": [{"text": t, "url": _https(u)} for t, u in links],
+            **{k: str(data[k]) for k in keep if k in data},
+            **_site_layers(data),
+        }
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as e:
+        raise SystemExit(f"--reference-sites: {e!r}") from None
+
+
 def _hours_output(
     a: argparse.Namespace, met: MetField, hourly: Sequence[Json], F: dict[str, FloatArray]
 ) -> list[Json]:
@@ -1446,6 +1502,9 @@ def simulate(a: argparse.Namespace, log: TextIO = sys.stderr) -> Json:
     outlines = _reference_outlines(a)
     if outlines:
         payload["meta"]["outlines"] = outlines
+    sites = _reference_sites(a)
+    if sites:
+        payload["meta"]["sites"] = sites
     payload["meta"]["hysplit"] = hysplit_files(a, bins_out, payload["grid"])
     if sky_meta:
         payload["meta"]["skyGrid"] = sky_meta

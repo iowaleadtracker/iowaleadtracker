@@ -71,6 +71,50 @@ def test_weather_at_centers_the_weather_grid_elsewhere() -> None:
             puff.weather_point(puff.parse_args([*base, "--weather-at", bad]))
 
 
+def test_reference_sites_are_checked(tmp_path: Path) -> None:
+    """A file of sites needs kinds with a known shape, and sites of a listed kind."""
+    good = {
+        "name": "Agency sites",
+        "kinds": {"lead": {"label": "Lead monitor", "shape": "diamond"}},
+        "instruments": {"x": {"name": "X", "text": "Measures lead."}},
+        "sites": [{"id": "A1", "kind": "lead", "lat": 40.7, "lon": -91.3, "instruments": ["x"]}],
+        "unit": "µg/m³",
+    }
+    path = tmp_path / "sites.json"
+    path.write_text(json.dumps(good), encoding="utf-8")
+    ns = argparse.Namespace(reference_sites=str(path))
+    out = puff._reference_sites(ns)
+    assert out is not None
+    assert out["name"] == "Agency sites"
+    assert out["unit"] == "µg/m³"
+    assert out["sites"][0]["id"] == "A1"
+    assert puff._reference_sites(argparse.Namespace(reference_sites=None)) is None
+    site = good["sites"][0]  # type: ignore[index]
+    for bad in (
+        {**good, "kinds": {"lead": {"label": "L", "shape": "star"}}},  # no such shape
+        {**good, "sites": [{**site, "kind": "soil"}]},  # a kind that isn't listed
+        {**good, "sites": [{**site, "instruments": ["y"]}]},  # an instrument not described
+        {**good, "sites": [{**site, "lat": "40.7"}]},
+        {**good, "links": [{"text": "x", "url": "javascript:alert(1)"}]},
+        {"name": "x"},
+    ):
+        path.write_text(json.dumps(bad), encoding="utf-8")
+        with pytest.raises(SystemExit, match="--reference-sites"):
+            puff._reference_sites(ns)
+
+
+def test_the_saved_epa_sites_load() -> None:
+    """The site build's file of EPA sites passes the same checks."""
+    root = Path(__file__).resolve().parent.parent
+    path = root / "scenarios" / "iowa-aap-lead-azide" / "epa_sites.json"
+    out = puff._reference_sites(argparse.Namespace(reference_sites=str(path)))
+    assert out is not None
+    lead = [s for s in out["sites"] if s["kind"] == "lead"]
+    assert [s["id"] for s in lead] == ["AS01", "AS02", "AS03", "AS04"]
+    assert all(s["readings"]["max"]["v"] < 0.1 for s in lead)  # µg/m³, as EPA posts them
+    assert "not model estimates" in out["note"]
+
+
 def test_reference_outlines_are_checked(tmp_path: Path) -> None:
     """A file of outlines needs a name and zones of [latitude, longitude] lines."""
     good = {

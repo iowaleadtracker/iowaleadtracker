@@ -504,7 +504,7 @@ def test_deposition_view_opens_at_epas_lowest_action_level() -> None:
 
 def test_armys_final_maps_are_offered_for_the_blast_they_were_made_for() -> None:
     """The box: off by default, on the 9 a.m. maps only, and described as the Army's forecast."""
-    assert site.army_outlines(site.DATE, "09:00") == [
+    assert site.army_outlines(site.DATE, "09:00")[:2] == [
         "--reference-outlines",
         str(site.ARMY_OUTLINES),
     ]
@@ -1698,3 +1698,11 @@ def test_farthest_reach_ignores_stray_cells_past_the_edge() -> None:
     assert kept[3, 3] == 0.0
     assert kept[4, 6] == 0.0
     assert not fs.joined_to_peak(a, 10.0).any()  # nothing reaches the level
+
+
+def test_epas_sites_are_offered_on_the_blasts_maps() -> None:
+    """EPA's sampling sites go with the 9 a.m. maps, forecast and archived, and no others."""
+    assert site.army_outlines(site.DATE, "09:00")[2:] == ["--reference-sites", str(site.EPA_SITES)]
+    assert "--reference-sites" not in site.army_outlines(site.DATE, "09:30")
+    for run in site.archived_runs("python"):
+        assert "--reference-sites" in run.cmd

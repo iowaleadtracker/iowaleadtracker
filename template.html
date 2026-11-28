@@ -55,6 +55,7 @@ dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
 .legend {
   position: absolute; right: 12px; bottom: 26px; background: var(--surface); border: 1px solid var(--line);
   border-radius: 10px; padding: 8px 10px 6px; min-width: 210px; box-shadow: 0 1px 4px rgba(0,0,0,.12);
+  max-height: calc(100% - 38px); overflow-y: auto;   /* a site's details can make it tall */
 }
 .legend .lt { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
 .legend canvas { display: block; width: 100%; height: 12px; border-radius: 3px; }
@@ -67,7 +68,7 @@ dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
   border: 1px solid var(--line); border-left: 4px solid #fab219; border-radius: 8px; padding: 8px 12px; font-size: 13px;
   box-shadow: 0 1px 4px rgba(0,0,0,.12);
 }
-#tip {
+#tip { z-index: 2;
   position: absolute; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--line);
   border-radius: 8px; padding: 6px 8px; font-size: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.18); display: none; white-space: nowrap;
   font-variant-numeric: tabular-nums;
@@ -139,10 +140,25 @@ body.embedded > header { display: none; }
 #mapwrap.coop { touch-action: pan-x pan-y; }
 /* narrow screens: the legend sits in a strip under the map instead of on top of it */
 .legend.below {
-  position: static; order: 1; min-width: 0; margin: 0; border-radius: 0; box-shadow: none;
+  position: static; order: 1; min-width: 0; margin: 0; border-radius: 0; box-shadow: none; max-height: none;
   border-width: 0 0 1px; padding: 8px 16px 6px;
 }
 .legend.below .lz { font-size: 12.5px; }
+/* measurement sites from another source (--reference-sites): the key, and the tapped site */
+.ssw { flex: none; display: block; }
+#sitepick { font: inherit; font-size: 12px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 1px 4px; }
+#legsite { width: 270px; max-width: 100%; font-size: 12px; }
+.legend.below #legsite { width: auto; }
+#legsite .sitehead { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; }
+#legsite .sitehead span { flex: 1; }
+#legsite .sitehead button { border: 0; background: var(--chip); color: var(--ink); border-radius: 6px; width: 24px; height: 24px; cursor: pointer; font-size: 15px; line-height: 1; }
+#legsite .sitesub { color: var(--ink-2); margin: 1px 0 4px; }
+#legsite dl { font-size: 12px; gap: 2px 10px; }
+#legsite dd .muted { font-size: 11px; }
+#legsite .inst { margin: 5px 0 0; padding: 0; list-style: none; color: var(--ink-2); }
+#legsite .inst li { margin: 2px 0; }
+#legsite .inst b { color: var(--ink); font-weight: 600; }
+#map.onsite { cursor: pointer; }
 </style>
 </head>
 <body>
@@ -167,6 +183,8 @@ body.embedded > header { display: none; }
       <div id="legzones" hidden></div>
       <div class="lz" id="legenv" hidden></div>
       <div id="legref" hidden></div>
+      <div id="legsites" hidden></div>
+      <div id="legsite" hidden aria-live="polite"></div>
       <div id="leghy" hidden><div id="leghybands"></div><div class="legnote" id="leghytext" style="border-top:0;padding-top:0;margin-top:3px"></div></div>
       <div class="lz lpath" id="legpath" style="margin-top:4px"><svg width="26" height="8" aria-hidden="true"><line x1="1" y1="4" x2="25" y2="4" stroke="currentColor" stroke-width="2" stroke-dasharray="5 4"/></svg>Path of the cloud's center, labeled with the local time it passes</div>
       <div id="legsky" hidden>
@@ -260,6 +278,7 @@ body.embedded > header { display: none; }
   <label class="opt" id="rangewrap">Color scale <input id="decades" type="range" min="2" max="8" value="5" aria-label="Color scale range"> <span id="decout"></span></label>
   <label class="opt" id="envwrap" hidden><input type="checkbox" id="showEnv"> <span id="envlabel"></span></label>
   <label class="opt" id="refwrap" hidden><input type="checkbox" id="showRef"> <span id="reflabel"></span></label>
+  <label class="opt" id="siteswrap" hidden><input type="checkbox" id="showSites"> <span id="siteslabel"></span></label>
   <label class="opt"><input type="checkbox" id="showPuffs" checked> puffs</label>
   <label class="opt"><input type="checkbox" id="showWind" checked> wind</label>
   <label class="opt" id="skywrap"><input type="checkbox" id="showSky"> sky cover &amp; rain</label>
@@ -569,7 +588,7 @@ renderStatic();
 
 // ---------- state ----------
 const S = {
-  hour: 1, field: "conc", units: M.units || "mass", puffs: true, wind: true, sky: false, hy: false, ref: false, base: "auto", playing: false,
+  hour: 1, field: "conc", units: M.units || "mass", puffs: true, wind: true, sky: false, hy: false, ref: false, sites: false, base: "auto", playing: false,
   lat: M.lat, lon: M.lon, z: 8,
   zoneMetric: M.zoneMetric || "m60", locs: M.loc.map((l) => l.value), track: true, env: false,
   dlocs: M.depLoc ? M.depLoc.map((l) => l.value) : [1e-6, 1e-5, 1e-4],
@@ -808,6 +827,123 @@ function drawReference() {
   }
   ctx.textAlign = "left";
 }
+// ---------- measurement sites from another source (--reference-sites) ----------
+// For example an agency's sampling sites: a symbol for each kind of site (M.sites.kinds),
+// labels with the highest reading where a site posts readings, and a tap or click on one
+// opens its details in the legend. Measurements as the source posted them, not this model's.
+const SITES = M.sites || null;
+if (SITES) SITES.sites.forEach((s, k) => { s.key = s.id || `${s.kind}-${k}`; });
+let siteSel = null;                               // the site whose details are open
+const SITE_ORDER = ["diamond", "square-dot", "square", "triangle", "circle"];   // drawn last on top
+const siteShape = (s) => SITES.kinds[s.kind].shape;
+const kindsInOrder = () => Object.entries(SITES.kinds).sort((a, b) => SITE_ORDER.indexOf(a[1].shape) - SITE_ORDER.indexOf(b[1].shape));
+const siteR = (shape) => ({ diamond: 7, triangle: 5.5, circle: 4.5 }[shape] || 5);
+// One path per shape, centered on (x, y), for the map (a canvas context) and the key (SVG).
+function shapePath(c, shape, x, y, r) {
+  c.beginPath();
+  if (shape === "diamond") { c.moveTo(x, y - r); c.lineTo(x + r, y); c.lineTo(x, y + r); c.lineTo(x - r, y); c.closePath(); }
+  else if (shape === "triangle") { c.moveTo(x, y - r); c.lineTo(x + r * 0.95, y + r * 0.7); c.lineTo(x - r * 0.95, y + r * 0.7); c.closePath(); }
+  else if (shape === "circle") c.arc(x, y, r, 0, 7);
+  else c.rect(x - r, y - r, 2 * r, 2 * r);
+}
+function shapeSvg(shape) {
+  const r = siteR(shape), d = { diamond: `M7 ${7 - r}L${7 + r} 7L7 ${7 + r}L${7 - r} 7Z`,
+    triangle: `M7 ${7 - r}L${7 + r * 0.95} ${7 + r * 0.7}L${7 - r * 0.95} ${7 + r * 0.7}Z`,
+    circle: `M${7 - r} 7a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z` }[shape] || `M${7 - r} ${7 - r}h${2 * r}v${2 * r}h${-2 * r}Z`;
+  return `<svg class="ssw" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="${d}" fill="#fff" stroke="#1d1d1b" stroke-width="${shape === "diamond" ? 1.8 : 1.4}"/>` +
+    (shape === "square-dot" ? '<circle cx="7" cy="7" r="1.8" fill="#1d1d1b"/>' : "") + "</svg>";
+}
+// Readings as posted, in the source's unit: three decimals, as EPA's feed and the brief show them.
+const fmtReading = (v) => (v === 0 ? "0" : v >= 0.001 ? v.toFixed(3) : v.toPrecision(1));
+const MONTHS = ["Jan.", "Feb.", "March", "April", "May", "June", "July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec."];
+function fmtWhen(iso) {                           // "Nov. 25, 9:10 a.m." in the map's local time
+  const d = new Date(new Date(iso).getTime() + (M.tzOffsetMin || 0) * 60000), h = d.getUTCHours();
+  return `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}, ${h % 12 || 12}:${pad(d.getUTCMinutes())} ${h < 12 ? "a.m." : "p.m."}`;
+}
+const hoursBetween = (a, b) => (new Date(b) - new Date(a)) / 3.6e6;
+function fromSource(s) {                          // distance and direction from this map's source
+  const dy = (s.lat - M.lat) * 111.195, dx = (s.lon - M.lon) * 111.195 * Math.cos(M.lat * Math.PI / 180);
+  const brg = (Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360;
+  return `${fmtDist(Math.hypot(dx, dy))} ${compass(brg)} (${Math.round(brg)}°) of the map's source`;
+}
+const siteLinks = () => ((SITES.links || []).length ? " Source: " + SITES.links.map((l) =>
+  /^https?:\/\//i.test(l.url) ? `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.text)}</a>` : esc(l.text)).join(", ") + "." : "");
+function siteLegend() {
+  $("legsites").hidden = !S.sites || !!siteSel;
+  $("legsite").hidden = !S.sites || !siteSel;
+  if (!S.sites) return;
+  if (!siteSel) {
+    const n = {}; for (const s of SITES.sites) n[s.kind] = (n[s.kind] || 0) + 1;
+    $("legsites").innerHTML = kindsInOrder().filter(([k]) => n[k]).map(([k, v]) =>
+      `<div class="lz">${shapeSvg(v.shape)}<span>${esc(v.label)} (${n[k]})</span></div>`).join("") +
+      (SITES.sites.some((s) => s.readings) ? `<div class="lz muted" style="font-size:11.5px">Labels: highest reading since the blast, ${esc(SITES.unit || "")}. Tap a site for details.</div>`
+        : '<div class="lz muted" style="font-size:11.5px">Tap a site for details.</div>') +
+      // the same details without a pointer: pick a site by name, and the map centers on it
+      `<label class="lz">Details for <select id="sitepick"><option value="">a site…</option>${kindsInOrder().map(([k, v]) => {
+        const named = SITES.sites.filter((x) => x.kind === k && x.id);
+        return named.length ? `<optgroup label="${esc(v.label)}">${named.map((x) => `<option value="${esc(x.key)}">${esc(x.id)}</option>`).join("")}</optgroup>` : "";
+      }).join("")}</select></label>` +
+      `<div class="legnote" style="border-top:0;padding-top:0;margin-top:3px">${esc(SITES.note || "")}${siteLinks()}</div>`;
+    $("sitepick").addEventListener("change", (e) => {
+      const pick = SITES.sites.find((x) => x.key === e.target.value);
+      if (pick) { S.lat = pick.lat; S.lon = pick.lon; selectSite(pick); $("siteclose").focus(); }
+    });
+    return;
+  }
+  const s = siteSel, K = SITES.kinds[s.kind], r = s.readings, u = esc(SITES.unit || "");
+  const when = (p) => (p ? `${fmtReading(p.v)} ${u}<br><span class="muted">${fmtWhen(p.t)}</span>` : "none posted");
+  let dl = "";
+  if (r) {
+    const age = SITES.retrieved ? hoursBetween(r.last.t, SITES.retrieved) : 0;
+    dl = `<dl><dt>Highest since the blast</dt><dd>${when(r.max)}</dd>` +
+      `<dt>Highest before it</dt><dd>${when(r.maxBefore)}</dd>` +
+      `<dt>Last reading</dt><dd>${when(r.last)}${age >= 2 ? `<br><span class="muted">${Math.round(age)} h before this copy was saved</span>` : ""}</dd>` +
+      `<dt>Readings since the blast</dt><dd>${r.posted}, ${r.zero} of them zero</dd></dl>`;
+  } else if (s.start) dl = `<dl><dt>Sampling started</dt><dd>${fmtWhen(s.start)}</dd></dl>`;
+  const inst = (s.instruments || []).map((i) => SITES.instruments[i]).filter(Boolean);
+  $("legsite").innerHTML =
+    `<div class="sitehead">${shapeSvg(K.shape)}<span>${esc(s.id || K.label)}</span><button type="button" id="siteclose" aria-label="Close the site's details">×</button></div>` +
+    `<div class="sitesub">${s.id ? esc(K.label) + " · " : ""}${fromSource(s)}</div>` + dl +
+    (inst.length ? `<ul class="inst">${inst.map((i) => `<li><b>${esc(i.name)}.</b> ${esc(i.text)}</li>`).join("")}</ul>` : "") +
+    `<div class="legnote">${esc(SITES.note || "")}${siteLinks()}${M.tzOffsetMin ? ` Times are local (${fmtTime(s.start || (r && r.last.t) || SITES.retrieved, M.tzOffsetMin).replace(/^.*\(|\)$/g, "")}).` : ""}</div>`;
+  $("siteclose").addEventListener("click", () => selectSite(null));
+}
+function selectSite(s) { siteSel = s; siteLegend(); schedule(); }
+function drawSites() {
+  if (!S.sites) return;
+  const dark = isDark(), ink = "#1d1d1b", halo = "rgba(255,255,255,0.92)";
+  const pts = SITES.sites.map((s) => ({ s, shape: siteShape(s), p: toScreen(s.lat, s.lon) }))
+    .filter(({ p: [x, y] }) => x > -20 && y > -20 && x < W + 20 && y < H + 20)
+    .sort((a, b) => SITE_ORDER.indexOf(b.shape) - SITE_ORDER.indexOf(a.shape));
+  for (const { s, shape, p: [x, y] } of pts) {
+    const r = siteR(shape);
+    if (siteSel === s) { ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue("--accent"); ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, r + 5, 0, 7); ctx.stroke(); }
+    shapePath(ctx, shape, x, y, r);
+    ctx.fillStyle = "#fff"; ctx.fill();
+    ctx.strokeStyle = ink; ctx.lineWidth = shape === "diamond" ? 2 : 1.4; ctx.stroke();
+    if (shape === "square-dot") { ctx.fillStyle = ink; ctx.beginPath(); ctx.arc(x, y, 1.8, 0, 7); ctx.fill(); }
+  }
+  // labels: the highest reading where there is one; other sites' names once zoomed in
+  ctx.font = "600 11.5px system-ui, sans-serif"; ctx.textBaseline = "middle"; ctx.textAlign = "left";
+  for (const { s, shape, p: [x, y] } of pts) {
+    const text = s.readings && s.readings.max ? `${s.id} · ${fmtReading(s.readings.max.v)}` : s.id && S.z >= 10.5 ? s.id : "";
+    if (!text) continue;
+    const tx = x + siteR(shape) + 4;
+    ctx.lineWidth = 3.5; ctx.strokeStyle = dark ? "rgba(31,31,29,0.92)" : halo; ctx.strokeText(text, tx, y);
+    ctx.fillStyle = dark ? "#f0efea" : ink; ctx.fillText(text, tx, y);
+  }
+}
+function siteAt(x, y) {                           // the nearest site within reach of a finger or pointer
+  if (!S.sites) return null;
+  const reach = coarseMQ.matches ? 20 : 11;
+  let best = null, bd = reach;
+  for (const s of SITES.sites) {
+    const [sx, sy] = toScreen(s.lat, s.lon), d = Math.hypot(sx - x, sy - y) - (siteShape(s) === "diamond" ? 2 : 0);
+    if (d < bd) { bd = d; best = s; }
+  }
+  return best;
+}
+
 function buildOverlay() {
   const key = [S.hour, S.field, S.units, S.decades, isDark(), S.zoneMetric, S.locs.join(","), S.dlocs.join(","), S.fixTop, S.fixMin, S.fixDepMin, S.env, S.hy].join("|");
   if (key === overlayKey) return;
@@ -1154,6 +1290,7 @@ function draw() {
   drawHysplitEdges();
   drawReference();
   if (S.hy) drawSource(); else drawOwn(h);       // HYSPLIT: the source alone, without this model's wind, path and puffs
+  drawSites();
 }
 function drawOwn(h) {
   const ink = isDark() ? "rgba(240,239,234," : "rgba(29,29,27,";
@@ -1332,6 +1469,14 @@ cv.addEventListener("pointermove", (e) => {
   $("tip").style.display = "none";
   schedule();
 });
+// A tap or click that didn't move the map opens the site under it (or closes the details).
+let downXY = null;
+cv.addEventListener("pointerdown", (e) => { downXY = [e.offsetX, e.offsetY]; }, true);
+cv.addEventListener("click", (e) => {
+  if (!S.sites || (downXY && Math.hypot(e.offsetX - downXY[0], e.offsetY - downXY[1]) > 6)) return;
+  const s = siteAt(e.offsetX, e.offsetY);
+  if (s || siteSel) selectSite(s === siteSel ? null : s);
+});
 const up = (e) => { pointers.delete(e.pointerId); if (pointers.size < 2) pinch = null; if (!pointers.size) cv.classList.remove("dragging"); };
 cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
 cv.addEventListener("pointerleave", () => { $("tip").style.display = "none"; });
@@ -1385,6 +1530,18 @@ $("zfit").addEventListener("click", () => { fit(plumeBounds()); schedule(); });
 
 function hover(x, y) {
   const tip = $("tip");
+  const site = siteAt(x, y);
+  cv.classList.toggle("onsite", !!site);
+  if (site) {                                     // a measurement site: what it is, its highest reading
+    const K = SITES.kinds[site.kind], m = site.readings && site.readings.max;
+    tip.innerHTML = `<b>${esc(site.id || K.label)}</b>${site.id ? " · " + esc(K.label) : ""}` +
+      (m ? `<br>Highest since the blast: <b>${fmtReading(m.v)} ${esc(SITES.unit || "")}</b>` : "") +
+      '<br><span class="muted">Click for details</span>';
+    tip.style.display = "block";
+    tip.style.left = Math.min(W - tip.offsetWidth - 6, x + 14) + "px";
+    tip.style.top = Math.max(6, y - tip.offsetHeight - 10) + "px";
+    return;
+  }
   const [la, lo] = toLatLon(x, y);
   const i = Math.floor((lo - GR.west) / (GR.east - GR.west) * NX), j = Math.floor((GR.north - la) / (GR.north - GR.south) * NY);
   if (i < 0 || j < 0 || i >= NX || j >= NY) { tip.style.display = "none"; return; }
@@ -1526,6 +1683,11 @@ if (M.outlines) {                                 // outlines from another sourc
   $("refwrap").hidden = false;
   $("reflabel").textContent = M.outlines.name;
   $("showRef").addEventListener("change", (e) => { S.ref = e.target.checked; render(); });
+}
+if (SITES) {                                      // measurement sites from another source came with this map
+  $("siteswrap").hidden = false;
+  $("siteslabel").textContent = SITES.name;
+  $("showSites").addEventListener("change", (e) => { S.sites = e.target.checked; if (!S.sites) siteSel = null; siteLegend(); schedule(); });
 }
 if (FIELDS.hy_conc) {                             // a saved HYSPLIT run came with this map
   $("modelseg").hidden = false;
