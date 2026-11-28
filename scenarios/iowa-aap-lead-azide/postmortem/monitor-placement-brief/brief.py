@@ -55,6 +55,10 @@ SOIL_DEPTH_M, SOIL_KG_M3 = 0.0254, 1300.0  # the top inch of soil at 1.3 g/cm3 (
 # Lead in Iowa's soil, mg/kg: 91 samples of USGS's 2007-2010 background survey (EPA undated).
 IOWA_SOIL = {"samples": 91, "median": 21.7, "lowest": 8.4, "highest": 48.5}
 LOW_CASE = 0.07  # share of the lead airborne in the case the fields are for
+# The maker's detection limits for lead on its Xact 625i, µg/m3, by sampling time in minutes:
+# one standard deviation, free of interference (SCI 2024). EPA ran 5-minute samples from
+# 7 a.m. to 2 p.m. on the day of the detonation and hourly ones otherwise (EPA 2026d).
+XACT_LIMIT = {5: 6.4e-3, 15: 1.0e-3, 30: 0.36e-3, 60: 0.13e-3}
 
 
 def nearest(grid: lib.Grid, lat: float, lon: float) -> float:
@@ -198,9 +202,19 @@ def numbers(grids: dict[str, lib.Grid]) -> dict[str, Any]:
         "army_map": lib.army_placement(),
         "ground": ground(),
     }
+    limit = XACT_LIMIT[5]
+    out["monitor"] = {
+        "lead_limit_ugm3": {str(k): v for k, v in XACT_LIMIT.items()},
+        "map_line_over_5min_limit": lib.ARMY_AIR * UG / limit,
+    }
     for s in out["sites"].values():
         s["air_ugm3"] = {k: nearest(g, s["lat"], s["lon"]) * UG for k, g in grids.items()}
         s["army_map"] = on_army_map(s["lat"], s["lon"])
+    # how far above that 5-minute limit the reruns' values at the nearest monitor are
+    nearest_monitor = out["sites"][XACT[0]]["air_ugm3"]
+    out["monitor"]["as01_over_5min_limit"] = {
+        k: nearest_monitor[k] / limit for k in ("analysis", "hysplit")
+    }
     return out
 
 

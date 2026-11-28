@@ -193,3 +193,20 @@ def test_brief_reports_what_epa_said_about_the_monitors_inlets() -> None:
     assert fs.EPA_NOV28_URL in readme
     refs = [r for r in works_cited.REFERENCES if isinstance(r, str)]
     assert any(r.startswith("EPA Press Office, 2026:") and fs.EPA_NOV28_URL in r for r in refs)
+
+
+def test_brief_gives_the_monitors_published_detection_limit() -> None:
+    """The maker's 5-minute limit for lead, and what the reruns' AS01 values are against it."""
+    readme = " ".join(brief_page.README.read_text(encoding="utf-8").split())
+    numbers = json.loads((brief_page.README.parent / "numbers.json").read_text(encoding="utf-8"))
+    monitor = numbers["monitor"]
+    assert monitor["lead_limit_ugm3"]["5"] == pytest.approx(0.0064)  # SCI 2024, lead, 5 minutes
+    assert "6.4 ng/m³ (0.0064 µg/m³) for 5-minute samples" in readme
+    assert f"about {monitor['map_line_over_5min_limit']:.0f} times lower" in readme
+    over = monitor["as01_over_5min_limit"]
+    assert round(over["analysis"], -2) == 200  # "about 200 and 70 times" in the text
+    assert round(over["hysplit"], -1) == 70
+    assert "about 200 and 70 times the maker's 5-minute limit" in readme
+    assert "The readings can't tell these two apart." in readme  # no verdict either way
+    assert "not a limit measured in the field" in readme
+    assert "- SCI, 2024:" in readme

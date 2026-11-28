@@ -735,8 +735,10 @@ CHANGES = [
             f'monitors were switched off at 3 p.m. on Nov. 26. The <a href="{ANALYSIS_PATH}">'
             "preliminary analysis</a> no longer lists an inlet too small for coarse particles "
             "as a possible reason for the near-zero readings: EPA says the monitors used "
-            "total-suspended-particulate inlets. Its finding about where the monitors sat is "
-            "unchanged. The maps did not change."
+            "total-suspended-particulate inlets. It also gives the maker&rsquo;s published "
+            "detection limit for lead on that kind of monitor (0.0064 &micro;g/m&sup3; for "
+            "5-minute samples) and what follows from it at the nearest monitor. Its finding "
+            "about where the monitors sat is unchanged. The maps did not change."
         ),
     ),
     (

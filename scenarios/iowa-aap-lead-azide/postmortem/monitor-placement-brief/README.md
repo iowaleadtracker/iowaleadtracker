@@ -16,7 +16,9 @@ particles is therefore no longer one of the explanations for the near-zero readi
 also posted its first lab results: no lead found in 38 water samples taken at public water
 supplies after the detonation. Results for its air filters, soil, dust wipes, and tap
 water were still pending. EPA's release refers to "the area that the plume actually
-traveled" without saying where that was (EPA 2026d).*
+traveled" without saying where that was (EPA 2026d). The maker's published detection
+limit for lead on this kind of monitor is 0.0064 µg/m³ for 5-minute samples (SCI 2024);
+points 3 and 4 under "What it shows" say what follows from it.*
 
 > **Unofficial.** This is a screening analysis by a private citizen, not from the Army or
 > any government agency. Don't use it to decide if you're safe; follow official
@@ -234,11 +236,26 @@ describes the readings as 0.0 µg/m³, "zero detect or non-detect"; the public f
 values in Table 3 are small, and not all of them are zero. EPA has not published the
 monitors' model or detection limit, or how the public feed treats small values.
 
+The maker's ambient model, the Xact 625i, has a 5-minute mode and a low-volume TSP inlet
+among its options. Its datasheet gives detection limits for lead of 6.4 ng/m³
+(0.0064 µg/m³) for 5-minute samples and 0.13 ng/m³ (0.00013 µg/m³) for hourly ones
+(SCI 2024). Those are the maker's figures, at one standard deviation with no interfering
+elements. They are not a limit measured in the field, and EPA has published none of its
+own. Taken at face value, the 5-minute limit is about 28 times lower than the 0.18 µg/m³
+line drawn on the map.
+
 **4. So the readings alone can't say what happened.** A line of monitors along one
 direction sees a cloud only over a narrow range of directions. In the full analysis the
 four monitors would read 0.18 µg/m³ or more for the 7% case over about 35° of arc, from
 211°–215° to 245°–252°, and over about 27° for a release of 1%. The analyzed path is at
 the southern edge of the first range and outside the second.
+
+What the readings do say is narrower. At AS01 the two reruns give 1.3 and 0.44 µg/m³ for
+the 7% case (Table 2), about 200 and 70 times the maker's 5-minute limit, and AS01's
+highest posted reading was 0.002 µg/m³. If the monitor performed as its datasheet says,
+lead in those amounts did not pass AS01. Either the cloud's edge was south of where the
+reruns put it, by the small margin point 2 describes, or much less lead was in the air
+than the 7% case assumes. The readings can't tell these two apart.
 
 ## How it was made
 
@@ -371,7 +388,11 @@ actually released, and it may have been much less.
 EPA says they are Xact monitors, which measure metals on a filter tape by X-ray
 fluorescence, and that they were fitted with total-suspended-particulate inlets so that
 larger particles would be captured too (EPA 2026d). It hasn't said which model or what
-detection limit. The full analysis covers what is published for this kind of instrument.
+detection limit. The maker's datasheet for its ambient model, the Xact 625i, gives a
+detection limit for lead of 0.0064 µg/m³ for 5-minute samples, which EPA used from 7 a.m.
+to 2 p.m. on the day of the detonation, and 0.00013 µg/m³ for hourly ones (SCI 2024).
+Both are far below the 0.18 µg/m³ line on the map. They are the maker's figures at one
+standard deviation, not a limit measured in the field.
 
 **What other explanations fit the near-zero readings?**
 The full analysis lists them without ranking: little fine lead became
@@ -447,6 +468,12 @@ Iowa Lead Tracker, an unofficial public project by a private citizen
   Source of the Army's "the EPA has detected zero lead."
 - NOAA: High-Resolution Rapid Refresh (HRRR) forecasts and analyses, and NOAA Air
   Resources Laboratory's archive of HRRR for HYSPLIT.
+- SCI, 2024: Xact 625i Ambient Multi-Metals Monitoring System. Datasheet, Sailbri Cooper
+  Inc. (Cooper Environmental), posted February 2024,
+  https://sci-monitoring.com/wp-content/uploads/2024/02/Xact-625i-Datasheet.pdf (retrieved
+  Nov. 28, 2026). Minimum detection limits for lead: 6.4, 1.0, 0.36, and 0.13 ng/m³ for
+  5-, 15-, 30-, and 60-minute samples, "interference free one sigma." Inlet options:
+  PM10, PM2.5, PM1, and low-volume TSP.
 - Stein, A. F., and Coauthors, 2015: NOAA's HYSPLIT atmospheric transport and dispersion
   modeling system. *Bull. Amer. Meteor. Soc.*, **96**, 2059–2077,
   doi:10.1175/BAMS-D-14-00110.1.

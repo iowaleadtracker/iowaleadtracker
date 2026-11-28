@@ -307,5 +307,18 @@
     "soil_added_mgkg_all_airborne": 0.7598273620185642
    }
   }
+ },
+ "monitor": {
+  "lead_limit_ugm3": {
+   "5": 0.0064,
+   "15": 0.001,
+   "30": 0.00036,
+   "60": 0.00013
+  },
+  "map_line_over_5min_limit": 28.124999999999996,
+  "as01_over_5min_limit": {
+   "analysis": 196.3547206773608,
+   "hysplit": 68.85320438798637
+  }
  }
 }
