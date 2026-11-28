@@ -141,6 +141,38 @@ test("the panel's peak values are the data's, in the units chosen", async ({ pag
   expect(Math.abs(ugm2 / (h.dmax * 1e9) - 1)).toBeLessThan(0.01);
 });
 
+test("the levels-of-concern inputs follow the units", async ({ page }) => {
+  await openMap(page, fixture("forecast"));   // built for U.S. units
+  await page.locator('#fieldseg button[data-v="zones"]').click();
+  await page.selectOption("#zmetric", "dep");
+  await expect(page.locator("#zonenote")).toContainText("Levels in µg/ft².");
+  await page.locator('#sysseg button[data-v="metric"]').click();
+  await expect(page.locator("#zonenote")).toContainText("Levels in µg/m².");
+  await page.selectOption("#zmetric", "m60");
+  await expect(page.locator("#zonenote")).toContainText("Levels in µg/m³.");
+  await page.selectOption("#units", "mass");                 // no fixed unit: mg
+  await expect(page.locator("#zonenote")).toContainText("Levels in mg/m³.");
+});
+
+test("hovering the levels of concern gives mass, even with particle counts chosen", async ({ page, isMobile }) => {
+  test.skip(isMobile, "hover needs a mouse");
+  await openMap(page, fixture("forecast"));
+  await page.selectOption("#units", "count");
+  await page.locator('#fieldseg button[data-v="zones"]').click();
+  await page.locator("#hour").fill("8");
+  const box = await page.locator("#map").boundingBox();
+  let text = "";
+  // look for a cell the cloud reached: scan the map until the tip shows a value
+  for (let y = 0.2; y <= 0.8 && !/so far: \d/.test(text); y += 0.05) {
+    for (let x = 0.2; x <= 0.8 && !/so far: \d/.test(text); x += 0.05) {
+      await page.mouse.move(box.x + box.width * x, box.y + box.height * y);
+      text = (await page.locator("#tip").textContent()) || "";
+    }
+  }
+  expect(text).toMatch(/so far: [\d.,×⁰¹²³⁴⁵⁶⁷⁸⁹⁻]+ [mµnpf]?g\/m[²³]/);   // a mass, not particles
+  await expect(page.locator("#units")).toHaveValue("count");   // the choice is untouched
+});
+
 test("text from the data can't inject markup or script", async ({ page }) => {
   const data = fixture("forecast");
   const evil = '<img src=x onerror="window.__xss=1">';
