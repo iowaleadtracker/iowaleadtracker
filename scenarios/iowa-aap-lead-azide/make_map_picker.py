@@ -227,7 +227,7 @@ DESCRIPTION_NO_DATE = DESCRIPTION.replace("the Nov. 25, 2026 blast", "the blast"
 CSP = (
     "default-src 'none'; "
     "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; "
-    "style-src 'unsafe-inline'; img-src 'self' data: blob: https://server.arcgisonline.com; "
+    "style-src 'unsafe-inline'; img-src 'self' https://server.arcgisonline.com; "
     "connect-src 'self' https://cloudflareinsights.com; frame-src 'self'; "
     "frame-ancestors 'self'; "
     "base-uri 'none'; form-action 'none'; object-src 'none'; upgrade-insecure-requests"

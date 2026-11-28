@@ -1431,7 +1431,7 @@ def _archived_html(fa: Facts | None, pct: dict[str, str]) -> str:
   <p>Farthest distance from the plant where lead on the ground reaches each EPA dust-lead
     action level by the end of the 8-hour run, for a blast at {BLAST_TIME} The smaller
     number, where there is one, is the farther of the two dry-deposition schemes.</p>
-  <div class="tablewrap"><table>
+  <div class="tablewrap" tabindex="0" role="region" aria-label="Table"><table>
     {DEP_TABLE_HEAD}
     <tbody>{"".join(rows)}</tbody></table></div>
   <p>{_town_text(fa)} Town checks use approximate town centers. {TOWN_CAVEAT}</p>
@@ -1505,7 +1505,7 @@ def hysplit_compare_html(fa: Facts | None, pct: dict[str, str]) -> str:
   <p>{NOAA_WHAT} {what}</p>
   <p>{HYSPLIT_HOW}</p>
   <p>{line}</p>
-  <div class="tablewrap"><table>
+  <div class="tablewrap" tabindex="0" role="region" aria-label="Table"><table>
     {HYSPLIT_TABLE_HEAD}
     <tbody>{"".join(rows)}</tbody></table></div>
   <p>{farther} {HYSPLIT_LIMIT}</p>"""
@@ -1584,7 +1584,7 @@ def _day_html(f: Facts, ctx: dict[str, Any], lead: str = PLANNED_DAY) -> str:
   <h3>{_other_title(f["day"], lead)}</h3>
   <p>The map also models {f["day"]}; choose it under &ldquo;Day&rdquo; above the map. \
 {note + " " if note else ""}{wind_sentence(f)} {path_sentence(f)} {t.forecast_line}</p>
-  <div class="tablewrap"><table>
+  <div class="tablewrap" tabindex="0" role="region" aria-label="Table"><table>
     {DEP_TABLE_HEAD}
     <tbody>{"".join(t.rows_html)}</tbody></table></div>
   <p>{t.town} Town checks use approximate town centers. {TOWN_CAVEAT}</p>
@@ -1643,7 +1643,7 @@ below it is
     the farthest any of the {ctx["n_models"]} weather forecasts reaches, with either of two
     dry-deposition schemes (Zhang et al. 2001 and its revision by Emerson et al. 2020), which is
     what the map shows with &ldquo;weather-model spread&rdquo; turned on.</p>
-  <div class="tablewrap"><table>
+  <div class="tablewrap" tabindex="0" role="region" aria-label="Table"><table>
     {DEP_TABLE_HEAD}
     <tbody>{"".join(t.rows_html)}</tbody></table></div>
   <p>{t.town} Town checks use approximate town centers. {TOWN_CAVEAT}</p>

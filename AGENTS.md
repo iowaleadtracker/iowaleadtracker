@@ -20,10 +20,11 @@ pre-commit run --all-files   # ruff, ruff format, mypy, fast tests, file checks
 pytest                       # the full suite
 pnpm install && pnpm lint    # front-end lint: oxlint (JS), ESLint (HTML, CSS); Node from .nvmrc
 pnpm test:map                # the map page in a browser (Playwright), with saved map data
+pnpm test:site               # the built site in a browser: pages, CSP, accessibility (after --build)
 ```
 
 CI (`.github/workflows/ci.yml`) runs these, plus an offline site build, on every push
-(the front-end lint and map tests on every branch but `main`, so not on the merge);
+(the front-end lint and browser tests on every branch but `main`, so not on the merge);
 `main` only takes changes through a reviewed pull request.
 
 If the change should not alter the published maps, prove it:

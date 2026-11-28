@@ -41,6 +41,21 @@ Army mitigated case at 9:00, forecast and archived weather) on a coarse grid. Wh
 model starts writing a new key the page reads, `test_map_fixtures.py` fails; remake them
 with `python3 tools/refresh_map_fixtures.py` (about 20 s, from the saved forecasts).
 
+## Browser tests of the built site
+
+```bash
+python3 scenarios/iowa-aap-lead-azide/make_map_picker.py --build   # once
+pnpm test:site                                                      # skips without a build
+```
+
+`frontend/site.spec.js` serves `outputs/site` with the headers from its `_headers` file, as
+Cloudflare does, so the Content-Security-Policy is in force and anything it blocks fails a
+test. It checks the landing page (About on first visit, the dialogs' focus, every case,
+weather and time loading a map, the U.S./metric switch reaching the map, the phone layout),
+the staged page's menus, the monitor-placement brief, the 404 page, a map opened on its own
+(with the HYSPLIT file download), and runs an axe accessibility scan (WCAG 2.1 A and AA) on
+each page; the map tests scan the map page. CI runs it on the build job's site.
+
 ## Rules
 
 - **Never use the network.** `conftest.py` makes every download fail. Model runs use a
