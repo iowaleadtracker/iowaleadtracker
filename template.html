@@ -883,7 +883,7 @@ function resultsDl(r) {
   return `<dl><dt>Highest since the blast</dt><dd>${when(r.max)}</dd>` +
     `<dt>Highest before it</dt><dd>${when(r.maxBefore)}</dd>` +
     `<dt>Latest</dt><dd>${when(r.last)}${age >= 2 ? `<br><span class="muted">${Math.round(age)} h before this copy was saved</span>` : ""}</dd>` +
-    `<dt>Posted since the blast</dt><dd>${r.posted}, ${r.zero} of them zero</dd></dl>`;
+    `<dt>Measurements collected</dt><dd>${r.posted} total, ${r.zero} of them zero</dd></dl>`;
 }
 function siteLegend() {
   $("legsites").hidden = !S.sites || !!siteSel;
