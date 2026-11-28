@@ -39,7 +39,8 @@ EVENT = dt.datetime(2026, 11, 25, 15, 0, tzinfo=UTC)
 VIEWER = "https://experience.arcgis.com/experience/1ddcf8b9d8314971b00dac8893ae9cd6"
 BRIEF_URL = "https://iowaleadtracker.com/monitor-placement/"
 
-#: What each instrument is, for the map's detail view. Keep these to what the sources say,
+#: What each instrument is, for the map's detail view; whether it has posted results is
+#: shown from the data (``readings``), not written here. Keep these to what the sources say,
 #: and don't say what an instrument can't measure unless its source says so:
 #: Xact and the air cassette from the monitor-placement brief (EPA 2026a, 2026b there);
 #: DustTrak from TSI's DustTrak II 8530 page, AreaRAE from Honeywell's AreaRAE Pro RAEMet
@@ -54,29 +55,26 @@ INSTRUMENTS: dict[str, dict[str, str]] = {
     },
     "cassette": {
         "name": "Air cassette",
-        "text": "A filter that collects particles from the air. A lab measures the lead on "
-        "it; no results had been posted.",
+        "text": "A filter that collects particles from the air. A lab measures the lead on it.",
     },
     "dusttrak": {
         "name": "DustTrak",
         "text": "A light-scattering laser photometer that gives real-time readings of the "
-        "mass of particles in the air (TSI). No readings had been posted.",
+        "mass of particles in the air (TSI).",
     },
     "arearae": {
         "name": "AreaRAE",
         "text": "A wireless monitor for up to seven hazards, including gamma radiation, "
-        "volatile organic compounds, combustible and toxic gases, and oxygen (Honeywell). "
-        "No readings had been posted.",
+        "volatile organic compounds, combustible and toxic gases, and oxygen (Honeywell).",
     },
     "summa": {
         "name": "Summa canister",
         "text": "A specially prepared stainless steel canister that takes in a sample of "
-        "air for a lab to test for volatile organic compounds (EPA Method TO-15). No "
-        "results had been posted.",
+        "air for a lab to test for volatile organic compounds (EPA Method TO-15).",
     },
     "soil": {
         "name": "Soil sample",
-        "text": "EPA lists where and when it started sampling soil. No results had been posted.",
+        "text": "EPA lists where and when it started sampling soil.",
     },
 }
 #: EPA's spellings in ``Instrument_Type``.
@@ -132,8 +130,8 @@ def instrument_keys(text: str) -> list[str]:
     return out
 
 
-def summarize_readings(recs: list[dict[str, Any]]) -> dict[str, Any]:
-    """Summarize one monitor's readings: since the blast, before it, and the last one."""
+def summarize_readings(recs: list[dict[str, Any]], unit: str) -> dict[str, Any]:
+    """Summarize one instrument's results: since the blast, before it, and the last one."""
     rows = sorted((r["Mon_Date_Time"], float(r["Mon_Results"])) for r in recs)
     event_ms = EVENT.timestamp() * 1000
     after = [(t, v) for t, v in rows if t >= event_ms]
@@ -147,6 +145,7 @@ def summarize_readings(recs: list[dict[str, Any]]) -> dict[str, Any]:
 
     t_last, v_last = rows[-1]
     return {
+        "unit": unit,
         "posted": len(after),
         "zero": sum(v == 0 for _, v in after),
         "max": peak(after),
@@ -179,12 +178,15 @@ def summarize(
         site: dict[str, Any] = {"id": sid, "lat": round(g["y"], 5), "lon": round(g["x"], 5)}
         if sid in by_station:
             site |= {"kind": "lead", "instruments": ["xact", *keys]}
-            site["readings"] = summarize_readings(by_station.pop(sid))
         else:
             site |= {
                 "kind": "realtime" if {"dusttrak", "arearae"} & set(keys) else "filter",
                 "instruments": keys,
             }
+        # one entry per instrument there: its results, or null until EPA posts some
+        site["readings"] = dict.fromkeys(site["instruments"])
+        if sid in by_station:
+            site["readings"]["xact"] = summarize_readings(by_station.pop(sid), unit)
         out_sites.append(site)
     if by_station:
         raise ValueError(f"readings for stations not in the site list: {sorted(by_station)}")
@@ -196,6 +198,7 @@ def summarize(
                 "lon": round(ft["geometry"]["x"], 5),
                 "kind": "soil",
                 "instruments": ["soil"],
+                "readings": {"soil": None},
                 "start": iso(ft["attributes"]["Sample_Start_Date_Time"]),
             }
             for ft in soil
@@ -214,7 +217,6 @@ def summarize(
         ],
         "retrieved": retrieved.astimezone(UTC).strftime("%Y-%m-%dT%H:%MZ"),
         "event": EVENT.strftime("%Y-%m-%dT%H:%MZ"),
-        "unit": unit,
         "kinds": KINDS,
         "instruments": INSTRUMENTS,
         "sites": out_sites + soil_out,
@@ -257,13 +259,13 @@ def main(argv: list[str] | None = None) -> None:
     a = ap.parse_args(argv)
     data = download()
     lead = [s for s in data["sites"] if s["kind"] == "lead"]
-    n = sum(s["readings"]["posted"] for s in lead)
+    n = sum(s["readings"]["xact"]["posted"] for s in lead)
     sys.stdout.write(
         f"{data['retrieved']}: {len(data['sites'])} sites and soil points, "
         f"{len(lead)} lead monitors, {n} readings since the blast\n"
     )
     for s in lead:
-        r = s["readings"]
+        r = s["readings"]["xact"]
         sys.stdout.write(
             f"  {s['id']}: highest {r['max']['v']} at {r['max']['t']}, last {r['last']['t']}\n"
         )

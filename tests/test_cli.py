@@ -88,6 +88,12 @@ def test_reference_sites_are_checked(tmp_path: Path) -> None:
     assert out["name"] == "Agency sites"
     assert out["unit"] == "µg/m³"
     assert out["sites"][0]["id"] == "A1"
+    site_with_none = {**good["sites"][0], "readings": {"x": None}}  # type: ignore[index]
+    path.write_text(json.dumps({**good, "sites": [site_with_none]}), encoding="utf-8")
+    loaded = puff._reference_sites(ns)
+    assert loaded is not None
+    assert loaded["sites"][0]["readings"] == {"x": None}
+    path.write_text(json.dumps(good), encoding="utf-8")
     assert "instrument" not in out["kinds"]["lead"]  # optional: the site's first is described
     assert puff._reference_sites(argparse.Namespace(reference_sites=None)) is None
     site = good["sites"][0]  # type: ignore[index]
@@ -97,6 +103,9 @@ def test_reference_sites_are_checked(tmp_path: Path) -> None:
         {**good, "sites": [{**site, "kind": "soil"}]},  # a kind that isn't listed
         {**good, "sites": [{**site, "instruments": ["y"]}]},  # an instrument not described
         {**good, "sites": [{**site, "lat": "40.7"}]},
+        {**good, "sites": [{**site, "readings": {"y": None}}]},  # not an instrument there
+        {**good, "sites": [{**site, "readings": {"x": 0.002}}]},  # a number, not a summary
+        {**good, "sites": [{**site, "readings": [None]}]},
         {**good, "links": [{"text": "x", "url": "javascript:alert(1)"}]},
         {"name": "x"},
     ):
@@ -113,7 +122,10 @@ def test_the_saved_epa_sites_load() -> None:
     assert out is not None
     lead = [s for s in out["sites"] if s["kind"] == "lead"]
     assert [s["id"] for s in lead] == ["AS01", "AS02", "AS03", "AS04"]
-    assert all(s["readings"]["max"]["v"] < 0.1 for s in lead)  # µg/m³, as EPA posts them
+    assert all(s["readings"]["xact"]["max"]["v"] < 0.1 for s in lead)  # µg/m³, as EPA posts
+    for s in out["sites"]:  # every instrument has an entry; only the Xact monitors have results
+        assert set(s["readings"]) == set(s["instruments"])
+        assert all((r is not None) == (i == "xact") for i, r in s["readings"].items())
     assert "not model estimates" in out["note"]
 
 

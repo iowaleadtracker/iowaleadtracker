@@ -121,10 +121,11 @@ test("EPA's sites are off until ticked, with a key, and open in the legend when 
   const detail = page.locator("#legsite");
   await expect(detail).toBeVisible();
   await expect(detail).toContainText("Continuous lead monitor");
-  await expect(detail).toContainText(`${as01.readings.max.v.toFixed(3)} ${sites.unit}`);
-  await expect(detail).toContainText(`${as01.readings.posted}, ${as01.readings.zero} of them zero`);
+  const xact = as01.readings.xact;
+  await expect(detail).toContainText(`${xact.max.v.toFixed(3)} ${xact.unit}`);
+  await expect(detail).toContainText(`${xact.posted}, ${xact.zero} of them zero`);
   await expect(detail).toContainText("Xact continuous lead monitor.");   // the kind's own instrument, described
-  await expect(detail).toContainText("Also here: DustTrak, AreaRAE, Air cassette, Summa canister.");   // the rest, named
+  await expect(detail).toContainText("Also here, no results posted: DustTrak, AreaRAE, Air cassette, Summa canister.");   // the rest (null), named
   await expect(detail).not.toContainText(sites.instruments.dusttrak.text);
   await expect(detail).toContainText("Measurements, not model estimates.");
   await page.locator("#siteclose").click();
@@ -144,6 +145,40 @@ test("EPA's sites are off until ticked, with a key, and open in the legend when 
   await expect(detail.locator(".sitehead")).toContainText("AS01");
   await page.locator("#showSites").uncheck();
   await expect(detail).toBeHidden();
+  expect(errors).toEqual([]);
+});
+
+test("a site shows each instrument's results, and says which have none", async ({ page }) => {
+  // made-up lab results for one air cassette, to stand in for results EPA hasn't posted
+  const data = fixture("forecast"), sites = data.meta.sites;
+  const as06 = sites.sites.find((s) => s.id === "AS06"), as01 = sites.sites.find((s) => s.id === "AS01");
+  expect(as06.readings.cassette).toBeNull();
+  as06.readings.cassette = { unit: "µg/m³", posted: 1, zero: 0, max: { v: 0.123, t: "2026-11-25T21:00Z" }, maxBefore: null, first: "2026-11-25T21:00Z", last: { v: 0.123, t: "2026-11-25T21:00Z" } };
+  as01.readings.cassette = { unit: "µg/m³", posted: 1, zero: 1, max: { v: 0, t: "2026-11-25T21:00Z" }, maxBefore: null, first: "2026-11-25T21:00Z", last: { v: 0, t: "2026-11-25T21:00Z" } };
+  const errors = await openMap(page, data);
+  await page.locator("#showSites").check();
+  const detail = page.locator("#legsite");
+  // a filter site: the cassette is its own sample, so its results come right after its description
+  await page.selectOption("#sitepick", "AS06");
+  await expect(detail).toContainText("Air cassette.");
+  await expect(detail).toContainText("0.123 µg/m³");
+  await expect(detail).toContainText("1, 0 of them zero");
+  await expect(detail).toContainText("Also here, no results posted: DustTrak, AreaRAE, Summa canister.");
+  await expect(detail).not.toContainText("No results posted.");
+  // a lead monitor with a cassette result too: both instruments' results, the rest named
+  await page.locator("#siteclose").click();
+  await page.selectOption("#sitepick", "AS01");
+  await expect(detail.locator("dl")).toHaveCount(2);
+  await expect(detail).toContainText(`${as01.readings.xact.posted}, ${as01.readings.xact.zero} of them zero`);
+  await expect(detail).toContainText("1, 1 of them zero");
+  await expect(detail).toContainText("Also here, no results posted: DustTrak, AreaRAE, Summa canister.");
+  // a site with nothing posted says so
+  await page.locator("#siteclose").click();
+  const as12 = sites.sites.find((s) => s.id === "AS12");
+  expect(Object.values(as12.readings).every((r) => r === null)).toBe(true);
+  await page.selectOption("#sitepick", "AS12");
+  await expect(detail).toContainText("No results posted.");
+  await expect(detail.locator("dl")).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 

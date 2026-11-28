@@ -59,7 +59,14 @@ def test_sites_get_a_kind_by_what_they_can_say_about_lead() -> None:
     assert by_id["AS01"]["instruments"] == ["xact", "dusttrak", "arearae", "cassette", "summa"]
     assert by_id["AS02"]["kind"] == "filter"
     assert by_id["soil"]["start"] == "2026-11-23T10:00Z"
-    assert out["unit"] == "µg/m³"
+    # one entry per instrument there: results where EPA posted some, null where it hasn't
+    assert by_id["AS01"]["readings"]["xact"]["unit"] == "µg/m³"
+    assert {i: r for i, r in by_id["AS01"]["readings"].items() if i != "xact"} == dict.fromkeys(
+        ["dusttrak", "arearae", "cassette", "summa"]
+    )
+    assert by_id["AS02"]["readings"] == {"cassette": None, "summa": None}
+    assert by_id["soil"]["readings"] == {"soil": None}
+    assert "unit" not in out  # each summary carries its own
     assert {s["shape"] for s in out["kinds"].values()} == {
         "diamond",
         "square-dot",
@@ -80,7 +87,7 @@ def test_sites_get_a_kind_by_what_they_can_say_about_lead() -> None:
 
 
 def test_readings_split_at_the_blast() -> None:
-    r = epa.summarize(SITES, READINGS, [], NOW)["sites"][0]["readings"]
+    r = epa.summarize(SITES, READINGS, [], NOW)["sites"][0]["readings"]["xact"]
     assert r["posted"] == 4  # from 9 a.m. CST on
     assert r["zero"] == 1
     assert r["max"] == {"v": 0.004, "t": "2026-11-25T16:00Z"}  # the first time it got there

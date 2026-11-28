@@ -544,8 +544,8 @@ def _add_display_args(p: argparse.ArgumentParser) -> None:
         "sites) that readers can switch on and tap for details: a JSON file with a name, a "
         'note, links, "kinds" (a label, a shape and, optionally, the instrument a site\'s '
         'details describe), "instruments" (a name and a description for each) and "sites", '
-        "each a kind, a latitude and longitude, its instruments and, optionally, an id and a "
-        "summary of its readings",
+        "each a kind, a latitude and longitude, its instruments and, optionally, an id and "
+        '"readings": for each instrument there, a summary of its results or null',
     )
     p.add_argument(
         "--hysplit-overlay-note",
@@ -1158,6 +1158,16 @@ def _site_layers(data: Json) -> Json:
             raise ValueError(msg)
         if any(i not in instruments for i in s.get("instruments", [])):
             msg = f"site {s.get('id', '?')} lists an instrument that isn't described"
+            raise ValueError(msg)
+        readings = s.get("readings", {})
+        if not isinstance(readings, dict) or any(
+            i not in s.get("instruments", []) or not (r is None or isinstance(r, dict))
+            for i, r in readings.items()
+        ):
+            msg = (
+                f"site {s.get('id', '?')}: readings must map its own instruments to a "
+                "summary of results, or to null when none are posted"
+            )
             raise ValueError(msg)
     return {"kinds": kinds, "instruments": instruments, "sites": data["sites"]}
 
