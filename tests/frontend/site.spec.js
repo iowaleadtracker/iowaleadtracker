@@ -88,6 +88,11 @@ async function mapReady(page, base) {
   };
   await expect.poll(state, { message: `the map ${src} loads`, timeout: 20000 }).toBe("ready");
 }
+// Pick a menu value as a reader does: only when it changes. (Setting a menu to its current
+// value still fires "change", and two map loads back to back are more than WebKit handles.)
+async function choose(page, sel, value) {
+  if ((await page.locator(sel).inputValue()) !== value) await page.selectOption(sel, value);
+}
 const noSideScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
 
 test.describe("landing page", () => {
@@ -128,8 +133,10 @@ test.describe("landing page", () => {
       ? page.locator(`${sel} option`).evaluateAll((os) => os.map((o) => o.value)) : [null]);
     let n = 0;
     for (const w of await choices("#w")) for (const c of await choices("#c")) for (const t of await choices("#t")) {
-      for (const [sel, v] of [["#w", w], ["#c", c], ["#t", t]]) if (v !== null) await page.selectOption(sel, v);
-      await mapReady(page, origin + "/");
+      for (const [sel, v] of [["#w", w], ["#c", c], ["#t", t]]) {
+        if (v !== null) await choose(page, sel, v);
+        await mapReady(page, origin + "/");   // one map at a time, as a reader sees them
+      }
       n++;
     }
     expect(n).toBeGreaterThan(1);
@@ -166,10 +173,12 @@ test("every day, case and time on the staged page, and its buttons, load maps", 
   await loads();
   const choices = (sel) => page.locator(`${sel} option`).evaluateAll((os) => os.map((o) => o.value));
   for (const d of await choices("#d")) {
-    await page.selectOption("#d", d);   // each day has its own times
+    await choose(page, "#d", d);   // each day has its own times
+    await loads();
     for (const c of await choices("#c")) for (const t of await choices("#t")) {
-      await page.selectOption("#c", c);
-      await page.selectOption("#t", t);
+      await choose(page, "#c", c);
+      await loads();
+      await choose(page, "#t", t);
       await loads();
     }
   }
