@@ -108,6 +108,7 @@ def test_reference_sites_are_checked(tmp_path: Path) -> None:
         {**good, "instruments": {"x": {"name": "X", "limit": {"v": 0, "unit": "u"}}}},
         {**good, "sites": [{**site, "readings": {"y": None}}]},  # not an instrument there
         {**good, "sites": [{**site, "readings": {"x": 0.002}}]},  # a number, not a summary
+        {**good, "sites": [{**site, "readings": {"x": {"url": "javascript:alert(1)"}}}]},
         {**good, "sites": [{**site, "readings": [None]}]},
         {**good, "links": [{"text": "x", "url": "javascript:alert(1)"}]},
         {"name": "x"},
@@ -130,6 +131,10 @@ def test_the_saved_epa_sites_load() -> None:
     limits = {k: i["limit"]["v"] for k, i in out["instruments"].items() if "limit" in i}
     assert limits == {"xact": 0.18, "cassette": 0.18}
     assert out["instruments"]["xact"]["limit"]["unit"] == "µg/m³"
+    for s in lead:  # "Measurements collected" links to EPA's viewer, filtered to the station
+        url = s["readings"]["xact"]["url"]
+        assert url.startswith("https://experience.arcgis.com/experience/00329268")
+        assert f"Air_Station_ID%3D%27{s['id']}%27" in url
     for s in out["sites"]:  # every instrument has an entry; only the Xact monitors have results
         assert set(s["readings"]) == set(s["instruments"])
         assert all((r is not None) == (i == "xact") for i, r in s["readings"].items())

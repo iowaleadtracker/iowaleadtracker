@@ -88,6 +88,8 @@ def test_sites_get_a_kind_by_what_they_can_say_about_lead() -> None:
 
 def test_readings_split_at_the_blast() -> None:
     r = epa.summarize(SITES, READINGS, [], NOW)["sites"][0]["readings"]["xact"]
+    # a link to EPA's viewer with its lead layer filtered to this station, as EPA spells it
+    assert r["url"] == (f"{epa.VIEWER}/?data_filter={epa.XACT_SOURCE}:Air_Station_ID%3D%27AS01%27")
     assert r["posted"] == 4  # from 9 a.m. CST on
     assert r["zero"] == 1
     assert r["max"] == {"v": 0.004, "t": "2026-11-25T16:00Z"}  # the first time it got there

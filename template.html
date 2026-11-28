@@ -886,7 +886,8 @@ function resultsDl(r, inst) {
   return `<dl><dt>Highest since the blast</dt><dd>${when(r.max)}</dd>` +
     `<dt>Highest before it</dt><dd>${when(r.maxBefore)}</dd>` +
     `<dt>Latest</dt><dd>${when(r.last)}${age >= 2 ? `<br><span class="muted">${Math.round(age)} h before this copy was saved</span>` : ""}</dd>` +
-    `<dt>Measurements collected</dt><dd>${r.posted} total, ${r.zero} posted as 0</dd>` +
+    // where they are posted: EPA's map, filtered to this site's results (a new tab)
+    `<dt>${r.url && /^https:\/\//i.test(r.url) ? `<a class="srclink" href="${esc(r.url)}" target="_blank" rel="noopener" title="Open EPA's map with this layer filtered to this site's results">Measurements collected<span aria-hidden="true"> ↗</span></a>` : "Measurements collected"}</dt><dd>${r.posted} total, ${r.zero} posted as 0</dd>` +
     // the number links to where its source is listed; whose limit it is shows on hover
     (L ? `<dt>Published detection limit</dt><dd>${L.url && /^https:\/\//i.test(L.url)
       ? `<a class="reflink" href="${esc(L.url)}" target="_blank" rel="noopener"${L.label ? ` title="${esc("Source: " + L.label)}"` : ""}>${esc(L.v)} ${esc(L.unit)}</a>`

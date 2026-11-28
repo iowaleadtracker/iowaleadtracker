@@ -25,6 +25,8 @@ import argparse
 import datetime as dt
 import json
 import sys
+import urllib.parse
+import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -36,7 +38,36 @@ UTC = dt.timezone.utc
 #: The detonation, 9 a.m. CST Nov. 25, 2026 (as the brief's RELEASE_UTC): readings at or
 #: after it are "since the blast", earlier ones are the baseline.
 EVENT = dt.datetime(2026, 11, 25, 15, 0, tzinfo=UTC)
-VIEWER = "https://experience.arcgis.com/experience/1ddcf8b9d8314971b00dac8893ae9cd6"
+# EPA's original viewer (cited in works_cited.py) now only shows this newer app inside it,
+# "Iowa Army Ammunition Plant Response Sample Data Viewer", so links go to the newer one.
+VIEWER = "https://experience.arcgis.com/experience/00329268edc24f068127d26200d35a45"
+VIEWER_ITEM = "https://www.arcgis.com/sharing/rest/content/items/00329268edc24f068127d26200d35a45"
+# The viewer's data source for the Xact lead layer. A link with ?data_filter=<this>:<where>
+# opens the viewer with that layer filtered to one station (Experience Builder's URL
+# parameters). download() checks the viewer still has it, since EPA rebuilds its apps.
+XACT_SOURCE = "dataSource_1-1a214a59c41-layer-7"
+
+
+def viewer_link(station_id: str) -> str:
+    """Return EPA's viewer with its lead layer filtered to one station, as EPA spells it."""
+    where = urllib.parse.quote(f"Air_Station_ID='{station_id}'", safe="")
+    return f"{VIEWER}/?data_filter={XACT_SOURCE}:{where}"
+
+
+def check_viewer() -> None:
+    """Stop if EPA's viewer no longer has the Xact data source the links filter."""
+    with urllib.request.urlopen(f"{VIEWER_ITEM}/data?f=json", timeout=60) as r:  # noqa: S310
+        app = json.load(r)
+    used = {
+        u.get("dataSourceId")
+        for w in app.get("widgets", {}).values()
+        for u in (w.get("useDataSources") or [])
+    }
+    if XACT_SOURCE not in used:
+        msg = f"EPA's viewer no longer uses {XACT_SOURCE}; find its Xact layer's id again"
+        raise SystemExit(msg)
+
+
 BRIEF_URL = "https://iowaleadtracker.com/monitor-placement/"
 
 #: What each instrument is, for the map's detail view, with the symbol beside its results
@@ -207,7 +238,10 @@ def summarize(
         # one entry per instrument there: its results, or null until EPA posts some
         site["readings"] = dict.fromkeys(site["instruments"])
         if sid in by_station:
-            site["readings"]["xact"] = summarize_readings(by_station.pop(sid), unit)
+            recs_here = by_station.pop(sid)
+            site["readings"]["xact"] = summarize_readings(recs_here, unit) | {
+                "url": viewer_link(recs_here[0]["Air_Station_ID"])
+            }
         out_sites.append(site)
     if by_station:
         raise ValueError(f"readings for stations not in the site list: {sorted(by_station)}")
@@ -249,6 +283,7 @@ def download() -> dict[str, Any]:
     sys.path.insert(0, str(BRIEF))
     import epa_fetch  # noqa: PLC0415 - the brief's module, found through the path above
 
+    check_viewer()
     now = dt.datetime.now(UTC)
     sites = epa_fetch.query(epa_fetch.SITES, orderByFields="Station_ID")
     recs = [

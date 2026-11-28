@@ -1188,6 +1188,9 @@ def _site_layers(data: Json) -> Json:
                 "summary of results, or to null when none are posted"
             )
             raise ValueError(msg)
+        for r in readings.values():  # a summary's link to where its results are posted
+            if r and "url" in r:
+                r["url"] = _https(str(r["url"]))
     return {"kinds": kinds, "instruments": instruments, "sites": data["sites"]}
 
 

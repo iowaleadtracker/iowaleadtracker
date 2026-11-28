@@ -123,7 +123,14 @@ test("EPA's sites are off until ticked, with a key, and open in the legend when 
   await expect(detail).toContainText("Continuous lead monitor");
   const xact = as01.readings.xact;
   await expect(detail).toContainText(`${xact.max.v.toFixed(3)} ${xact.unit}`);
-  await expect(detail).toContainText(`Measurements collected${xact.posted} total, ${xact.zero} posted as 0`);
+  await expect(detail).toContainText(`${xact.posted} total, ${xact.zero} posted as 0`);
+  // "Measurements collected" links to EPA's map, filtered to this site, in a new tab
+  const src = detail.locator("dt a.srclink");
+  await expect(src).toHaveText("Measurements collected ↗");
+  await expect(src).toHaveAttribute("href", xact.url);
+  await expect(src).toHaveAttribute("target", "_blank");
+  expect(xact.url).toContain("data_filter=");
+  expect(xact.url).toContain("%27AS01%27");
   // beside the air results: the published limit, linked to where its source is listed
   await expect(detail).toContainText("Published detection limit0.18 µg/m³");
   const limit = detail.locator("a.reflink");
@@ -170,7 +177,8 @@ test("a site shows each instrument's results, and says which have none", async (
   await page.selectOption("#sitepick", "AS06");
   await expect(detail.locator(".insthead").first()).toHaveText("Air cassette");
   await expect(detail).toContainText("0.123 µg/m³");
-  await expect(detail).toContainText("Measurements collected1 total, 0 posted as 0");
+  await expect(detail).toContainText("1 total, 0 posted as 0");
+  await expect(detail.locator("dt", { hasText: "Measurements collected" }).locator("a")).toHaveCount(0);   // no url: plain text
   await expect(detail).toContainText("Also here, no results posted: DustTrak, AreaRAE, Summa canister.");
   await expect(detail).not.toContainText("No results posted.");
   // a lead monitor with a cassette result too: both instruments' results, the rest named
