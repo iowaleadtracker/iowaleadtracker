@@ -1714,8 +1714,11 @@ def test_references_open_from_a_link() -> None:
     """#references opens Methodology and References: from a link, or the map's limit link."""
     page = (site.HERE / "index_template.html").read_text(encoding="utf-8")
     assert "const openRefs = isRefs();" in page  # read before show() rewrites the hash
-    assert "if (openRefs) openDialog(cite);" in page  # instead of the first-visit note
+    # on a first visit the note (it says the map is unofficial) comes first, then the references
+    assert "if (openRefs) note.addEventListener('close', () => openDialog(cite)" in page
     assert "e.data.puffOpen === 'references'" in page  # the map, inside the page
     assert "(isRefs() ? '' : location.hash.slice(1))" in page  # not read as a map choice
     data = json.loads(site.EPA_SITES.read_text(encoding="utf-8"))
-    assert data["instruments"]["xact"]["limit"]["url"] == site.SITE_URL + "#references"
+    # a path on the site, so the mirror and local builds open their own references
+    assert data["instruments"]["xact"]["limit"]["url"] == "/#references"
+    # the browser paths: tests/frontend/site.spec.js ("references" tests)

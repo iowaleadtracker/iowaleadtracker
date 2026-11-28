@@ -44,10 +44,15 @@ READINGS = [
     _reading("AS01", "2026-11-26 21:00", 0.0),
 ]
 SOIL = [
+    # two samples at one spot (EPA lists some spots more than once): one place on the map
+    {
+        "attributes": {"Sample_Start_Date_Time": _ms("2026-11-23 12:30")},
+        "geometry": {"x": -91.2, "y": 40.8},
+    },
     {
         "attributes": {"Sample_Start_Date_Time": _ms("2026-11-23 10:00")},
         "geometry": {"x": -91.2, "y": 40.8},
-    }
+    },
 ]
 NOW = dt.datetime(2026, 11, 28, 7, 12, tzinfo=UTC)
 
@@ -59,6 +64,8 @@ def test_sites_get_a_kind_by_what_they_can_say_about_lead() -> None:
     assert by_id["AS01"]["instruments"] == ["xact", "dusttrak", "arearae", "cassette", "summa"]
     assert by_id["AS02"]["kind"] == "filter"
     assert by_id["soil"]["start"] == "2026-11-23T10:00Z"
+    assert by_id["soil"]["starts"] == ["2026-11-23T10:00Z", "2026-11-23T12:30Z"]
+    assert sum(s["kind"] == "soil" for s in out["sites"]) == 1
     # one entry per instrument there: results where EPA posted some, null where it hasn't
     assert by_id["AS01"]["readings"]["xact"]["unit"] == "µg/m³"
     assert {i: r for i, r in by_id["AS01"]["readings"].items() if i != "xact"} == dict.fromkeys(
@@ -104,6 +111,15 @@ def test_surprises_in_the_layers_stop_the_refresh() -> None:
         epa.summarize(SITES, [_reading("AS09", "2026-11-25 16:00", 0.0)], [], NOW)
     with pytest.raises(ValueError, match="mixes units"):
         epa.summarize(SITES, [*READINGS, {**READINGS[1], "Mon_Units": "ng/m3"}], [], NOW)
+    with pytest.raises(ValueError, match="repeats station IDs"):  # AS-01 and AS01 are one station
+        epa.summarize([*SITES, _site("AS01", "Air Cassette")], READINGS, [], NOW)
+
+
+def test_a_record_without_a_value_is_left_out() -> None:
+    """EPA's layer may hold a record with no result; it isn't a measurement of zero."""
+    blank = {**READINGS[1], "Mon_Results": None}
+    r = epa.summarize(SITES, [*READINGS, blank], [], NOW)["sites"][0]["readings"]["xact"]
+    assert r["posted"] == 4
 
 
 def test_the_file_is_json_with_a_site_per_line() -> None:

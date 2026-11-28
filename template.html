@@ -197,7 +197,7 @@ body.embedded > header { display: none; }
       <div class="lz" id="legenv" hidden></div>
       <div id="legref" hidden></div>
       <div id="legsites" hidden></div>
-      <div id="legsite" hidden aria-live="polite"></div>
+      <div id="legsite" hidden></div>
       <div id="leghy" hidden><div id="leghybands"></div><div class="legnote" id="leghytext" style="border-top:0;padding-top:0;margin-top:3px"></div></div>
       <div class="lz lpath" id="legpath" style="margin-top:4px"><svg width="26" height="8" aria-hidden="true"><line x1="1" y1="4" x2="25" y2="4" stroke="currentColor" stroke-width="2" stroke-dasharray="5 4"/></svg>Path of the cloud's center, labeled with the local time it passes</div>
       <div id="legsky" hidden>
@@ -868,7 +868,7 @@ function shapeSvg(shape) {
     (shape === "square-dot" ? '<circle cx="7" cy="7" r="1.8" fill="#1d1d1b"/>' : "") + "</svg>";
 }
 // Readings as posted, in the source's unit: three decimals, as EPA's feed and the brief show them.
-const fmtReading = (v) => (v === 0 ? "0" : v >= 0.001 ? v.toFixed(3) : v.toPrecision(1));
+const fmtReading = (v) => (!Number.isFinite(v) ? "–" : v === 0 ? "0" : v >= 0.001 ? v.toFixed(3) : v.toPrecision(1));
 const MONTHS = ["Jan.", "Feb.", "March", "April", "May", "June", "July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec."];
 function fmtWhen(iso) {                           // "Nov. 25, 9:10 a.m." in the map's local time
   const d = new Date(new Date(iso).getTime() + (M.tzOffsetMin || 0) * 60000), h = d.getUTCHours();
@@ -896,9 +896,9 @@ function resultsDl(r, inst) {
     `<dt>Highest before it</dt><dd>${when(r.maxBefore)}</dd>` +
     `<dt>Latest</dt><dd>${when(r.last)}${age >= 2 ? `<br><span class="muted">${Math.round(age)} h before this copy was saved</span>` : ""}</dd>` +
     // where they are posted: EPA's map, filtered to this site's results (a new tab)
-    `<dt>${r.url && /^https:\/\//i.test(r.url) ? `<a class="srclink" href="${esc(r.url)}" target="_blank" rel="noopener" title="Open EPA's map with this layer filtered to this site's results">Measurements collected<span class="via"><span class="dot"> ·</span> on EPA's map<span aria-hidden="true"> ↗</span></span></a>` : "Measurements collected"}</dt><dd>${r.posted} total, <span class="nowrap">${r.zero} posted as 0</span></dd>` +
+    `<dt>${r.url && /^https:\/\//i.test(r.url) ? `<a class="srclink" href="${esc(r.url)}" target="_blank" rel="noopener" title="Open EPA's map with this layer filtered to this site's results">Measurements collected<span class="via"><span class="dot"> ·</span> on EPA's map<span aria-hidden="true"> ↗</span></span></a>` : "Measurements collected"}</dt><dd>${esc(r.posted)} total, <span class="nowrap">${esc(r.zero)} posted as 0</span></dd>` +
     // the number links to where its source is listed; whose limit it is shows on hover
-    (L ? `<dt>Published detection limit</dt><dd>${L.url && /^https:\/\//i.test(L.url)
+    (L ? `<dt>Army's published detection limit</dt><dd>${L.url && /^(https:\/\/|\/(?!\/))/i.test(L.url)
       ? `<a class="reflink" href="${esc(L.url)}" target="_blank" rel="noopener"${L.label ? ` title="${esc("Source: " + L.label)}"` : ""}>${esc(L.v)} ${esc(L.unit)}</a>`
       : `${esc(L.v)} ${esc(L.unit)}`}</dd>` : "") + "</dl>";
 }
@@ -934,7 +934,7 @@ function siteLegend() {
   $("legsite").innerHTML =
     `<div class="sitehead">${shapeSvg(K.shape)}<span>${esc(s.id || K.label)}</span><button type="button" id="siteclose" aria-label="Close the site's details">×</button></div>` +
     `<div class="sitesub">${s.id ? esc(K.label) + " · " : ""}${fromSource(s)}</div>` +
-    (s.start ? `<dl><dt>Sampling started</dt><dd>${fmtWhen(s.start)}</dd></dl>` : "") +
+    (s.start ? `<dl><dt>${(s.starts || []).length > 1 ? `${s.starts.length} samples, started` : "Sampling started"}</dt><dd>${(s.starts && s.starts.length ? s.starts : [s.start]).map(fmtWhen).join("<br>")}</dd></dl>` : "") +
     // the kind's own instrument: described, then its results
     (main ? `<div class="insthead">${icon(mainId)}<b>${esc(main.name)}</b></div><p class="inst">${esc(main.text)}</p>` + (r ? resultsDl(r, main) : '<p class="inst muted">No results posted.</p>') : "") +
     // the others: their results under their names; the ones without results only named
@@ -962,7 +962,7 @@ function closeSite() {
   $("sitepick").focus({ preventScroll: true });
   if (narrowMQ.matches) $("legsites").scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
 }
-$("legsite").addEventListener("keydown", (e) => { if (e.key === "Escape" && siteSel) { e.preventDefault(); closeSite(); } });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && siteSel && !document.querySelector("dialog[open]")) { e.preventDefault(); closeSite(); } });
 function drawSites() {
   if (!S.sites) return;
   const dark = isDark(), ink = "#1d1d1b", halo = "rgba(255,255,255,0.92)";
@@ -985,7 +985,7 @@ function drawSites() {
   const cands = [];
   for (const { s, shape, p: [x, y] } of pts) {
     const r = headline(s), v = r && r.max ? r.max.v : null;
-    const text = v != null ? `${s.id || ""} · ${fmtReading(v)}` : s.id && S.z >= 10.5 ? s.id : "";
+    const text = v != null ? (s.id ? `${s.id} · ` : "") + fmtReading(v) : s.id && S.z >= 10.5 ? s.id : "";
     if (text) cands.push({ s, x, y, text, gap: siteR(shape) + 4, rank: s === siteSel ? Infinity : v != null ? 1 + v : 0 });
   }
   cands.sort((a, b) => b.rank - a.rank);
@@ -1539,7 +1539,8 @@ cv.addEventListener("pointermove", (e) => {
 });
 // A tap or click that didn't move the map opens the site under it (or closes the details).
 let downXY = null;
-cv.addEventListener("pointerdown", (e) => { downXY = [e.offsetX, e.offsetY]; }, true);
+let downInDetails = false;                        // read before the press takes focus off the ×
+cv.addEventListener("pointerdown", (e) => { downXY = [e.offsetX, e.offsetY]; downInDetails = $("legsite").contains(document.activeElement); }, true);
 // A second tap on the site just opened, within a double tap's time, keeps it open (a double
 // tap zooms the map); later, a tap on the open site closes it.
 let openedAt = 0;
@@ -1548,8 +1549,13 @@ cv.addEventListener("click", (e) => {
   const s = siteAt(e.offsetX, e.offsetY);
   if (s && s === siteSel && e.timeStamp - openedAt < 350) return;
   if (!s && !siteSel) return;
-  selectSite(s === siteSel ? null : s);
-  if (siteSel) { openedAt = e.timeStamp; showSiteDetails(); }
+  // focus in the details (on the × after a pick from the list) stays somewhere useful:
+  // in the key when they close, on the new site's × when another opens
+  const hadFocus = downInDetails || $("legsite").contains(document.activeElement);
+  if (!s || s === siteSel) { if (hadFocus) closeSite(); else selectSite(null); return; }
+  selectSite(s);
+  if (hadFocus) $("siteclose").focus({ preventScroll: true });
+  openedAt = e.timeStamp; showSiteDetails();
 });
 // On narrow screens the details sit under the map: after a tap, scroll just enough that
 // their heading and first lines are on screen. Inside the site, the page around the map

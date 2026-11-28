@@ -373,6 +373,10 @@ const BUILT = $built_json;
 let seen = false;
 try { seen = localStorage.getItem('noteSeen') === BUILT; } catch (e) {}
 note.addEventListener('close', () => { try { localStorage.setItem('noteSeen', BUILT); } catch (e) {} });
-if (openRefs) openDialog(cite);                // a link to the references: those, not the note
-else if (!seen && canModal) openDialog(note);
+// A link to the references opens them; on a first visit the note comes first (it says the
+// map is unofficial) and the references open when it's closed.
+if (!seen && canModal) {
+  openDialog(note);
+  if (openRefs) note.addEventListener('close', () => openDialog(cite), { once: true });
+} else if (openRefs) openDialog(cite);
 </script></body></html>

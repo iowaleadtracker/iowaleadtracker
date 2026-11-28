@@ -86,9 +86,10 @@ BRIEF_URL = "https://iowaleadtracker.com/monitor-placement/"
 AIR_LIMIT = {
     "v": 0.18,
     "unit": "µg/m³",
-    "label": "the Army's lead air sampling method (Army air map, Nov. 25)",
-    # the site's Methodology and References, where McFate 2026d is listed
-    "url": "https://iowaleadtracker.com/#references",
+    "label": "the Army's lead air sampling method, from its 3 p.m. maps of Nov. 25 (McFate 2026d)",
+    # the site's Methodology and References, where McFate 2026d is listed: a path on the
+    # site, so the mirror and local builds open their own copy
+    "url": "/#references",
 }
 INSTRUMENTS: dict[str, dict[str, Any]] = {
     "xact": {
@@ -184,7 +185,15 @@ def instrument_keys(text: str) -> list[str]:
 
 def summarize_readings(recs: list[dict[str, Any]], unit: str) -> dict[str, Any]:
     """Summarize one instrument's results: since the blast, before it, and the last one."""
-    rows = sorted((r["Mon_Date_Time"], float(r["Mon_Results"])) for r in recs)
+    # a record without a time or a value is not a measurement: left out
+    rows = sorted(
+        (r["Mon_Date_Time"], float(r["Mon_Results"]))
+        for r in recs
+        if r.get("Mon_Date_Time") is not None and r.get("Mon_Results") is not None
+    )
+    if not rows:
+        msg = "a station has records but no measurements"
+        raise ValueError(msg)
     event_ms = EVENT.timestamp() * 1000
     after = [(t, v) for t, v in rows if t >= event_ms]
     before = [(t, v) for t, v in rows if t < event_ms]
@@ -223,6 +232,11 @@ def summarize(
         raise ValueError(f"the lead layer mixes units: {sorted(units)}")
     unit = (units.pop() if units else "µg/m3").replace("m3", "m³")
     out_sites = []
+    ids = [station(ft["attributes"]["Station_ID"]) for ft in sites]
+    if len(ids) != len(set(ids)):
+        dup = sorted({i for i in ids if ids.count(i) > 1})
+        msg = f"the site list repeats station IDs: {dup}"
+        raise ValueError(msg)
     for ft in sites:
         a, g = ft["attributes"], ft["geometry"]
         sid = station(a["Station_ID"])
@@ -246,18 +260,25 @@ def summarize(
     if by_station:
         raise ValueError(f"readings for stations not in the site list: {sorted(by_station)}")
     out_sites.sort(key=lambda s: s["id"])
+    # Soil samples at one spot (EPA lists some spots two or three times, with different
+    # start times) are one place on the map, with every start time.
+    spots: dict[tuple[float, float], list[str]] = {}
+    for ft in soil:
+        if ft.get("geometry") and ft["attributes"].get("Sample_Start_Date_Time"):
+            key = (round(ft["geometry"]["y"], 5), round(ft["geometry"]["x"], 5))
+            spots.setdefault(key, []).append(iso(ft["attributes"]["Sample_Start_Date_Time"]))
     soil_out = sorted(
         (
             {
-                "lat": round(ft["geometry"]["y"], 5),
-                "lon": round(ft["geometry"]["x"], 5),
+                "lat": lat,
+                "lon": lon,
                 "kind": "soil",
                 "instruments": ["soil"],
                 "readings": {"soil": None},
-                "start": iso(ft["attributes"]["Sample_Start_Date_Time"]),
+                "start": min(starts),
+                "starts": sorted(starts),
             }
-            for ft in soil
-            if ft.get("geometry") and ft["attributes"].get("Sample_Start_Date_Time")
+            for (lat, lon), starts in spots.items()
         ),
         key=lambda s: (s["start"], s["lat"], s["lon"]),
     )

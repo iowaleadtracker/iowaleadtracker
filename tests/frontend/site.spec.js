@@ -143,6 +143,37 @@ test.describe("landing page", () => {
     expect(errors).toEqual([]);
   });
 
+  test("#references opens the references, after the About note on a first visit", async ({ page }) => {
+    const errors = await open(page, "/#references");
+    await expect(page.locator("dialog#note")).toHaveAttribute("open", "");   // first visit: the note first
+    await expect(page.locator("dialog#cite")).not.toHaveAttribute("open", "");
+    await page.keyboard.press("Escape");
+    await expect(page.locator("dialog#cite")).toHaveAttribute("open", "");   // then the references
+    await page.keyboard.press("Escape");
+    await page.goto(origin + "/#references");                               // a later visit: straight there
+    await expect(page.locator("dialog#cite")).toHaveAttribute("open", "");
+    await expect(page.locator("dialog#note")).not.toHaveAttribute("open", "");
+    expect(errors).toEqual([]);
+  });
+
+  test("the map's detection-limit link opens the references on the page around it", async ({ page }) => {
+    const errors = await open(page, "/");
+    await page.keyboard.press("Escape");
+    await mapReady(page, origin + "/");
+    const map = mapFrame(page);
+    test.skip(!(await map.locator("#siteswrap").isVisible()), "the opening map has no EPA sites");
+    await map.locator("#showSites").check();
+    await map.locator("#sitepick").selectOption("AS01");
+    const link = map.locator("#legsite a.reflink").first();
+    await expect(link).toHaveAttribute("href", "/#references");
+    const tabs = page.context().pages().length;
+    await link.click();
+    await expect(page.locator("dialog#cite")).toHaveAttribute("open", "");
+    expect(page.context().pages().length).toBe(tabs);   // in place, not a new tab
+    await expect(page.locator("dialog#cite")).toContainText("McFate, L., 2026d");
+    expect(errors).toEqual([]);
+  });
+
   test("the U.S./metric switch reaches the map", async ({ page }) => {
     const errors = await open(page, "/");
     await page.keyboard.press("Escape");

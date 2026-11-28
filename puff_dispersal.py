@@ -39,6 +39,7 @@ import argparse
 import datetime as dt
 import json
 import math
+import re
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, TextIO, TypeAlias
@@ -1140,7 +1141,74 @@ def _site_limit(limit: Json) -> Json:
         msg = "a detection limit needs a positive number"
         raise ValueError(msg)
     out = {"v": v, "unit": str(limit["unit"]), "label": str(limit.get("label", ""))}
-    return out | ({"url": _https(str(limit["url"]))} if "url" in limit else {})
+    return out | ({"url": _site_or_https(str(limit["url"]))} if "url" in limit else {})
+
+
+def _site_or_https(url: str) -> str:
+    """Return a link that is a path on the same site ("/...") or an https address."""
+    return url if url.startswith("/") and not url.startswith("//") else _https(url)
+
+
+ISO_MINUTE = re.compile(r"^\d{4}-\d\d-\d\dT\d\d:\d\dZ$")
+
+
+def _is_number(v: object) -> bool:
+    return isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
+
+
+def _site_result(r: Json) -> Json:
+    """Check one instrument's results summary: counts, values and times of the right types.
+
+    It goes into the page's markup, so nothing in it may be text where a number belongs.
+    """
+    ok = (
+        all(
+            isinstance(r.get(k), int) and not isinstance(r.get(k), bool) for k in ("posted", "zero")
+        )
+        and 0 <= r["zero"] <= r["posted"]
+        and isinstance(r.get("unit", ""), str)
+        and isinstance(r.get("first", ""), str)
+        and all(
+            r.get(k) is None
+            or (
+                isinstance(r[k], dict)
+                and _is_number(r[k].get("v"))
+                and ISO_MINUTE.match(str(r[k].get("t")))
+            )
+            for k in ("max", "maxBefore", "last")
+        )
+    )
+    if not ok:
+        msg = "a results summary needs whole-number counts and values with YYYY-MM-DDTHH:MMZ times"
+        raise ValueError(msg)
+    return r | ({"url": _https(str(r["url"]))} if "url" in r else {})
+
+
+def _check_site(s: Json, kinds: Json, instruments: Json) -> None:
+    """Check one site: a listed kind, a position, described instruments, its results."""
+    if s["kind"] not in kinds or not _is_line([[s["lat"], s["lon"]]], points=1):
+        msg = "each site needs a listed kind and a latitude and longitude"
+        raise ValueError(msg)
+    if any(i not in instruments for i in s.get("instruments", [])):
+        msg = f"site {s.get('id', '?')} lists an instrument that isn't described"
+        raise ValueError(msg)
+    readings = s.get("readings", {})
+    if not isinstance(readings, dict) or any(
+        i not in s.get("instruments", []) or not (r is None or isinstance(r, dict))
+        for i, r in readings.items()
+    ):
+        msg = (
+            f"site {s.get('id', '?')}: readings must map its own instruments to a "
+            "summary of results, or to null when none are posted"
+        )
+        raise ValueError(msg)
+    for k, r in readings.items():
+        if r is not None:
+            readings[k] = _site_result(r)
+    times = [s["start"]] if "start" in s else []
+    if any(not ISO_MINUTE.match(str(t)) for t in times + list(s.get("starts", []))):
+        msg = f"site {s.get('id', '?')}: start times must be YYYY-MM-DDTHH:MMZ"
+        raise ValueError(msg)
 
 
 def _site_layers(data: Json) -> Json:
@@ -1172,25 +1240,7 @@ def _site_layers(data: Json) -> Json:
         msg = "a kind's instrument must be one of the described instruments"
         raise ValueError(msg)
     for s in data["sites"]:
-        if s["kind"] not in kinds or not _is_line([[s["lat"], s["lon"]]], points=1):
-            msg = "each site needs a listed kind and a latitude and longitude"
-            raise ValueError(msg)
-        if any(i not in instruments for i in s.get("instruments", [])):
-            msg = f"site {s.get('id', '?')} lists an instrument that isn't described"
-            raise ValueError(msg)
-        readings = s.get("readings", {})
-        if not isinstance(readings, dict) or any(
-            i not in s.get("instruments", []) or not (r is None or isinstance(r, dict))
-            for i, r in readings.items()
-        ):
-            msg = (
-                f"site {s.get('id', '?')}: readings must map its own instruments to a "
-                "summary of results, or to null when none are posted"
-            )
-            raise ValueError(msg)
-        for r in readings.values():  # a summary's link to where its results are posted
-            if r and "url" in r:
-                r["url"] = _https(str(r["url"]))
+        _check_site(s, kinds, instruments)
     return {"kinds": kinds, "instruments": instruments, "sites": data["sites"]}
 
 

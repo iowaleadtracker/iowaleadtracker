@@ -133,7 +133,7 @@ test("EPA's sites are off until ticked, with a key, and open in the legend when 
   expect(xact.url).toContain("data_filter=");
   expect(xact.url).toContain("%27AS01%27");
   // beside the air results: the published limit, linked to where its source is listed
-  await expect(detail).toContainText("Published detection limit0.18 µg/m³");
+  await expect(detail).toContainText("Army's published detection limit0.18 µg/m³");   // whose, in plain sight
   const limit = detail.locator("a.reflink");
   await expect(limit).toHaveAttribute("href", sites.instruments.xact.limit.url);
   await expect(limit).toHaveAttribute("title", /^Source: the Army's lead air sampling method/);
@@ -188,7 +188,7 @@ test("a site shows each instrument's results, and says which have none", async (
   await expect(detail.locator("dl")).toHaveCount(2);
   await expect(detail.locator(".insthead")).toHaveText([sites.instruments.xact.name, "Air cassette"]);   // each result under its symbol and name
   await expect(detail.locator(".insthead svg")).toHaveCount(2);
-  await expect(detail.locator("dt", { hasText: "Published detection limit" })).toHaveCount(2);   // both are lead in air
+  await expect(detail.locator("dt", { hasText: "Army's published detection limit" })).toHaveCount(2);   // both are lead in air
   await expect(detail).toContainText(`${as01.readings.xact.posted} total, ${as01.readings.xact.zero} posted as 0`);
   await expect(detail).toContainText("1 total, 1 posted as 0");
   await expect(detail).toContainText("Also here, no results posted: DustTrak, AreaRAE, Summa canister.");
@@ -309,6 +309,44 @@ test("every \"Measurements collected\" link opens EPA's map in a new tab, by tap
       await tab.close();
     }
   }
+  expect(errors).toEqual([]);
+});
+
+test("Escape closes a site opened by a click, and closing from the map keeps keyboard focus", async ({ page, isMobile }) => {
+  test.skip(isMobile, "pointer clicks and the keyboard");
+  const errors = await openMap(page, fixture("forecast"));
+  await page.locator("#showSites").check();
+  // opened by a click on the map: focus isn't in the details, Escape still closes them
+  let [x, y] = await siteAtCenter(page, "AS02");
+  await page.mouse.click(x, y);
+  await expect(page.locator("#legsite .sitehead")).toContainText("AS02");
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#legsite")).toBeHidden();
+  // picked from the list (focus on the ×), then closed by a click on the open site: focus to the list
+  await page.selectOption("#sitepick", "AS02");
+  await expect(page.locator("#siteclose")).toBeFocused();
+  [x, y] = await (async () => { const m = await page.locator("#map").boundingBox(); return [m.x + m.width / 2, m.y + m.height / 2]; })();
+  await page.waitForTimeout(400);   // past a double click's time
+  await page.mouse.click(x, y);
+  await expect(page.locator("#legsite")).toBeHidden();
+  await expect(page.locator("#sitepick")).toBeFocused();
+  // the same with a click on empty map
+  await page.selectOption("#sitepick", "AS02");
+  await page.mouse.click(x - 200, y - 150 > 0 ? y - 150 : y + 150);
+  await expect(page.locator("#legsite")).toBeHidden();
+  await expect(page.locator("#sitepick")).toBeFocused();
+  expect(errors).toEqual([]);
+});
+
+test("a site's counts go into the page as text, not markup", async ({ page }) => {
+  const data = fixture("forecast");
+  const as01 = data.meta.sites.sites.find((s) => s.id === "AS01");
+  as01.readings.xact.posted = "<b id=injected>84</b>";   // the build refuses this; the page must not trust it either
+  const errors = await openMap(page, data);
+  await page.locator("#showSites").check();
+  await page.selectOption("#sitepick", "AS01");
+  await expect(page.locator("#legsite")).toContainText("<b id=injected>84</b> total");
+  await expect(page.locator("#injected")).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 

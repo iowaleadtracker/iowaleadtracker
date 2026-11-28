@@ -73,6 +73,15 @@ def test_weather_at_centers_the_weather_grid_elsewhere() -> None:
 
 def test_reference_sites_are_checked(tmp_path: Path) -> None:
     """A file of sites needs kinds with a known shape, and sites of a listed kind."""
+    result = {
+        "unit": "µg/m³",
+        "posted": 2,
+        "zero": 1,
+        "max": {"v": 0.002, "t": "2026-11-25T15:10Z"},
+        "maxBefore": None,
+        "first": "2026-11-25T15:00Z",
+        "last": {"v": 0.0, "t": "2026-11-25T15:20Z"},
+    }
     good = {
         "name": "Agency sites",
         "kinds": {"lead": {"label": "Lead monitor", "shape": "diamond"}},
@@ -88,6 +97,14 @@ def test_reference_sites_are_checked(tmp_path: Path) -> None:
     assert out["name"] == "Agency sites"
     assert out["unit"] == "µg/m³"
     assert out["sites"][0]["id"] == "A1"
+    site_with_result = {**good["sites"][0], "readings": {"x": result}}  # type: ignore[index]
+    path.write_text(json.dumps({**good, "sites": [site_with_result]}), encoding="utf-8")
+    assert puff._reference_sites(ns) is not None  # a well-formed summary passes
+    limit = {"v": 0.18, "unit": "µg/m³", "url": "/#references"}  # a path on the site is fine
+    path.write_text(
+        json.dumps({**good, "instruments": {"x": {"name": "X", "limit": limit}}}), encoding="utf-8"
+    )
+    assert puff._reference_sites(ns)["instruments"]["x"]["limit"]["url"] == "/#references"  # type: ignore[index]
     site_with_none = {**good["sites"][0], "readings": {"x": None}}  # type: ignore[index]
     path.write_text(json.dumps({**good, "sites": [site_with_none]}), encoding="utf-8")
     loaded = puff._reference_sites(ns)
@@ -109,6 +126,26 @@ def test_reference_sites_are_checked(tmp_path: Path) -> None:
         {**good, "sites": [{**site, "readings": {"y": None}}]},  # not an instrument there
         {**good, "sites": [{**site, "readings": {"x": 0.002}}]},  # a number, not a summary
         {**good, "sites": [{**site, "readings": {"x": {"url": "javascript:alert(1)"}}}]},
+        # the summary goes into the page's markup: counts and values must be numbers
+        {**good, "sites": [{**site, "readings": {"x": {**result, "posted": "<img src=x>"}}}]},
+        {**good, "sites": [{**site, "readings": {"x": {**result, "zero": 9}}}]},  # > posted
+        {
+            **good,
+            "sites": [
+                {
+                    **site,
+                    "readings": {"x": {**result, "max": {"v": "oops", "t": "2026-11-25T15:10Z"}}},
+                }
+            ],
+        },
+        {**good, "sites": [{**site, "readings": {"x": {**result, "last": {"v": 0, "t": "<b>"}}}}]},
+        {**good, "sites": [{**site, "starts": ["Nov. 22"]}]},
+        {
+            **good,
+            "instruments": {
+                "x": {"name": "X", "limit": {"v": 0.18, "unit": "u", "url": "//evil.example"}}
+            },
+        },
         {**good, "sites": [{**site, "readings": [None]}]},
         {**good, "links": [{"text": "x", "url": "javascript:alert(1)"}]},
         {"name": "x"},
