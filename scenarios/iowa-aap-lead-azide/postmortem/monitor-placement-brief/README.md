@@ -9,6 +9,10 @@ after the Army detonated its lead azide stockpile at the Iowa Army Ammunition Pl
 that came down. For the amounts modeled here, bulk soil samples probably can't show it;
 wipes of surfaces near the path can. See "What is needed now."*
 
+*Revised Nov. 28, 2026: an earlier version said EPA's DustTrak monitors record particles
+"not lead." Their maker's description says what they measure, not what they can't, so
+that is removed.*
+
 > **Unofficial.** This is a screening analysis by a private citizen, not from the Army or
 > any government agency. Don't use it to decide if you're safe; follow official
 > instructions. The map shows model estimates for an assumed release. It is not a
@@ -134,8 +138,9 @@ values (µg/m³) and the instruments EPA lists. Model estimates, not measurement
 - **Filter cassettes** are at every one of these sites. A lab measures the lead on the
   filter. AS06 and AS12 matter most: they are in the body of the rerun cloud and read
   almost nothing on the forecast path, so a result there separates the two paths.
-- **DustTrak particle monitors** are at AS06 and AS35. They record airborne particles
-  continuously, not lead. A record from AS06 for 9 to 11 a.m. on Nov. 25 would show
+- **DustTrak particle monitors** are at AS06 and AS35. They give real-time readings of
+  the mass of particles in the air, by light scattering (TSI 2026). A record from AS06
+  for 9 to 11 a.m. on Nov. 25 would show
   whether a particle cloud passed, and when, without waiting for a lab.
 - **The Army's own samplers.** Its permit application describes 24-hour filter samples at
   ten locations and five response samples during the event (U.S. Army 2026b). Their locations are not
@@ -429,6 +434,9 @@ Iowa Lead Tracker, an unofficial public project by a private citizen
 - Stein, A. F., and Coauthors, 2015: NOAA's HYSPLIT atmospheric transport and dispersion
   modeling system. *Bull. Amer. Meteor. Soc.*, **96**, 2059–2077,
   doi:10.1175/BAMS-D-14-00110.1.
+- TSI, 2026: DustTrak II aerosol monitor 8530. Product page, TSI Incorporated,
+  https://tsi.com/products/aerosol-and-dust-monitors/aerosol-and-dust-monitors/dusttrak-ii-aerosol-monitor-8530
+  (retrieved Nov. 28, 2026).
 - U.S. Army, 2026a: Public advisory maps, "Mitigated 0.26" dispersion and deposition,
   detonation 25 Nov 2026 0900 CST, issued Nov. 25, 2026, a/o 250700NOV26 (in
   `data/army/`; the ground map only).

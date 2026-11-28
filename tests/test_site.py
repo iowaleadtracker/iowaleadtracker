@@ -254,7 +254,7 @@ def test_header_and_about_box_name_the_weather() -> None:
         "The winds come from four weather forecasts, current as of X."
     )
     nov26 = [what for when, what in works_cited.CHANGES if when == "Nov. 26"]
-    assert works_cited.CHANGES[0][0] == "Nov. 27"  # the newest entry (the HYSPLIT comparison)
+    assert works_cited.CHANGES[0][0] == "Nov. 28"  # the newest entry (the DustTrak wording)
     assert any("opens on a 9 a.m. blast, the low case, and archived weather" in w for w in nov26)
     assert any(
         "Opening on the low case is not a finding that little lead got out." in w for w in nov26

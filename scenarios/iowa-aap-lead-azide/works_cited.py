@@ -737,6 +737,15 @@ ARMY_BOX_METHOD = (
 CHANGES_HEAD = "Change log"
 CHANGES = [
     (
+        "Nov. 28",
+        (
+            "The preliminary analysis and this change log no longer say EPA&rsquo;s real-time "
+            "dust monitors (DustTrak) don&rsquo;t measure lead. Their maker&rsquo;s description "
+            "says what they measure (the mass of particles in the air, by light scattering; "
+            "TSI, cited 2026), not what they can&rsquo;t. The maps did not change."
+        ),
+    ),
+    (
         "Nov. 27",
         (
             "&ldquo;When was the detonation?&rdquo; is rewritten in order, in three short "
@@ -753,8 +762,8 @@ CHANGES = [
             "continuous lead monitors&rdquo; and says which: the Xact analyzers at stations "
             "AS01&ndash;AS04, which measure lead directly, not the air-sample cassettes at "
             "EPA&rsquo;s other stations (such as AS-06 and AS-12), whose lead results need lab "
-            "analysis. Some of those stations also have real-time dust monitors, which don&rsquo;t "
-            "measure lead. The lab-analyzed samplers are called air-sample cassettes throughout. "
+            "analysis. Some of those stations also have real-time dust monitors. The "
+            "lab-analyzed samplers are called air-sample cassettes throughout. "
             "Same on the preliminary analysis page and its map. The maps did not change."
         ),
     ),
