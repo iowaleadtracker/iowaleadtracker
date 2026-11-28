@@ -39,7 +39,8 @@ EVENT = dt.datetime(2026, 11, 25, 15, 0, tzinfo=UTC)
 VIEWER = "https://experience.arcgis.com/experience/1ddcf8b9d8314971b00dac8893ae9cd6"
 BRIEF_URL = "https://iowaleadtracker.com/monitor-placement/"
 
-#: What each instrument is, for the map's detail view. Keep these to what the sources say:
+#: What each instrument is, for the map's detail view. Keep these to what the sources say,
+#: and don't say what an instrument can't measure unless its source says so:
 #: Xact and the air cassette from the monitor-placement brief (EPA 2026a, 2026b there);
 #: DustTrak from TSI's DustTrak II 8530 page, AreaRAE from Honeywell's AreaRAE Pro RAEMet
 #: sensor page, the Summa canister from EPA Compendium Method TO-15 (EPA/625/R-96/010b,
@@ -59,19 +60,19 @@ INSTRUMENTS: dict[str, dict[str, str]] = {
     "dusttrak": {
         "name": "DustTrak",
         "text": "A light-scattering laser photometer that gives real-time readings of the "
-        "mass of particles in the air (TSI). It measures all particles, not lead. No "
-        "readings had been posted.",
+        "mass of particles in the air (TSI). No readings had been posted.",
     },
     "arearae": {
         "name": "AreaRAE",
-        "text": "A wireless monitor for up to seven hazards, among them volatile organic "
-        "compounds, combustible and toxic gases, oxygen and gamma radiation (Honeywell). "
-        "It doesn't measure lead in dust.",
+        "text": "A wireless monitor for up to seven hazards, including gamma radiation, "
+        "volatile organic compounds, combustible and toxic gases, and oxygen (Honeywell). "
+        "No readings had been posted.",
     },
     "summa": {
         "name": "Summa canister",
         "text": "A specially prepared stainless steel canister that takes in a sample of "
-        "air for a lab to test for volatile organic compounds (EPA Method TO-15), not lead.",
+        "air for a lab to test for volatile organic compounds (EPA Method TO-15). No "
+        "results had been posted.",
     },
     "soil": {
         "name": "Soil sample",
