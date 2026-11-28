@@ -75,6 +75,7 @@ test("each fixture shows only the layers its data has", async ({ page }) => {
   await expect(page.locator("#refwrap")).toBeVisible();     // the Army's zones
   await expect(page.locator("#envwrap")).toBeVisible();     // the model spread
   await expect(page.locator("#modelseg")).toBeHidden();     // no saved HYSPLIT run
+  await expect(page.locator("#siteswrap")).toBeVisible();   // EPA's sampling sites
   await openMap(page, fixture("archived"));
   await expect(page.locator("#skywrap")).toBeHidden();      // built without the weather layer
   await expect(page.locator("#modelseg")).toBeVisible();    // NOAA HYSPLIT
@@ -104,6 +105,299 @@ test("the Army's zones are off until ticked", async ({ page }) => {
   await expect(page.locator("#legref")).toBeHidden();
   await page.locator("#showRef").check();
   await expect(page.locator("#legref")).toBeVisible();
+});
+
+test("EPA's sites are off until ticked, with a key, and open in the legend when tapped", async ({ page, isMobile }) => {
+  const data = fixture("forecast"), sites = data.meta.sites;
+  const errors = await openMap(page, data);
+  await expect(page.locator("#showSites")).not.toBeChecked();
+  await expect(page.locator("#legsites")).toBeHidden();
+  await page.locator("#showSites").check();
+  await expect(page.locator("#legsites")).toBeVisible();
+  for (const k of Object.values(sites.kinds)) await expect(page.locator("#legsites")).toContainText(k.label);
+  await expect(page.locator("#legsites")).toContainText("A reading near zero doesn't show");
+  // from the list: the map centers on the site and its details open
+  const as01 = sites.sites.find((s) => s.id === "AS01");
+  await page.selectOption("#sitepick", "AS01");
+  const detail = page.locator("#legsite");
+  await expect(detail).toBeVisible();
+  await expect(detail).toContainText("Continuous lead monitor");
+  const xact = as01.readings.xact;
+  await expect(detail).toContainText(`${xact.max.v.toFixed(3)} ${xact.unit}`);
+  await expect(detail).toContainText(`${xact.posted} total, ${xact.zero} posted as 0`);
+  // "Measurements collected" links to EPA's map, filtered to this site, in a new tab
+  const src = detail.locator("dt a.srclink");
+  await expect(src).toHaveText("Measurements collected · on EPA's map ↗");   // says where it goes, for phones without hover text
+  await expect(src).toHaveAttribute("href", xact.url);
+  await expect(src).toHaveAttribute("target", "_blank");
+  expect(xact.url).toContain("data_filter=");
+  expect(xact.url).toContain("%27AS01%27");
+  // beside the air results: the published limit, linked to where its source is listed
+  await expect(detail).toContainText("Army's published detection limit0.18 µg/m³");   // whose, in plain sight
+  const limit = detail.locator("a.reflink");
+  await expect(limit).toHaveAttribute("href", sites.instruments.xact.limit.url);
+  await expect(limit).toHaveAttribute("title", /^Source: the Army's lead air sampling method/);
+  await expect(limit).toHaveAttribute("target", "_blank");   // opened on its own; in the site, the dialog
+  await expect(detail.locator(".insthead").first()).toHaveText(sites.instruments.xact.name);   // the kind's own instrument first
+  await expect(detail.locator(".insthead svg")).toHaveCount(1);   // with its symbol
+  await expect(detail).toContainText(sites.instruments.xact.text);
+  await expect(detail).toContainText("Also here, no results posted: DustTrak, AreaRAE, Air cassette, Summa canister.");   // the rest (null), named
+  await expect(detail).not.toContainText(sites.instruments.dusttrak.text);
+  await expect(detail).toContainText("Measurements, not model estimates.");
+  await page.locator("#siteclose").click();
+  await expect(detail).toBeHidden();
+  // a click or tap on the site (now at the map's center) opens it again; a drag doesn't
+  await page.locator("#map").scrollIntoViewIfNeeded();
+  const [cx, cy] = await pickedSpot(page);   // where the list put AS01
+  if (isMobile) await page.touchscreen.tap(cx, cy);   // one finger scrolls the page: no drag here
+  else {
+    await page.mouse.move(cx, cy); await page.mouse.down(); await page.mouse.move(cx + 40, cy + 20); await page.mouse.up();
+    await expect(detail).toBeHidden();
+    await page.mouse.move(cx + 40, cy + 20); await page.mouse.down(); await page.mouse.move(cx, cy); await page.mouse.up();   // and back
+    await page.mouse.click(cx, cy);
+  }
+  await expect(detail).toBeVisible();
+  await expect(detail.locator(".sitehead")).toContainText("AS01");
+  await page.locator("#showSites").uncheck();
+  await expect(detail).toBeHidden();
+  expect(errors).toEqual([]);
+});
+
+test("a site shows each instrument's results, and says which have none", async ({ page }) => {
+  // made-up lab results for one air cassette, to stand in for results EPA hasn't posted
+  const data = fixture("forecast"), sites = data.meta.sites;
+  const as06 = sites.sites.find((s) => s.id === "AS06"), as01 = sites.sites.find((s) => s.id === "AS01");
+  expect(as06.readings.cassette).toBeNull();
+  as06.readings.cassette = { unit: "µg/m³", posted: 1, zero: 0, max: { v: 0.123, t: "2026-11-25T21:00Z" }, maxBefore: null, first: "2026-11-25T21:00Z", last: { v: 0.123, t: "2026-11-25T21:00Z" } };
+  as01.readings.cassette = { unit: "µg/m³", posted: 1, zero: 1, max: { v: 0, t: "2026-11-25T21:00Z" }, maxBefore: null, first: "2026-11-25T21:00Z", last: { v: 0, t: "2026-11-25T21:00Z" } };
+  const errors = await openMap(page, data);
+  await page.locator("#showSites").check();
+  const detail = page.locator("#legsite");
+  // a filter site: the cassette is its own sample, so its results come right after its description
+  await page.selectOption("#sitepick", "AS06");
+  await expect(detail.locator(".insthead").first()).toHaveText("Air cassette");
+  await expect(detail).toContainText("0.123 µg/m³");
+  await expect(detail).toContainText("1 total, 0 posted as 0");
+  await expect(detail.locator("dt", { hasText: "Measurements collected" }).locator("a")).toHaveCount(0);   // no url: plain text
+  await expect(detail).toContainText("Also here, no results posted: DustTrak, AreaRAE, Summa canister.");
+  await expect(detail).not.toContainText("No results posted.");
+  // a lead monitor with a cassette result too: both instruments' results, the rest named
+  await page.locator("#siteclose").click();
+  await page.selectOption("#sitepick", "AS01");
+  await expect(detail.locator("dl")).toHaveCount(2);
+  await expect(detail.locator(".insthead")).toHaveText([sites.instruments.xact.name, "Air cassette"]);   // each result under its symbol and name
+  await expect(detail.locator(".insthead svg")).toHaveCount(2);
+  await expect(detail.locator("dt", { hasText: "Army's published detection limit" })).toHaveCount(2);   // both are lead in air
+  await expect(detail).toContainText(`${as01.readings.xact.posted} total, ${as01.readings.xact.zero} posted as 0`);
+  await expect(detail).toContainText("1 total, 1 posted as 0");
+  await expect(detail).toContainText("Also here, no results posted: DustTrak, AreaRAE, Summa canister.");
+  // a site with nothing posted says so
+  await page.locator("#siteclose").click();
+  const as12 = sites.sites.find((s) => s.id === "AS12");
+  expect(Object.values(as12.readings).every((r) => r === null)).toBe(true);
+  await page.selectOption("#sitepick", "AS12");
+  await expect(detail).toContainText("No results posted.");
+  await expect(detail.locator("dl")).toHaveCount(0);
+  await expect(detail).not.toContainText("detection limit");   // only beside results
+  expect(errors).toEqual([]);
+});
+
+test("closing a site's details: focus goes to the list, Escape closes too, and the × fits a finger", async ({ page, isMobile }) => {
+  const errors = await openMap(page, fixture("forecast"));
+  await page.locator("#showSites").check();
+  await page.selectOption("#sitepick", "AS01");
+  const close = page.locator("#siteclose");
+  await expect(close).toBeFocused();   // opened from the list: focus on the ×
+  const b = await close.boundingBox();
+  if (isMobile) expect(Math.min(b.width, b.height)).toBeGreaterThanOrEqual(44);   // touch: a finger-sized target
+  else expect(Math.min(b.width, b.height)).toBeGreaterThanOrEqual(24);   // the WCAG minimum
+  expect(await page.locator(".legend").evaluate((l) => l.scrollWidth <= l.clientWidth)).toBe(true);   // no sideways scroll
+  if (isMobile) { await close.scrollIntoViewIfNeeded(); const c = await close.boundingBox(); await page.touchscreen.tap(c.x + c.width / 2, c.y + c.height / 2); }
+  else await close.click();
+  await expect(page.locator("#legsite")).toBeHidden();
+  await expect(page.locator("#legsites")).toBeVisible();
+  await expect(page.locator("#sitepick")).toBeFocused();   // not lost to the page
+  await expect(page.locator("#sitepick")).toBeInViewport();   // the key in view, even where the legend shrank
+  // the keyboard: pick again, then Escape from inside the details
+  await page.selectOption("#sitepick", "AS02");
+  await expect(page.locator("#legsite")).toContainText("AS02");
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#legsite")).toBeHidden();
+  await expect(page.locator("#sitepick")).toBeFocused();
+  expect(errors).toEqual([]);
+});
+
+// A point on the map with no site under it (the hover tip isn't a site's) and clear of the
+// zoom buttons and the legend: for a click on "empty map".
+async function emptyMapSpot(page) {
+  const m = await page.locator("#map").boundingBox(), lg = await page.locator(".legend").boundingBox();
+  const right = lg && lg.x > m.x ? lg.x - 10 : m.x + m.width - 10;
+  for (let y = m.y + m.height - 30; y > m.y + 30; y -= 37) for (let x = m.x + 70; x < right; x += 41) {
+    await page.mouse.move(x, y);
+    const tip = await page.evaluate(() => { const t = document.getElementById("tip"); return t.style.display === "block" ? t.textContent : ""; });
+    if (!tip.includes("Click for details")) return [x, y];
+  }
+  throw new Error("no empty spot on the map");
+}
+// Where the list put the last site it was asked for, on the page: the map's center, or on
+// wide screens midway across the part the legend doesn't cover (the page records it).
+async function pickedSpot(page) {
+  const m = await page.locator("#map").boundingBox();
+  const [x, y] = (await page.locator("#map").getAttribute("data-site-spot")).split(",").map(Number);
+  return [m.x + x, m.y + y];
+}
+// Center the map on a site with the list, close its details, put the map at the top of the
+// screen, and return the site's spot, ready to tap.
+async function siteAtCenter(page, id) {
+  if (await page.locator("#legsite").isVisible()) await page.locator("#siteclose").click();   // the list is in the key
+  await page.selectOption("#sitepick", id);
+  await page.locator("#siteclose").click();
+  await page.evaluate(() => window.scrollTo(0, 0));
+  return pickedSpot(page);
+}
+
+test("on a phone, a tapped site's details scroll into view, and a double tap keeps them open", async ({ page, isMobile }) => {
+  test.skip(!isMobile, "taps and the details under the map are for narrow touch screens");
+  const errors = await openMap(page, fixture("forecast"));
+  await page.locator("#showSites").check();
+  const vh = page.viewportSize().height;
+  let [x, y] = await siteAtCenter(page, "AS03");
+  await page.touchscreen.tap(x, y);
+  const head = page.locator("#legsite .sitehead");
+  await expect(head).toContainText("AS03");
+  await expect.poll(async () => (await head.boundingBox()).y).toBeLessThanOrEqual(vh * 0.6);   // the heading on screen
+  expect((await head.boundingBox()).y).toBeGreaterThanOrEqual(0);
+  // a double tap: the second tap doesn't close what the first opened
+  [x, y] = await siteAtCenter(page, "AS03");
+  await page.touchscreen.tap(x, y);
+  await page.touchscreen.tap(x, y);
+  await page.waitForTimeout(400);
+  await expect(page.locator("#legsite")).toBeVisible();
+  await expect(head).toContainText("AS03");
+  // a later tap on the open site closes it
+  await page.evaluate(() => window.scrollTo(0, 0));
+  [x, y] = await pickedSpot(page);
+  await page.touchscreen.tap(x, y);
+  await expect(page.locator("#legsite")).toBeHidden();
+  expect(errors).toEqual([]);
+});
+
+test("crowded labels: some are left out at a wide zoom, all are back zoomed in", async ({ page, isMobile }) => {
+  const errors = await openMap(page, fixture("forecast"));
+  await page.locator("#showSites").check();
+  const [sx, sy] = await siteAtCenter(page, "AS02");
+  // zoom about AS02: on phones it is at the map's center, where the buttons zoom (mobile
+  // WebKit has no mouse wheel); on wide screens the legend moves it left, so the wheel there
+  const zoom = async (n) => {
+    if (isMobile) for (let i = 0; i < Math.abs(n); i++) await page.locator(n > 0 ? "#zin" : "#zout").click();
+    else { await page.mouse.move(sx, sy); for (let i = 0; i < Math.abs(n); i++) await page.mouse.wheel(0, n > 0 ? -400 : 400); }
+  };
+  await zoom(-5);   // the monitors crowd together
+  const labels = async () => (await page.locator("#map").getAttribute("data-site-labels")).split("/").map(Number);
+  await expect.poll(async () => { const [shown, wanted] = await labels(); return shown < wanted && shown >= 1; }).toBe(true);
+  await zoom(7);   // zoomed in: room for every label on screen
+  await expect.poll(async () => { const [shown, wanted] = await labels(); return wanted >= 1 && shown === wanted; }).toBe(true);
+  expect(errors).toEqual([]);
+});
+
+test("every \"Measurements collected\" link opens EPA's map in a new tab, by tap, click or Enter", async ({ page, isMobile }) => {
+  const data = fixture("forecast");
+  // the new tab is another page: answer EPA's address with a stub, so the test stays offline
+  await page.context().route("https://experience.arcgis.com/**", (r) => r.fulfill({ contentType: "text/html", body: "<title>stub</title>" }));
+  const errors = await openMap(page, data);
+  await page.locator("#showSites").check();
+  const linked = data.meta.sites.sites.filter((s) => Object.values(s.readings || {}).some((r) => r && r.url));
+  expect(linked.map((s) => s.id)).toEqual(["AS01", "AS02", "AS03", "AS04"]);
+  for (const s of linked) {
+    for (const how of ["pointer", "Enter"]) {
+      if (await page.locator("#legsite").isVisible()) await page.locator("#siteclose").click();
+      await page.selectOption("#sitepick", s.id);
+      const link = page.locator("#legsite a.srclink");
+      await expect(link).toHaveAttribute("target", "_blank");
+      await expect(link).toHaveAttribute("rel", /noopener/);
+      if (isMobile) for (const a of [link, page.locator("#legsite a.reflink").first()])   // finger-sized, not overlapping
+        expect((await a.boundingBox()).height).toBeGreaterThanOrEqual(44);
+      await link.scrollIntoViewIfNeeded();
+      const before = page.url();
+      const act = async () => {
+        if (how === "Enter") { await link.focus(); await page.keyboard.press("Enter"); }
+        else if (isMobile) { const b = await link.boundingBox(); await page.touchscreen.tap(b.x + b.width / 2, b.y + b.height / 2); }
+        else await link.click();
+      };
+      const [tab] = await Promise.all([page.context().waitForEvent("page"), act()]);
+      await tab.waitForLoadState("domcontentloaded");
+      expect(tab.url()).toBe(s.readings.xact.url);   // EPA's map, filtered to this site
+      expect(page.url()).toBe(before);   // the map stays where it was
+      await expect(page.locator("#legsite .sitehead")).toContainText(s.id);   // with the site still open
+      await tab.close();
+    }
+  }
+  expect(errors).toEqual([]);
+});
+
+test("Escape closes a site opened by a click, and closing from the map keeps keyboard focus", async ({ page, isMobile }) => {
+  test.skip(isMobile, "pointer clicks and the keyboard");
+  const errors = await openMap(page, fixture("forecast"));
+  await page.locator("#showSites").check();
+  // opened by a click on the map: focus isn't in the details, Escape still closes them
+  let [x, y] = await siteAtCenter(page, "AS02");
+  await page.mouse.click(x, y);
+  await expect(page.locator("#legsite .sitehead")).toContainText("AS02");
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#legsite")).toBeHidden();
+  // picked from the list (focus on the ×), then closed by a click on the open site: focus to the list
+  await page.selectOption("#sitepick", "AS02");
+  await expect(page.locator("#siteclose")).toBeFocused();
+  [x, y] = await pickedSpot(page);
+  await page.waitForTimeout(400);   // past a double click's time
+  await page.mouse.click(x, y);
+  await expect(page.locator("#legsite")).toBeHidden();
+  await expect(page.locator("#sitepick")).toBeFocused();
+  // the same with a click on empty map
+  await page.selectOption("#sitepick", "AS02");
+  await page.mouse.click(...(await emptyMapSpot(page)));
+  await expect(page.locator("#legsite")).toBeHidden();
+  await expect(page.locator("#sitepick")).toBeFocused();
+  expect(errors).toEqual([]);
+});
+
+test("a site's counts go into the page as text, not markup", async ({ page }) => {
+  const data = fixture("forecast");
+  const as01 = data.meta.sites.sites.find((s) => s.id === "AS01");
+  as01.readings.xact.posted = "<b id=injected>84</b>";   // the build refuses this; the page must not trust it either
+  const errors = await openMap(page, data);
+  await page.locator("#showSites").check();
+  await page.selectOption("#sitepick", "AS01");
+  await expect(page.locator("#legsite")).toContainText("<b id=injected>84</b> total");
+  await expect(page.locator("#injected")).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test("a site's symbol is filled, in EPA's colors, only once it has results since the blast", async ({ page }) => {
+  const data = fixture("forecast"), sites = data.meta.sites;
+  // a made-up air-cassette result at a filter site (EPA hasn't posted one)
+  const as06 = sites.sites.find((s) => s.id === "AS06");
+  as06.readings.cassette = { unit: "µg/m³", posted: 1, zero: 0, max: { v: 0.1, t: "2026-11-25T21:00Z" }, maxBefore: null, first: "2026-11-25T21:00Z", last: { v: 0.1, t: "2026-11-25T21:00Z" } };
+  const errors = await openMap(page, data);
+  await page.locator("#showSites").check();
+  const headFill = () => page.locator("#legsite .sitehead svg path").getAttribute("fill");
+  // the lead monitors: EPA's color for results below 32 µg/m³
+  await page.selectOption("#sitepick", "AS01");
+  expect(await headFill()).toBe(sites.kinds.lead.fill.breaks[0].color);
+  await page.locator("#siteclose").click();
+  // a site with nothing posted: outlined
+  await page.selectOption("#sitepick", "AS12");
+  expect(await headFill()).toBe("#fff");
+  await page.locator("#siteclose").click();
+  // the filter site with a result: its kind's color
+  await page.selectOption("#sitepick", "AS06");
+  expect(await headFill()).toBe(sites.kinds[as06.kind].fill.color);
+  await page.locator("#siteclose").click();
+  // the key says what filled means, with the colors in use
+  await expect(page.locator("#legsites")).toContainText("Filled: results posted since the blast, in the colors EPA’s map uses, except gray where EPA uses green. Outlined: none yet.");
+  expect(sites.kinds.lead.fill.breaks[0].color).toBe("#8f8f8f");   // neutral, not EPA's green: no "safe" color
+  await expect(page.locator("#legsites")).toContainText("Continuous lead monitor (Xact), highest result below 32 µg/m³");
+  expect(errors).toEqual([]);
 });
 
 test("deposition opens at the map's minimum, with a box that brings lower values back", async ({ page }) => {

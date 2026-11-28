@@ -153,6 +153,14 @@ REFERENCES = [
     "Emerson, E. W., and Coauthors, 2020: Revisiting particle dry deposition and its role in "
     "radiative effect estimates. <i>Proc. Natl. Acad. Sci. USA</i>, <b>117</b>, "
     "26&thinsp;076&ndash;26&thinsp;082, " + doi("10.1073/pnas.2014761117") + ".",
+    "EPA Press Office, 2026: EPA releases initial water source lab results indicating "
+    "Wednesday&rsquo;s controlled detonation in Iowa did not result in an elevation of lead in "
+    "water bodies that serve as sources of drinking water. News release, U.S. Environmental "
+    "Protection Agency, 28 November 2026, accessed 28 November 2026, "
+    + _a(
+        "https://www.epa.gov/newsreleases/epa-releases-initial-water-source-lab-results-indicating-wednesdays-controlled"
+    )
+    + ".",
     "EPA Region 7, 2026: Iowa Army Ammunition Plant response data viewer (continuous lead "
     "monitors and air sampling stations). ArcGIS Experience, U.S. Environmental Protection "
     "Agency, accessed 25 November 2026, "
@@ -163,6 +171,13 @@ REFERENCES = [
         "<b>43</b>, "
         "46246."
     ),
+    "EPA, 1999: Compendium Method TO-15: Determination of volatile organic compounds (VOCs) "
+    "in air collected in specially-prepared canisters and analyzed by gas "
+    "chromatography/mass spectrometry (GC/MS). <i>Compendium of Methods for the Determination "
+    "of Toxic Organic Compounds in Ambient Air</i>, 2nd ed., EPA/625/R-96/010b, U.S. "
+    "Environmental Protection Agency, accessed 28 November 2026, "
+    + _a("https://www.epa.gov/sites/default/files/2019-11/documents/to-15r.pdf")
+    + ".",
     (
         "EPA, 2008: National ambient air quality standards for lead. <i>Fed. Regist.</i>, "
         "<b>73</b>, "
@@ -221,6 +236,12 @@ REFERENCES = [
     "Homann, S. G., and F. Aluzzi, 2013: HotSpot health physics codes, version 3.0: User&rsquo;s "
     "guide. LLNL-SM-636474, Lawrence Livermore National Laboratory, "
     + _a("https://narac.llnl.gov/hotspot")
+    + ".",
+    "Honeywell, cited 2026: AreaRAE Pro RAEMet sensor. Product page, RAE Systems by "
+    "Honeywell, accessed 28 November 2026, "
+    + _a(
+        "https://automation.honeywell.com/us/en/products/gas-and-flame-detection/portables/multi-gas/arearae-pro-raemet-sensor"
+    )
     + ".",
     "Iowa Environmental Mesonet, 2026: ASOS observations for Burlington (BRL), Fort Madison "
     "(FSW) and Mount Pleasant (MPZ), Iowa, 25 November 2026, 8:30&ndash;10:30 a.m. CST. Iowa "
@@ -339,6 +360,12 @@ REFERENCES = [
         "Stull, R. B., 1988: <i>An Introduction to Boundary Layer Meteorology</i>. Kluwer "
         "Academic, 666 pp."
     ),
+    "TSI, cited 2026: DustTrak II aerosol monitor 8530. Product page, TSI Incorporated, "
+    "accessed 28 November 2026, "
+    + _a(
+        "https://tsi.com/products/aerosol-and-dust-monitors/aerosol-and-dust-monitors/dusttrak-ii-aerosol-monitor-8530"
+    )
+    + ".",
     (
         "Turner, D. B., 1970: <i>Workbook of Atmospheric Dispersion Estimates</i>. Rev. ed. Public "
         "Health Service Publ. 999-AP-26, National Air Pollution Control Administration."
@@ -718,6 +745,28 @@ ARMY_BOX_METHOD = (
 CHANGES_HEAD = "Change log"
 CHANGES = [
     (
+        "Nov. 28",
+        (
+            "The header, the About box, the summary and the questions add EPA&rsquo;s Nov. 28 "
+            "news release: its first lab results found no lead in the 38 water samples it took "
+            "after the blast at public water supplies (EPA Press Office 2026). Results for tap "
+            "water, soil, dust and air samples are still to come. The preliminary analysis now "
+            "gives the continuous lead monitors&rsquo; inlets from the same release (total "
+            "suspended particulate) and notes that EPA says they were switched off at 3 p.m. "
+            "Nov. 26, though its feed shows readings from AS03 until 7:21 a.m. Nov. 27. The "
+            "maps did not change."
+        ),
+    ),
+    (
+        "Nov. 28",
+        (
+            "The preliminary analysis and this change log no longer say EPA&rsquo;s real-time "
+            "dust monitors (DustTrak) don&rsquo;t measure lead. Their maker&rsquo;s description "
+            "says what they measure (the mass of particles in the air, by light scattering; "
+            "TSI, cited 2026), not what they can&rsquo;t. The maps did not change."
+        ),
+    ),
+    (
         "Nov. 27",
         (
             "&ldquo;When was the detonation?&rdquo; is rewritten in order, in three short "
@@ -734,8 +783,8 @@ CHANGES = [
             "continuous lead monitors&rdquo; and says which: the Xact analyzers at stations "
             "AS01&ndash;AS04, which measure lead directly, not the air-sample cassettes at "
             "EPA&rsquo;s other stations (such as AS-06 and AS-12), whose lead results need lab "
-            "analysis. Some of those stations also have real-time dust monitors, which don&rsquo;t "
-            "measure lead. The lab-analyzed samplers are called air-sample cassettes throughout. "
+            "analysis. Some of those stations also have real-time dust monitors. The "
+            "lab-analyzed samplers are called air-sample cassettes throughout. "
             "Same on the preliminary analysis page and its map. The maps did not change."
         ),
     ),

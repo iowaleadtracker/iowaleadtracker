@@ -71,6 +71,144 @@ def test_weather_at_centers_the_weather_grid_elsewhere() -> None:
             puff.weather_point(puff.parse_args([*base, "--weather-at", bad]))
 
 
+def test_reference_sites_are_checked(tmp_path: Path) -> None:
+    """A file of sites needs kinds with a known shape, and sites of a listed kind."""
+    result = {
+        "unit": "µg/m³",
+        "posted": 2,
+        "zero": 1,
+        "max": {"v": 0.002, "t": "2026-11-25T15:10Z"},
+        "maxBefore": None,
+        "first": "2026-11-25T15:00Z",
+        "last": {"v": 0.0, "t": "2026-11-25T15:20Z"},
+    }
+    good = {
+        "name": "Agency sites",
+        "kinds": {"lead": {"label": "Lead monitor", "shape": "diamond"}},
+        "instruments": {"x": {"name": "X", "text": "Measures lead."}},
+        "sites": [{"id": "A1", "kind": "lead", "lat": 40.7, "lon": -91.3, "instruments": ["x"]}],
+        "unit": "µg/m³",
+    }
+    path = tmp_path / "sites.json"
+    path.write_text(json.dumps(good), encoding="utf-8")
+    ns = argparse.Namespace(reference_sites=str(path))
+    out = puff._reference_sites(ns)
+    assert out is not None
+    assert out["name"] == "Agency sites"
+    assert out["unit"] == "µg/m³"
+    assert out["sites"][0]["id"] == "A1"
+    site_with_result = {**good["sites"][0], "readings": {"x": result}}  # type: ignore[index]
+    path.write_text(json.dumps({**good, "sites": [site_with_result]}), encoding="utf-8")
+    assert puff._reference_sites(ns) is not None  # a well-formed summary passes
+    limit = {"v": 0.18, "unit": "µg/m³", "url": "/#references"}  # a path on the site is fine
+    path.write_text(
+        json.dumps({**good, "instruments": {"x": {"name": "X", "limit": limit}}}), encoding="utf-8"
+    )
+    assert puff._reference_sites(ns)["instruments"]["x"]["limit"]["url"] == "/#references"  # type: ignore[index]
+    site_with_none = {**good["sites"][0], "readings": {"x": None}}  # type: ignore[index]
+    path.write_text(json.dumps({**good, "sites": [site_with_none]}), encoding="utf-8")
+    loaded = puff._reference_sites(ns)
+    assert loaded is not None
+    assert loaded["sites"][0]["readings"] == {"x": None}
+    path.write_text(json.dumps(good), encoding="utf-8")
+    assert "instrument" not in out["kinds"]["lead"]  # optional: the site's first is described
+    assert puff._reference_sites(argparse.Namespace(reference_sites=None)) is None
+    site = good["sites"][0]  # type: ignore[index]
+    for bad in (
+        {**good, "kinds": {"lead": {"label": "L", "shape": "star"}}},  # no such shape
+        {**good, "kinds": {"lead": {"label": "L", "shape": "diamond", "instrument": "y"}}},
+        {**good, "sites": [{**site, "kind": "soil"}]},  # a kind that isn't listed
+        {**good, "sites": [{**site, "instruments": ["y"]}]},  # an instrument not described
+        {**good, "sites": [{**site, "lat": "40.7"}]},
+        {**good, "instruments": {"x": {"name": "X", "shape": "star"}}},  # no such shape
+        {**good, "kinds": {"lead": {"label": "L", "shape": "diamond", "fill": {"color": "red"}}}},
+        {
+            **good,
+            "kinds": {
+                "lead": {
+                    "label": "L",
+                    "shape": "diamond",
+                    "fill": {"breaks": [{"color": "#59ff00"}]},
+                }
+            },
+        },
+        {
+            **good,
+            "kinds": {
+                "lead": {
+                    "label": "L",
+                    "shape": "diamond",
+                    "fill": {"breaks": [{"below": "32", "color": "#59ff00"}, {"color": "#ffee00"}]},
+                }
+            },
+        },
+        {**good, "instruments": {"x": {"name": "X", "limit": {"v": "0.18", "unit": "u"}}}},
+        {**good, "instruments": {"x": {"name": "X", "limit": {"v": 0, "unit": "u"}}}},
+        {**good, "sites": [{**site, "readings": {"y": None}}]},  # not an instrument there
+        {**good, "sites": [{**site, "readings": {"x": 0.002}}]},  # a number, not a summary
+        {**good, "sites": [{**site, "readings": {"x": {"url": "javascript:alert(1)"}}}]},
+        # the summary goes into the page's markup: counts and values must be numbers
+        {**good, "sites": [{**site, "readings": {"x": {**result, "posted": "<img src=x>"}}}]},
+        {**good, "sites": [{**site, "readings": {"x": {**result, "zero": 9}}}]},  # > posted
+        {
+            **good,
+            "sites": [
+                {
+                    **site,
+                    "readings": {"x": {**result, "max": {"v": "oops", "t": "2026-11-25T15:10Z"}}},
+                }
+            ],
+        },
+        {**good, "sites": [{**site, "readings": {"x": {**result, "last": {"v": 0, "t": "<b>"}}}}]},
+        {**good, "sites": [{**site, "starts": ["Nov. 22"]}]},
+        {
+            **good,
+            "instruments": {
+                "x": {"name": "X", "limit": {"v": 0.18, "unit": "u", "url": "//evil.example"}}
+            },
+        },
+        {**good, "sites": [{**site, "readings": [None]}]},
+        {**good, "links": [{"text": "x", "url": "javascript:alert(1)"}]},
+        {"name": "x"},
+    ):
+        path.write_text(json.dumps(bad), encoding="utf-8")
+        with pytest.raises(SystemExit, match="--reference-sites"):
+            puff._reference_sites(ns)
+
+
+def test_the_saved_epa_sites_load() -> None:
+    """The site build's file of EPA sites passes the same checks."""
+    root = Path(__file__).resolve().parent.parent
+    path = root / "scenarios" / "iowa-aap-lead-azide" / "epa_sites.json"
+    out = puff._reference_sites(argparse.Namespace(reference_sites=str(path)))
+    assert out is not None
+    lead = [s for s in out["sites"] if s["kind"] == "lead"]
+    assert [s["id"] for s in lead] == ["AS01", "AS02", "AS03", "AS04"]
+    assert all(s["readings"]["xact"]["max"]["v"] < 0.1 for s in lead)  # µg/m³, as EPA posts
+    # the Army's 0.18 µg/m³ beside lead-in-air results only (Xact, air cassette)
+    limits = {k: i["limit"]["v"] for k, i in out["instruments"].items() if "limit" in i}
+    assert limits == {"xact": 0.18, "cassette": 0.18}
+    assert out["instruments"]["xact"]["limit"]["unit"] == "µg/m³"
+    for s in lead:  # "Measurements collected" links to EPA's viewer, filtered to the station
+        url = s["readings"]["xact"]["url"]
+        assert url.startswith("https://experience.arcgis.com/experience/00329268")
+        assert f"Air_Station_ID%3D%27{s['id']}%27" in url
+    for s in out["sites"]:  # every instrument has an entry; only the Xact monitors have results
+        assert set(s["readings"]) == set(s["instruments"])
+        assert all((r is not None) == (i == "xact") for i, r in s["readings"].items())
+    assert "not model estimates" in out["note"]
+    # filled only once results are posted, in EPA's colors: one per kind, two breaks for lead;
+    # below 32 µg/m³ a neutral gray, not EPA's green, so the map doesn't read as "safe"
+    fills = {k: v["fill"] for k, v in out["kinds"].items()}
+    assert fills["lead"]["breaks"][0] == {
+        "below": 32,
+        "color": "#8f8f8f",
+        "label": "below 32 µg/m³",
+    }
+    assert fills["lead"]["breaks"][1]["color"] == "#ffee00"  # EPA's yellow at or above
+    assert fills["water"] == {"color": "#0000ff"}
+
+
 def test_reference_outlines_are_checked(tmp_path: Path) -> None:
     """A file of outlines needs a name and zones of [latitude, longitude] lines."""
     good = {

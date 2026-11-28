@@ -9,6 +9,16 @@ after the Army detonated its lead azide stockpile at the Iowa Army Ammunition Pl
 that came down. For the amounts modeled here, bulk soil samples probably can't show it;
 wipes of surfaces near the path can. See "What is needed now."*
 
+*Revised Nov. 28, 2026: an earlier version said EPA's DustTrak monitors record particles
+"not lead." Their maker's description says what they measure, not what they can't, so
+that is removed.*
+
+*Revised Nov. 28, 2026, later: EPA's Nov. 28 news release (EPA 2026d) says the continuous
+lead monitors used total suspended particulate (TSP) inlets and that their 0.0 readings
+are "zero detect or non-detect"; the brief no longer says the inlet is unpublished. The
+release also says the monitors were switched off at 3 p.m. CT on Nov. 26, though EPA's
+public feed shows readings from AS03 until 7:21 a.m. CST on Nov. 27.*
+
 > **Unofficial.** This is a screening analysis by a private citizen, not from the Army or
 > any government agency. Don't use it to decide if you're safe; follow official
 > instructions. The map shows model estimates for an assumed release. It is not a
@@ -134,8 +144,9 @@ values (µg/m³) and the instruments EPA lists. Model estimates, not measurement
 - **Filter cassettes** are at every one of these sites. A lab measures the lead on the
   filter. AS06 and AS12 matter most: they are in the body of the rerun cloud and read
   almost nothing on the forecast path, so a result there separates the two paths.
-- **DustTrak particle monitors** are at AS06 and AS35. They record airborne particles
-  continuously, not lead. A record from AS06 for 9 to 11 a.m. on Nov. 25 would show
+- **DustTrak particle monitors** are at AS06 and AS35. They give real-time readings of
+  the mass of particles in the air, by light scattering (TSI 2026). A record from AS06
+  for 9 to 11 a.m. on Nov. 25 would show
   whether a particle cloud passed, and when, without waiting for a lab.
 - **The Army's own samplers.** Its permit application describes 24-hour filter samples at
   ten locations and five response samples during the event (U.S. Army 2026b). Their locations are not
@@ -219,8 +230,12 @@ measurements. The last column says where the site falls on the Army's final grou
 | All four | 263 | 246 | 0.010 | 0.006 |
 <!-- /table:readings -->
 
-EPA calls these "Xact stations monitoring for lead." It has not published their model,
-inlet size, or detection limit, or how the public feed treats small values.
+EPA calls these "Xact stations monitoring for lead." Its Nov. 28 news release says they used
+total suspended particulate (TSP) inlets, so that larger particles would be caught too, and
+calls their 0.0 readings "zero detect or non-detect" (EPA 2026d). It has not published their
+model or detection limit. The release says the monitors were switched off at 3 p.m. CT on
+Nov. 26; EPA's public feed nonetheless shows readings from AS03 until 7:21 a.m. CST on
+Nov. 27.
 
 **4. So the readings alone can't say what happened.** A line of monitors along one
 direction sees a cloud only over a narrow range of directions. In the full analysis the
@@ -357,8 +372,9 @@ actually released, and it may have been much less.
 
 **What can the monitors detect?**
 EPA says they are Xact monitors, which measure metals on a filter tape by X-ray
-fluorescence. It hasn't said which model, what inlet size, or what detection limit. The
-full analysis covers what is published for this kind of instrument.
+fluorescence, with total suspended particulate (TSP) inlets (EPA 2026d). It hasn't said
+which model or what detection limit. The full analysis covers what is published for this
+kind of instrument.
 
 **What other explanations fit the near-zero readings?**
 The full analysis lists them without ranking: little fine lead became
@@ -372,8 +388,7 @@ Lab results from the ground and from the instruments in the analyzed-weather pat
 record at AS06 for the morning of Nov. 25, and wipes of surfaces between about
 205° and 245° from the magazines out to 15 miles. Bulk soil samples probably can't: the
 modeled lead on the ground is far less than soil already holds. Also an official
-statement of where the detonation was, and the monitors' model, inlet, and detection
-limit.
+statement of where the detonation was, and the monitors' model and detection limit.
 
 **Has anyone checked this?**
 No one outside the project. It has had AI referee reviews, which found and led to
@@ -415,6 +430,12 @@ Iowa Lead Tracker, an unofficial public project by a private citizen
 - EPA, 2026c: EPA collects over 1,200 air, land, and water samples ahead of Iowa Army
   Ammunition Plant controlled detonation. News release, Nov. 25, 2026,
   https://www.epa.gov/newsreleases/epa-collects-over-1200-air-land-and-water-samples-ahead-iowa-army-ammunition-plant.
+- EPA, 2026d: EPA releases initial water source lab results indicating Wednesday's
+  controlled detonation in Iowa did not result in an elevation of lead in water bodies that
+  serve as sources of drinking water. News release, Nov. 28, 2026,
+  https://www.epa.gov/newsreleases/epa-releases-initial-water-source-lab-results-indicating-wednesdays-controlled.
+  Source of the monitors' TSP inlets, "zero detect or non-detect", and the switch-off at
+  3 p.m. CT Nov. 26.
 - Esri: World Imagery (Esri, Maxar, Earthstar Geographics), and USA Counties Generalized
   Boundaries, from the Census Bureau's county boundaries.
 - Iowa's News Now, 2026: Understanding the lead plume: What the Army's projected
@@ -429,6 +450,9 @@ Iowa Lead Tracker, an unofficial public project by a private citizen
 - Stein, A. F., and Coauthors, 2015: NOAA's HYSPLIT atmospheric transport and dispersion
   modeling system. *Bull. Amer. Meteor. Soc.*, **96**, 2059–2077,
   doi:10.1175/BAMS-D-14-00110.1.
+- TSI, 2026: DustTrak II aerosol monitor 8530. Product page, TSI Incorporated,
+  https://tsi.com/products/aerosol-and-dust-monitors/aerosol-and-dust-monitors/dusttrak-ii-aerosol-monitor-8530
+  (retrieved Nov. 28, 2026).
 - U.S. Army, 2026a: Public advisory maps, "Mitigated 0.26" dispersion and deposition,
   detonation 25 Nov 2026 0900 CST, issued Nov. 25, 2026, a/o 250700NOV26 (in
   `data/army/`; the ground map only).

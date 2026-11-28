@@ -483,6 +483,24 @@ CBS2_RESUME_URL = (
     "middletown-officials-say-normal-activities-can-resume-following-lead-azide-detonation"
 )
 CBS2_RESUME_CITE = "CBS2 Iowa, Nov. 25"
+# EPA's news release of Nov. 28, 2026, "EPA Releases Initial Water Source Lab Results ...",
+# read in full Nov. 28 (EPA Press Office 2026 in works_cited.py): no lead found in the 38
+# water samples taken after the detonation at public water supplies (finished treated
+# drinking water and untreated water at the intake); results for tap water, soil, dust and
+# air samples still to come at epa.gov/IowaData. It also says the Xact monitors used total
+# suspended particulate (TSP) inlets and reported 0.0 ug/m3 ("zero detect or non-detect")
+# for 30 hours after the blast.
+EPA_WATER_URL = (
+    "https://www.epa.gov/newsreleases/"
+    "epa-releases-initial-water-source-lab-results-indicating-wednesdays-controlled"
+)
+EPA_WATER_CITE = "EPA, Nov. 28"
+EPA_WATER = (
+    "On Nov. 28, EPA said its first lab results found no lead in the 38 water samples it took "
+    "after the blast at public water supplies, both treated drinking water and untreated water "
+    f"at the intakes ({EPA_WATER_CITE}). Results for tap water, soil, dust and air samples are "
+    "still to come."
+)
 # Airport observations at blast time (OBSERVED_WX).
 IEM_URL = "https://mesonet.agron.iastate.edu/request/download.phtml?network=IA_ASOS"
 IEM_CITE = "Iowa Environmental Mesonet, Nov. 25"
@@ -525,8 +543,8 @@ ANALYSIS_HTML = (
 # Where readers find the agencies' own information: a line in the header of the landing
 # page and of the analysis page.
 OFFICIAL_HTML = (
-    f'<b>Official information:</b> <a href="{EPA_VIEWER_URL}" rel="noopener">EPA&rsquo;s '
-    "response data viewer</a> (air monitoring) &middot; "
+    f'<b>Official information:</b> <a href="{EPA_VIEWER_URL}" rel="noopener">EPA Sampling '
+    "and Monitoring Map</a> &middot; "
     f'<a href="{ARMY_MAPS_URL}" rel="noopener">Army updates and maps</a> (army.mil/asc).'
 )
 EARLY_AIR = (
@@ -534,8 +552,8 @@ EARLY_AIR = (
     "AS01\u2013AS04) southwest of the plant, "
     "through 4 p.m. CST, was below the 0.18 micrograms per cubic meter detection limit the "
     f"Army cites ({EPA_VIEWER_CITE}). These are early readings only. Lab results from "
-    "the air-sample cassettes at EPA\u2019s other stations, and soil and water sampling, are "
-    "still pending and are "
+    "the air-sample cassettes at EPA\u2019s other stations, and from soil, dust and tap-water "
+    "sampling, are still pending and are "
     "needed before anyone knows where lead settled."
 )
 # When the blast happened: the Army's 3 p.m. map slides (ARMY_3PM_URL) give the
@@ -553,16 +571,19 @@ AFTER_BLAST = (
     "At 3 p.m. CST that day, the Army said air sensors report no lead detection at this time, "
     "and that sampling of the ground is underway, with results to be published when available "
     f"({ARMY_3PM_CITE}). {EARLY_AIR} That evening, Middletown\u2019s city clerk said the Army, "
-    f"CDC, EPA and FEMA had confirmed normal activities could resume ({CBS2_RESUME_CITE})."
+    f"CDC, EPA and FEMA had confirmed normal activities could resume ({CBS2_RESUME_CITE}). "
+    f"{EPA_WATER}"
 )
 BLAST_DONE = f"{BLAST_TIME_SENTENCE} {AFTER_BLAST}"
 BLAST_STATUS_HTML = (
     "<b>Official:</b> the Army carried out the detonation at 9:00 a.m. CST Wednesday, "
     "Nov. 25. At 3 p.m. it said air sensors report no lead detection at this time and ground "
     "sampling is underway, with results to be published when available "
-    f'(<a href="{ARMY_3PM_URL}" rel="noopener">{ARMY_3PM_CITE}</a>). Updates: '
+    f'(<a href="{ARMY_3PM_URL}" rel="noopener">{ARMY_3PM_CITE}</a>). On Nov. 28, EPA said its '
+    "first lab results found no lead in the 38 water samples it took after the blast at public "
+    f'water supplies (<a href="{EPA_WATER_URL}" rel="noopener">{EPA_WATER_CITE}</a>). Updates: '
     f'<a href="{ARMY_MAPS_URL}" rel="noopener">Army (army.mil/asc)</a> &middot; '
-    f'<a href="{EPA_VIEWER_URL}" rel="noopener">EPA air monitoring</a>. '
+    f'<a href="{EPA_VIEWER_URL}" rel="noopener">EPA Sampling and Monitoring Map</a>. '
     "<b>Follow official instructions.</b>"
 )
 EARLY_AIR_HTML = (
@@ -596,6 +617,7 @@ NAMED_SOURCES = (
     (EPA_VIEWER_CITE, EPA_VIEWER_URL),
     (ARMY_3PM_CITE, ARMY_3PM_URL),
     (CBS2_RESUME_CITE, CBS2_RESUME_URL),
+    (EPA_WATER_CITE, EPA_WATER_URL),
     (IEM_CITE, IEM_URL),
     (ADVISORY_NOV24_CITE, ADVISORY_NOV24_URL),
     ("Acting Secretary of the Army on X", SECARMY_URL),
@@ -1037,7 +1059,9 @@ ABOUT_WHEN = (
     "At 3 p.m. CST it said air sensors report no lead detection at this time and ground "
     f"sampling is underway, with results to be published when available ({ARMY_3PM_CITE}). "
     "That evening, Middletown\u2019s city clerk said the Army, CDC, EPA and FEMA had confirmed "
-    f"normal activities could resume ({CBS2_RESUME_CITE}). Follow official instructions."
+    f"normal activities could resume ({CBS2_RESUME_CITE}). On Nov. 28, EPA said it found no "
+    f"lead in 38 water samples from public water supplies taken after the blast "
+    f"({EPA_WATER_CITE}). Follow official instructions."
 )
 ANALYSIS_SHORT_HEAD = "Preliminary analysis."
 ANALYSIS_SHORT = (

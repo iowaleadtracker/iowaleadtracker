@@ -291,6 +291,9 @@ const openDialog = (d) => {
 document.getElementById('about').addEventListener('click', () => openDialog(note));
 const cite = document.getElementById('cite');
 document.getElementById('cites').addEventListener('click', () => openDialog(cite));
+// #references opens Methodology and References (the map's detection-limit links point here)
+const isRefs = () => location.hash === '#references';
+const openRefs = isRefs();                // read now: show() below rewrites the hash to the map's choice
 cite.addEventListener('click', (e) => {       // a click on the backdrop closes it
   const r = cite.getBoundingClientRect();
   if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) cite.close();
@@ -313,6 +316,7 @@ window.addEventListener('message', (e) => {
     if (narrow.matches) document.documentElement.style.setProperty('--frameh', Math.max(300, e.data.puffHeight) + 'px');
     return;
   }
+  if (e.data.puffOpen === 'references') { openDialog(cite); return; }   // a link in the map
   if (e.data.puffUnits === 'us' || e.data.puffUnits === 'metric') setSys(e.data.puffUnits, false);
 });
 // keep the map height right when the phone turns or the header wraps differently
@@ -343,7 +347,7 @@ frame.addEventListener('load', () => { if (frame.contentWindow) frame.contentWin
 setSys(sys, false);
 // #HHMM-case picks the time and case, on load and when the hash changes
 function applyHash() {
-  const [ht, hc, ...rest] = location.hash.slice(1).split('-');
+  const [ht, hc, ...rest] = (isRefs() ? '' : location.hash.slice(1)).split('-');   // not a map choice
   // After the time and case, in any order: a weather source and a day code.
   const hs = rest.find((x) => [...src.options].some((o) => o.value === x));
   const hd = rest.find((x) => !ALL_SOURCES.includes(x));
@@ -362,12 +366,17 @@ function applyHash() {
   for (const o of cas.options) if (o.value === hc && !o.selected) { o.selected = true; changed = true; }
   return changed;
 }
-window.addEventListener('hashchange', () => { if (applyHash()) show(); });
+window.addEventListener('hashchange', () => { if (isRefs()) openDialog(cite); else if (applyHash()) show(); });
 applyHash();
 show();                                   // load the map before anything that could fail
 const BUILT = $built_json;
 let seen = false;
 try { seen = localStorage.getItem('noteSeen') === BUILT; } catch (e) {}
 note.addEventListener('close', () => { try { localStorage.setItem('noteSeen', BUILT); } catch (e) {} });
-if (!seen && canModal) openDialog(note);
+// A link to the references opens them; on a first visit the note comes first (it says the
+// map is unofficial) and the references open when it's closed.
+if (!seen && canModal) {
+  openDialog(note);
+  if (openRefs) note.addEventListener('close', () => openDialog(cite), { once: true });
+} else if (openRefs) openDialog(cite);
 </script></body></html>

@@ -254,7 +254,7 @@ def test_header_and_about_box_name_the_weather() -> None:
         "The winds come from four weather forecasts, current as of X."
     )
     nov26 = [what for when, what in works_cited.CHANGES if when == "Nov. 26"]
-    assert works_cited.CHANGES[0][0] == "Nov. 27"  # the newest entry (the HYSPLIT comparison)
+    assert works_cited.CHANGES[0][0] == "Nov. 28"  # the newest entry (the DustTrak wording)
     assert any("opens on a 9 a.m. blast, the low case, and archived weather" in w for w in nov26)
     assert any(
         "Opening on the low case is not a finding that little lead got out." in w for w in nov26
@@ -506,7 +506,7 @@ def test_deposition_view_opens_at_epas_lowest_action_level() -> None:
 
 def test_armys_final_maps_are_offered_for_the_blast_they_were_made_for() -> None:
     """The box: off by default, on the 9 a.m. maps only, and described as the Army's forecast."""
-    assert site.army_outlines(site.DATE, "09:00") == [
+    assert site.army_outlines(site.DATE, "09:00")[:2] == [
         "--reference-outlines",
         str(site.ARMY_OUTLINES),
     ]
@@ -1040,7 +1040,17 @@ def test_early_air_readings_say_lab_results_are_pending() -> None:
         assert "early readings only" in text.lower()
         assert "still pending and are needed" in text.replace("</b>", "")
         assert "safe" not in text.lower()  # no verdicts about anyone's safety
-    assert "soil and water sampling" in fs.EARLY_AIR
+    assert "soil, dust and tap-water sampling" in fs.EARLY_AIR
+    # EPA's Nov. 28 water results: attributed and linked wherever the official word is given
+    assert "no lead in the 38 water samples" in fs.EPA_WATER
+    assert "safe" not in fs.EPA_WATER.lower()
+    assert fs.EPA_WATER in fs.AFTER_BLAST
+    assert fs.EPA_WATER_URL in fs.BLAST_STATUS_HTML
+    assert fs.EPA_WATER_URL in fs.about_time_html("X")
+    assert any(
+        r.startswith("EPA Press Office, 2026:") and fs.EPA_WATER_URL in r
+        for r in works_cited.REFERENCES
+    )
     assert "air-sample cassettes and surface wipes along that path" in fs.EARLY_AIR_HTML
     assert fs.EARLY_AIR in fs.time_note("X")
     assert fs.EPA_VIEWER_URL in fs.time_note_html("X")
@@ -1700,3 +1710,25 @@ def test_farthest_reach_ignores_stray_cells_past_the_edge() -> None:
     assert kept[3, 3] == 0.0
     assert kept[4, 6] == 0.0
     assert not fs.joined_to_peak(a, 10.0).any()  # nothing reaches the level
+
+
+def test_epas_sites_are_offered_on_the_blasts_maps() -> None:
+    """EPA's sampling sites go with the 9 a.m. maps, forecast and archived, and no others."""
+    assert site.army_outlines(site.DATE, "09:00")[2:] == ["--reference-sites", str(site.EPA_SITES)]
+    assert "--reference-sites" not in site.army_outlines(site.DATE, "09:30")
+    for run in site.archived_runs("python"):
+        assert "--reference-sites" in run.cmd
+
+
+def test_references_open_from_a_link() -> None:
+    """#references opens Methodology and References: from a link, or the map's limit link."""
+    page = (site.HERE / "index_template.html").read_text(encoding="utf-8")
+    assert "const openRefs = isRefs();" in page  # read before show() rewrites the hash
+    # on a first visit the note (it says the map is unofficial) comes first, then the references
+    assert "if (openRefs) note.addEventListener('close', () => openDialog(cite)" in page
+    assert "e.data.puffOpen === 'references'" in page  # the map, inside the page
+    assert "(isRefs() ? '' : location.hash.slice(1))" in page  # not read as a map choice
+    data = json.loads(site.EPA_SITES.read_text(encoding="utf-8"))
+    # a path on the site, so the mirror and local builds open their own references
+    assert data["instruments"]["xact"]["limit"]["url"] == "/#references"
+    # the browser paths: tests/frontend/site.spec.js ("references" tests)

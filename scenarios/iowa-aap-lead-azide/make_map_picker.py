@@ -137,6 +137,9 @@ ARCHIVED_LAT, ARCHIVED_LON = 40.8096, -91.2692
 # The zones on the Army's final maps for the 9 a.m. blast, traced and placed on the ground
 # (army-final-maps/README.md). A box under the maps for that blast draws them.
 ARMY_OUTLINES = HERE / "army-final-maps" / "outlines.json"
+# EPA's sampling sites and its continuous lead monitors' readings, saved by
+# tools/refresh_epa.py; on the blast's maps, as a layer readers can switch on.
+EPA_SITES = HERE / "epa_sites.json"
 ARMY_BLAST = (DATE, "09:00")  # the blast the Army's final maps are for
 # NOAA's HYSPLIT model for the same blast on NOAA ARL's archive of HRRR, saved as fields the
 # archived-weather maps can show (hysplit-archived/README.md). A button under the map
@@ -708,10 +711,11 @@ def archived_runs(py: str) -> list[Run]:
 
 
 def army_outlines(day: str, t: str) -> list[str]:
-    """Return the option that adds the Army's final maps, for the blast they were made for."""
-    if (day, t) != ARMY_BLAST or not ARMY_OUTLINES.exists():
+    """Return the options that add the Army's final maps and EPA's sites, for that blast."""
+    if (day, t) != ARMY_BLAST:
         return []
-    return ["--reference-outlines", str(ARMY_OUTLINES)]
+    out = ["--reference-outlines", str(ARMY_OUTLINES)] if ARMY_OUTLINES.exists() else []
+    return out + (["--reference-sites", str(EPA_SITES)] if EPA_SITES.exists() else [])
 
 
 def build_archived(py: str) -> None:

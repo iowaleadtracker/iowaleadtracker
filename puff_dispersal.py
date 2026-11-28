@@ -39,6 +39,7 @@ import argparse
 import datetime as dt
 import json
 import math
+import re
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, TextIO, TypeAlias
@@ -535,6 +536,18 @@ def _add_display_args(p: argparse.ArgumentParser) -> None:
         help="add outlines from another source (for example an agency's published map) that "
         'readers can switch on: a JSON file with a name, a note, links, and under "air" and '
         '"dep" a list of zones, each a label and lines of [latitude, longitude] points',
+    )
+    p.add_argument(
+        "--reference-sites",
+        default=None,
+        metavar="FILE",
+        help="add measurement sites from another source (for example an agency's sampling "
+        "sites) that readers can switch on and tap for details: a JSON file with a name, a "
+        'note, links, "kinds" (a label, a shape and, optionally, the instrument a site\'s '
+        'details describe), "instruments" (a name, a description and, optionally, a shape '
+        'and a detection limit for each) and "sites", each a kind, a latitude and '
+        'longitude, its instruments and, optionally, an id and "readings": for each '
+        "instrument there, a summary of its results or null",
     )
     p.add_argument(
         "--hysplit-overlay-note",
@@ -1118,6 +1131,164 @@ def _reference_outlines(a: argparse.Namespace) -> Json | None:
         raise SystemExit(f"--reference-outlines: {e!r}") from None
 
 
+SITE_SHAPES = ("diamond", "square", "square-dot", "triangle", "circle")
+
+
+HEX_COLOR = re.compile(r"^#[0-9a-fA-F]{6}$")
+
+
+def _site_fill(fill: Json) -> Json:
+    """Check a kind's fill: one #rrggbb color, or breaks (below a number, then the rest)."""
+    breaks = fill.get("breaks")
+    if breaks is None:
+        if not HEX_COLOR.match(str(fill.get("color"))):
+            msg = "a kind's fill needs a #rrggbb color"
+            raise ValueError(msg)
+        return {"color": str(fill["color"])}
+    ok = (
+        isinstance(breaks, list)
+        and len(breaks) >= 2
+        and all(HEX_COLOR.match(str(b.get("color"))) for b in breaks)
+        and all(_is_number(b.get("below")) for b in breaks[:-1])
+        and "below" not in breaks[-1]
+    )
+    if not ok:
+        msg = "a kind's fill breaks need #rrggbb colors, each but the last with a number below"
+        raise ValueError(msg)
+    return {"breaks": [{k: b[k] for k in ("below", "color", "label") if k in b} for b in breaks]}
+
+
+def _site_limit(limit: Json) -> Json:
+    """Return an instrument's detection limit: a positive number, its unit, whose, a link."""
+    v = limit["v"]
+    if isinstance(v, bool) or not isinstance(v, (int, float)) or not v > 0:
+        msg = "a detection limit needs a positive number"
+        raise ValueError(msg)
+    out = {"v": v, "unit": str(limit["unit"]), "label": str(limit.get("label", ""))}
+    return out | ({"url": _site_or_https(str(limit["url"]))} if "url" in limit else {})
+
+
+def _site_or_https(url: str) -> str:
+    """Return a link that is a path on the same site ("/...") or an https address."""
+    return url if url.startswith("/") and not url.startswith("//") else _https(url)
+
+
+ISO_MINUTE = re.compile(r"^\d{4}-\d\d-\d\dT\d\d:\d\dZ$")
+
+
+def _is_number(v: object) -> bool:
+    return isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
+
+
+def _site_result(r: Json) -> Json:
+    """Check one instrument's results summary: counts, values and times of the right types.
+
+    It goes into the page's markup, so nothing in it may be text where a number belongs.
+    """
+    ok = (
+        all(
+            isinstance(r.get(k), int) and not isinstance(r.get(k), bool) for k in ("posted", "zero")
+        )
+        and 0 <= r["zero"] <= r["posted"]
+        and isinstance(r.get("unit", ""), str)
+        and isinstance(r.get("first", ""), str)
+        and all(
+            r.get(k) is None
+            or (
+                isinstance(r[k], dict)
+                and _is_number(r[k].get("v"))
+                and ISO_MINUTE.match(str(r[k].get("t")))
+            )
+            for k in ("max", "maxBefore", "last")
+        )
+    )
+    if not ok:
+        msg = "a results summary needs whole-number counts and values with YYYY-MM-DDTHH:MMZ times"
+        raise ValueError(msg)
+    return r | ({"url": _https(str(r["url"]))} if "url" in r else {})
+
+
+def _check_site(s: Json, kinds: Json, instruments: Json) -> None:
+    """Check one site: a listed kind, a position, described instruments, its results."""
+    if s["kind"] not in kinds or not _is_line([[s["lat"], s["lon"]]], points=1):
+        msg = "each site needs a listed kind and a latitude and longitude"
+        raise ValueError(msg)
+    if any(i not in instruments for i in s.get("instruments", [])):
+        msg = f"site {s.get('id', '?')} lists an instrument that isn't described"
+        raise ValueError(msg)
+    readings = s.get("readings", {})
+    if not isinstance(readings, dict) or any(
+        i not in s.get("instruments", []) or not (r is None or isinstance(r, dict))
+        for i, r in readings.items()
+    ):
+        msg = (
+            f"site {s.get('id', '?')}: readings must map its own instruments to a "
+            "summary of results, or to null when none are posted"
+        )
+        raise ValueError(msg)
+    for k, r in readings.items():
+        if r is not None:
+            readings[k] = _site_result(r)
+    times = [s["start"]] if "start" in s else []
+    if any(not ISO_MINUTE.match(str(t)) for t in times + list(s.get("starts", []))):
+        msg = f"site {s.get('id', '?')}: start times must be YYYY-MM-DDTHH:MMZ"
+        raise ValueError(msg)
+
+
+def _site_layers(data: Json) -> Json:
+    """Return the kinds, instruments and sites of a file, checked against each other."""
+    kinds = {
+        str(k): {
+            "label": str(v["label"]),
+            "shape": str(v["shape"]),
+            **({"instrument": str(v["instrument"])} if "instrument" in v else {}),
+            **({"fill": _site_fill(v["fill"])} if "fill" in v else {}),
+        }
+        for k, v in data["kinds"].items()
+    }
+    if any(k["shape"] not in SITE_SHAPES for k in kinds.values()):
+        msg = f"each kind's shape must be one of {', '.join(SITE_SHAPES)}"
+        raise ValueError(msg)
+    instruments = {
+        str(k): {
+            "name": str(v["name"]),
+            "text": str(v.get("text", "")),
+            **({"shape": str(v["shape"])} if "shape" in v else {}),
+            **({"limit": _site_limit(v["limit"])} if "limit" in v else {}),
+        }
+        for k, v in data.get("instruments", {}).items()
+    }
+    if any(i.get("shape", "circle") not in SITE_SHAPES for i in instruments.values()):
+        msg = f"an instrument's shape must be one of {', '.join(SITE_SHAPES)}"
+        raise ValueError(msg)
+    if any("instrument" in k and k["instrument"] not in instruments for k in kinds.values()):
+        msg = "a kind's instrument must be one of the described instruments"
+        raise ValueError(msg)
+    for s in data["sites"]:
+        _check_site(s, kinds, instruments)
+    return {"kinds": kinds, "instruments": instruments, "sites": data["sites"]}
+
+
+def _reference_sites(a: argparse.Namespace) -> Json | None:
+    """Return the sites of ``--reference-sites`` for the page, or nothing without it."""
+    path = getattr(a, "reference_sites", None)
+    if not path:
+        return None
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+        links = [(str(ln["text"]), str(ln["url"])) for ln in data.get("links", [])]
+        keep = ("retrieved", "event", "unit")
+        return {
+            "name": str(data["name"]),
+            "note": str(data.get("note", "")),
+            "links": [{"text": t, "url": _https(u)} for t, u in links],
+            **{k: str(data[k]) for k in keep if k in data},
+            **_site_layers(data),
+        }
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as e:
+        raise SystemExit(f"--reference-sites: {e!r}") from None
+
+
 def _hours_output(
     a: argparse.Namespace, met: MetField, hourly: Sequence[Json], F: dict[str, FloatArray]
 ) -> list[Json]:
@@ -1446,6 +1617,9 @@ def simulate(a: argparse.Namespace, log: TextIO = sys.stderr) -> Json:
     outlines = _reference_outlines(a)
     if outlines:
         payload["meta"]["outlines"] = outlines
+    sites = _reference_sites(a)
+    if sites:
+        payload["meta"]["sites"] = sites
     payload["meta"]["hysplit"] = hysplit_files(a, bins_out, payload["grid"])
     if sky_meta:
         payload["meta"]["skyGrid"] = sky_meta
