@@ -28,18 +28,22 @@
  },
  "kinds": {
   "filter": {
+   "instrument": "cassette",
    "label": "Air filter and gas canister",
    "shape": "square"
   },
   "lead": {
+   "instrument": "xact",
    "label": "Continuous lead monitor (Xact)",
    "shape": "diamond"
   },
   "realtime": {
+   "instrument": "cassette",
    "label": "Air filter, with dust and gas monitors",
    "shape": "square-dot"
   },
   "soil": {
+   "instrument": "soil",
    "label": "Soil sampling location",
    "shape": "triangle"
   }

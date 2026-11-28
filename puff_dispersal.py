@@ -542,9 +542,10 @@ def _add_display_args(p: argparse.ArgumentParser) -> None:
         metavar="FILE",
         help="add measurement sites from another source (for example an agency's sampling "
         "sites) that readers can switch on and tap for details: a JSON file with a name, a "
-        'note, links, "kinds" (a label and a shape for each), "instruments" (a name and a '
-        'description for each) and "sites", each a kind, a latitude and longitude, its '
-        "instruments and, optionally, an id and a summary of its readings",
+        'note, links, "kinds" (a label, a shape and, optionally, the instrument a site\'s '
+        'details describe), "instruments" (a name and a description for each) and "sites", '
+        "each a kind, a latitude and longitude, its instruments and, optionally, an id and a "
+        "summary of its readings",
     )
     p.add_argument(
         "--hysplit-overlay-note",
@@ -1134,7 +1135,11 @@ SITE_SHAPES = ("diamond", "square", "square-dot", "triangle", "circle")
 def _site_layers(data: Json) -> Json:
     """Return the kinds, instruments and sites of a file, checked against each other."""
     kinds = {
-        str(k): {"label": str(v["label"]), "shape": str(v["shape"])}
+        str(k): {
+            "label": str(v["label"]),
+            "shape": str(v["shape"]),
+            **({"instrument": str(v["instrument"])} if "instrument" in v else {}),
+        }
         for k, v in data["kinds"].items()
     }
     if any(k["shape"] not in SITE_SHAPES for k in kinds.values()):
@@ -1144,6 +1149,9 @@ def _site_layers(data: Json) -> Json:
         str(k): {"name": str(v["name"]), "text": str(v.get("text", ""))}
         for k, v in data.get("instruments", {}).items()
     }
+    if any("instrument" in k and k["instrument"] not in instruments for k in kinds.values()):
+        msg = "a kind's instrument must be one of the described instruments"
+        raise ValueError(msg)
     for s in data["sites"]:
         if s["kind"] not in kinds or not _is_line([[s["lat"], s["lon"]]], points=1):
             msg = "each site needs a listed kind and a latitude and longitude"

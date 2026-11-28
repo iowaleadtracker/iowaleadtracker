@@ -66,6 +66,15 @@ def test_sites_get_a_kind_by_what_they_can_say_about_lead() -> None:
         "square",
         "triangle",
     }
+    # each kind's details describe the sample that says something about lead; its sites have it
+    assert {k: v["instrument"] for k, v in out["kinds"].items()} == {
+        "lead": "xact",
+        "realtime": "cassette",
+        "filter": "cassette",
+        "soil": "soil",
+    }
+    for s in out["sites"]:
+        assert out["kinds"][s["kind"]]["instrument"] in s["instruments"]
     assert out["retrieved"] == "2026-11-28T07:12Z"
     assert "Nov. 28, 2026, 1:12 a.m. CST" in out["note"]
 

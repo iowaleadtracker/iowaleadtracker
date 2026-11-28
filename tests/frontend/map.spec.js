@@ -123,7 +123,9 @@ test("EPA's sites are off until ticked, with a key, and open in the legend when 
   await expect(detail).toContainText("Continuous lead monitor");
   await expect(detail).toContainText(`${as01.readings.max.v.toFixed(3)} ${sites.unit}`);
   await expect(detail).toContainText(`${as01.readings.posted}, ${as01.readings.zero} of them zero`);
-  await expect(detail).toContainText("Xact continuous lead monitor.");
+  await expect(detail).toContainText("Xact continuous lead monitor.");   // the kind's own instrument, described
+  await expect(detail).toContainText("Also here: DustTrak, AreaRAE, Air cassette, Summa canister.");   // the rest, named
+  await expect(detail).not.toContainText(sites.instruments.dusttrak.text);
   await expect(detail).toContainText("Measurements, not model estimates.");
   await page.locator("#siteclose").click();
   await expect(detail).toBeHidden();

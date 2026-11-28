@@ -89,12 +89,18 @@ ALIASES = {
     "summa canister": "summa",
 }
 #: One symbol per kind of site, by what it can say about lead. No common standard exists
-#: for these; the diamond and square follow the monitor-placement brief's map.
+#: for these; the diamond and square follow the monitor-placement brief's map. A site's
+#: details describe the kind's own instrument (the sample that says something about lead)
+#: and only name the other instruments there.
 KINDS: dict[str, dict[str, str]] = {
-    "lead": {"label": "Continuous lead monitor (Xact)", "shape": "diamond"},
-    "realtime": {"label": "Air filter, with dust and gas monitors", "shape": "square-dot"},
-    "filter": {"label": "Air filter and gas canister", "shape": "square"},
-    "soil": {"label": "Soil sampling location", "shape": "triangle"},
+    "lead": {"label": "Continuous lead monitor (Xact)", "shape": "diamond", "instrument": "xact"},
+    "realtime": {
+        "label": "Air filter, with dust and gas monitors",
+        "shape": "square-dot",
+        "instrument": "cassette",
+    },
+    "filter": {"label": "Air filter and gas canister", "shape": "square", "instrument": "cassette"},
+    "soil": {"label": "Soil sampling location", "shape": "triangle", "instrument": "soil"},
 }
 NOTE = (
     "EPA's preliminary data as posted, saved {when}. Only the four continuous lead "

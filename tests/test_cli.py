@@ -88,10 +88,12 @@ def test_reference_sites_are_checked(tmp_path: Path) -> None:
     assert out["name"] == "Agency sites"
     assert out["unit"] == "µg/m³"
     assert out["sites"][0]["id"] == "A1"
+    assert "instrument" not in out["kinds"]["lead"]  # optional: the site's first is described
     assert puff._reference_sites(argparse.Namespace(reference_sites=None)) is None
     site = good["sites"][0]  # type: ignore[index]
     for bad in (
         {**good, "kinds": {"lead": {"label": "L", "shape": "star"}}},  # no such shape
+        {**good, "kinds": {"lead": {"label": "L", "shape": "diamond", "instrument": "y"}}},
         {**good, "sites": [{**site, "kind": "soil"}]},  # a kind that isn't listed
         {**good, "sites": [{**site, "instruments": ["y"]}]},  # an instrument not described
         {**good, "sites": [{**site, "lat": "40.7"}]},

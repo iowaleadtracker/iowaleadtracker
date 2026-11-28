@@ -156,7 +156,6 @@ body.embedded > header { display: none; }
 #legsite dl { font-size: 12px; gap: 2px 10px; }
 #legsite dd .muted { font-size: 11px; }
 #legsite .inst { margin: 5px 0 0; padding: 0; list-style: none; color: var(--ink-2); }
-#legsite .inst li { margin: 2px 0; }
 #legsite .inst b { color: var(--ink); font-weight: 600; }
 #map.onsite { cursor: pointer; }
 </style>
@@ -900,11 +899,14 @@ function siteLegend() {
       `<dt>Last reading</dt><dd>${when(r.last)}${age >= 2 ? `<br><span class="muted">${Math.round(age)} h before this copy was saved</span>` : ""}</dd>` +
       `<dt>Readings since the blast</dt><dd>${r.posted}, ${r.zero} of them zero</dd></dl>`;
   } else if (s.start) dl = `<dl><dt>Sampling started</dt><dd>${fmtWhen(s.start)}</dd></dl>`;
-  const inst = (s.instruments || []).map((i) => SITES.instruments[i]).filter(Boolean);
+  // the kind's own instrument described; the others there only named (their descriptions on hover)
+  const ids = s.instruments || [], mainId = K.instrument && ids.includes(K.instrument) ? K.instrument : ids[0];
+  const main = SITES.instruments[mainId], others = ids.filter((i) => i !== mainId).map((i) => SITES.instruments[i]).filter(Boolean);
   $("legsite").innerHTML =
     `<div class="sitehead">${shapeSvg(K.shape)}<span>${esc(s.id || K.label)}</span><button type="button" id="siteclose" aria-label="Close the site's details">×</button></div>` +
     `<div class="sitesub">${s.id ? esc(K.label) + " · " : ""}${fromSource(s)}</div>` + dl +
-    (inst.length ? `<ul class="inst">${inst.map((i) => `<li><b>${esc(i.name)}.</b> ${esc(i.text)}</li>`).join("")}</ul>` : "") +
+    (main ? `<p class="inst"><b>${esc(main.name)}.</b> ${esc(main.text)}</p>` : "") +
+    (others.length ? `<p class="inst">Also here: ${others.map((i) => `<span title="${esc(i.text)}">${esc(i.name)}</span>`).join(", ")}.</p>` : "") +
     `<div class="legnote">${esc(SITES.note || "")}${siteLinks()}${M.tzOffsetMin ? ` Times are local (${fmtTime(s.start || (r && r.last.t) || SITES.retrieved, M.tzOffsetMin).replace(/^.*\(|\)$/g, "")}).` : ""}</div>`;
   $("siteclose").addEventListener("click", () => selectSite(null));
 }
