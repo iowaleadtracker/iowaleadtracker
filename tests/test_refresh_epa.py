@@ -79,6 +79,7 @@ def test_sites_get_a_kind_by_what_they_can_say_about_lead() -> None:
         "square-dot",
         "square",
         "triangle",
+        "circle",
     }
     # each kind's details describe the sample that says something about lead; its sites have it
     assert {k: v["instrument"] for k, v in out["kinds"].items()} == {
@@ -86,6 +87,7 @@ def test_sites_get_a_kind_by_what_they_can_say_about_lead() -> None:
         "realtime": "cassette",
         "filter": "cassette",
         "soil": "soil",
+        "water": "water",
     }
     for s in out["sites"]:
         assert out["kinds"][s["kind"]]["instrument"] in s["instruments"]
@@ -127,3 +129,27 @@ def test_the_file_is_json_with_a_site_per_line() -> None:
     text = epa.dumps(data)
     assert json.loads(text) == data
     assert text.count('\n  {"') == len(data["sites"])
+
+
+def test_water_sites_are_circles_one_per_spot_and_far_points_left_out() -> None:
+    """EPA's water samples: one circle per spot with every start time; none 960 mi away."""
+
+    def sample(when: str, lat: float, lon: float) -> dict[str, object]:
+        return {
+            "attributes": {"Sample_Start_Date_Time": _ms(when)},
+            "geometry": {"x": lon, "y": lat},
+        }
+
+    water = [
+        sample("2026-11-21 16:00", 40.70, -91.40),
+        sample("2026-11-21 16:15", 40.70, -91.40),  # the same spot again
+        sample("2026-11-22 09:00", 34.3798, -74.9871),  # in the Atlantic, as in EPA's layer
+    ]
+    out = epa.summarize(SITES, READINGS, [], NOW, water)
+    w = [s for s in out["sites"] if s["kind"] == "water"]
+    assert len(w) == 1
+    assert w[0]["starts"] == ["2026-11-21T16:00Z", "2026-11-21T16:15Z"]
+    assert w[0]["readings"] == {"water": None}
+    assert out["kinds"]["water"]["shape"] == "circle"
+    # the circle is water's alone: no instrument in another kind's details uses it
+    assert [k for k, i in out["instruments"].items() if i.get("shape") == "circle"] == ["water"]

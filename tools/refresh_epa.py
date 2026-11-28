@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import math
 import sys
 import urllib.parse
 import urllib.request
@@ -35,6 +36,8 @@ SCENARIO = ROOT / "scenarios" / "iowa-aap-lead-azide"
 BRIEF = SCENARIO / "postmortem" / "monitor-placement-brief"
 OUT = SCENARIO / "epa_sites.json"
 UTC = dt.timezone.utc
+# The plant point the site uses (as epa_fetch.py), for distances.
+LAT0, LON0 = 40.825518, -91.266502
 #: The detonation, 9 a.m. CST Nov. 25, 2026 (as the brief's RELEASE_UTC): readings at or
 #: after it are "since the blast", earlier ones are the baseline.
 EVENT = dt.datetime(2026, 11, 25, 15, 0, tzinfo=UTC)
@@ -120,9 +123,13 @@ INSTRUMENTS: dict[str, dict[str, Any]] = {
     },
     "summa": {
         "name": "Summa canister",
-        "shape": "circle",
         "text": "A specially prepared stainless steel canister that takes in a sample of "
         "air for a lab to test for volatile organic compounds (EPA Method TO-15).",
+    },
+    "water": {
+        "name": "Water sample",
+        "shape": "circle",
+        "text": "EPA lists where and when it started sampling water.",
     },
     "soil": {
         "name": "Soil sample",
@@ -152,6 +159,8 @@ KINDS: dict[str, dict[str, str]] = {
     },
     "filter": {"label": "Air filter and gas canister", "shape": "square", "instrument": "cassette"},
     "soil": {"label": "Soil sampling location", "shape": "triangle", "instrument": "soil"},
+    # EPA's own map draws its water sites as circles too
+    "water": {"label": "Water sampling location", "shape": "circle", "instrument": "water"},
 }
 NOTE = (
     "EPA's preliminary data as posted, saved {when}. Only the four continuous lead "
@@ -216,11 +225,54 @@ def summarize_readings(recs: list[dict[str, Any]], unit: str) -> dict[str, Any]:
     }
 
 
+#: Sample locations farther than this from the plant are left out: EPA's water layer puts
+#: five samples at one point in the Atlantic, about 960 miles away, which can't be a site
+#: of this response. download() reports how many were left out.
+MAX_MILES = 300.0
+
+
+def miles_from_plant(lat: float, lon: float) -> float:
+    """Return the distance from the plant point the site uses, in miles."""
+    dy = (lat - LAT0) * 111.195
+    dx = (lon - LON0) * 111.195 * math.cos(math.radians(LAT0))
+    return math.hypot(dx, dy) / 1.609344
+
+
+def sample_spots(features: list[dict[str, Any]], kind: str) -> list[dict[str, Any]]:
+    """Return one site per spot for a layer of sample locations with start times.
+
+    EPA lists some spots several times, with different start times; each spot is one
+    place on the map, with every start time. Spots beyond MAX_MILES are left out.
+    """
+    spots: dict[tuple[float, float], list[str]] = {}
+    for ft in features:
+        if ft.get("geometry") and ft["attributes"].get("Sample_Start_Date_Time"):
+            key = (round(ft["geometry"]["y"], 5), round(ft["geometry"]["x"], 5))
+            spots.setdefault(key, []).append(iso(ft["attributes"]["Sample_Start_Date_Time"]))
+    return sorted(
+        (
+            {
+                "lat": lat,
+                "lon": lon,
+                "kind": kind,
+                "instruments": [kind],
+                "readings": {kind: None},
+                "start": min(starts),
+                "starts": sorted(starts),
+            }
+            for (lat, lon), starts in spots.items()
+            if miles_from_plant(lat, lon) <= MAX_MILES
+        ),
+        key=lambda s: (s["start"], s["lat"], s["lon"]),
+    )
+
+
 def summarize(
     sites: list[dict[str, Any]],
     recs: list[dict[str, Any]],
     soil: list[dict[str, Any]],
     retrieved: dt.datetime,
+    water: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Return the map's ``--reference-sites`` data from the three layers' features."""
     by_station: dict[str, list[dict[str, Any]]] = {}
@@ -260,28 +312,8 @@ def summarize(
     if by_station:
         raise ValueError(f"readings for stations not in the site list: {sorted(by_station)}")
     out_sites.sort(key=lambda s: s["id"])
-    # Soil samples at one spot (EPA lists some spots two or three times, with different
-    # start times) are one place on the map, with every start time.
-    spots: dict[tuple[float, float], list[str]] = {}
-    for ft in soil:
-        if ft.get("geometry") and ft["attributes"].get("Sample_Start_Date_Time"):
-            key = (round(ft["geometry"]["y"], 5), round(ft["geometry"]["x"], 5))
-            spots.setdefault(key, []).append(iso(ft["attributes"]["Sample_Start_Date_Time"]))
-    soil_out = sorted(
-        (
-            {
-                "lat": lat,
-                "lon": lon,
-                "kind": "soil",
-                "instruments": ["soil"],
-                "readings": {"soil": None},
-                "start": min(starts),
-                "starts": sorted(starts),
-            }
-            for (lat, lon), starts in spots.items()
-        ),
-        key=lambda s: (s["start"], s["lat"], s["lon"]),
-    )
+    soil_out = sample_spots(soil, "soil")
+    water_out = sample_spots(water or [], "water")
     when = retrieved.astimezone(dt.timezone(dt.timedelta(hours=-6)))
     when_text = f"{when:%b. %-d, %Y, %-I:%M} {'a.m.' if when.hour < 12 else 'p.m.'} CST"
     return {
@@ -295,7 +327,7 @@ def summarize(
         "event": EVENT.strftime("%Y-%m-%dT%H:%MZ"),
         "kinds": KINDS,
         "instruments": INSTRUMENTS,
-        "sites": out_sites + soil_out,
+        "sites": out_sites + soil_out + water_out,
     }
 
 
@@ -315,7 +347,21 @@ def download() -> dict[str, Any]:
         f"{epa_fetch.SERVICES}/IAAAP_Soil_Sampling_Location/FeatureServer/0/query",
         orderByFields="OBJECTID_1",
     )
-    return summarize(sites, recs, soil, now)
+    water = epa_fetch.query(
+        f"{epa_fetch.SERVICES}/IAAAP_Water_Sampling_Location/FeatureServer/1/query",
+        orderByFields="OBJECTID_1",
+    )
+    far = [
+        ft
+        for ft in soil + water
+        if ft.get("geometry")
+        and miles_from_plant(ft["geometry"]["y"], ft["geometry"]["x"]) > MAX_MILES
+    ]
+    if far:
+        sys.stdout.write(
+            f"left out {len(far)} sample records more than {MAX_MILES:.0f} miles away\n"
+        )
+    return summarize(sites, recs, soil, now, water)
 
 
 def dumps(data: dict[str, Any]) -> str:
@@ -338,7 +384,7 @@ def main(argv: list[str] | None = None) -> None:
     lead = [s for s in data["sites"] if s["kind"] == "lead"]
     n = sum(s["readings"]["xact"]["posted"] for s in lead)
     sys.stdout.write(
-        f"{data['retrieved']}: {len(data['sites'])} sites and soil points, "
+        f"{data['retrieved']}: {len(data['sites'])} air sites and soil and water spots, "
         f"{len(lead)} lead monitors, {n} readings since the blast\n"
     )
     for s in lead:

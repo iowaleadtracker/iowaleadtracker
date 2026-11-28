@@ -29,8 +29,12 @@
   },
   "summa": {
    "name": "Summa canister",
-   "shape": "circle",
    "text": "A specially prepared stainless steel canister that takes in a sample of air for a lab to test for volatile organic compounds (EPA Method TO-15)."
+  },
+  "water": {
+   "name": "Water sample",
+   "shape": "circle",
+   "text": "EPA lists where and when it started sampling water."
   },
   "xact": {
    "limit": {
@@ -64,6 +68,11 @@
    "instrument": "soil",
    "label": "Soil sampling location",
    "shape": "triangle"
+  },
+  "water": {
+   "instrument": "water",
+   "label": "Water sampling location",
+   "shape": "circle"
   }
  },
  "links": [
@@ -77,8 +86,8 @@
   }
  ],
  "name": "EPA sampling sites",
- "note": "EPA's preliminary data as posted, saved Nov. 28, 2026, 9:05 a.m. CST. Only the four continuous lead monitors post results. A reading near zero doesn't show whether a cloud missed the monitor or little lead got out. Measurements, not model estimates.",
- "retrieved": "2026-11-28T15:05Z",
+ "note": "EPA's preliminary data as posted, saved Nov. 28, 2026, 9:18 a.m. CST. Only the four continuous lead monitors post results. A reading near zero doesn't show whether a cloud missed the monitor or little lead got out. Measurements, not model estimates.",
+ "retrieved": "2026-11-28T15:18Z",
  "sites": [
   {"id": "AS01", "instruments": ["xact", "dusttrak", "arearae", "cassette", "summa"], "kind": "lead", "lat": 40.77722, "lon": -91.32383, "readings": {"arearae": null, "cassette": null, "dusttrak": null, "summa": null, "xact": {"first": "2026-11-25T13:00Z", "last": {"t": "2026-11-26T21:01Z", "v": 0.0}, "max": {"t": "2026-11-25T15:10Z", "v": 0.002084}, "maxBefore": {"t": "2026-11-25T13:00Z", "v": 0.0}, "posted": 84, "unit": "µg/m³", "url": "https://experience.arcgis.com/experience/00329268edc24f068127d26200d35a45/?data_filter=dataSource_1-1a214a59c41-layer-7:Air_Station_ID%3D%27AS01%27", "zero": 82}}},
   {"id": "AS02", "instruments": ["xact", "dusttrak", "arearae", "cassette", "summa"], "kind": "lead", "lat": 40.70835, "lon": -91.44983, "readings": {"arearae": null, "cassette": null, "dusttrak": null, "summa": null, "xact": {"first": "2026-11-25T13:20Z", "last": {"t": "2026-11-26T21:39Z", "v": 0.0}, "max": {"t": "2026-11-25T19:51Z", "v": 0.00427}, "maxBefore": {"t": "2026-11-25T14:41Z", "v": 0.003}, "posted": 85, "unit": "µg/m³", "url": "https://experience.arcgis.com/experience/00329268edc24f068127d26200d35a45/?data_filter=dataSource_1-1a214a59c41-layer-7:Air_Station_ID%3D%27AS02%27", "zero": 83}}},
@@ -172,6 +181,65 @@
   {"instruments": ["soil"], "kind": "soil", "lat": 40.726, "lon": -91.48751, "readings": {"soil": null}, "start": "2026-11-23T22:00Z", "starts": ["2026-11-23T22:00Z"]},
   {"instruments": ["soil"], "kind": "soil", "lat": 40.71084, "lon": -91.4877, "readings": {"soil": null}, "start": "2026-11-23T22:10Z", "starts": ["2026-11-23T22:10Z"]},
   {"instruments": ["soil"], "kind": "soil", "lat": 40.68124, "lon": -91.44737, "readings": {"soil": null}, "start": "2026-11-23T22:16Z", "starts": ["2026-11-23T22:16Z"]},
-  {"instruments": ["soil"], "kind": "soil", "lat": 40.67128, "lon": -91.42989, "readings": {"soil": null}, "start": "2026-11-23T22:23Z", "starts": ["2026-11-23T22:23Z"]}
+  {"instruments": ["soil"], "kind": "soil", "lat": 40.67128, "lon": -91.42989, "readings": {"soil": null}, "start": "2026-11-23T22:23Z", "starts": ["2026-11-23T22:23Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 39.75086, "lon": -92.50965, "readings": {"water": null}, "start": "2026-11-21T16:00Z", "starts": ["2026-11-21T16:00Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 39.72549, "lon": -92.04515, "readings": {"water": null}, "start": "2026-11-21T16:10Z", "starts": ["2026-11-21T16:10Z", "2026-11-21T16:40Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 39.50606, "lon": -91.83976, "readings": {"water": null}, "start": "2026-11-21T16:55Z", "starts": ["2026-11-21T16:55Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.17812, "lon": -92.65224, "readings": {"water": null}, "start": "2026-11-21T17:45Z", "starts": ["2026-11-21T17:45Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 39.60644, "lon": -91.66523, "readings": {"water": null}, "start": "2026-11-21T17:50Z", "starts": ["2026-11-21T17:50Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 39.93221, "lon": -91.41636, "readings": {"water": null}, "start": "2026-11-21T18:15Z", "starts": ["2026-11-21T18:15Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 39.72084, "lon": -91.36211, "readings": {"water": null}, "start": "2026-11-21T18:53Z", "starts": ["2026-11-21T18:53Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.28868, "lon": -92.61888, "readings": {"water": null}, "start": "2026-11-21T19:27Z", "starts": ["2026-11-21T19:27Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.36329, "lon": -91.44176, "readings": {"water": null}, "start": "2026-11-21T19:27Z", "starts": ["2026-11-21T19:27Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.4411, "lon": -92.21891, "readings": {"water": null}, "start": "2026-11-21T20:23Z", "starts": ["2026-11-21T20:23Z", "2026-11-21T20:28Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.39857, "lon": -91.35452, "readings": {"water": null}, "start": "2026-11-21T20:25Z", "starts": ["2026-11-21T20:25Z", "2026-11-23T00:34Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 39.3775, "lon": -91.4081, "readings": {"water": null}, "start": "2026-11-21T20:39Z", "starts": ["2026-11-21T20:39Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.4483, "lon": -92.201, "readings": {"water": null}, "start": "2026-11-21T20:56Z", "starts": ["2026-11-21T20:56Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.55257, "lon": -91.40119, "readings": {"water": null}, "start": "2026-11-21T21:02Z", "starts": ["2026-11-21T21:02Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.4402, "lon": -92.2278, "readings": {"water": null}, "start": "2026-11-21T21:05Z", "starts": ["2026-11-21T21:05Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.6897, "lon": -91.9942, "readings": {"water": null}, "start": "2026-11-21T21:10Z", "starts": ["2026-11-21T21:10Z", "2026-11-21T22:00Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 41.01767, "lon": -92.41694, "readings": {"water": null}, "start": "2026-11-21T22:19Z", "starts": ["2026-11-21T22:19Z", "2026-11-22T16:13Z", "2026-11-22T16:15Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.8222, "lon": -91.09873, "readings": {"water": null}, "start": "2026-11-21T22:25Z", "starts": ["2026-11-21T22:25Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.708, "lon": -91.452, "readings": {"water": null}, "start": "2026-11-21T22:38Z", "starts": ["2026-11-21T22:38Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.7408, "lon": -91.1192, "readings": {"water": null}, "start": "2026-11-21T23:00Z", "starts": ["2026-11-21T23:00Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 39.71857, "lon": -90.21739, "readings": {"water": null}, "start": "2026-11-21T23:15Z", "starts": ["2026-11-21T23:15Z", "2026-11-23T00:28Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.0078, "lon": -91.9741, "readings": {"water": null}, "start": "2026-11-22T06:29Z", "starts": ["2026-11-22T06:29Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.8325, "lon": -91.385, "readings": {"water": null}, "start": "2026-11-22T14:15Z", "starts": ["2026-11-22T14:15Z", "2026-11-22T14:20Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.9874, "lon": -90.3991, "readings": {"water": null}, "start": "2026-11-22T14:35Z", "starts": ["2026-11-22T14:35Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.9585, "lon": -91.5255, "readings": {"water": null}, "start": "2026-11-22T14:55Z", "starts": ["2026-11-22T14:55Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.82812, "lon": -92.89812, "readings": {"water": null}, "start": "2026-11-22T14:58Z", "starts": ["2026-11-22T14:58Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.72619, "lon": -89.55011, "readings": {"water": null}, "start": "2026-11-22T15:08Z", "starts": ["2026-11-22T15:08Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.82634, "lon": -92.89661, "readings": {"water": null}, "start": "2026-11-22T15:16Z", "starts": ["2026-11-22T15:16Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.453, "lon": -90.793, "readings": {"water": null}, "start": "2026-11-22T15:45Z", "starts": ["2026-11-22T15:45Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 41.1878, "lon": -91.8942, "readings": {"water": null}, "start": "2026-11-22T15:45Z", "starts": ["2026-11-22T15:45Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 41.52673, "lon": -90.44671, "readings": {"water": null}, "start": "2026-11-22T15:50Z", "starts": ["2026-11-22T15:50Z", "2026-11-22T19:13Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.419, "lon": -91.158, "readings": {"water": null}, "start": "2026-11-22T16:16Z", "starts": ["2026-11-22T16:16Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 41.3833, "lon": -92.136, "readings": {"water": null}, "start": "2026-11-22T16:30Z", "starts": ["2026-11-22T16:30Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.5415, "lon": -91.3835, "readings": {"water": null}, "start": "2026-11-22T16:46Z", "starts": ["2026-11-22T16:46Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.5735, "lon": -89.9785, "readings": {"water": null}, "start": "2026-11-22T16:56Z", "starts": ["2026-11-22T16:56Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 41.52775, "lon": -90.55003, "readings": {"water": null}, "start": "2026-11-22T17:25Z", "starts": ["2026-11-22T17:25Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 41.725, "lon": -91.6299, "readings": {"water": null}, "start": "2026-11-22T17:35Z", "starts": ["2026-11-22T17:35Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.0, "lon": -91.5196, "readings": {"water": null}, "start": "2026-11-22T17:44Z", "starts": ["2026-11-22T17:44Z", "2026-11-22T17:48Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 41.52352, "lon": -90.5431, "readings": {"water": null}, "start": "2026-11-22T18:12Z", "starts": ["2026-11-22T18:12Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.30453, "lon": -90.45993, "readings": {"water": null}, "start": "2026-11-22T18:14Z", "starts": ["2026-11-22T18:14Z", "2026-11-22T18:18Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 41.5242, "lon": -90.6835, "readings": {"water": null}, "start": "2026-11-22T18:40Z", "starts": ["2026-11-22T18:40Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 41.65893, "lon": -91.54063, "readings": {"water": null}, "start": "2026-11-22T18:40Z", "starts": ["2026-11-22T18:40Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 41.5129, "lon": -90.51403, "readings": {"water": null}, "start": "2026-11-22T18:41Z", "starts": ["2026-11-22T18:41Z", "2026-11-22T18:41Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.0903, "lon": -91.9013, "readings": {"water": null}, "start": "2026-11-22T18:53Z", "starts": ["2026-11-22T18:53Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.506, "lon": -90.71646, "readings": {"water": null}, "start": "2026-11-22T19:11Z", "starts": ["2026-11-22T19:11Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 41.4258, "lon": -90.8267, "readings": {"water": null}, "start": "2026-11-22T19:25Z", "starts": ["2026-11-22T19:25Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 41.68829, "lon": -91.55759, "readings": {"water": null}, "start": "2026-11-22T19:25Z", "starts": ["2026-11-22T19:25Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.5034, "lon": -91.7707, "readings": {"water": null}, "start": "2026-11-22T19:47Z", "starts": ["2026-11-22T19:47Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.641, "lon": -91.682, "readings": {"water": null}, "start": "2026-11-22T20:10Z", "starts": ["2026-11-22T20:10Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 41.1998, "lon": -91.114, "readings": {"water": null}, "start": "2026-11-22T20:10Z", "starts": ["2026-11-22T20:10Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.57807, "lon": -90.87304, "readings": {"water": null}, "start": "2026-11-22T20:25Z", "starts": ["2026-11-22T20:25Z", "2026-11-23T00:18Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.6434, "lon": -91.4896, "readings": {"water": null}, "start": "2026-11-22T20:38Z", "starts": ["2026-11-22T20:38Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.57749, "lon": -90.86582, "readings": {"water": null}, "start": "2026-11-22T20:44Z", "starts": ["2026-11-22T20:44Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.9631, "lon": -91.1586, "readings": {"water": null}, "start": "2026-11-22T20:55Z", "starts": ["2026-11-22T20:55Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.596, "lon": -90.968, "readings": {"water": null}, "start": "2026-11-22T21:15Z", "starts": ["2026-11-22T21:15Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.8583, "lon": -90.9681, "readings": {"water": null}, "start": "2026-11-22T21:28Z", "starts": ["2026-11-22T21:28Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.5092, "lon": -90.7331, "readings": {"water": null}, "start": "2026-11-23T03:14Z", "starts": ["2026-11-23T03:14Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.70093, "lon": -91.13996, "readings": {"water": null}, "start": "2026-11-25T13:10Z", "starts": ["2026-11-25T13:10Z"]},
+  {"instruments": ["water"], "kind": "water", "lat": 40.38691, "lon": -91.43998, "readings": {"water": null}, "start": "2026-11-25T13:55Z", "starts": ["2026-11-25T13:55Z"]}
  ]
 }
