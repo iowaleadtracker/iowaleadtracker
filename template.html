@@ -157,8 +157,17 @@ body.embedded > header { display: none; }
 #legsite .sitehead button { border: 0; background: var(--chip); color: var(--ink); border-radius: 6px; width: 24px; height: 24px; cursor: pointer; font-size: 15px; line-height: 1; flex: none; }
 /* touch screens: a target a finger can hit (44px, the usual guidance for phones) */
 @media (pointer: coarse) { #legsite .sitehead button { width: 44px; height: 44px; font-size: 20px; } }
+/* touch screens: the links in a site's results get a 44px-tall row, so a finger can hit
+   one without the next (their rows grow; the text stays the same size) */
+@media (pointer: coarse) {
+  #legsite a.srclink, #legsite a.reflink { display: inline-block; padding: 15px 0; }
+  #legsite a.srclink .via { display: block; }       /* "on EPA's map ↗" on its own line, */
+  #legsite a.srclink .dot { display: none; }        /* so the count beside it doesn't wrap */
+}
+#legsite dd { overflow-wrap: normal; }
+#legsite dd .nowrap { white-space: nowrap; }
 #legsite .sitesub { color: var(--ink-2); margin: 1px 0 4px; }
-#legsite dl { font-size: 12px; gap: 2px 10px; }
+#legsite dl { font-size: 12px; gap: 2px 10px; align-items: baseline; }   /* a label and its value on one line, even beside a padded link */
 #legsite dd .muted { font-size: 11px; }
 #legsite .inst { margin: 5px 0 0; padding: 0; list-style: none; color: var(--ink-2); }
 #legsite .inst b { color: var(--ink); font-weight: 600; }
@@ -887,7 +896,7 @@ function resultsDl(r, inst) {
     `<dt>Highest before it</dt><dd>${when(r.maxBefore)}</dd>` +
     `<dt>Latest</dt><dd>${when(r.last)}${age >= 2 ? `<br><span class="muted">${Math.round(age)} h before this copy was saved</span>` : ""}</dd>` +
     // where they are posted: EPA's map, filtered to this site's results (a new tab)
-    `<dt>${r.url && /^https:\/\//i.test(r.url) ? `<a class="srclink" href="${esc(r.url)}" target="_blank" rel="noopener" title="Open EPA's map with this layer filtered to this site's results">Measurements collected<span aria-hidden="true"> ↗</span></a>` : "Measurements collected"}</dt><dd>${r.posted} total, ${r.zero} posted as 0</dd>` +
+    `<dt>${r.url && /^https:\/\//i.test(r.url) ? `<a class="srclink" href="${esc(r.url)}" target="_blank" rel="noopener" title="Open EPA's map with this layer filtered to this site's results">Measurements collected<span class="via"><span class="dot"> ·</span> on EPA's map<span aria-hidden="true"> ↗</span></span></a>` : "Measurements collected"}</dt><dd>${r.posted} total, <span class="nowrap">${r.zero} posted as 0</span></dd>` +
     // the number links to where its source is listed; whose limit it is shows on hover
     (L ? `<dt>Published detection limit</dt><dd>${L.url && /^https:\/\//i.test(L.url)
       ? `<a class="reflink" href="${esc(L.url)}" target="_blank" rel="noopener"${L.label ? ` title="${esc("Source: " + L.label)}"` : ""}>${esc(L.v)} ${esc(L.unit)}</a>`

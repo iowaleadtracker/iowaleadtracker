@@ -126,7 +126,7 @@ test("EPA's sites are off until ticked, with a key, and open in the legend when 
   await expect(detail).toContainText(`${xact.posted} total, ${xact.zero} posted as 0`);
   // "Measurements collected" links to EPA's map, filtered to this site, in a new tab
   const src = detail.locator("dt a.srclink");
-  await expect(src).toHaveText("Measurements collected ↗");
+  await expect(src).toHaveText("Measurements collected · on EPA's map ↗");   // says where it goes, for phones without hover text
   await expect(src).toHaveAttribute("href", xact.url);
   await expect(src).toHaveAttribute("target", "_blank");
   expect(xact.url).toContain("data_filter=");
@@ -291,6 +291,8 @@ test("every \"Measurements collected\" link opens EPA's map in a new tab, by tap
       const link = page.locator("#legsite a.srclink");
       await expect(link).toHaveAttribute("target", "_blank");
       await expect(link).toHaveAttribute("rel", /noopener/);
+      if (isMobile) for (const a of [link, page.locator("#legsite a.reflink").first()])   // finger-sized, not overlapping
+        expect((await a.boundingBox()).height).toBeGreaterThanOrEqual(44);
       await link.scrollIntoViewIfNeeded();
       const before = page.url();
       const act = async () => {
