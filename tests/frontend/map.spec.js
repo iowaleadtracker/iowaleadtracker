@@ -141,6 +141,55 @@ test("the panel's peak values are the data's, in the units chosen", async ({ pag
   expect(Math.abs(ugm2 / (h.dmax * 1e9) - 1)).toBeLessThan(0.01);
 });
 
+test("the levels-of-concern inputs follow the units", async ({ page }) => {
+  await openMap(page, fixture("forecast"));   // built for U.S. units
+  await page.locator('#fieldseg button[data-v="zones"]').click();
+  await page.selectOption("#zmetric", "dep");
+  await expect(page.locator("#zonenote")).toContainText("Levels in µg/ft².");
+  await page.locator('#sysseg button[data-v="metric"]').click();
+  await expect(page.locator("#zonenote")).toContainText("Levels in µg/m².");
+  await page.selectOption("#zmetric", "m60");
+  await expect(page.locator("#zonenote")).toContainText("Levels in µg/m³.");
+  await page.selectOption("#units", "mass");                 // no fixed unit: mg
+  await expect(page.locator("#zonenote")).toContainText("Levels in mg/m³.");
+});
+
+test("hovering the levels of concern gives mass, even with particle counts chosen", async ({ page, isMobile }) => {
+  test.skip(isMobile, "hover needs a mouse");
+  await openMap(page, fixture("forecast"));
+  await page.selectOption("#units", "count");
+  await page.locator('#fieldseg button[data-v="zones"]').click();
+  await page.locator("#hour").fill("8");
+  const box = await page.locator("#map").boundingBox();
+  let text = "";
+  // look for a cell the cloud reached: scan the map until the tip shows a value
+  for (let y = 0.2; y <= 0.8 && !/so far: \d/.test(text); y += 0.05) {
+    for (let x = 0.2; x <= 0.8 && !/so far: \d/.test(text); x += 0.05) {
+      await page.mouse.move(box.x + box.width * x, box.y + box.height * y);
+      text = (await page.locator("#tip").textContent()) || "";
+    }
+  }
+  expect(text, "no scanned point reached a cell the cloud reached").toMatch(/so far: \d/);
+  // a mass in a readable unit (metric, or U.S. ounces, pounds, tons for big amounts), not particles
+  // (big numbers may be written ×10⁴ and up; a negative power would mean a too-large unit)
+  expect(text).toMatch(/so far: [\d.,]+(?:×10[⁰-⁹]+)? (?:[mµnpfk]?g|t|oz|lb|tons)\/m[²³]/);
+  await expect(page.locator("#units")).toHaveValue("count");   // the choice is untouched
+});
+
+test("the air minimum's label follows the units", async ({ page }) => {
+  await openMap(page, fixture("forecast"));   // built with --scale-min 0.15ug (per m³)
+  const label = page.locator("#fixtoplabel");
+  await expect(label).toHaveText("show only ≥ 0.15 µg/m³");
+  await page.selectOption("#units", "cm3");
+  await expect(label).toHaveText("show only ≥ 1.5×10⁻⁷ µg/cm³");   // 1 m³ = 10⁶ cm³
+  await page.selectOption("#units", "mass");   // no fixed unit: the legend's, picked by size
+  const unit = (await page.locator("#legtitle").textContent()).match(/\(([^)]+)\)$/)[1];
+  await expect(label).toHaveText(new RegExp(`^show only ≥ [\\d.,]+ ${unit.replace("/", "\\/")}$`));
+  await page.locator('#fieldseg button[data-v="dep"]').click();   // deposition: its own minimum, same rule
+  const depUnit = (await page.locator("#legtitle").textContent()).match(/\(([^)]+)\)$/)[1];
+  await expect(label).toHaveText(new RegExp(`^show only ≥ [\\d.,]+ ${depUnit.replace("/", "\\/")}$`));
+});
+
 test("text from the data can't inject markup or script", async ({ page }) => {
   const data = fixture("forecast");
   const evil = '<img src=x onerror="window.__xss=1">';

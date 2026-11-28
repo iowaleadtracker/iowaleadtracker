@@ -608,9 +608,7 @@ function rampLUT(field) {
 function unitInfo() {
   const F = FIELDS[S.field], area = S.field === "dep" ? "m²" : "m³";
   if (S.units === "count") return { factor: 1, label: `particles/${area}` };
-  if (S.units === "cm3") return S.field === "dep" ? { factor: 1e5, label: "µg/cm²" } : { factor: 1e3, label: "µg/cm³" };
-  if (S.units === "ugm3") return S.field === "dep" ? { factor: 1e9, label: "µg/m²" } : { factor: 1e9, label: "µg/m³" };
-  if (S.units === "ugft2") return S.field === "dep" ? { factor: UGFT2, label: "µg/ft²" } : { factor: 1e9, label: "µg/m³" };
+  if (UNITS[S.units]) { const [factor, label] = UNITS[S.units][S.field === "dep" ? "dep" : "air"]; return { factor, label }; }
   const maxv = S.field !== "dep" && S.fixTop && M.scaleMax ? Math.max(F.max, M.scaleMax) : F.max;
   const u = [["g", 1e3], ["mg", 1e6], ["µg", 1e9], ["ng", 1e12], ["pg", 1e15], ["fg", 1e18]];
   let pick = u[u.length - 1];
@@ -619,20 +617,29 @@ function unitInfo() {
 }
 
 const UGFT2 = 1e9 * 0.09290304;          // kg/m2 -> µg/ft2
+// The fixed units of the Units menu: [factor from kg/m3 (air) or kg/m2 (deposition), label].
+// "mass" (no entry) picks g, mg, µg ... by the size of the values; where a fixed unit is
+// needed for it (or for "count"), mg is used: FIXED_MASS.
+const UNITS = {
+  ugm3: { air: [1e9, "µg/m³"], dep: [1e9, "µg/m²"] },
+  ugft2: { air: [1e9, "µg/m³"], dep: [UGFT2, "µg/ft²"] },
+  cm3: { air: [1e3, "µg/cm³"], dep: [1e5, "µg/cm²"] },
+};
+const FIXED_MASS = { air: [1e6, "mg/m³"], dep: [1e6, "mg/m²"] };
+const fixedUnit = (kind) => (UNITS[S.units] || FIXED_MASS)[kind];   // kind: "air" or "dep"
+const unitText = (v, [factor, label]) => `${fmt(v * factor, 3)} ${label}`;
 // With the uncertainty view on, use the field holding the highest value of any ensemble member.
 const eKey = (f) => (S.env && FIELDS["env_" + f] ? "env_" + f : f);
 const fkey = (f) => (S.units === "count" && FIELDS[f + "_n"] ? f + "_n" : eKey(f));
-// value in kg/m3 (air) or kg/m2 (deposition) -> text in the selected units
-function fmtVal(v, field, vCount) {
+// value in kg/m3 (air) or kg/m2 (deposition) -> text in the selected units (or in `units`)
+function fmtVal(v, field, vCount, units = S.units) {
   const area = field === "dep" ? "m²" : "m³";
-  if (S.units === "count") return `${fmt(vCount, 3)} particles/${area}`;
-  if (S.units === "cm3") return field === "dep" ? `${fmt(v * 1e5, 3)} µg/cm²` : `${fmt(v * 1e3, 3)} µg/cm³`;
-  if (S.units === "ugm3") return field === "dep" ? `${fmt(v * 1e9, 3)} µg/m²` : `${fmt(v * 1e9, 3)} µg/m³`;
-  if (S.units === "ugft2") return field === "dep" ? `${fmt(v * UGFT2, 3)} µg/ft²` : `${fmt(v * 1e9, 3)} µg/m³`;
+  if (units === "count") return `${fmt(vCount, 3)} particles/${area}`;
+  if (UNITS[units]) return unitText(v, UNITS[units][field === "dep" ? "dep" : "air"]);
   return `${fmtMass(v)}/${area}`;
 }
-const locText = (v) => (S.units === "cm3" ? `${fmt(v * 1e3, 3)} µg/cm³` : S.units === "ugm3" || S.units === "ugft2" ? `${fmt(v * 1e9, 3)} µg/m³` : `${fmt(v * 1e6, 3)} mg/m³`);
-const depText = (v) => (S.units === "ugft2" ? `${fmt(v * UGFT2, 3)} µg/ft²` : S.units === "cm3" ? `${fmt(v * 1e5, 3)} µg/cm²` : S.units === "ugm3" ? `${fmt(v * 1e9, 3)} µg/m²` : `${fmt(v * 1e6, 3)} mg/m²`);
+const locText = (v) => unitText(v, fixedUnit("air"));
+const depText = (v) => unitText(v, fixedUnit("dep"));
 
 // ---------- overlay image ----------
 // The model grid is evenly spaced in latitude; re-sample its rows onto an evenly
@@ -1291,7 +1298,8 @@ function syncMinBox() {
   $("fixtopwrap").hidden = !v;
   if (!v) return;
   $("fixtop").checked = dep ? S.fixDepMin : S.fixMin;
-  $("fixtoplabel").textContent = "show only ≥ " + (dep ? depText(v) : M.scaleMin >= 1e-6 ? fmt(M.scaleMin * 1e3, 3) + " µg/cm³" : fmt(M.scaleMin * 1e9, 3) + " µg/m³");
+  const U = unitInfo();   // the legend's unit, so the cutoff reads against the scale beside it
+  $("fixtoplabel").textContent = "show only ≥ " + unitText(v, [U.factor, U.label]);
 }
 function render() { syncMinBox(); updatePanel(); draw(); }
 
@@ -1383,10 +1391,8 @@ function hover(x, y) {
   const lines = [], BELOW = "below map range (not zero)";
   if (S.field === "zones") {
     const zn = eKey(S.zoneMetric), F = FIELDS[zn], q = cumulativeQ(zn, S.hour)[j * NX + i];
-    const zu = S.units === "count" ? "mass" : S.units, keep = S.units;
-    S.units = zu;
-    lines.push(`${{ m60: "Max 60-min avg", peak: "Max peak", dep: "Deposited" }[S.zoneMetric]} so far: <b>${q ? fmtVal(10 ** qToLog(F, q), S.zoneMetric === "dep" ? "dep" : "conc") : BELOW}</b>`);
-    S.units = keep;
+    const zu = S.units === "count" ? "mass" : S.units;   // the zones are mass, never counts
+    lines.push(`${{ m60: "Max 60-min avg", peak: "Max peak", dep: "Deposited" }[S.zoneMetric]} so far: <b>${q ? fmtVal(10 ** qToLog(F, q), S.zoneMetric === "dep" ? "dep" : "conc", 0, zu) : BELOW}</b>`);
   }
   const here = (name) => { const F = FIELDS[name], q = F.q[(S.hour - 1) * NCELL + j * NX + i]; return q ? 10 ** qToLog(F, q) : 0; };
   if (S.hy) {
@@ -1499,9 +1505,7 @@ document.addEventListener("keydown", (e) => {
 });
 darkMQ.addEventListener("change", () => { overlayKey = ""; schedule(); });
 // threat-level inputs follow the display units (kg/m3 internally)
-const locUnit = () => (S.zoneMetric === "dep"
-  ? (S.units === "ugft2" ? [UGFT2, "µg/ft²"] : S.units === "ugm3" ? [1e9, "µg/m²"] : S.units === "cm3" ? [1e5, "µg/cm²"] : [1e6, "mg/m²"])
-  : (S.units === "ugm3" || S.units === "ugft2" ? [1e9, "µg/m³"] : S.units === "cm3" ? [1e3, "µg/cm³"] : [1e6, "mg/m³"]));
+const locUnit = () => fixedUnit(S.zoneMetric === "dep" ? "dep" : "air");
 const curLocs = () => (S.zoneMetric === "dep" ? S.dlocs : S.locs);
 function syncLocInputs() {
   const [f, name] = locUnit();
