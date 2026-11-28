@@ -967,15 +967,29 @@ function drawSites() {
     ctx.strokeStyle = ink; ctx.lineWidth = shape === "diamond" ? 2 : 1.4; ctx.stroke();
     if (shape === "square-dot") { ctx.fillStyle = ink; ctx.beginPath(); ctx.arc(x, y, 1.8, 0, 7); ctx.fill(); }
   }
-  // labels: the highest reading where there is one; other sites' names once zoomed in
+  // Labels: the highest result where there is one; other sites' names once zoomed in. Where
+  // sites crowd, labels go in order (the open site, then the highest results, then names),
+  // each right of its symbol or else left of it, and one that would overlap a label already
+  // placed is left out; zooming in spreads the sites and brings them back.
   ctx.font = "600 11.5px system-ui, sans-serif"; ctx.textBaseline = "middle"; ctx.textAlign = "left";
+  const cands = [];
   for (const { s, shape, p: [x, y] } of pts) {
-    const r = headline(s), text = r && r.max ? `${s.id || ""} · ${fmtReading(r.max.v)}` : s.id && S.z >= 10.5 ? s.id : "";
-    if (!text) continue;
-    const tx = x + siteR(shape) + 4;
-    ctx.lineWidth = 3.5; ctx.strokeStyle = dark ? "rgba(31,31,29,0.92)" : halo; ctx.strokeText(text, tx, y);
-    ctx.fillStyle = dark ? "#f0efea" : ink; ctx.fillText(text, tx, y);
+    const r = headline(s), v = r && r.max ? r.max.v : null;
+    const text = v != null ? `${s.id || ""} · ${fmtReading(v)}` : s.id && S.z >= 10.5 ? s.id : "";
+    if (text) cands.push({ s, x, y, text, gap: siteR(shape) + 4, rank: s === siteSel ? Infinity : v != null ? 1 + v : 0 });
   }
+  cands.sort((a, b) => b.rank - a.rank);
+  const placed = [], hits = (q) => placed.some((o) => q.x < o.x + o.w && o.x < q.x + q.w && q.y < o.y + o.h && o.y < q.y + q.h);
+  for (const c of cands) {
+    const w = ctx.measureText(c.text).width + 4, h = 15;
+    const box = [{ x: c.x + c.gap - 2, y: c.y - h / 2, w, h }, { x: c.x - c.gap - w + 2, y: c.y - h / 2, w, h }].find((q) => !hits(q));
+    if (!box) continue;
+    placed.push(box);
+    const tx = box.x + 2;
+    ctx.lineWidth = 3.5; ctx.strokeStyle = dark ? "rgba(31,31,29,0.92)" : halo; ctx.strokeText(c.text, tx, c.y);
+    ctx.fillStyle = dark ? "#f0efea" : ink; ctx.fillText(c.text, tx, c.y);
+  }
+  cv.dataset.siteLabels = `${placed.length}/${cands.length}`;   // labels shown/wanted, for the browser tests
 }
 function siteAt(x, y) {                           // the nearest site within reach of a finger or pointer
   if (!S.sites) return null;
@@ -1516,11 +1530,29 @@ cv.addEventListener("pointermove", (e) => {
 // A tap or click that didn't move the map opens the site under it (or closes the details).
 let downXY = null;
 cv.addEventListener("pointerdown", (e) => { downXY = [e.offsetX, e.offsetY]; }, true);
+// A second tap on the site just opened, within a double tap's time, keeps it open (a double
+// tap zooms the map); later, a tap on the open site closes it.
+let openedAt = 0;
 cv.addEventListener("click", (e) => {
   if (!S.sites || (downXY && Math.hypot(e.offsetX - downXY[0], e.offsetY - downXY[1]) > 6)) return;
   const s = siteAt(e.offsetX, e.offsetY);
-  if (s || siteSel) selectSite(s === siteSel ? null : s);
+  if (s && s === siteSel && e.timeStamp - openedAt < 350) return;
+  if (!s && !siteSel) return;
+  selectSite(s === siteSel ? null : s);
+  if (siteSel) { openedAt = e.timeStamp; showSiteDetails(); }
 });
+// On narrow screens the details sit under the map: after a tap, scroll just enough that
+// their heading and first lines are on screen. Inside the site, the page around the map
+// scrolls (the frame is as tall as the map page).
+function showSiteDetails() {
+  if (!narrowMQ.matches) return;
+  try {
+    const embedded = window.top !== window, win = embedded ? window.parent : window;
+    const top = $("legsite").getBoundingClientRect().top + (embedded ? window.frameElement.getBoundingClientRect().top : 0);
+    const want = win.innerHeight * 0.55;          // the heading no lower than this
+    if (top > want) win.scrollBy({ top: top - want, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  } catch (err) { /* another origin's page around the map: leave the scroll alone */ }
+}
 const up = (e) => { pointers.delete(e.pointerId); if (pointers.size < 2) pinch = null; if (!pointers.size) cv.classList.remove("dragging"); };
 cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
 cv.addEventListener("pointerleave", () => { $("tip").style.display = "none"; });

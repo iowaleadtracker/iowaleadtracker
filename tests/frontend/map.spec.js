@@ -219,6 +219,55 @@ test("closing a site's details: focus goes to the list, Escape closes too, and t
   expect(errors).toEqual([]);
 });
 
+// Center the map on a site with the list, close its details, put the map at the top of the
+// screen, and return the map's center: the site's spot, ready to tap.
+async function siteAtCenter(page, id) {
+  if (await page.locator("#legsite").isVisible()) await page.locator("#siteclose").click();   // the list is in the key
+  await page.selectOption("#sitepick", id);
+  await page.locator("#siteclose").click();
+  await page.evaluate(() => window.scrollTo(0, 0));
+  const m = await page.locator("#map").boundingBox();
+  return [m.x + m.width / 2, m.y + m.height / 2];
+}
+
+test("on a phone, a tapped site's details scroll into view, and a double tap keeps them open", async ({ page, isMobile }) => {
+  test.skip(!isMobile, "taps and the details under the map are for narrow touch screens");
+  const errors = await openMap(page, fixture("forecast"));
+  await page.locator("#showSites").check();
+  const vh = page.viewportSize().height;
+  let [x, y] = await siteAtCenter(page, "AS03");
+  await page.touchscreen.tap(x, y);
+  const head = page.locator("#legsite .sitehead");
+  await expect(head).toContainText("AS03");
+  await expect.poll(async () => (await head.boundingBox()).y).toBeLessThanOrEqual(vh * 0.6);   // the heading on screen
+  expect((await head.boundingBox()).y).toBeGreaterThanOrEqual(0);
+  // a double tap: the second tap doesn't close what the first opened
+  [x, y] = await siteAtCenter(page, "AS03");
+  await page.touchscreen.tap(x, y);
+  await page.touchscreen.tap(x, y);
+  await page.waitForTimeout(400);
+  await expect(page.locator("#legsite")).toBeVisible();
+  await expect(head).toContainText("AS03");
+  // a later tap on the open site closes it
+  await page.evaluate(() => window.scrollTo(0, 0));
+  const m = await page.locator("#map").boundingBox();
+  await page.touchscreen.tap(m.x + m.width / 2, m.y + m.height / 2);
+  await expect(page.locator("#legsite")).toBeHidden();
+  expect(errors).toEqual([]);
+});
+
+test("crowded labels: some are left out at a wide zoom, all are back zoomed in", async ({ page }) => {
+  const errors = await openMap(page, fixture("forecast"));
+  await page.locator("#showSites").check();
+  await siteAtCenter(page, "AS02");
+  for (let i = 0; i < 5; i++) await page.locator("#zout").click();   // the monitors crowd together
+  const labels = async () => (await page.locator("#map").getAttribute("data-site-labels")).split("/").map(Number);
+  await expect.poll(async () => { const [shown, wanted] = await labels(); return shown < wanted && shown >= 1; }).toBe(true);
+  for (let i = 0; i < 7; i++) await page.locator("#zin").click();   // zoomed in: room for every label on screen
+  await expect.poll(async () => { const [shown, wanted] = await labels(); return wanted >= 1 && shown === wanted; }).toBe(true);
+  expect(errors).toEqual([]);
+});
+
 test("deposition opens at the map's minimum, with a box that brings lower values back", async ({ page }) => {
   await openMap(page, fixture("forecast"));   // built with --dep-scale-min 5ug/ft2
   await page.locator('#fieldseg button[data-v="dep"]').click();
