@@ -155,7 +155,9 @@ ALIASES = {
 #: it since the blast (until then it is outlined): the colors EPA's own map uses for each
 #: layer (its web map 4ac8e3f8e6f94a209292e5992aba5d5f, read Nov. 28, 2026). EPA colors
 #: each lead reading by one break, 32 µg/m³: "breaks" fill a monitor by its highest result
-#: since the blast, in the color of the first break it is below, else the last.
+#: since the blast, in the color of the first break it is below, else the last. Below the
+#: break EPA uses green; the site uses a neutral gray instead, so the map never reads as
+#: saying a place is safe (AGENTS.md). At or above it, EPA's yellow.
 KINDS: dict[str, dict[str, Any]] = {
     "lead": {
         "label": "Continuous lead monitor (Xact)",
@@ -163,7 +165,7 @@ KINDS: dict[str, dict[str, Any]] = {
         "instrument": "xact",
         "fill": {
             "breaks": [
-                {"below": 32, "color": "#59ff00", "label": "below 32 µg/m³"},
+                {"below": 32, "color": "#8f8f8f", "label": "below 32 µg/m³"},
                 {"color": "#ffee00", "label": "32 µg/m³ or more"},
             ]
         },

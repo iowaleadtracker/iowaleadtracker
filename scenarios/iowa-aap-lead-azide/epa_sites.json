@@ -62,7 +62,7 @@
     "breaks": [
      {
       "below": 32,
-      "color": "#59ff00",
+      "color": "#8f8f8f",
       "label": "below 32 µg/m³"
      },
      {

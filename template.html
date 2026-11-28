@@ -917,7 +917,7 @@ function resultsDl(r, inst) {
 function fillKey() {
   const filled = kindsInOrder().filter(([k]) => SITES.sites.some((s) => s.kind === k && siteFill(s)));
   if (!filled.length) return '<div class="lz muted" style="font-size:11.5px">Outlined: no results posted since the blast.</div>';
-  return '<div class="lz muted" style="font-size:11.5px">Filled, in the colors EPA&rsquo;s map uses: results posted since the blast. Outlined: none yet.</div>' +
+  return '<div class="lz muted" style="font-size:11.5px">Filled: results posted since the blast, in the colors EPA&rsquo;s map uses, except gray where EPA uses green. Outlined: none yet.</div>' +
     filled.map(([, v]) => (v.fill.breaks
       ? v.fill.breaks.map((b) => `<div class="lz">${shapeSvg(v.shape, b.color)}<span>${esc(v.label)}, highest result ${esc(b.label || "")}</span></div>`).join("")
       : `<div class="lz">${shapeSvg(v.shape, v.fill.color)}<span>${esc(v.label)}, results posted</span></div>`)).join("");

@@ -227,6 +227,18 @@ test("closing a site's details: focus goes to the list, Escape closes too, and t
   expect(errors).toEqual([]);
 });
 
+// A point on the map with no site under it (the hover tip isn't a site's) and clear of the
+// zoom buttons and the legend: for a click on "empty map".
+async function emptyMapSpot(page) {
+  const m = await page.locator("#map").boundingBox(), lg = await page.locator(".legend").boundingBox();
+  const right = lg && lg.x > m.x ? lg.x - 10 : m.x + m.width - 10;
+  for (let y = m.y + m.height - 30; y > m.y + 30; y -= 37) for (let x = m.x + 70; x < right; x += 41) {
+    await page.mouse.move(x, y);
+    const tip = await page.evaluate(() => { const t = document.getElementById("tip"); return t.style.display === "block" ? t.textContent : ""; });
+    if (!tip.includes("Click for details")) return [x, y];
+  }
+  throw new Error("no empty spot on the map");
+}
 // Where the list put the last site it was asked for, on the page: the map's center, or on
 // wide screens midway across the part the legend doesn't cover (the page records it).
 async function pickedSpot(page) {
@@ -343,7 +355,7 @@ test("Escape closes a site opened by a click, and closing from the map keeps key
   await expect(page.locator("#sitepick")).toBeFocused();
   // the same with a click on empty map
   await page.selectOption("#sitepick", "AS02");
-  await page.mouse.click(x - 200, y - 150 > 0 ? y - 150 : y + 150);
+  await page.mouse.click(...(await emptyMapSpot(page)));
   await expect(page.locator("#legsite")).toBeHidden();
   await expect(page.locator("#sitepick")).toBeFocused();
   expect(errors).toEqual([]);
@@ -382,7 +394,8 @@ test("a site's symbol is filled, in EPA's colors, only once it has results since
   expect(await headFill()).toBe(sites.kinds[as06.kind].fill.color);
   await page.locator("#siteclose").click();
   // the key says what filled means, with the colors in use
-  await expect(page.locator("#legsites")).toContainText("Filled, in the colors EPA’s map uses: results posted since the blast. Outlined: none yet.");
+  await expect(page.locator("#legsites")).toContainText("Filled: results posted since the blast, in the colors EPA’s map uses, except gray where EPA uses green. Outlined: none yet.");
+  expect(sites.kinds.lead.fill.breaks[0].color).toBe("#8f8f8f");   // neutral, not EPA's green: no "safe" color
   await expect(page.locator("#legsites")).toContainText("Continuous lead monitor (Xact), highest result below 32 µg/m³");
   expect(errors).toEqual([]);
 });

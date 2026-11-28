@@ -197,13 +197,15 @@ def test_the_saved_epa_sites_load() -> None:
         assert set(s["readings"]) == set(s["instruments"])
         assert all((r is not None) == (i == "xact") for i, r in s["readings"].items())
     assert "not model estimates" in out["note"]
-    # filled only once results are posted, in EPA's colors: one per kind, two breaks for lead
+    # filled only once results are posted, in EPA's colors: one per kind, two breaks for lead;
+    # below 32 µg/m³ a neutral gray, not EPA's green, so the map doesn't read as "safe"
     fills = {k: v["fill"] for k, v in out["kinds"].items()}
     assert fills["lead"]["breaks"][0] == {
         "below": 32,
-        "color": "#59ff00",
+        "color": "#8f8f8f",
         "label": "below 32 µg/m³",
     }
+    assert fills["lead"]["breaks"][1]["color"] == "#ffee00"  # EPA's yellow at or above
     assert fills["water"] == {"color": "#0000ff"}
 
 
