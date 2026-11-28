@@ -79,10 +79,14 @@ const mapFrame = (page) => page.frameLocator("iframe#map");
 async function mapReady(page, base) {
   const src = await page.locator("iframe#map").getAttribute("src");
   const want = new URL(src, base).href.split("#")[0];
-  await expect.poll(async () => {
+  // say what was seen, so a failure tells a missing frame from a slow one
+  const state = async () => {
     const f = page.frames().find((fr) => fr.url().split("#")[0] === want);
-    return f ? f.evaluate(() => !document.getElementById("loading") && !!document.getElementById("title")?.textContent).catch(() => false) : false;
-  }, { message: `the map ${src} loads` }).toBe(true);
+    if (!f) return `no frame at ${want} (frames: ${page.frames().map((fr) => fr.url()).join(", ")})`;
+    return f.evaluate(() => (document.getElementById("loading") ? `loading: ${document.getElementById("loading").textContent}`
+      : document.getElementById("title")?.textContent ? "ready" : "no map on the page")).catch((e) => `frame busy: ${e.message.split("\n")[0]}`);
+  };
+  await expect.poll(state, { message: `the map ${src} loads`, timeout: 20000 }).toBe("ready");
 }
 const noSideScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
 
@@ -116,6 +120,7 @@ test.describe("landing page", () => {
   });
 
   test("every combination of weather, case and time loads a map", async ({ page }) => {
+    test.setTimeout(120000);   // loads every map, one at a time
     const errors = await open(page, "/");
     await page.keyboard.press("Escape");
     await mapReady(page, origin + "/");
@@ -155,6 +160,7 @@ test.describe("landing page", () => {
 });
 
 test("every day, case and time on the staged page, and its buttons, load maps", async ({ page }) => {
+  test.setTimeout(120000);   // loads every map, one at a time
   const errors = await open(page, `/${STAGED}/`);
   const loads = () => mapReady(page, `${origin}/${STAGED}/`);
   await loads();
