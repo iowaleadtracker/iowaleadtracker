@@ -307,9 +307,25 @@ function fillTimes() {{
   }});
   s.selectedIndex = pick;
 }}
+// One map at a time: Safari can drop a src set while the frame still loads the last one.
+// While a map loads, keep the latest choice and load it when the frame is done (or after
+// 10 s if it never reports back); the same URL is a no-op.
+let frameBusy = 0, frameNext = "";
+function setFrame(url) {{
+  const frame = $("map");
+  if (url === frame.getAttribute("src")) {{ frameNext = ""; return; }}
+  if (frameBusy) {{ frameNext = url; return; }}
+  frameBusy = setTimeout(frameDone, 10000);
+  frame.src = url;
+}}
+function frameDone() {{
+  clearTimeout(frameBusy); frameBusy = 0;
+  if (frameNext) {{ const u = frameNext; frameNext = ""; setFrame(u); }}
+}}
+$("map").addEventListener("load", frameDone);
 function show() {{
   const key = $("d").value + "-" + $("c").value + "-" + $("t").value.replace(":", "");
-  if (FILES[key]) $("map").src = FILES[key];
+  if (FILES[key]) setFrame(FILES[key]);
 }}
 function step(k) {{
   const s = $("t"); const i = s.selectedIndex + k;

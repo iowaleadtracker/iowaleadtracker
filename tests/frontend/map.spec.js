@@ -5,6 +5,7 @@
 // Fixtures: tests/frontend/fixtures/forecast.json (sky layer, Army outlines, model spread)
 // and archived.json (NOAA HYSPLIT overlay). Remake with tools/refresh_map_fixtures.py.
 import { test, expect } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 import { readFileSync } from "node:fs";
 
 const TEMPLATE = readFileSync(new URL("../../template.html", import.meta.url), "utf8");
@@ -250,4 +251,12 @@ test("the page fits the screen, with the legend below the map on narrow screens"
     return { cls: legend.classList.contains("below"), inMap: document.getElementById("mapwrap").contains(legend) };
   });
   expect(below).toEqual(isMobile ? { cls: true, inMap: false } : { cls: false, inMap: true });
+});
+
+test("no accessibility violations (axe, WCAG 2.1 A and AA)", async ({ page }) => {
+  for (const name of ["forecast", "archived"]) {
+    await openMap(page, fixture(name));
+    const r = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
+    expect(r.violations.map((v) => `${name}: ${v.id}: ${v.help} (${v.nodes.length}): ${v.nodes.slice(0, 3).map((n) => n.target.join(" ")).join(" | ")}`)).toEqual([]);
+  }
 });

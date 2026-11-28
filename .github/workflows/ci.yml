@@ -7,10 +7,10 @@
 # pushes made with the workflow token don't start other workflows. A pull request from a
 # fork gets no automatic CI; run this workflow on its branch by hand.
 #
-# The front-end lint and the map's browser tests run on every branch push except main, so
+# The front-end lint and the browser tests run on every branch push except main, so
 # a pull request shows them but the merge to main doesn't run them again. A merge that
-# resolves conflicts in the pages isn't checked before it deploys: run `pnpm lint` and
-# `pnpm test:map` first.
+# resolves conflicts in the pages isn't checked before it deploys: run `pnpm lint`,
+# `pnpm test:map` and `pnpm test:site` first.
 name: CI
 
 on:
@@ -80,6 +80,28 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - name: Browser tests of the map page
         run: pnpm test:map
+
+  test-site:
+    # the built site (landing, staged, brief, 404, a map on its own) in Chromium, Firefox and
+    # WebKit, with the site's real headers (the CSP in force) and an accessibility scan
+    if: github.ref != 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: site-${{ needs.build.outputs.key }}
+          path: scenarios/iowa-aap-lead-azide/outputs/site/
+      - uses: pnpm/action-setup@v6  # the version in package.json's packageManager
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium firefox webkit
+      - name: Browser tests of the built site
+        run: pnpm test:site
 
   tests:
     runs-on: ubuntu-latest

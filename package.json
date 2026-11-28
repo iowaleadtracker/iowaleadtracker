@@ -12,9 +12,11 @@
     "lint:pages": "python3 tools/lint_pages.py .lint",
     "lint:js": "oxlint --deny-warnings .lint/js/*.js tests/frontend/*.js playwright.config.js",
     "lint:eslint": "eslint --max-warnings 0 .lint",
-    "test:map": "playwright test"
+    "test:map": "playwright test map.spec.js",
+    "test:site": "playwright test site.spec.js"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
     "@eslint/css": "2.0.1",
     "@html-eslint/eslint-plugin": "0.69.0",
     "@html-eslint/parser": "0.69.0",

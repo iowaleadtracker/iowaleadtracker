@@ -1033,7 +1033,7 @@ def render(ctx: dict[str, Any], site_url: str, built_txt: str) -> str:
   <ul class="refs">{refs}</ul>
   <p class="meta">{data_credits(ctx.get("models", []))}</p>
   <h3>Key assumptions</h3>
-  <div class="tablewrap"><table>
+  <div class="tablewrap" tabindex="0" role="region" aria-label="Table"><table>
     {ASSUME_HEAD}
     <tbody>{rows}</tbody></table></div>
   <h3>Citing this map</h3>
