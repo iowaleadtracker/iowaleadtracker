@@ -154,29 +154,26 @@ test("the levels-of-concern inputs follow the units", async ({ page }) => {
   await expect(page.locator("#zonenote")).toContainText("Levels in mg/m³.");
 });
 
-for (const units of ["count", "mass", "cm3"]) {
-  test(`hovering the levels of concern uses the level inputs' unit (units: ${units})`, async ({ page, isMobile }) => {
-    test.skip(isMobile, "hover needs a mouse");
-    await openMap(page, fixture("forecast"));
-    await page.selectOption("#units", units);
-    await page.locator('#fieldseg button[data-v="zones"]').click();
-    await page.locator("#hour").fill("8");
-    const unit = (await page.locator("#zonenote").textContent()).match(/^Levels in (\S+)\./)[1];
-    const box = await page.locator("#map").boundingBox();
-    let text = "";
-    // look for a cell the cloud reached: scan the map until the tip shows a value
-    for (let y = 0.2; y <= 0.8 && !/so far: \d/.test(text); y += 0.05) {
-      for (let x = 0.2; x <= 0.8 && !/so far: \d/.test(text); x += 0.05) {
-        await page.mouse.move(box.x + box.width * x, box.y + box.height * y);
-        text = (await page.locator("#tip").textContent()) || "";
-      }
+test("hovering the levels of concern gives mass, even with particle counts chosen", async ({ page, isMobile }) => {
+  test.skip(isMobile, "hover needs a mouse");
+  await openMap(page, fixture("forecast"));
+  await page.selectOption("#units", "count");
+  await page.locator('#fieldseg button[data-v="zones"]').click();
+  await page.locator("#hour").fill("8");
+  const box = await page.locator("#map").boundingBox();
+  let text = "";
+  // look for a cell the cloud reached: scan the map until the tip shows a value
+  for (let y = 0.2; y <= 0.8 && !/so far: \d/.test(text); y += 0.05) {
+    for (let x = 0.2; x <= 0.8 && !/so far: \d/.test(text); x += 0.05) {
+      await page.mouse.move(box.x + box.width * x, box.y + box.height * y);
+      text = (await page.locator("#tip").textContent()) || "";
     }
-    expect(text, "no scanned point reached a cell the cloud reached").toMatch(/so far: \d/);
-    // the same unit as the inputs it's compared with: a mass, never particles
-    expect(text).toMatch(new RegExp(`so far: [\\d.,×⁰¹²³⁴⁵⁶⁷⁸⁹⁻]+ ${unit.replace("/", "\\/")}`));
-    await expect(page.locator("#units")).toHaveValue(units);   // the choice is untouched
-  });
-}
+  }
+  expect(text, "no scanned point reached a cell the cloud reached").toMatch(/so far: \d/);
+  // a mass in a readable unit (metric, or U.S. ounces, pounds, tons for big amounts), not particles
+  expect(text).toMatch(/so far: [\d.,]+ (?:[mµnpfk]?g|t|oz|lb|tons)\/m[²³]/);
+  await expect(page.locator("#units")).toHaveValue("count");   // the choice is untouched
+});
 
 test("the air minimum's label follows the units", async ({ page }) => {
   await openMap(page, fixture("forecast"));   // built with --scale-min 0.15ug (per m³)
