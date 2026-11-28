@@ -150,17 +150,49 @@ ALIASES = {
 #: for these; the diamond and square follow the monitor-placement brief's map. A site's
 #: details describe the kind's own instrument (the sample that says something about lead)
 #: and only name the other instruments there.
-KINDS: dict[str, dict[str, str]] = {
-    "lead": {"label": "Continuous lead monitor (Xact)", "shape": "diamond", "instrument": "xact"},
+#:
+#: "fill" is the color a site's symbol is filled with once results have been posted from
+#: it since the blast (until then it is outlined): the colors EPA's own map uses for each
+#: layer (its web map 4ac8e3f8e6f94a209292e5992aba5d5f, read Nov. 28, 2026). EPA colors
+#: each lead reading by one break, 32 µg/m³: "breaks" fill a monitor by its highest result
+#: since the blast, in the color of the first break it is below, else the last.
+KINDS: dict[str, dict[str, Any]] = {
+    "lead": {
+        "label": "Continuous lead monitor (Xact)",
+        "shape": "diamond",
+        "instrument": "xact",
+        "fill": {
+            "breaks": [
+                {"below": 32, "color": "#59ff00", "label": "below 32 µg/m³"},
+                {"color": "#ffee00", "label": "32 µg/m³ or more"},
+            ]
+        },
+    },
     "realtime": {
         "label": "Air filter, with dust and gas monitors",
         "shape": "square-dot",
         "instrument": "cassette",
+        "fill": {"color": "#149ece"},
     },
-    "filter": {"label": "Air filter and gas canister", "shape": "square", "instrument": "cassette"},
-    "soil": {"label": "Soil sampling location", "shape": "triangle", "instrument": "soil"},
+    "filter": {
+        "label": "Air filter and gas canister",
+        "shape": "square",
+        "instrument": "cassette",
+        "fill": {"color": "#e500ff"},
+    },
+    "soil": {
+        "label": "Soil sampling location",
+        "shape": "triangle",
+        "instrument": "soil",
+        "fill": {"color": "#966400"},
+    },
     # EPA's own map draws its water sites as circles too
-    "water": {"label": "Water sampling location", "shape": "circle", "instrument": "water"},
+    "water": {
+        "label": "Water sampling location",
+        "shape": "circle",
+        "instrument": "water",
+        "fill": {"color": "#0000ff"},
+    },
 }
 NOTE = (
     "EPA's preliminary data as posted, saved {when}. Only the four continuous lead "

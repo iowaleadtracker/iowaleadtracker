@@ -121,6 +121,27 @@ def test_reference_sites_are_checked(tmp_path: Path) -> None:
         {**good, "sites": [{**site, "instruments": ["y"]}]},  # an instrument not described
         {**good, "sites": [{**site, "lat": "40.7"}]},
         {**good, "instruments": {"x": {"name": "X", "shape": "star"}}},  # no such shape
+        {**good, "kinds": {"lead": {"label": "L", "shape": "diamond", "fill": {"color": "red"}}}},
+        {
+            **good,
+            "kinds": {
+                "lead": {
+                    "label": "L",
+                    "shape": "diamond",
+                    "fill": {"breaks": [{"color": "#59ff00"}]},
+                }
+            },
+        },
+        {
+            **good,
+            "kinds": {
+                "lead": {
+                    "label": "L",
+                    "shape": "diamond",
+                    "fill": {"breaks": [{"below": "32", "color": "#59ff00"}, {"color": "#ffee00"}]},
+                }
+            },
+        },
         {**good, "instruments": {"x": {"name": "X", "limit": {"v": "0.18", "unit": "u"}}}},
         {**good, "instruments": {"x": {"name": "X", "limit": {"v": 0, "unit": "u"}}}},
         {**good, "sites": [{**site, "readings": {"y": None}}]},  # not an instrument there
@@ -176,6 +197,14 @@ def test_the_saved_epa_sites_load() -> None:
         assert set(s["readings"]) == set(s["instruments"])
         assert all((r is not None) == (i == "xact") for i, r in s["readings"].items())
     assert "not model estimates" in out["note"]
+    # filled only once results are posted, in EPA's colors: one per kind, two breaks for lead
+    fills = {k: v["fill"] for k, v in out["kinds"].items()}
+    assert fills["lead"]["breaks"][0] == {
+        "below": 32,
+        "color": "#59ff00",
+        "label": "below 32 µg/m³",
+    }
+    assert fills["water"] == {"color": "#0000ff"}
 
 
 def test_reference_outlines_are_checked(tmp_path: Path) -> None:

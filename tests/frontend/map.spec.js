@@ -148,8 +148,7 @@ test("EPA's sites are off until ticked, with a key, and open in the legend when 
   await expect(detail).toBeHidden();
   // a click or tap on the site (now at the map's center) opens it again; a drag doesn't
   await page.locator("#map").scrollIntoViewIfNeeded();
-  const box = await page.locator("#map").boundingBox();
-  const [cx, cy] = [box.x + box.width / 2, box.y + box.height / 2];
+  const [cx, cy] = await pickedSpot(page);   // where the list put AS01
   if (isMobile) await page.touchscreen.tap(cx, cy);   // one finger scrolls the page: no drag here
   else {
     await page.mouse.move(cx, cy); await page.mouse.down(); await page.mouse.move(cx + 40, cy + 20); await page.mouse.up();
@@ -228,15 +227,21 @@ test("closing a site's details: focus goes to the list, Escape closes too, and t
   expect(errors).toEqual([]);
 });
 
+// Where the list put the last site it was asked for, on the page: the map's center, or on
+// wide screens midway across the part the legend doesn't cover (the page records it).
+async function pickedSpot(page) {
+  const m = await page.locator("#map").boundingBox();
+  const [x, y] = (await page.locator("#map").getAttribute("data-site-spot")).split(",").map(Number);
+  return [m.x + x, m.y + y];
+}
 // Center the map on a site with the list, close its details, put the map at the top of the
-// screen, and return the map's center: the site's spot, ready to tap.
+// screen, and return the site's spot, ready to tap.
 async function siteAtCenter(page, id) {
   if (await page.locator("#legsite").isVisible()) await page.locator("#siteclose").click();   // the list is in the key
   await page.selectOption("#sitepick", id);
   await page.locator("#siteclose").click();
   await page.evaluate(() => window.scrollTo(0, 0));
-  const m = await page.locator("#map").boundingBox();
-  return [m.x + m.width / 2, m.y + m.height / 2];
+  return pickedSpot(page);
 }
 
 test("on a phone, a tapped site's details scroll into view, and a double tap keeps them open", async ({ page, isMobile }) => {
@@ -259,8 +264,8 @@ test("on a phone, a tapped site's details scroll into view, and a double tap kee
   await expect(head).toContainText("AS03");
   // a later tap on the open site closes it
   await page.evaluate(() => window.scrollTo(0, 0));
-  const m = await page.locator("#map").boundingBox();
-  await page.touchscreen.tap(m.x + m.width / 2, m.y + m.height / 2);
+  [x, y] = await pickedSpot(page);
+  await page.touchscreen.tap(x, y);
   await expect(page.locator("#legsite")).toBeHidden();
   expect(errors).toEqual([]);
 });
@@ -268,11 +273,12 @@ test("on a phone, a tapped site's details scroll into view, and a double tap kee
 test("crowded labels: some are left out at a wide zoom, all are back zoomed in", async ({ page }) => {
   const errors = await openMap(page, fixture("forecast"));
   await page.locator("#showSites").check();
-  await siteAtCenter(page, "AS02");
-  for (let i = 0; i < 5; i++) await page.locator("#zout").click();   // the monitors crowd together
+  const [sx, sy] = await siteAtCenter(page, "AS02");
+  await page.mouse.move(sx, sy);
+  for (let i = 0; i < 5; i++) await page.mouse.wheel(0, 400);   // zoom out about AS02: the monitors crowd together
   const labels = async () => (await page.locator("#map").getAttribute("data-site-labels")).split("/").map(Number);
   await expect.poll(async () => { const [shown, wanted] = await labels(); return shown < wanted && shown >= 1; }).toBe(true);
-  for (let i = 0; i < 7; i++) await page.locator("#zin").click();   // zoomed in: room for every label on screen
+  for (let i = 0; i < 7; i++) await page.mouse.wheel(0, -400);   // zoomed in about AS02: room for every label on screen
   await expect.poll(async () => { const [shown, wanted] = await labels(); return wanted >= 1 && shown === wanted; }).toBe(true);
   expect(errors).toEqual([]);
 });
@@ -325,7 +331,7 @@ test("Escape closes a site opened by a click, and closing from the map keeps key
   // picked from the list (focus on the ×), then closed by a click on the open site: focus to the list
   await page.selectOption("#sitepick", "AS02");
   await expect(page.locator("#siteclose")).toBeFocused();
-  [x, y] = await (async () => { const m = await page.locator("#map").boundingBox(); return [m.x + m.width / 2, m.y + m.height / 2]; })();
+  [x, y] = await pickedSpot(page);
   await page.waitForTimeout(400);   // past a double click's time
   await page.mouse.click(x, y);
   await expect(page.locator("#legsite")).toBeHidden();
@@ -347,6 +353,32 @@ test("a site's counts go into the page as text, not markup", async ({ page }) =>
   await page.selectOption("#sitepick", "AS01");
   await expect(page.locator("#legsite")).toContainText("<b id=injected>84</b> total");
   await expect(page.locator("#injected")).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test("a site's symbol is filled, in EPA's colors, only once it has results since the blast", async ({ page }) => {
+  const data = fixture("forecast"), sites = data.meta.sites;
+  // a made-up air-cassette result at a filter site (EPA hasn't posted one)
+  const as06 = sites.sites.find((s) => s.id === "AS06");
+  as06.readings.cassette = { unit: "µg/m³", posted: 1, zero: 0, max: { v: 0.1, t: "2026-11-25T21:00Z" }, maxBefore: null, first: "2026-11-25T21:00Z", last: { v: 0.1, t: "2026-11-25T21:00Z" } };
+  const errors = await openMap(page, data);
+  await page.locator("#showSites").check();
+  const headFill = () => page.locator("#legsite .sitehead svg path").getAttribute("fill");
+  // the lead monitors: EPA's color for results below 32 µg/m³
+  await page.selectOption("#sitepick", "AS01");
+  expect(await headFill()).toBe(sites.kinds.lead.fill.breaks[0].color);
+  await page.locator("#siteclose").click();
+  // a site with nothing posted: outlined
+  await page.selectOption("#sitepick", "AS12");
+  expect(await headFill()).toBe("#fff");
+  await page.locator("#siteclose").click();
+  // the filter site with a result: its kind's color
+  await page.selectOption("#sitepick", "AS06");
+  expect(await headFill()).toBe(sites.kinds[as06.kind].fill.color);
+  await page.locator("#siteclose").click();
+  // the key says what filled means, with the colors in use
+  await expect(page.locator("#legsites")).toContainText("Filled, in the colors EPA’s map uses: results posted since the blast. Outlined: none yet.");
+  await expect(page.locator("#legsites")).toContainText("Continuous lead monitor (Xact), highest result below 32 µg/m³");
   expect(errors).toEqual([]);
 });
 

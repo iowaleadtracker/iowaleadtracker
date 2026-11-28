@@ -860,11 +860,22 @@ function shapePath(c, shape, x, y, r) {
   else if (shape === "circle") c.arc(x, y, r, 0, 7);
   else c.rect(x - r, y - r, 2 * r, 2 * r);
 }
-function shapeSvg(shape) {
+// A site's symbol is filled, in its kind's color (EPA's), only once results have been posted
+// from it since the blast; until then it is outlined. A kind with breaks (lead: EPA colors
+// each reading by 32 µg/m³) takes the color of the first break its highest result is below.
+const sinceBlast = (r) => !!(r && r.posted > 0);
+function siteFill(s) {
+  const F = SITES.kinds[s.kind].fill, rs = Object.values(s.readings || {}).filter(sinceBlast);
+  if (!F || !rs.length) return null;
+  if (!F.breaks) return F.color;
+  const r = sinceBlast(headline(s)) ? headline(s) : rs[0], v = r.max ? r.max.v : 0;
+  return (F.breaks.find((b) => b.below != null && v < b.below) || F.breaks[F.breaks.length - 1]).color;
+}
+function shapeSvg(shape, fill = "#fff") {
   const r = siteR(shape), d = { diamond: `M7 ${7 - r}L${7 + r} 7L7 ${7 + r}L${7 - r} 7Z`,
     triangle: `M7 ${7 - r}L${7 + r * 0.95} ${7 + r * 0.7}L${7 - r * 0.95} ${7 + r * 0.7}Z`,
     circle: `M${7 - r} 7a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z` }[shape] || `M${7 - r} ${7 - r}h${2 * r}v${2 * r}h${-2 * r}Z`;
-  return `<svg class="ssw" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="${d}" fill="#fff" stroke="#1d1d1b" stroke-width="${shape === "diamond" ? 1.8 : 1.4}"/>` +
+  return `<svg class="ssw" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="${d}" fill="${esc(fill)}" stroke="#1d1d1b" stroke-width="${shape === "diamond" ? 1.8 : 1.4}"/>` +
     (shape === "square-dot" ? '<circle cx="7" cy="7" r="1.8" fill="#1d1d1b"/>' : "") + "</svg>";
 }
 // Readings as posted, in the source's unit: three decimals, as EPA's feed and the brief show them.
@@ -902,6 +913,15 @@ function resultsDl(r, inst) {
       ? `<a class="reflink" href="${esc(L.url)}" target="_blank" rel="noopener"${L.label ? ` title="${esc("Source: " + L.label)}"` : ""}>${esc(L.v)} ${esc(L.unit)}</a>`
       : `${esc(L.v)} ${esc(L.unit)}`}</dd>` : "") + "</dl>";
 }
+// The key's lines for filled symbols: only for kinds with a site filled, each color shown.
+function fillKey() {
+  const filled = kindsInOrder().filter(([k]) => SITES.sites.some((s) => s.kind === k && siteFill(s)));
+  if (!filled.length) return '<div class="lz muted" style="font-size:11.5px">Outlined: no results posted since the blast.</div>';
+  return '<div class="lz muted" style="font-size:11.5px">Filled, in the colors EPA&rsquo;s map uses: results posted since the blast. Outlined: none yet.</div>' +
+    filled.map(([, v]) => (v.fill.breaks
+      ? v.fill.breaks.map((b) => `<div class="lz">${shapeSvg(v.shape, b.color)}<span>${esc(v.label)}, highest result ${esc(b.label || "")}</span></div>`).join("")
+      : `<div class="lz">${shapeSvg(v.shape, v.fill.color)}<span>${esc(v.label)}, results posted</span></div>`)).join("");
+}
 function siteLegend() {
   $("legsites").hidden = !S.sites || !!siteSel;
   $("legsite").hidden = !S.sites || !siteSel;
@@ -910,6 +930,7 @@ function siteLegend() {
     const n = {}; for (const s of SITES.sites) n[s.kind] = (n[s.kind] || 0) + 1;
     $("legsites").innerHTML = kindsInOrder().filter(([k]) => n[k]).map(([k, v]) =>
       `<div class="lz">${shapeSvg(v.shape)}<span>${esc(v.label)} (${n[k]})</span></div>`).join("") +
+      fillKey() +
       (labelUnits().length ? `<div class="lz muted" style="font-size:11.5px">Labels: highest result since the blast${labelUnits().length === 1 ? ", " + esc(labelUnits()[0]) : ""}. Tap a site for details.</div>`
         : '<div class="lz muted" style="font-size:11.5px">Tap a site for details.</div>') +
       // the same details without a pointer: pick a site by name, and the map centers on it
@@ -920,19 +941,20 @@ function siteLegend() {
       `<div class="legnote" style="border-top:0;padding-top:0;margin-top:3px">${esc(SITES.note || "")}${siteLinks()}</div>`;
     $("sitepick").addEventListener("change", (e) => {
       const pick = SITES.sites.find((x) => x.key === e.target.value);
-      if (pick) { S.lat = pick.lat; S.lon = pick.lon; selectSite(pick); $("siteclose").focus(); }
+      if (pick) { centerOnSite(pick); selectSite(pick); $("siteclose").focus(); }
     });
     return;
   }
   const s = siteSel, K = SITES.kinds[s.kind], ids = s.instruments || [], mainId = mainInst(s);
   const main = SITES.instruments[mainId], r = resultOf(s, mainId);
   const named = (i) => `<span title="${esc(SITES.instruments[i].text)}">${esc(SITES.instruments[i].name)}</span>`;
-  const icon = (i) => (SITES.instruments[i].shape ? shapeSvg(SITES.instruments[i].shape) : "");   // its symbol beside its results
+  // its symbol beside its results: filled, as on the map, for the site's own instrument
+  const icon = (i) => (SITES.instruments[i].shape ? shapeSvg(SITES.instruments[i].shape, i === mainInst(s) && sinceBlast(resultOf(s, i)) ? siteFill(s) : "#fff") : "");
   const others = ids.filter((i) => i !== mainId && SITES.instruments[i]);
   const withResults = others.filter((i) => resultOf(s, i)), without = others.filter((i) => !resultOf(s, i));
   const first = [r, ...withResults.map((i) => resultOf(s, i))].find((x) => x && x.last);
   $("legsite").innerHTML =
-    `<div class="sitehead">${shapeSvg(K.shape)}<span>${esc(s.id || K.label)}</span><button type="button" id="siteclose" aria-label="Close the site's details">×</button></div>` +
+    `<div class="sitehead">${shapeSvg(K.shape, siteFill(s) || "#fff")}<span>${esc(s.id || K.label)}</span><button type="button" id="siteclose" aria-label="Close the site's details">×</button></div>` +
     `<div class="sitesub">${s.id ? esc(K.label) + " · " : ""}${fromSource(s)}</div>` +
     (s.start ? `<dl><dt>${(s.starts || []).length > 1 ? `${s.starts.length} samples, started` : "Sampling started"}</dt><dd>${(s.starts && s.starts.length ? s.starts : [s.start]).map(fmtWhen).join("<br>")}</dd></dl>` : "") +
     // the kind's own instrument: described, then its results
@@ -953,6 +975,19 @@ $("legsite").addEventListener("click", (e) => {
   e.preventDefault();
   window.parent.postMessage({ puffOpen: "references" }, location.origin);
 });
+// Center the map on a site in the part of the map the legend doesn't cover: on wide screens
+// the legend sits over the map's right side, so the site goes midway across the rest.
+function siteSpot() {
+  const lg = document.querySelector(".legend");
+  if (lg.classList.contains("below")) return [W / 2, H / 2];
+  const left = lg.getBoundingClientRect().left - cv.getBoundingClientRect().left;
+  return [left > 80 && left < W ? left / 2 : W / 2, H / 2];
+}
+function centerOnSite(s) {
+  const [x, y] = siteSpot();
+  S.lon = xlon(wx(s.lon, S.z) + (W / 2 - x), S.z); S.lat = ylat(wy(s.lat, S.z) + (H / 2 - y), S.z);
+  cv.dataset.siteSpot = `${Math.round(x)},${Math.round(y)}`;   // where the site is now, for the browser tests
+}
 function selectSite(s) { siteSel = s; siteLegend(); schedule(); }
 // Closing the details (the × or Escape): the key comes back, focus goes to its "Details for"
 // list (the × is gone, and the next site is picked there), and on narrow screens, where the
@@ -973,7 +1008,7 @@ function drawSites() {
     const r = siteR(shape);
     if (siteSel === s) { ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue("--accent"); ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, r + 5, 0, 7); ctx.stroke(); }
     shapePath(ctx, shape, x, y, r);
-    ctx.fillStyle = "#fff"; ctx.fill();
+    ctx.fillStyle = siteFill(s) || "#fff"; ctx.fill();
     ctx.strokeStyle = ink; ctx.lineWidth = shape === "diamond" ? 2 : 1.4; ctx.stroke();
     if (shape === "square-dot") { ctx.fillStyle = ink; ctx.beginPath(); ctx.arc(x, y, 1.8, 0, 7); ctx.fill(); }
   }

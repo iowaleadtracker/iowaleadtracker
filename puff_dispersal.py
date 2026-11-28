@@ -1134,6 +1134,30 @@ def _reference_outlines(a: argparse.Namespace) -> Json | None:
 SITE_SHAPES = ("diamond", "square", "square-dot", "triangle", "circle")
 
 
+HEX_COLOR = re.compile(r"^#[0-9a-fA-F]{6}$")
+
+
+def _site_fill(fill: Json) -> Json:
+    """Check a kind's fill: one #rrggbb color, or breaks (below a number, then the rest)."""
+    breaks = fill.get("breaks")
+    if breaks is None:
+        if not HEX_COLOR.match(str(fill.get("color"))):
+            msg = "a kind's fill needs a #rrggbb color"
+            raise ValueError(msg)
+        return {"color": str(fill["color"])}
+    ok = (
+        isinstance(breaks, list)
+        and len(breaks) >= 2
+        and all(HEX_COLOR.match(str(b.get("color"))) for b in breaks)
+        and all(_is_number(b.get("below")) for b in breaks[:-1])
+        and "below" not in breaks[-1]
+    )
+    if not ok:
+        msg = "a kind's fill breaks need #rrggbb colors, each but the last with a number below"
+        raise ValueError(msg)
+    return {"breaks": [{k: b[k] for k in ("below", "color", "label") if k in b} for b in breaks]}
+
+
 def _site_limit(limit: Json) -> Json:
     """Return an instrument's detection limit: a positive number, its unit, whose, a link."""
     v = limit["v"]
@@ -1218,6 +1242,7 @@ def _site_layers(data: Json) -> Json:
             "label": str(v["label"]),
             "shape": str(v["shape"]),
             **({"instrument": str(v["instrument"])} if "instrument" in v else {}),
+            **({"fill": _site_fill(v["fill"])} if "fill" in v else {}),
         }
         for k, v in data["kinds"].items()
     }

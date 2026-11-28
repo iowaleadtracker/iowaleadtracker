@@ -50,26 +50,51 @@
  },
  "kinds": {
   "filter": {
+   "fill": {
+    "color": "#e500ff"
+   },
    "instrument": "cassette",
    "label": "Air filter and gas canister",
    "shape": "square"
   },
   "lead": {
+   "fill": {
+    "breaks": [
+     {
+      "below": 32,
+      "color": "#59ff00",
+      "label": "below 32 µg/m³"
+     },
+     {
+      "color": "#ffee00",
+      "label": "32 µg/m³ or more"
+     }
+    ]
+   },
    "instrument": "xact",
    "label": "Continuous lead monitor (Xact)",
    "shape": "diamond"
   },
   "realtime": {
+   "fill": {
+    "color": "#149ece"
+   },
    "instrument": "cassette",
    "label": "Air filter, with dust and gas monitors",
    "shape": "square-dot"
   },
   "soil": {
+   "fill": {
+    "color": "#966400"
+   },
    "instrument": "soil",
    "label": "Soil sampling location",
    "shape": "triangle"
   },
   "water": {
+   "fill": {
+    "color": "#0000ff"
+   },
    "instrument": "water",
    "label": "Water sampling location",
    "shape": "circle"
@@ -86,8 +111,8 @@
   }
  ],
  "name": "EPA sampling sites",
- "note": "EPA's preliminary data as posted, saved Nov. 28, 2026, 9:18 a.m. CST. Only the four continuous lead monitors post results. A reading near zero doesn't show whether a cloud missed the monitor or little lead got out. Measurements, not model estimates.",
- "retrieved": "2026-11-28T15:18Z",
+ "note": "EPA's preliminary data as posted, saved Nov. 28, 2026, 9:28 a.m. CST. Only the four continuous lead monitors post results. A reading near zero doesn't show whether a cloud missed the monitor or little lead got out. Measurements, not model estimates.",
+ "retrieved": "2026-11-28T15:28Z",
  "sites": [
   {"id": "AS01", "instruments": ["xact", "dusttrak", "arearae", "cassette", "summa"], "kind": "lead", "lat": 40.77722, "lon": -91.32383, "readings": {"arearae": null, "cassette": null, "dusttrak": null, "summa": null, "xact": {"first": "2026-11-25T13:00Z", "last": {"t": "2026-11-26T21:01Z", "v": 0.0}, "max": {"t": "2026-11-25T15:10Z", "v": 0.002084}, "maxBefore": {"t": "2026-11-25T13:00Z", "v": 0.0}, "posted": 84, "unit": "µg/m³", "url": "https://experience.arcgis.com/experience/00329268edc24f068127d26200d35a45/?data_filter=dataSource_1-1a214a59c41-layer-7:Air_Station_ID%3D%27AS01%27", "zero": 82}}},
   {"id": "AS02", "instruments": ["xact", "dusttrak", "arearae", "cassette", "summa"], "kind": "lead", "lat": 40.70835, "lon": -91.44983, "readings": {"arearae": null, "cassette": null, "dusttrak": null, "summa": null, "xact": {"first": "2026-11-25T13:20Z", "last": {"t": "2026-11-26T21:39Z", "v": 0.0}, "max": {"t": "2026-11-25T19:51Z", "v": 0.00427}, "maxBefore": {"t": "2026-11-25T14:41Z", "v": 0.003}, "posted": 85, "unit": "µg/m³", "url": "https://experience.arcgis.com/experience/00329268edc24f068127d26200d35a45/?data_filter=dataSource_1-1a214a59c41-layer-7:Air_Station_ID%3D%27AS02%27", "zero": 83}}},

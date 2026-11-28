@@ -525,8 +525,8 @@ ANALYSIS_HTML = (
 # Where readers find the agencies' own information: a line in the header of the landing
 # page and of the analysis page.
 OFFICIAL_HTML = (
-    f'<b>Official information:</b> <a href="{EPA_VIEWER_URL}" rel="noopener">EPA&rsquo;s '
-    "response data viewer</a> (air monitoring) &middot; "
+    f'<b>Official information:</b> <a href="{EPA_VIEWER_URL}" rel="noopener">EPA Sampling '
+    "and Monitoring Map</a> &middot; "
     f'<a href="{ARMY_MAPS_URL}" rel="noopener">Army updates and maps</a> (army.mil/asc).'
 )
 EARLY_AIR = (
@@ -562,7 +562,7 @@ BLAST_STATUS_HTML = (
     "sampling is underway, with results to be published when available "
     f'(<a href="{ARMY_3PM_URL}" rel="noopener">{ARMY_3PM_CITE}</a>). Updates: '
     f'<a href="{ARMY_MAPS_URL}" rel="noopener">Army (army.mil/asc)</a> &middot; '
-    f'<a href="{EPA_VIEWER_URL}" rel="noopener">EPA air monitoring</a>. '
+    f'<a href="{EPA_VIEWER_URL}" rel="noopener">EPA Sampling and Monitoring Map</a>. '
     "<b>Follow official instructions.</b>"
 )
 EARLY_AIR_HTML = (
