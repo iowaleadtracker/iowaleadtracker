@@ -39,6 +39,7 @@ from zoneinfo import ZoneInfo
 import brief_page
 import forecast_summary
 import mirror
+import site_style
 import staged
 import works_cited
 
@@ -1163,6 +1164,7 @@ def render_page(maps: Maps, now: dt.datetime, built_txt: str) -> tuple[str, str]
         or DEFAULT_WHO
     )
     values = {
+        "base_css": site_style.BASE_CSS,
         "site_name": SITE_NAME,
         "site_url": SITE_URL,
         "description": html.escape(description),

@@ -17,10 +17,12 @@ import re
 from pathlib import Path
 from typing import Any
 
+import brief_page
 import forecast_summary as fs
 import make_map_picker as site
 import numpy as np
 import pytest
+import site_style
 import staged
 import works_cited
 
@@ -1167,7 +1169,9 @@ def test_link_to_a_day_not_in_this_update_says_so() -> None:
 def test_long_links_wrap_on_phones() -> None:
     """Source URLs shown as link text (the court filing) mustn't push the page sideways."""
     css = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
-    assert re.search(r"\.doc a \{[^}]*overflow-wrap: anywhere", css)
+    assert re.search(r"\.doc a \{[^}]*overflow-wrap: anywhere", site_style.BASE_CSS)
+    assert "<style>\n$base_css\n" in css  # the landing page gets the shared rules
+    assert "<style>\n$base_css\n" in brief_page.PAGE.template  # and so does the brief
     assert re.search(r"dialog a \{[^}]*overflow-wrap: anywhere", css)
 
 
