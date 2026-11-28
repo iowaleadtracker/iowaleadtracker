@@ -56,6 +56,8 @@ AIR_LIMIT = {
     "v": 0.18,
     "unit": "µg/m³",
     "label": "the Army's lead air sampling method (Army air map, Nov. 25)",
+    # the site's Methodology and References, where McFate 2026d is listed
+    "url": "https://iowaleadtracker.com/#references",
 }
 INSTRUMENTS: dict[str, dict[str, Any]] = {
     "xact": {

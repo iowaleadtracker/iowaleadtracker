@@ -1706,3 +1706,14 @@ def test_epas_sites_are_offered_on_the_blasts_maps() -> None:
     assert "--reference-sites" not in site.army_outlines(site.DATE, "09:30")
     for run in site.archived_runs("python"):
         assert "--reference-sites" in run.cmd
+
+
+def test_references_open_from_a_link() -> None:
+    """#references opens Methodology and References: from a link, or the map's limit link."""
+    page = (site.HERE / "index_template.html").read_text(encoding="utf-8")
+    assert "const openRefs = isRefs();" in page  # read before show() rewrites the hash
+    assert "if (openRefs) openDialog(cite);" in page  # instead of the first-visit note
+    assert "e.data.puffOpen === 'references'" in page  # the map, inside the page
+    assert "(isRefs() ? '' : location.hash.slice(1))" in page  # not read as a map choice
+    data = json.loads(site.EPA_SITES.read_text(encoding="utf-8"))
+    assert data["instruments"]["xact"]["limit"]["url"] == site.SITE_URL + "#references"

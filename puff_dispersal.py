@@ -1134,12 +1134,13 @@ SITE_SHAPES = ("diamond", "square", "square-dot", "triangle", "circle")
 
 
 def _site_limit(limit: Json) -> Json:
-    """Return an instrument's detection limit: a positive number, its unit and whose it is."""
+    """Return an instrument's detection limit: a positive number, its unit, whose, a link."""
     v = limit["v"]
     if isinstance(v, bool) or not isinstance(v, (int, float)) or not v > 0:
         msg = "a detection limit needs a positive number"
         raise ValueError(msg)
-    return {"v": v, "unit": str(limit["unit"]), "label": str(limit.get("label", ""))}
+    out = {"v": v, "unit": str(limit["unit"]), "label": str(limit.get("label", ""))}
+    return out | ({"url": _https(str(limit["url"]))} if "url" in limit else {})
 
 
 def _site_layers(data: Json) -> Json:

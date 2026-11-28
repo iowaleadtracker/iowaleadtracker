@@ -885,7 +885,10 @@ function resultsDl(r, inst) {
     `<dt>Highest before it</dt><dd>${when(r.maxBefore)}</dd>` +
     `<dt>Latest</dt><dd>${when(r.last)}${age >= 2 ? `<br><span class="muted">${Math.round(age)} h before this copy was saved</span>` : ""}</dd>` +
     `<dt>Measurements collected</dt><dd>${r.posted} total, ${r.zero} of them zero</dd>` +
-    (L ? `<dt>Detection limit</dt><dd>${esc(L.v)} ${esc(L.unit)}${L.label ? `<br><span class="muted">${esc(L.label)}</span>` : ""}</dd>` : "") + "</dl>";
+    // the number links to where its source is listed; whose limit it is shows on hover
+    (L ? `<dt>Published detection limit</dt><dd>${L.url && /^https:\/\//i.test(L.url)
+      ? `<a class="reflink" href="${esc(L.url)}" target="_blank" rel="noopener"${L.label ? ` title="${esc("Source: " + L.label)}"` : ""}>${esc(L.v)} ${esc(L.unit)}</a>`
+      : `${esc(L.v)} ${esc(L.unit)}`}</dd>` : "") + "</dl>";
 }
 function siteLegend() {
   $("legsites").hidden = !S.sites || !!siteSel;
@@ -928,6 +931,16 @@ function siteLegend() {
     `<div class="legnote">${esc(SITES.note || "")}${siteLinks()}${M.tzOffsetMin ? ` Times are local (${fmtTime(s.start || (first && first.last.t) || SITES.retrieved, M.tzOffsetMin).replace(/^.*\(|\)$/g, "")}).` : ""}</div>`;
   $("siteclose").addEventListener("click", () => selectSite(null));
 }
+// Inside the site, a link to its own references opens that dialog on the page around the map
+// instead of a new tab.
+$("legsite").addEventListener("click", (e) => {
+  const a = e.target.closest("a.reflink");
+  if (!a || window.top === window) return;
+  const u = new URL(a.href);
+  if (u.origin !== location.origin || u.hash !== "#references") return;
+  e.preventDefault();
+  window.parent.postMessage({ puffOpen: "references" }, location.origin);
+});
 function selectSite(s) { siteSel = s; siteLegend(); schedule(); }
 function drawSites() {
   if (!S.sites) return;

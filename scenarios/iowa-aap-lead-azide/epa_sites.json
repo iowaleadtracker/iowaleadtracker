@@ -10,6 +10,7 @@
    "limit": {
     "label": "the Army's lead air sampling method (Army air map, Nov. 25)",
     "unit": "µg/m³",
+    "url": "https://iowaleadtracker.com/#references",
     "v": 0.18
    },
    "name": "Air cassette",
@@ -35,6 +36,7 @@
    "limit": {
     "label": "the Army's lead air sampling method (Army air map, Nov. 25)",
     "unit": "µg/m³",
+    "url": "https://iowaleadtracker.com/#references",
     "v": 0.18
    },
    "name": "Xact continuous lead monitor",

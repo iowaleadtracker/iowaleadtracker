@@ -124,7 +124,12 @@ test("EPA's sites are off until ticked, with a key, and open in the legend when 
   const xact = as01.readings.xact;
   await expect(detail).toContainText(`${xact.max.v.toFixed(3)} ${xact.unit}`);
   await expect(detail).toContainText(`Measurements collected${xact.posted} total, ${xact.zero} of them zero`);
-  await expect(detail).toContainText("Detection limit0.18 µg/m³the Army's lead air sampling method");   // beside the air results
+  // beside the air results: the published limit, linked to where its source is listed
+  await expect(detail).toContainText("Published detection limit0.18 µg/m³");
+  const limit = detail.locator("a.reflink");
+  await expect(limit).toHaveAttribute("href", sites.instruments.xact.limit.url);
+  await expect(limit).toHaveAttribute("title", /^Source: the Army's lead air sampling method/);
+  await expect(limit).toHaveAttribute("target", "_blank");   // opened on its own; in the site, the dialog
   await expect(detail.locator(".insthead").first()).toHaveText(sites.instruments.xact.name);   // the kind's own instrument first
   await expect(detail.locator(".insthead svg")).toHaveCount(1);   // with its symbol
   await expect(detail).toContainText(sites.instruments.xact.text);
@@ -174,7 +179,7 @@ test("a site shows each instrument's results, and says which have none", async (
   await expect(detail.locator("dl")).toHaveCount(2);
   await expect(detail.locator(".insthead")).toHaveText([sites.instruments.xact.name, "Air cassette"]);   // each result under its symbol and name
   await expect(detail.locator(".insthead svg")).toHaveCount(2);
-  await expect(detail.locator("dt", { hasText: "Detection limit" })).toHaveCount(2);   // both are lead in air
+  await expect(detail.locator("dt", { hasText: "Published detection limit" })).toHaveCount(2);   // both are lead in air
   await expect(detail).toContainText(`${as01.readings.xact.posted} total, ${as01.readings.xact.zero} of them zero`);
   await expect(detail).toContainText("1 total, 1 of them zero");
   await expect(detail).toContainText("Also here, no results posted: DustTrak, AreaRAE, Summa canister.");
@@ -185,7 +190,7 @@ test("a site shows each instrument's results, and says which have none", async (
   await page.selectOption("#sitepick", "AS12");
   await expect(detail).toContainText("No results posted.");
   await expect(detail.locator("dl")).toHaveCount(0);
-  await expect(detail).not.toContainText("Detection limit");   // only beside results
+  await expect(detail).not.toContainText("detection limit");   // only beside results
   expect(errors).toEqual([]);
 });
 
