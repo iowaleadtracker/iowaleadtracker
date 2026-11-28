@@ -276,6 +276,39 @@ test("crowded labels: some are left out at a wide zoom, all are back zoomed in",
   expect(errors).toEqual([]);
 });
 
+test("every \"Measurements collected\" link opens EPA's map in a new tab, by tap, click or Enter", async ({ page, isMobile }) => {
+  const data = fixture("forecast");
+  // the new tab is another page: answer EPA's address with a stub, so the test stays offline
+  await page.context().route("https://experience.arcgis.com/**", (r) => r.fulfill({ contentType: "text/html", body: "<title>stub</title>" }));
+  const errors = await openMap(page, data);
+  await page.locator("#showSites").check();
+  const linked = data.meta.sites.sites.filter((s) => Object.values(s.readings || {}).some((r) => r && r.url));
+  expect(linked.map((s) => s.id)).toEqual(["AS01", "AS02", "AS03", "AS04"]);
+  for (const s of linked) {
+    for (const how of ["pointer", "Enter"]) {
+      if (await page.locator("#legsite").isVisible()) await page.locator("#siteclose").click();
+      await page.selectOption("#sitepick", s.id);
+      const link = page.locator("#legsite a.srclink");
+      await expect(link).toHaveAttribute("target", "_blank");
+      await expect(link).toHaveAttribute("rel", /noopener/);
+      await link.scrollIntoViewIfNeeded();
+      const before = page.url();
+      const act = async () => {
+        if (how === "Enter") { await link.focus(); await page.keyboard.press("Enter"); }
+        else if (isMobile) { const b = await link.boundingBox(); await page.touchscreen.tap(b.x + b.width / 2, b.y + b.height / 2); }
+        else await link.click();
+      };
+      const [tab] = await Promise.all([page.context().waitForEvent("page"), act()]);
+      await tab.waitForLoadState("domcontentloaded");
+      expect(tab.url()).toBe(s.readings.xact.url);   // EPA's map, filtered to this site
+      expect(page.url()).toBe(before);   // the map stays where it was
+      await expect(page.locator("#legsite .sitehead")).toContainText(s.id);   // with the site still open
+      await tab.close();
+    }
+  }
+  expect(errors).toEqual([]);
+});
+
 test("deposition opens at the map's minimum, with a box that brings lower values back", async ({ page }) => {
   await openMap(page, fixture("forecast"));   // built with --dep-scale-min 5ug/ft2
   await page.locator('#fieldseg button[data-v="dep"]').click();
