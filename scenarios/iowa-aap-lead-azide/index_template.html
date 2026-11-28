@@ -118,7 +118,7 @@ $base_css
   <p class="daynote" id="pendingnote"$pending_hidden>$pending_note</p>
 </header>
 <dialog id="note" aria-labelledby="note-h">
-  <h2 id="note-h" tabindex="-1" autofocus>About this map</h2>
+  <h2 id="note-h" tabindex="-1">About this map</h2>
   $about_time
   <p><b>What the map shows.</b> Where lead from <span class="u-us">about 9,700
     pounds</span><span class="u-metric" hidden>about 4,400 kg (9,700 pounds)</span> of lead
@@ -147,7 +147,7 @@ $base_css
   <form method="dialog"><button type="submit">OK</button></form>
 </dialog>
 <dialog id="cite" class="wide" aria-labelledby="cite-h">
-  <h2 id="cite-h" tabindex="-1" autofocus>Methodology and References</h2>
+  <h2 id="cite-h" tabindex="-1">Methodology and References</h2>
   <h3>Background</h3>
   <p><b>The four cases.</b> The Army estimates that 26% of the lead gets into the air
     with its mitigation (an emission factor of 0.26, in its
@@ -235,12 +235,32 @@ function mapH() {
   const hh = document.querySelector('header').offsetHeight, nav = 60;
   return Math.max(280, Math.round(vh - hh - nav - 70));    // leaves room for the legend strip
 }
+// One map at a time. Safari (WebKit) can drop a src set while the frame is still loading
+// the last one, leaving a map that doesn't match the menus. So while a map loads, keep the
+// latest choice and load it when the frame is done. The same URL is a no-op; a change after
+// the # only (same file) goes straight through, as it never fires "load"; and a load that
+// never reports back frees the frame after 10 s.
+let frameBusy = 0, frameNext = '';
+const pathOf = (u) => u.split('#')[0];
+function setFrame(url) {
+  const cur = frame.getAttribute('src') || '';
+  if (url === cur) { frameNext = ''; return; }
+  if (pathOf(url) === pathOf(cur)) { frameNext = ''; frame.src = url; return; }
+  if (frameBusy) { frameNext = url; return; }
+  frameBusy = setTimeout(frameDone, 10000);
+  frame.src = url;
+}
+function frameDone() {
+  clearTimeout(frameBusy); frameBusy = 0;
+  if (frameNext) { const u = frameNext; frameNext = ''; setFrame(u); }
+}
+frame.addEventListener('load', frameDone);
 function show() {
   const t = sel.value.replace(':', '');
   // Forecast maps keep their old keys; another weather source goes in front of the key.
   const f = MAP_FILES[(src.value === 'forecast' ? '' : src.value + '-') + day.value + '-' + cas.value + '-' + t];
   if (!f) return;
-  frame.src = f + EXT + '#u=' + sys + (narrow.matches ? '&h=' + mapH() : '');
+  setFrame(f + EXT + '#u=' + sys + (narrow.matches ? '&h=' + mapH() : ''));
   history.replaceState(null, '', '#' + t + '-' + cas.value +
     (day.value === LINK_DAY ? '' : '-' + DAY_CODES[day.value]) +
     (src.value === OPEN_SOURCE ? '' : '-' + src.value));

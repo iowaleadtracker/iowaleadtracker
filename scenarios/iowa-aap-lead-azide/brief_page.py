@@ -187,7 +187,9 @@ def _table(rows: list[str]) -> str:
     """Return a Markdown table as HTML, in a wrapper that scrolls on phones."""
     cells = [[c.strip() for c in r.strip().strip("|").split("|")] for r in rows]
     head, body = cells[0], cells[2:]
-    out = ['<div class="tablewrap"><table><thead><tr>']
+    out = [
+        '<div class="tablewrap" tabindex="0" role="region" aria-label="Table"><table><thead><tr>'
+    ]
     out += [f"<th>{inline(c)}</th>" for c in head]
     out.append("</tr></thead><tbody>")
     for row in body:
@@ -284,7 +286,9 @@ def to_html(text: str) -> tuple[str, str]:
         first = lines[0]
         image = re.fullmatch(r"!\[([^\]]*)\]\(([^)]+)\)", " ".join(lines))
         if first.startswith(_FENCE):
-            out.append("<pre><code>" + html.escape("\n".join(lines[1:])) + "</code></pre>")
+            out.append(
+                '<pre tabindex="0"><code>' + html.escape("\n".join(lines[1:])) + "</code></pre>"
+            )
         elif first.startswith("#"):
             level, words = _heading(first)
             title = words if level == 1 else title

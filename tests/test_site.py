@@ -319,6 +319,8 @@ def test_town_caveat_wording() -> None:
 def test_security_headers() -> None:
     assert "frame-ancestors 'self'" in site.CSP
     assert "default-src 'none'" in site.CSP
+    assert "data:" not in site.CSP  # no page loads data: or blob: images
+    assert "blob:" not in site.CSP
     assert "geolocation=()" in site.PERMISSIONS
     assert "Strict-Transport-Security" in site.HEADERS
 
@@ -1380,7 +1382,7 @@ def test_mentions_in_methodology() -> None:
 def test_methodology_and_references_dialog() -> None:
     """The dialog is "Methodology and References" and opens with a short note on the method."""
     page = site.PAGE_TEMPLATE.read_text(encoding="utf-8")
-    assert '<h2 id="cite-h" tabindex="-1" autofocus>Methodology and References</h2>' in page
+    assert '<h2 id="cite-h" tabindex="-1">Methodology and References</h2>' in page
     assert 'aria-haspopup="dialog">Methodology and References</button>' in page
     pct = {"low": "7%", "mid": "26%", "high": "55%", "permit": "100%"}
     ctx = {
