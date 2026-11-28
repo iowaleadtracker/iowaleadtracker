@@ -3,7 +3,7 @@
  "instruments": {
   "arearae": {
    "name": "AreaRAE",
-   "text": "A portable wireless monitor for gases such as volatile organic compounds (Honeywell). It doesn't measure lead."
+   "text": "A wireless monitor for up to seven hazards, among them volatile organic compounds, combustible and toxic gases, oxygen and gamma radiation (Honeywell). It doesn't measure lead in dust."
   },
   "cassette": {
    "name": "Air cassette",
@@ -11,7 +11,7 @@
   },
   "dusttrak": {
    "name": "DustTrak",
-   "text": "Measures airborne dust continuously by how much light it scatters (TSI). It measures all particles, not lead. No readings had been posted."
+   "text": "A light-scattering laser photometer that gives real-time readings of the mass of particles in the air (TSI). It measures all particles, not lead. No readings had been posted."
   },
   "soil": {
    "name": "Soil sample",
@@ -19,7 +19,7 @@
   },
   "summa": {
    "name": "Summa canister",
-   "text": "A steel canister that takes in a sample of air for a lab to test for volatile organic compounds (EPA Method TO-15), not lead."
+   "text": "A specially prepared stainless steel canister that takes in a sample of air for a lab to test for volatile organic compounds (EPA Method TO-15), not lead."
   },
   "xact": {
    "name": "Xact continuous lead monitor",

@@ -163,6 +163,13 @@ REFERENCES = [
         "<b>43</b>, "
         "46246."
     ),
+    "EPA, 1999: Compendium Method TO-15: Determination of volatile organic compounds (VOCs) "
+    "in air collected in specially-prepared canisters and analyzed by gas "
+    "chromatography/mass spectrometry (GC/MS). <i>Compendium of Methods for the Determination "
+    "of Toxic Organic Compounds in Ambient Air</i>, 2nd ed., EPA/625/R-96/010b, U.S. "
+    "Environmental Protection Agency, accessed 28 November 2026, "
+    + _a("https://www.epa.gov/sites/default/files/2019-11/documents/to-15r.pdf")
+    + ".",
     (
         "EPA, 2008: National ambient air quality standards for lead. <i>Fed. Regist.</i>, "
         "<b>73</b>, "
@@ -221,6 +228,12 @@ REFERENCES = [
     "Homann, S. G., and F. Aluzzi, 2013: HotSpot health physics codes, version 3.0: User&rsquo;s "
     "guide. LLNL-SM-636474, Lawrence Livermore National Laboratory, "
     + _a("https://narac.llnl.gov/hotspot")
+    + ".",
+    "Honeywell, cited 2026: AreaRAE Pro RAEMet sensor. Product page, RAE Systems by "
+    "Honeywell, accessed 28 November 2026, "
+    + _a(
+        "https://automation.honeywell.com/us/en/products/gas-and-flame-detection/portables/multi-gas/arearae-pro-raemet-sensor"
+    )
     + ".",
     "Iowa Environmental Mesonet, 2026: ASOS observations for Burlington (BRL), Fort Madison "
     "(FSW) and Mount Pleasant (MPZ), Iowa, 25 November 2026, 8:30&ndash;10:30 a.m. CST. Iowa "
@@ -339,6 +352,12 @@ REFERENCES = [
         "Stull, R. B., 1988: <i>An Introduction to Boundary Layer Meteorology</i>. Kluwer "
         "Academic, 666 pp."
     ),
+    "TSI, cited 2026: DustTrak II aerosol monitor 8530. Product page, TSI Incorporated, "
+    "accessed 28 November 2026, "
+    + _a(
+        "https://tsi.com/products/aerosol-and-dust-monitors/aerosol-and-dust-monitors/dusttrak-ii-aerosol-monitor-8530"
+    )
+    + ".",
     (
         "Turner, D. B., 1970: <i>Workbook of Atmospheric Dispersion Estimates</i>. Rev. ed. Public "
         "Health Service Publ. 999-AP-26, National Air Pollution Control Administration."

@@ -24,7 +24,12 @@ def _site(sid: str, instruments: str, lat: float = 40.7) -> dict[str, object]:
 
 
 def _reading(sid: str, when: str, value: float) -> dict[str, object]:
-    return {"Air_Station_ID": sid, "Mon_Date_Time": _ms(when), "Mon_Results": value, "Mon_Units": "µg/m3"}
+    return {
+        "Air_Station_ID": sid,
+        "Mon_Date_Time": _ms(when),
+        "Mon_Results": value,
+        "Mon_Units": "µg/m3",
+    }
 
 
 SITES = [
@@ -38,7 +43,12 @@ READINGS = [
     _reading("AS01", "2026-11-25 17:00", 0.004),  # the same highest again, later
     _reading("AS01", "2026-11-26 21:00", 0.0),
 ]
-SOIL = [{"attributes": {"Sample_Start_Date_Time": _ms("2026-11-23 10:00")}, "geometry": {"x": -91.2, "y": 40.8}}]
+SOIL = [
+    {
+        "attributes": {"Sample_Start_Date_Time": _ms("2026-11-23 10:00")},
+        "geometry": {"x": -91.2, "y": 40.8},
+    }
+]
 NOW = dt.datetime(2026, 11, 28, 7, 12, tzinfo=UTC)
 
 
@@ -50,7 +60,12 @@ def test_sites_get_a_kind_by_what_they_can_say_about_lead() -> None:
     assert by_id["AS02"]["kind"] == "filter"
     assert by_id["soil"]["start"] == "2026-11-23T10:00Z"
     assert out["unit"] == "µg/m³"
-    assert {s["shape"] for s in out["kinds"].values()} == {"diamond", "square-dot", "square", "triangle"}
+    assert {s["shape"] for s in out["kinds"].values()} == {
+        "diamond",
+        "square-dot",
+        "square",
+        "triangle",
+    }
     assert out["retrieved"] == "2026-11-28T07:12Z"
     assert "Nov. 28, 2026, 1:12 a.m. CST" in out["note"]
 

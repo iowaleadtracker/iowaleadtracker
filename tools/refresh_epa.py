@@ -41,10 +41,9 @@ BRIEF_URL = "https://iowaleadtracker.com/monitor-placement/"
 
 #: What each instrument is, for the map's detail view. Keep these to what the sources say:
 #: Xact and the air cassette from the monitor-placement brief (EPA 2026a, 2026b there);
-#: DustTrak from TSI's DustTrak II 8530 page, AreaRAE from Honeywell's AreaRAE Pro page,
-#: the Summa canister from EPA Compendium Method TO-15 (EPA/625/R-96/010b, 1999). Those
-#: three were seen only through web-search excerpts, not opened; check them and add them to
-#: works_cited.py before this layer is published.
+#: DustTrak from TSI's DustTrak II 8530 page, AreaRAE from Honeywell's AreaRAE Pro RAEMet
+#: sensor page, the Summa canister from EPA Compendium Method TO-15 (EPA/625/R-96/010b,
+#: 1999). All three are in works_cited.py (checked 28 November 2026).
 INSTRUMENTS: dict[str, dict[str, str]] = {
     "xact": {
         "name": "Xact continuous lead monitor",
@@ -59,23 +58,24 @@ INSTRUMENTS: dict[str, dict[str, str]] = {
     },
     "dusttrak": {
         "name": "DustTrak",
-        "text": "Measures airborne dust continuously by how much light it scatters (TSI). "
-        "It measures all particles, not lead. No readings had been posted.",
+        "text": "A light-scattering laser photometer that gives real-time readings of the "
+        "mass of particles in the air (TSI). It measures all particles, not lead. No "
+        "readings had been posted.",
     },
     "arearae": {
         "name": "AreaRAE",
-        "text": "A portable wireless monitor for gases such as volatile organic compounds "
-        "(Honeywell). It doesn't measure lead.",
+        "text": "A wireless monitor for up to seven hazards, among them volatile organic "
+        "compounds, combustible and toxic gases, oxygen and gamma radiation (Honeywell). "
+        "It doesn't measure lead in dust.",
     },
     "summa": {
         "name": "Summa canister",
-        "text": "A steel canister that takes in a sample of air for a lab to test for "
-        "volatile organic compounds (EPA Method TO-15), not lead.",
+        "text": "A specially prepared stainless steel canister that takes in a sample of "
+        "air for a lab to test for volatile organic compounds (EPA Method TO-15), not lead.",
     },
     "soil": {
         "name": "Soil sample",
-        "text": "EPA lists where and when it started sampling soil. No results had been "
-        "posted.",
+        "text": "EPA lists where and when it started sampling soil. No results had been posted.",
     },
 }
 #: EPA's spellings in ``Instrument_Type``.
@@ -236,7 +236,9 @@ def dumps(data: dict[str, Any]) -> str:
     """Return the file's text: sorted keys, one site per line, so a refresh diffs well."""
     head = {k: v for k, v in data.items() if k != "sites"}
     body = json.dumps(head, ensure_ascii=False, indent=1, sort_keys=True)
-    rows = ",\n".join("  " + json.dumps(s, ensure_ascii=False, sort_keys=True) for s in data["sites"])
+    rows = ",\n".join(
+        "  " + json.dumps(s, ensure_ascii=False, sort_keys=True) for s in data["sites"]
+    )
     return body[:-2] + ',\n "sites": [\n' + rows + "\n ]\n}\n"
 
 
@@ -255,7 +257,9 @@ def main(argv: list[str] | None = None) -> None:
     )
     for s in lead:
         r = s["readings"]
-        sys.stdout.write(f"  {s['id']}: highest {r['max']['v']} at {r['max']['t']}, last {r['last']['t']}\n")
+        sys.stdout.write(
+            f"  {s['id']}: highest {r['max']['v']} at {r['max']['t']}, last {r['last']['t']}\n"
+        )
     if a.check:
         return
     a.out.write_text(dumps(data), encoding="utf-8")
