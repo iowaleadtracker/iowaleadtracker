@@ -270,15 +270,20 @@ test("on a phone, a tapped site's details scroll into view, and a double tap kee
   expect(errors).toEqual([]);
 });
 
-test("crowded labels: some are left out at a wide zoom, all are back zoomed in", async ({ page }) => {
+test("crowded labels: some are left out at a wide zoom, all are back zoomed in", async ({ page, isMobile }) => {
   const errors = await openMap(page, fixture("forecast"));
   await page.locator("#showSites").check();
   const [sx, sy] = await siteAtCenter(page, "AS02");
-  await page.mouse.move(sx, sy);
-  for (let i = 0; i < 5; i++) await page.mouse.wheel(0, 400);   // zoom out about AS02: the monitors crowd together
+  // zoom about AS02: on phones it is at the map's center, where the buttons zoom (mobile
+  // WebKit has no mouse wheel); on wide screens the legend moves it left, so the wheel there
+  const zoom = async (n) => {
+    if (isMobile) for (let i = 0; i < Math.abs(n); i++) await page.locator(n > 0 ? "#zin" : "#zout").click();
+    else { await page.mouse.move(sx, sy); for (let i = 0; i < Math.abs(n); i++) await page.mouse.wheel(0, n > 0 ? -400 : 400); }
+  };
+  await zoom(-5);   // the monitors crowd together
   const labels = async () => (await page.locator("#map").getAttribute("data-site-labels")).split("/").map(Number);
   await expect.poll(async () => { const [shown, wanted] = await labels(); return shown < wanted && shown >= 1; }).toBe(true);
-  for (let i = 0; i < 7; i++) await page.mouse.wheel(0, -400);   // zoomed in about AS02: room for every label on screen
+  await zoom(7);   // zoomed in: room for every label on screen
   await expect.poll(async () => { const [shown, wanted] = await labels(); return wanted >= 1 && shown === wanted; }).toBe(true);
   expect(errors).toEqual([]);
 });
