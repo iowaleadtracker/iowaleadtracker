@@ -3,26 +3,32 @@
  "instruments": {
   "arearae": {
    "name": "AreaRAE",
+   "shape": "square-dot",
    "text": "A wireless monitor for up to seven hazards, including gamma radiation, volatile organic compounds, combustible and toxic gases, and oxygen (Honeywell)."
   },
   "cassette": {
    "name": "Air cassette",
+   "shape": "square",
    "text": "A filter that collects particles from the air. A lab measures the lead on it."
   },
   "dusttrak": {
    "name": "DustTrak",
+   "shape": "square-dot",
    "text": "A light-scattering laser photometer that gives real-time readings of the mass of particles in the air (TSI)."
   },
   "soil": {
    "name": "Soil sample",
+   "shape": "triangle",
    "text": "EPA lists where and when it started sampling soil."
   },
   "summa": {
    "name": "Summa canister",
+   "shape": "circle",
    "text": "A specially prepared stainless steel canister that takes in a sample of air for a lab to test for volatile organic compounds (EPA Method TO-15)."
   },
   "xact": {
    "name": "Xact continuous lead monitor",
+   "shape": "diamond",
    "text": "Collects particles from the air on a filter tape and measures their metals by X-ray fluorescence as it runs, so its readings post without a lab. EPA hasn't published the model, inlet size or detection limit."
   }
  },

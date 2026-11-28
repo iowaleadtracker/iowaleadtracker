@@ -124,7 +124,9 @@ test("EPA's sites are off until ticked, with a key, and open in the legend when 
   const xact = as01.readings.xact;
   await expect(detail).toContainText(`${xact.max.v.toFixed(3)} ${xact.unit}`);
   await expect(detail).toContainText(`${xact.posted}, ${xact.zero} of them zero`);
-  await expect(detail).toContainText("Xact continuous lead monitor.");   // the kind's own instrument, described
+  await expect(detail.locator(".insthead").first()).toHaveText(sites.instruments.xact.name);   // the kind's own instrument first
+  await expect(detail.locator(".insthead svg")).toHaveCount(1);   // with its symbol
+  await expect(detail).toContainText(sites.instruments.xact.text);
   await expect(detail).toContainText("Also here, no results posted: DustTrak, AreaRAE, Air cassette, Summa canister.");   // the rest (null), named
   await expect(detail).not.toContainText(sites.instruments.dusttrak.text);
   await expect(detail).toContainText("Measurements, not model estimates.");
@@ -160,7 +162,7 @@ test("a site shows each instrument's results, and says which have none", async (
   const detail = page.locator("#legsite");
   // a filter site: the cassette is its own sample, so its results come right after its description
   await page.selectOption("#sitepick", "AS06");
-  await expect(detail).toContainText("Air cassette.");
+  await expect(detail.locator(".insthead").first()).toHaveText("Air cassette");
   await expect(detail).toContainText("0.123 µg/m³");
   await expect(detail).toContainText("1, 0 of them zero");
   await expect(detail).toContainText("Also here, no results posted: DustTrak, AreaRAE, Summa canister.");
@@ -169,6 +171,8 @@ test("a site shows each instrument's results, and says which have none", async (
   await page.locator("#siteclose").click();
   await page.selectOption("#sitepick", "AS01");
   await expect(detail.locator("dl")).toHaveCount(2);
+  await expect(detail.locator(".insthead")).toHaveText([sites.instruments.xact.name, "Air cassette"]);   // each result under its symbol and name
+  await expect(detail.locator(".insthead svg")).toHaveCount(2);
   await expect(detail).toContainText(`${as01.readings.xact.posted}, ${as01.readings.xact.zero} of them zero`);
   await expect(detail).toContainText("1, 1 of them zero");
   await expect(detail).toContainText("Also here, no results posted: DustTrak, AreaRAE, Summa canister.");

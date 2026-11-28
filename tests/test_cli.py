@@ -103,6 +103,7 @@ def test_reference_sites_are_checked(tmp_path: Path) -> None:
         {**good, "sites": [{**site, "kind": "soil"}]},  # a kind that isn't listed
         {**good, "sites": [{**site, "instruments": ["y"]}]},  # an instrument not described
         {**good, "sites": [{**site, "lat": "40.7"}]},
+        {**good, "instruments": {"x": {"name": "X", "shape": "star"}}},  # no such shape
         {**good, "sites": [{**site, "readings": {"y": None}}]},  # not an instrument there
         {**good, "sites": [{**site, "readings": {"x": 0.002}}]},  # a number, not a summary
         {**good, "sites": [{**site, "readings": [None]}]},

@@ -39,7 +39,9 @@ EVENT = dt.datetime(2026, 11, 25, 15, 0, tzinfo=UTC)
 VIEWER = "https://experience.arcgis.com/experience/1ddcf8b9d8314971b00dac8893ae9cd6"
 BRIEF_URL = "https://iowaleadtracker.com/monitor-placement/"
 
-#: What each instrument is, for the map's detail view; whether it has posted results is
+#: What each instrument is, for the map's detail view, with the symbol beside its results
+#: (the shape of the kind of site it stands for; the Summa canister, which stands for none,
+#: a circle); whether it has posted results is
 #: shown from the data (``readings``), not written here. Keep these to what the sources say,
 #: and don't say what an instrument can't measure unless its source says so:
 #: Xact and the air cassette from the monitor-placement brief (EPA 2026a, 2026b there);
@@ -49,31 +51,37 @@ BRIEF_URL = "https://iowaleadtracker.com/monitor-placement/"
 INSTRUMENTS: dict[str, dict[str, str]] = {
     "xact": {
         "name": "Xact continuous lead monitor",
+        "shape": "diamond",
         "text": "Collects particles from the air on a filter tape and measures their metals "
         "by X-ray fluorescence as it runs, so its readings post without a lab. EPA "
         "hasn't published the model, inlet size or detection limit.",
     },
     "cassette": {
         "name": "Air cassette",
+        "shape": "square",
         "text": "A filter that collects particles from the air. A lab measures the lead on it.",
     },
     "dusttrak": {
         "name": "DustTrak",
+        "shape": "square-dot",
         "text": "A light-scattering laser photometer that gives real-time readings of the "
         "mass of particles in the air (TSI).",
     },
     "arearae": {
         "name": "AreaRAE",
+        "shape": "square-dot",
         "text": "A wireless monitor for up to seven hazards, including gamma radiation, "
         "volatile organic compounds, combustible and toxic gases, and oxygen (Honeywell).",
     },
     "summa": {
         "name": "Summa canister",
+        "shape": "circle",
         "text": "A specially prepared stainless steel canister that takes in a sample of "
         "air for a lab to test for volatile organic compounds (EPA Method TO-15).",
     },
     "soil": {
         "name": "Soil sample",
+        "shape": "triangle",
         "text": "EPA lists where and when it started sampling soil.",
     },
 }

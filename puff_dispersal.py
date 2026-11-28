@@ -543,9 +543,10 @@ def _add_display_args(p: argparse.ArgumentParser) -> None:
         help="add measurement sites from another source (for example an agency's sampling "
         "sites) that readers can switch on and tap for details: a JSON file with a name, a "
         'note, links, "kinds" (a label, a shape and, optionally, the instrument a site\'s '
-        'details describe), "instruments" (a name and a description for each) and "sites", '
-        "each a kind, a latitude and longitude, its instruments and, optionally, an id and "
-        '"readings": for each instrument there, a summary of its results or null',
+        'details describe), "instruments" (a name, a description and, optionally, a shape '
+        'for each) and "sites", each a kind, a latitude and longitude, its instruments and, '
+        'optionally, an id and "readings": for each instrument there, a summary of its '
+        "results or null",
     )
     p.add_argument(
         "--hysplit-overlay-note",
@@ -1146,9 +1147,16 @@ def _site_layers(data: Json) -> Json:
         msg = f"each kind's shape must be one of {', '.join(SITE_SHAPES)}"
         raise ValueError(msg)
     instruments = {
-        str(k): {"name": str(v["name"]), "text": str(v.get("text", ""))}
+        str(k): {
+            "name": str(v["name"]),
+            "text": str(v.get("text", "")),
+            **({"shape": str(v["shape"])} if "shape" in v else {}),
+        }
         for k, v in data.get("instruments", {}).items()
     }
+    if any(i.get("shape", "circle") not in SITE_SHAPES for i in instruments.values()):
+        msg = f"an instrument's shape must be one of {', '.join(SITE_SHAPES)}"
+        raise ValueError(msg)
     if any("instrument" in k and k["instrument"] not in instruments for k in kinds.values()):
         msg = "a kind's instrument must be one of the described instruments"
         raise ValueError(msg)
