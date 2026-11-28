@@ -750,7 +750,11 @@ CHANGES = [
             "The header, the About box, the summary and the questions add EPA&rsquo;s Nov. 28 "
             "news release: its first lab results found no lead in the 38 water samples it took "
             "after the blast at public water supplies (EPA Press Office 2026). Results for tap "
-            "water, soil, dust and air samples are still to come. The maps did not change."
+            "water, soil, dust and air samples are still to come. The preliminary analysis now "
+            "gives the continuous lead monitors&rsquo; inlets from the same release (total "
+            "suspended particulate) and notes that EPA says they were switched off at 3 p.m. "
+            "Nov. 26, though its feed shows readings from AS03 until 7:21 a.m. Nov. 27. The "
+            "maps did not change."
         ),
     ),
     (

@@ -103,7 +103,9 @@ INSTRUMENTS: dict[str, dict[str, Any]] = {
         "text": "Collects particles from the air on a filter tape and measures their metals "
         "by X-ray fluorescence as it runs, so its readings post without a lab. EPA says it "
         "used total suspended particulate (TSP) inlets, to catch larger particles too; it "
-        "hasn't published the model or detection limit (EPA, Nov. 28).",
+        "hasn't published the model or detection limit. EPA also says it switched the "
+        "monitors off at 3 p.m. Nov. 26, though its feed shows AS03 readings until 7:21 a.m. "
+        "Nov. 27 (EPA, Nov. 28).",
     },
     "cassette": {
         "name": "Air cassette",
