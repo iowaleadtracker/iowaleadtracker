@@ -631,11 +631,11 @@ const unitText = (v, [factor, label]) => `${fmt(v * factor, 3)} ${label}`;
 // With the uncertainty view on, use the field holding the highest value of any ensemble member.
 const eKey = (f) => (S.env && FIELDS["env_" + f] ? "env_" + f : f);
 const fkey = (f) => (S.units === "count" && FIELDS[f + "_n"] ? f + "_n" : eKey(f));
-// value in kg/m3 (air) or kg/m2 (deposition) -> text in the selected units (or in `units`)
-function fmtVal(v, field, vCount, units = S.units) {
+// value in kg/m3 (air) or kg/m2 (deposition) -> text in the selected units
+function fmtVal(v, field, vCount) {
   const area = field === "dep" ? "m²" : "m³";
-  if (units === "count") return `${fmt(vCount, 3)} particles/${area}`;
-  if (UNITS[units]) return unitText(v, UNITS[units][field === "dep" ? "dep" : "air"]);
+  if (S.units === "count") return `${fmt(vCount, 3)} particles/${area}`;
+  if (UNITS[S.units]) return unitText(v, UNITS[S.units][field === "dep" ? "dep" : "air"]);
   return `${fmtMass(v)}/${area}`;
 }
 const locText = (v) => unitText(v, fixedUnit("air"));
@@ -1298,7 +1298,7 @@ function syncMinBox() {
   $("fixtopwrap").hidden = !v;
   if (!v) return;
   $("fixtop").checked = dep ? S.fixDepMin : S.fixMin;
-  $("fixtoplabel").textContent = "show only ≥ " + (dep ? depText(v) : unitText(M.scaleMin, (M.scaleMin >= 1e-6 ? UNITS.cm3 : UNITS.ugm3).air));
+  $("fixtoplabel").textContent = "show only ≥ " + (dep ? depText(v) : locText(v));   // in the menu's units
 }
 function render() { syncMinBox(); updatePanel(); draw(); }
 
@@ -1390,8 +1390,9 @@ function hover(x, y) {
   const lines = [], BELOW = "below map range (not zero)";
   if (S.field === "zones") {
     const zn = eKey(S.zoneMetric), F = FIELDS[zn], q = cumulativeQ(zn, S.hour)[j * NX + i];
-    const zu = S.units === "count" ? "mass" : S.units;   // the zones are mass, never counts
-    lines.push(`${{ m60: "Max 60-min avg", peak: "Max peak", dep: "Deposited" }[S.zoneMetric]} so far: <b>${q ? fmtVal(10 ** qToLog(F, q), S.zoneMetric === "dep" ? "dep" : "conc", 0, zu) : BELOW}</b>`);
+    // in the unit of the level inputs, so the two compare directly (mass, never counts)
+    const zt = S.zoneMetric === "dep" ? depText : locText;
+    lines.push(`${{ m60: "Max 60-min avg", peak: "Max peak", dep: "Deposited" }[S.zoneMetric]} so far: <b>${q ? zt(10 ** qToLog(F, q)) : BELOW}</b>`);
   }
   const here = (name) => { const F = FIELDS[name], q = F.q[(S.hour - 1) * NCELL + j * NX + i]; return q ? 10 ** qToLog(F, q) : 0; };
   if (S.hy) {
